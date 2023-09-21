@@ -5,9 +5,9 @@
 [![version](https://img.shields.io/badge/version-v0.2.0-blue)](https://github.com/ChuTian-SCPC/problem_tool)
 [![license](https://img.shields.io/badge/license-MIT-green)](https://github.com/ChuTian-SCPC/problem_tool/blob/main/LICENSE)
 
-[中文文档](CN_Home)
+[中文文档](wiki/CN_Home)
 
-[English Wiki](EN_Home)
+[English Wiki](wiki/EN_Home)
 
 ## Generator是什么
 
