@@ -156,7 +156,7 @@ namespace generator{
             out << std::endl;
         }
 
-        void __r_err_msg(OutStream& out,int case_id){
+        void __run_err_msg(OutStream& out,int case_id){
             out.printf("Testcase %d :\033[1;31mERROR\033[0m ,meet some error,pleace check it or report.",case_id);
             out << std::endl;
         }
@@ -1051,8 +1051,8 @@ namespace generator{
             for (int i = start; i <= end; i++){
                 int index = i - start;
                 if(result[index] == R_UNKNOWN || result[index] == R_ERROR){
-                    msg::__r_err_msg(log_file,i);
-                    msg::__r_err_msg(msg::_err,i);
+                    msg::__run_err_msg(log_file,i);
+                    msg::__run_err_msg(msg::_err,i);
                     number_err ++;
                 }
                 if(result[index] == R_AC){
