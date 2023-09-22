@@ -13,6 +13,8 @@
 
 Generator是基于testlib.h库封装的一个出题辅助工具库。（当然它现在功能已经不局限于生成数据了）
 
+用来帮助Acmer更快的出题和对拍。
+
 [testlib.h](https://github.com/MikeMirzayanov/testlib)是Codeforces出题辅助工具。
 
 Generator可以方便的生成测试数据。
