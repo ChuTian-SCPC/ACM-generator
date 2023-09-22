@@ -880,7 +880,7 @@ namespace generator{
         } while(0)
 
         // make(generator) input files from start to end
-        // use "./data.exe"(default) ["./data" on Linux]
+        // use ".\\data.exe"(default) ["./data" on Linux]
         void make_inputs_exe(int start,int end,const char* format = "",...){
             FMT_TO_RESULT(format,format,_format);
             std::string folder_path = testcases_folder_path._path;
@@ -900,7 +900,7 @@ namespace generator{
         }
 
         // make(generator) input files from start to end
-        // use "./std.exe"(default) ["./std" on Linux]
+        // use ".\\std.exe"(default) ["./std" on Linux]
         void make_outputs_exe(int start,int end){
             std::string folder_path = testcases_folder_path._path;
             __create_directories(folder_path);
