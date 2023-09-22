@@ -179,6 +179,14 @@ namespace generator{
             return x;
         }
 
+        // equal to rnd.next(from,to),a int in [from,to]
+        template <typename T = int, typename U = int>
+        typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value, long long>::type
+        rand_int(T from, U to){
+            long long x = rnd.next((long long)from, (long long)to);
+            return x;
+        }
+
         // change input to double
         template <typename T>
         double __change_to_double(T n){
@@ -211,7 +219,7 @@ namespace generator{
         }
 
         // equal to rnd.next(form,to),a real number in [from,to)
-        template <typename T = double, typename T = double>
+        template <typename T = double>
         double rand_real(T from,T to) {
             double _from = __change_to_double(from);
             double _to = __change_to_double(to);
