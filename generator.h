@@ -423,7 +423,6 @@ namespace generator{
         }
 
         // return a string length is n, use testlib format
-        // CharType default is LowerLetter
         std::string rand_string(int n,const char* format,...){
             FMT_TO_RESULT(format, format, _format);
             std::string s = rnd.next("%s{%d}",_format.c_str(),n);
@@ -431,7 +430,6 @@ namespace generator{
         }
 
         // return a string length is in range [from,to],use testlib format
-        // CharType default is LowerLetter
         std::string rand_string(int from,int to,const char* format,...){
             FMT_TO_RESULT(format, format, _format);
             std::string s = rnd.next("%s{%d,%d}",_format.c_str(),from,to);
