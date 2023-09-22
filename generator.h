@@ -187,6 +187,12 @@ namespace generator{
             return x;
         }
 
+        // enable T is double or can be change to double
+        template <typename T>
+        constexpr bool is_double_valid() {
+            return std::is_floating_point<T>::value || std::is_convertible<T, double>::value;
+        }
+
         // change input to double
         template <typename T>
         double __change_to_double(T n){
@@ -220,15 +226,28 @@ namespace generator{
 
         // equal to rnd.next(form,to),a real number in [from,to)
         template <typename T = double>
-        double rand_real(T from,T to) {
+        typename std::enable_if<is_double_valid<T>(), double>::type
+        rand_real(T from,T to) {
             double _from = __change_to_double(from);
             double _to = __change_to_double(to);
             double x = rnd.next(_from, _to);
             return x;
         }
 
+        // equal to rnd.next(form,to),a real number in [from,to)
+        template <typename T = double,typename U = double>
+        typename std::enable_if<is_double_valid<T>() && is_double_valid<U>(), double>::type
+        rand_real(T from,U to) {
+            double _from = __change_to_double(from);
+            double _to = __change_to_double(to);
+            double x = rnd.next(_from, _to);
+            return x;
+        }
+
+
+
         std::pair<double,double> __format_to_double_range(std::string s){
-            int accuarcy = 0;
+            int accuarcy = 1;
             size_t open = s.find_first_of("[(");
             size_t close = s.find_first_of(")]");
             size_t comma = s.find(',');
@@ -332,10 +351,6 @@ namespace generator{
         }
 
         // return a real number in range (-to,-from]U[from,to)
-        template <typename T>
-        constexpr bool is_double_valid() {
-            return std::is_floating_point<T>::value || std::is_convertible<T, double>::value;
-        }
         template <typename T, typename U>
         typename std::enable_if<is_double_valid<T>() && is_double_valid<U>(), double>::type
         rand_abs(T from, U to) {
