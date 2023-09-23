@@ -127,37 +127,71 @@ namespace generator{
             exit(EXIT_FAILURE);
         }
 
-        void __ac_msg(OutStream& out,int case_id,int runtime){
-            out.printf("Testcase %d :\033[32mAC\033[0m ,Runtime = %dms.",case_id,runtime);
+        void __ac_msg(OutStream& out,bool color,int case_id,int runtime){
+            if(color){
+                out.printf("Testcase %d :\033[32mAC\033[0m ,Runtime = %dms.",case_id,runtime);
+            }
+            else{
+                out.printf("Testcase %d :AC ,Runtime = %dms.",case_id,runtime);
+            }
             out << std::endl;
         }
 
-        void __wa_msg(OutStream& out,int case_id,int runtime,std::string& result){
-            out.printf("Testcase %d :\033[1;31mWA\033[0m ,Runtime = %dms. ",case_id,runtime);
-            out.printf("\033[1;31mchecker return\033[0m :\n");
-            out.printf("%s",result.c_str());
+        void __wa_msg(OutStream& out,bool color,int case_id,int runtime,std::string& result){
+            if(color){
+                out.printf("Testcase %d :\033[1;31mWA\033[0m ,Runtime = %dms. ",case_id,runtime);
+                out.printf("\033[1;31mchecker return\033[0m :\n");
+                out.printf("%s",result.c_str());
+            }
+            else{
+                out.printf("Testcase %d :WA ,Runtime = %dms. ",case_id,runtime);
+                out.printf("checker return :\n");
+                out.printf("%s",result.c_str());
+            }
             out << std::endl;
         }
 
-        void __tleac_msg(OutStream& out,int case_id,int runtime){
-            out.printf("Testcase %d :\033[1;33mTLE\033[0m(\033[32mAC\033[0m) ,Runtime = %dms.",case_id,runtime);
+        void __tleac_msg(OutStream& out,bool color,int case_id,int runtime){
+            if(color){
+                out.printf("Testcase %d :\033[1;33mTLE\033[0m(\033[32mAC\033[0m) ,Runtime = %dms.",case_id,runtime);
+            }
+            else{
+                out.printf("Testcase %d :TLE(AC) ,Runtime = %dms.",case_id,runtime);
+            }
             out << std::endl;
         }
 
-        void __tlewa_msg(OutStream& out,int case_id,int runtime,std::string& result){
-            out.printf("Testcase %d :\033[1;33mTLE\033[0m(\033[1;31mWA\033[0m) ,Runtime = %dms. ",case_id,runtime);
-            out.printf("\033[1;31mchecker return :\033[0m\n");
-            out.printf("%s",result.c_str());
+        void __tlewa_msg(OutStream& out,bool color,int case_id,int runtime,std::string& result){
+            if(color){
+                out.printf("Testcase %d :\033[1;33mTLE\033[0m(\033[1;31mWA\033[0m) ,Runtime = %dms. ",case_id,runtime);
+                out.printf("\033[1;31mchecker return :\033[0m\n");
+                out.printf("%s",result.c_str());
+            }
+            else{
+                out.printf("Testcase %d :TLE(WA) ,Runtime = %dms. ",case_id,runtime);
+                out.printf("checker return :\n");
+                out.printf("%s",result.c_str());
+            }
             out << std::endl;
         }
 
-        void __tle_msg(OutStream& out,int case_id,int runtime){
-            out.printf("Testcase %d :\033[1;33mTLE\033[0m ,Runtime = %dms (killed).",case_id,runtime);
+        void __tle_msg(OutStream& out,bool color,int case_id,int runtime){
+            if(color){
+                out.printf("Testcase %d :\033[1;33mTLE\033[0m ,Runtime = %dms (killed).",case_id,runtime);  
+            }
+            else{
+                out.printf("Testcase %d :TLE ,Runtime = %dms (killed).",case_id,runtime);
+            }
             out << std::endl;
         }
 
-        void __run_err_msg(OutStream& out,int case_id){
-            out.printf("Testcase %d :\033[1;31mERROR\033[0m ,meet some error,pleace check it or report.",case_id);
+        void __run_err_msg(OutStream& out,bool color,int case_id){
+            if(color){
+                out.printf("Testcase %d :\033[1;31mERROR\033[0m ,meet some error,pleace check it or report.",case_id);
+            }
+            else{
+                out.printf("Testcase %d :ERROR ,meet some error,pleace check it or report.",case_id);
+            }
             out << std::endl;
         }
     }
@@ -1049,33 +1083,33 @@ namespace generator{
             for (int i = start; i <= end; i++){
                 int index = i - start;
                 if(result[index] == R_UNKNOWN || result[index] == R_ERROR){
-                    msg::__run_err_msg(log_file,i);
-                    msg::__run_err_msg(msg::_err,i);
+                    msg::__run_err_msg(log_file,false,i);
+                    msg::__run_err_msg(msg::_err,true,i);
                     number_err ++;
                 }
                 if(result[index] == R_AC){
-                    msg::__ac_msg(log_file,i,runtime[index]);
-                    msg::__ac_msg(msg::_err,i,runtime[index]);
+                    msg::__ac_msg(log_file,false,i,runtime[index]);
+                    msg::__ac_msg(msg::_err,true,i,runtime[index]);
                     number_ac ++;
                 }
                 if(result[index] == R_WA){
-                    msg::__wa_msg(log_file,i,runtime[index],testlib_result[index]);
-                    msg::__wa_msg(msg::_err,i,runtime[index],testlib_result[index]);
+                    msg::__wa_msg(log_file,false,i,runtime[index],testlib_result[index]);
+                    msg::__wa_msg(msg::_err,true,i,runtime[index],testlib_result[index]);
                     number_wa ++;
                 }
                 if(result[index] == R_TLEANDAC){
-                    msg::__tleac_msg(log_file,i,runtime[index]);
-                    msg::__tleac_msg(msg::_err,i,runtime[index]);
+                    msg::__tleac_msg(log_file,false,i,runtime[index]);
+                    msg::__tleac_msg(msg::_err,true,i,runtime[index]);
                     number_tle ++;
                 }
                 if(result[index] == R_TLEANDWA){
-                    msg::__tlewa_msg(log_file,i,runtime[index],testlib_result[index]);
-                    msg::__tlewa_msg(msg::_err,i,runtime[index],testlib_result[index]);
+                    msg::__tlewa_msg(log_file,false,i,runtime[index],testlib_result[index]);
+                    msg::__tlewa_msg(msg::_err,true,i,runtime[index],testlib_result[index]);
                     number_tle ++;
                 }
                 if(result[index] == R_TLE){
-                    msg::__tle_msg(log_file,i,runtime[index]);
-                    msg::__tle_msg(msg::_err,i,runtime[index]);
+                    msg::__tle_msg(log_file,false,i,runtime[index]);
+                    msg::__tle_msg(msg::_err,true,i,runtime[index]);
                     number_tle ++;
                 }
             }
@@ -1088,12 +1122,12 @@ namespace generator{
             return;
         }
 
-        std::vector<std::string> __get_args() {
+        std::vector<std::string> __get_checker_files() {
             return std::vector<std::string>();
         }
 
         template<typename T, typename... Args>
-        std::vector<std::string> __get_args(T first, Args... args) {       
+        std::vector<std::string> __get_checker_files(T first, Args... args) {       
             std::vector<std::string> result = {};
             std::string first_arg = std::string(first);
             std::string file = __get_full_path(first_arg);
@@ -1107,7 +1141,7 @@ namespace generator{
                     std::string(first).c_str(),
                     file.c_str());
             }
-            std::vector<std::string> rest = __get_args(args...);
+            std::vector<std::string> rest = __get_checker_files(args...);
             result.insert(result.end(), rest.begin(), rest.end());
             
             return result;
@@ -1122,7 +1156,7 @@ namespace generator{
             if(!__file_exists(checker_file)){
                 msg::__fail_msg(msg::_err,"Checker file %s doesn't exist, full path is %s.",checker.c_str(),checker_file.c_str());
             }
-            std::vector<std::string> programs = __get_args(args...);
+            std::vector<std::string> programs = __get_checker_files(args...);
             for(auto program:programs){
                 __compare_once(start,end,program,time_limit,checker_file);
             }
@@ -1166,7 +1200,7 @@ namespace generator{
             if(!__file_exists(checker_file)){
                 msg::__fail_msg(msg::_err,"Checker file %s doesn't exist, some thing may wrong!",checker_file.c_str());
             }
-            std::vector<std::string> programs = __get_args(args...);
+            std::vector<std::string> programs = __get_checker_files(args...);
             for(auto program:programs){
                 __compare_once(start,end,program,time_limit,checker_file);
             }
