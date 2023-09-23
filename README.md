@@ -13,6 +13,8 @@
 
 Generator是基于testlib.h库封装的一个出题辅助工具库。（当然它现在功能已经不局限于生成数据了）
 
+用来帮助Acmer更快的出题和对拍。
+
 [testlib.h](https://github.com/MikeMirzayanov/testlib)是Codeforces出题辅助工具。
 
 Generator可以方便的生成测试数据。
@@ -21,7 +23,7 @@ Generator可以方便的在本地进行对拍，内置testlib中常见的checker
 
 ## 如何使用Generator
 
-需要支持C++11，python3。本地能够支持命令`python`(Windows)。
+需要支持C++11，python3。对拍需要本地能够支持命令`python`(Windows)。
 
 将`testlib.h`，`generator.hpp`，文件夹`checker`放入同一个目录下。放在**标准库位置**或**工作目录**均可。
 
