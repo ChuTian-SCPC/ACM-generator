@@ -1,5 +1,5 @@
 <div align="center">
-    <h1>Genertor</h1>
+    <h1>Generator</h1>
 </div>
 
 [![version](https://img.shields.io/badge/version-v0.3.0-blue)](https://github.com/ChuTian-SCPC/problem_tool)
