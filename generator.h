@@ -120,7 +120,7 @@ namespace generator{
 
         template <typename... Args>
         void __error_msg(OutStream& out,const char* msg, Args... args) {
-            out.printf("\033[1;31mERROR\033[0m");
+            out.printf("\033[1;31mERROR\033[0m ");
             out.printf(msg,args...,nullptr);
             out.printf("\n");
             out << std::endl;
@@ -835,12 +835,22 @@ namespace generator{
                 _path += std::string(s);
             };
             void change_path(std::string &s) {
-                _path = s;
-                _path = __get_full_path(_path);
+                std::string path = s;
+                path = __get_full_path(path);
+                if(!__file_exists(path)){
+                    msg::__warn_msg(msg::_err,"Fail to find generator file %s.",path.c_str());
+                    return;
+                }
+                _path = path;
             }
             void change_path(const char *s) {
-                _path = std::string(s);
-                _path = __get_full_path(_path);
+                std::string path = std::string(s);
+                path = __get_full_path(path);
+                if(!__file_exists(path)){
+                    msg::__warn_msg(msg::_err,"Fail to find generator file %s.",path.c_str());
+                    return;
+                }
+                _path = path;
             }
             void join_current_path(std::string &s) {
                 _path = __get_current_path();
