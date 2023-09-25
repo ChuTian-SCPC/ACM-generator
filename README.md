@@ -1,5 +1,5 @@
 <div align="center">
-    <h1>Genertor</h1>
+    <h1>Generator</h1>
 </div>
 
 [![version](https://img.shields.io/badge/version-v0.3.0-blue)](https://github.com/ChuTian-SCPC/problem_tool)
@@ -32,6 +32,8 @@ Generator可以方便的在本地进行对拍，内置testlib中常见的checker
 MIT协议
 
 ## 功能实现
+
+**由于所有的测试均在Windows上面完成，所以在Linux上可能会存在较多的问题。**
 
 - [x] 基础数据生成函数
 
