@@ -574,8 +574,8 @@ namespace generator{
         }
 
         // return a rand vector length equal to n
-        template <typename T>
-        std::vector<T> rand_vector(int size,std::function<T()> func) {
+        template <typename T, typename Func>
+        std::vector<T> rand_vector(int size,Func func) {
             std::vector<T> v;
             for(int i = 0;i < size; i++){
                 T x = func();
@@ -585,8 +585,8 @@ namespace generator{
         }
 
         // return a rand vector length in range [from,to]
-        template <typename T>
-        std::vector<T> rand_vector(int from,int to,std::function<T()> func) {
+        template <typename T, typename Func>
+        std::vector<T> rand_vector(int from,int to,Func func) {
             std::vector<T> v;
             int size = rnd.next(from,to);
             for(int i = 0;i < size; i++){
