@@ -3,7 +3,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unordered_map>
-#include <thread>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -82,10 +81,6 @@ namespace generator{
         OutStream _err("/dev/tty");
     #endif
 
-        // compare msg outstream, default on stderr
-        // same with quitf, use freopen redirect to log file
-        // may unsafe
-        OutStream _cmp;
 
         template <typename... Args>
         void __fail_msg(OutStream& out,const char* msg, Args... args) {
@@ -1217,9 +1212,48 @@ namespace generator{
         }
     }
 
+    namespace graph{
+        template<typename T>
+        class Edge{
+            private:
+                int _u, _v;
+                T _w;
+            public:
+                Edge():_u(0),_v(0),_w(T()){}
+                Edge(int u,int v,T w):_u(u),_v(v),_w(w){}
+                int& u(){return _u;}
+                int& v(){return _v;}
+                T& w(){return _w;}
+                std::tuple<int,int,T> edge(){return std::make_tuple(_u,_v,_w);}
+                friend std::ostream& operator<<(std::ostream& os,const Edge<T>& edge) {
+                    os << edge._u << " " << edge._v << " " << edge._w ;
+                    return os;
+                }
+        };
+
+        template<>
+        class Edge<void>{
+            private:
+                int _u, _v;
+            public:
+                Edge():_u(0),_v(0){}
+                Edge(int u,int v):_u(u),_v(v){}
+                int& u(){return _u;}
+                int& v(){return _v;}
+                std::pair<int,int> edge(){return std::make_pair(_u,_v);}
+                friend std::ostream& operator<<(std::ostream& os,const Edge<void>& edge) {
+                    os << edge._u << " " << edge._v ;
+                    return os;
+                }
+        };
+        
+        using UnEdge = Edge<void>;
+    }
+
     namespace all{
         using namespace generator::msg;
         using namespace generator::rand;
         using namespace generator::io;
+        using namespace generator::graph;
     }
 }
