@@ -672,9 +672,9 @@ namespace generator{
         }
 
         std::string __get_file_name(std::string& path){
-            size_t pos = path.find_last_of("/\\"); 
+            size_t pos = path.find_last_of("/\\");
             if (pos != std::string::npos) {
-                std::string file_full_name = path.substr(pos + 1); 
+                std::string file_full_name = path.substr(pos + 1);
                 size_t pos_s = file_full_name.find_first_of(".");
                 if( pos_s != std::string::npos) {
                     std::string file_name = file_full_name.substr(0,pos_s);
@@ -684,7 +684,14 @@ namespace generator{
                     return file_full_name;
                 }
             } else {
-                msg::__fail_msg(msg::_err,"Error in get file name: %s",path.c_str());
+                size_t pos_s = path.find_first_of(".");
+                if( pos_s != std::string::npos) {
+                    std::string file_name = path.substr(0,pos_s);
+                    return file_name;
+                }
+                else{
+                    return path;
+                }
             }
             return "";
         }
@@ -882,7 +889,7 @@ namespace generator{
             std::string in_file = std::to_string(x) + ".in";
             std::string file_path = __path_join(folder_path,in_file) ;
             freopen(file_path.c_str(), "w", stdout);
-            msg::__success_msg(msg::_err,"Successfully create/open input file %s",file_path.c_str());
+            msg::__success_msg(msg::_err,"Successfully create input file %s",file_path.c_str());
         }
 
         void __write_output_file(int x){
@@ -894,11 +901,51 @@ namespace generator{
                 msg::__fail_msg(msg::_err,"Input file %s don't exist!",read_path.c_str());
             }
             freopen(read_path.c_str(), "r", stdin);
-            msg::__success_msg(msg::_err,"Successfully create/open input file %s",read_path.c_str());
             std::string write_file = std::to_string(x) + ".out";
             std::string write_path = __path_join(folder_path, write_file);
             freopen(write_path.c_str(), "w", stdout);
-            msg::__success_msg(msg::_err,"Successfully create/open output file %s",write_path.c_str());
+            msg::__success_msg(msg::_err,"Successfully create output file %s",write_path.c_str());
+        }
+
+        bool __input_file_exists(int x){
+            std::string folder_path = testcases_folder_path._path;
+            std::string in_file = std::to_string(x) + ".in";
+            std::string file_path = __path_join(folder_path,in_file);
+            return __file_exists(file_path);
+        }
+
+        std::vector<int> __get_inputs() {
+            std::vector<int> inputs;
+            std::string folder_path = testcases_folder_path._path;
+        #ifdef _WIN32
+            WIN32_FIND_DATA findFileData;
+            HANDLE hFind = FindFirstFile((folder_path + "\\*.in").c_str(), &findFileData);
+
+            if (hFind != INVALID_HANDLE_VALUE) {
+                do {
+                    std::string file_name = findFileData.cFileName;
+                    int num = std::stoi(__get_file_name(file_name));
+                    inputs.push_back(num);
+                } while (FindNextFile(hFind, &findFileData) != 0);
+
+                FindClose(hFind);
+            }
+        #else
+            DIR* dir = opendir(folder_path.c_str());
+            if (dir != nullptr) {
+                struct dirent* entry;
+                while ((entry = readdir(dir)) != nullptr) {
+                    std::string file_name = entry->d_name;
+                    if (file_name.size() >= 3 && file_name.substr(file_name.size() - 3) == ".in") {
+                        int num = std::stoi(__get_file_name(file_name));
+                        inputs.push_back(num);
+                    }
+                }
+                closedir(dir);
+            }
+        #endif
+
+            return inputs;
         }
 
         // make(generator) input files from __start to __end
@@ -923,6 +970,31 @@ namespace generator{
             } \
         } while(0)
 
+        // make(generator) __num input files if files don't exist
+        // use __Func
+        #define fill_inputs(__num,__Func,...) do{ \
+            int __sum = (__num); \
+            for(int __case = (1);__sum;__case++) { \
+                if(!__input_file_exists(__case)) { \
+                    __sum--; \
+                    __write_input_file(__case); \
+                    __fake_arg(__VA_ARGS__); \
+                    __Func; \
+                    __close_file(); \
+                } \
+            } \
+        }while(0)
+
+        // make(generator) all output files use __Func
+        #define fill_outputs(__Func) do{ \
+            auto __inputs =  __get_inputs(); \
+            for(auto __case:__inputs) { \
+                __write_output_file(__case); \
+                __Func; \
+                __close_file(); \
+            } \
+        }while(0)
+
         // make(generator) input files from start to end
         // use ".\\data.exe"(default) ["./data" on Linux]
         void make_inputs_exe(int start,int end,const char* format = "",...){
@@ -935,10 +1007,10 @@ namespace generator{
                 std::string command = data_path._path + " " + _format + " >" + file_path;
                 int return_code = std::system(command.c_str());
                 if(return_code == 0) {
-                    msg::__success_msg(msg::_err,"Successfully create/open input file %s",file_path.c_str());
+                    msg::__success_msg(msg::_err,"Successfully create input file %s",file_path.c_str());
                 }
                 else {
-                    msg::__error_msg(msg::_err,"Someting error in creating/opening input file %s",file_path.c_str());
+                    msg::__error_msg(msg::_err,"Someting error in creating input file %s",file_path.c_str());
                 }   
             }
         }
@@ -954,16 +1026,57 @@ namespace generator{
                 if(!__file_exists(read_path)) {
                     msg::__fail_msg(msg::_err,"Input file %s don't exist!",read_path.c_str());
                 }
-                msg::__success_msg(msg::_err,"Successfully create/open input file %s",read_path.c_str());
                 std::string write_file = std::to_string(i) + ".out";
                 std::string write_path = __path_join(folder_path, write_file);
                 std::string command = std_path._path + " <" + read_path + " >" + write_path;
                 int return_code = std::system(command.c_str());
                 if(return_code == 0) {
-                    msg::__success_msg(msg::_err,"Successfully create/open output file %s",write_path.c_str());
+                    msg::__success_msg(msg::_err,"Successfully create output file %s",write_path.c_str());
                 }
                 else {
-                    msg::__error_msg(msg::_err,"Someting error in creating/opening output file %s",write_path.c_str());
+                    msg::__error_msg(msg::_err,"Someting error in creating output file %s",write_path.c_str());
+                }
+            }
+        }
+
+        void fill_inputs_exe(int sum,const char* format = "",...){
+            FMT_TO_RESULT(format,format,_format);
+            std::string folder_path = testcases_folder_path._path;
+            __create_directories(folder_path);
+            for(int i = 1;sum; i++){
+                std::string in_file = std::to_string(i) + ".in";
+                std::string file_path = __path_join(folder_path,in_file) ;
+                if(__file_exists(file_path)){
+                    continue;
+                }
+                sum--;
+                std::string command = data_path._path + " " + _format + " >" + file_path;
+                int return_code = std::system(command.c_str());
+                if(return_code == 0) {
+                    msg::__success_msg(msg::_err,"Successfully create/open input file %s",file_path.c_str());
+                }
+                else {
+                    msg::__error_msg(msg::_err,"Someting error in creating/opening input file %s",file_path.c_str());
+                }   
+            }
+        }
+
+        void fill_outputs_exe(){
+            std::string folder_path = testcases_folder_path._path;
+            __create_directories(folder_path);
+            auto inputs =  __get_inputs();
+            for(auto x:inputs){
+                std::string read_file = std::to_string(x) + ".in";
+                std::string read_path = __path_join(folder_path, read_file);
+                std::string write_file = std::to_string(x) + ".out";
+                std::string write_path = __path_join(folder_path, write_file);
+                std::string command = std_path._path + " <" + read_path + " >" + write_path;
+                int return_code = std::system(command.c_str());
+                if(return_code == 0) {
+                    msg::__success_msg(msg::_err,"Successfully create output file %s",write_path.c_str());
+                }
+                else {
+                    msg::__error_msg(msg::_err,"Someting error in creating output file %s",write_path.c_str());
                 }
             }
         }
@@ -1162,6 +1275,7 @@ namespace generator{
         // checker is the checker.exe path(writen by testlib)
         template<typename... Args>
         void compare(int start,int end,int time_limit,std::string checker,Args ... args){
+            init_gen();
             std::string checker_file = __get_full_path(checker);
             if(!__file_exists(checker_file)){
                 msg::__fail_msg(msg::_err,"Checker file %s doesn't exist, full path is %s.",checker.c_str(),checker_file.c_str());
@@ -1186,6 +1300,7 @@ namespace generator{
         // checker is the default checker
         template<typename... Args>
         void compare(int start,int end,int time_limit,Checker checker,Args ... args){
+            init_gen();
             std::string lib_path = __get_lib_path();
             std::string checker_folder = __path_join(__get_folder_path(lib_path) ,"checker");
             std::string checker_file;
