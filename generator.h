@@ -214,10 +214,70 @@ namespace generator{
         }
 
         // equal to rnd.next(from,to),a int in [from,to]
-        template <typename T = int, typename U = int>
+        template <typename T = long long, typename U = long long>
         typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value, long long>::type
         rand_int(T from, U to){
             long long x = rnd.next((long long)from, (long long)to);
+            return x;
+        }
+
+        // rand a odd number between [1,n]
+        template <typename T = long long>
+        typename std::enable_if<std::is_integral<T>::value, long long>::type
+        rand_odd(T n){
+            long long nl = (long long)n;
+            long long r = (nl - (nl % 2 == 0) - 1LL)/2;
+            if(r < 0) {
+                msg::__fail_msg(msg::_err,"There is no odd number between [1,%lld].",nl);
+            }
+            long long x = rnd.next(0LL,r);
+            x = x * 2 + 1;
+            return x;
+        }
+
+        // rand a odd number between [from,to]
+        template <typename T = long long, typename U = long long>
+        typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value, long long>::type
+        rand_odd(T from, U to){
+            long long froml = (long long)from;
+            long long tol = (long long)to;
+            long long l = (froml + (froml % 2 == 0) - 1LL)/2;
+            long long r = (tol - (tol % 2 == 0) - 1LL)/2;
+            if(l > r) {
+                msg::__fail_msg(msg::_err,"There is no odd number between [%lld,%lld].",froml,tol);
+            }
+            long long x = rnd.next(l, r);
+            x = x * 2 + 1;       
+            return x;
+        }
+
+        // rand a even number between [0,n]
+        template <typename T = long long>
+        typename std::enable_if<std::is_integral<T>::value, long long>::type
+        rand_even(T n){
+            long long nl = (long long)n;
+            long long r = (nl - (nl % 2 == 1) - 1LL)/2;
+            if(r < 0) {
+                msg::__fail_msg(msg::_err,"There is no even number between [0,%lld].",nl);
+            }
+            long long x = rnd.next(0LL,r);
+            x = x * 2;
+            return x;
+        }
+
+        // rand a even number between [from,to]
+        template <typename T = long long, typename U = long long>
+        typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value, long long>::type
+        rand_even(T from, U to){
+            long long froml = (long long)from;
+            long long tol = (long long)to;
+            long long l = (froml + (froml % 2 == 1) - 1LL)/2;
+            long long r = (tol - (tol % 2 == 1) - 1LL)/2;
+            if(l > r) {
+                msg::__fail_msg(msg::_err,"There is no even number between [%lld,%lld].",froml,tol);
+            }
+            long long x = rnd.next(l, r);
+            x = x * 2;       
             return x;
         }
 
