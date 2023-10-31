@@ -1042,7 +1042,10 @@ namespace generator{
                 do {
                     std::string file_name = findFileData.cFileName;
                     int num = std::stoi(__get_file_name(file_name));
-                    inputs.push_back(num);
+                    std::string output_file = __path_join(folder_path, std::to_string(num) + ".out");
+                    if(!__file_exists(output_file)){
+                        inputs.push_back(num);
+                    }      
                 } while (FindNextFile(hFind, &findFileData) != 0);
 
                 FindClose(hFind);
