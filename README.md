@@ -23,9 +23,9 @@ Generator可以方便的在本地进行对拍，内置testlib中常见的checker
 
 ## 如何使用Generator
 
-需要支持C++11，python3。对拍需要本地能够支持命令`python`(Windows)。
+除对拍之外的功能需要支持C++11。对拍需要本地能够支持命令`python`(Windows)。
 
-将`testlib.h`，`generator.hpp`，文件夹`checker`放入同一个目录下。放在**标准库位置**或**工作目录**均可。
+将`testlib.h`，`generator.h`，文件夹`checker`放入同一个目录下。放在**标准库位置**或**工作目录**均可。
 
 ## 开源协议
 
