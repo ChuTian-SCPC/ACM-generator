@@ -197,6 +197,39 @@ namespace generator{
     }
 
     namespace rand{
+
+        std::pair<long long,long long> __format_to_int_range(std::string s){
+            int accuarcy = 1;
+            size_t open = s.find_first_of("[(");
+            size_t close = s.find_first_of(")]");
+            size_t comma = s.find(',');
+            auto string_to_int = [&](size_t from, size_t to) -> double{
+                std::string str = s.substr(from + 1, to - from - 1);
+                try {
+                    long long value = std::stoll(str);
+                    return value;
+                }
+                catch (const std::invalid_argument &e) {
+                    msg::__fail_msg(msg::_err,"%s is an invalid argument.", str.c_str());
+                }
+                catch (const std::out_of_range &e) {
+                    msg::__fail_msg(msg::_err,"%s is out of range.", str.c_str());
+                }
+            };
+            if(open == std::string::npos || close == std::string::npos || comma == std::string::npos){
+                msg::__fail_msg(msg::_err,"%s is an invalid range.",s.c_str());
+            }
+            long long left = string_to_int(open, comma);
+            long long right = string_to_int(comma, close);
+            if(s[open] == '('){
+                left ++;
+            }
+            if(s[close] == ')'){
+                right --;
+            }
+            return std::make_pair(left,right);
+        }
+
         // equal to rnd.next(n),a int in [0,n-1]
         template <typename T = int>
         typename std::enable_if<std::is_integral<T>::value, T>::type
@@ -218,6 +251,14 @@ namespace generator{
         typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value, long long>::type
         rand_int(T from, U to){
             long long x = rnd.next((long long)from, (long long)to);
+            return x;
+        }
+
+        // rand a integer number satisfied the given range
+        long long rand_int(const char* format,...) {
+            FMT_TO_RESULT(format, format, _format);
+            std::pair<long long,long long> range = __format_to_int_range(_format);
+            long long x = rnd.next(range.first,range.second);
             return x;
         }
 
@@ -251,12 +292,20 @@ namespace generator{
             return x;
         }
 
+        // rand a odd number satisfied the given range
+        long long rand_odd(const char* format,...) {
+            FMT_TO_RESULT(format, format, _format);
+            std::pair<long long,long long> range = __format_to_int_range(_format);
+            long long x = rand_odd(range.first,range.second);
+            return x;
+        }
+
         // rand a even number between [0,n]
         template <typename T = long long>
         typename std::enable_if<std::is_integral<T>::value, long long>::type
         rand_even(T n){
             long long nl = (long long)n;
-            long long r = (nl - (nl % 2 == 1) - 1LL)/2;
+            long long r = (nl - (nl % 2 == 1))/2;
             if(r < 0) {
                 msg::__fail_msg(msg::_err,"There is no even number between [0,%lld].",nl);
             }
@@ -271,13 +320,21 @@ namespace generator{
         rand_even(T from, U to){
             long long froml = (long long)from;
             long long tol = (long long)to;
-            long long l = (froml + (froml % 2 == 1) - 1LL)/2;
-            long long r = (tol - (tol % 2 == 1) - 1LL)/2;
+            long long l = (froml + (froml % 2 == 1))/2;
+            long long r = (tol - (tol % 2 == 1))/2;
             if(l > r) {
                 msg::__fail_msg(msg::_err,"There is no even number between [%lld,%lld].",froml,tol);
             }
             long long x = rnd.next(l, r);
             x = x * 2;       
+            return x;
+        }
+
+        // rand a even number satisfied the given range
+        long long rand_even(const char* format,...) {
+            FMT_TO_RESULT(format, format, _format);
+            std::pair<long long,long long> range = __format_to_int_range(_format);
+            long long x = rand_even(range.first,range.second);
             return x;
         }
 
@@ -602,7 +659,7 @@ namespace generator{
             sum -= from * size;
             T right = to - from;
             for(int i = 0;i < size;i++){
-                v[i] = rnd.next(std::max(T(0),sum - (size - i - 1) * right),std::min(sum,right));
+                v[i] = rnd.next(std::max(T(0),sum - T(size - i - 1) * right),std::min(sum,right));
                 sum -= v[i];
                 v[i] += from;
             }
