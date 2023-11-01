@@ -12,6 +12,8 @@
 #else
 #include <unistd.h>
 #include <limits.h>
+#include <dirent.h> 
+#include <sys/types.h>
 #endif
 namespace generator{
     namespace msg{
@@ -853,7 +855,7 @@ namespace generator{
                     continue;
                 }
                 if (!__create_directory(current_path)) {
-                    msg::__fail_msg(msg::__err,"Error in creating folder : %s",current_path.c_str());
+                    msg::__fail_msg(msg::_err,"Error in creating folder : %s",current_path.c_str());
                 }
             }
         #endif
@@ -913,7 +915,7 @@ namespace generator{
             if (realpath(path.c_str(), buffer) != nullptr) {
                 return std::string(buffer);
             } else {
-                msg::__error_msg(msg::__err,"Error in get full path of file: %s.",path.c_str());
+                msg::__error_msg(msg::_err,"Error in get full path of file: %s.",path.c_str());
             }
         #endif
         }
