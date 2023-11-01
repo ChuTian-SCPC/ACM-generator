@@ -1060,7 +1060,10 @@ namespace generator{
                     std::string file_name = entry->d_name;
                     if (file_name.size() >= 3 && file_name.substr(file_name.size() - 3) == ".in") {
                         int num = std::stoi(__get_file_name(file_name));
-                        inputs.push_back(num);
+                        std::string output_file = __path_join(folder_path, std::to_string(num) + ".out");
+                        if(!__file_exists(output_file)){
+                            inputs.push_back(num);
+                        }
                     }
                 }
                 closedir(dir);
