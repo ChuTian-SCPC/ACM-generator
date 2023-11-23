@@ -1214,7 +1214,7 @@ namespace generator{
         // no argvs's register
         // unsafe but may easier to use
         void init_gen() {
-            char * __fake_argvs[] = {"generator"};
+            char * __fake_argvs[] = {(char*)"generator"};
             registerGen(1, __fake_argvs , 1);
         }
 
