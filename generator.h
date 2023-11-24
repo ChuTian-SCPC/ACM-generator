@@ -1292,8 +1292,8 @@ namespace generator{
                     std::string command = 
                         checker + " " +
                         input_file_path + " " +
-                        output_file_path + " " +
-                        ans_file_path + " 2>" +
+                        ans_file_path + " " +
+                        output_file_path + " 2>" +
                         check_tmp_log_path;
                     int command_result = system(command.c_str());
                     std::string check_result = "";
