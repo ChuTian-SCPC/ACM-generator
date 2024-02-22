@@ -619,6 +619,59 @@ namespace generator{
             auto v = rnd.partition(size,sum,min_part);
             return v;
         }
+        
+        template<typename T>
+        void __rand_small_sum(std::vector<T>&v, T sum, T limit) {
+            int size = v.size();
+            std::vector<int> rand_v(size);
+            for(int i = 0; i < size; i++)
+                rand_v[i] = i;
+            shuffle(rand_v.begin(), rand_v.end());
+            int last = size - 1;
+            while(sum--) {
+                int rand_pos = rnd.next(0, last);
+                int add_pos = rand_v[rand_pos];
+                v[add_pos]++;
+                if(v[add_pos] >= limit) {
+                    std::swap(rand_v[last], rand_v[rand_pos]);
+                    last--;
+                }
+            }
+            return;
+        }
+        
+        template<typename T>
+        bool __rand_large_sum(std::vector<T>&v, T& sum, T limit) {
+            int size = v.size();
+            std::vector<int> rand_v(size);
+            for(int i = 0; i < size; i++)
+                rand_v[i] = i;
+            shuffle(rand_v.begin(), rand_v.end());
+            int last = size - 1;
+            T once_add_base = sum / 1000000;
+            while(sum > 1000000) {
+                int rand_pos, add_pos, once_add;
+                do {
+                    rand_pos = rnd.next(0, last);
+                    add_pos = rand_v[rand_pos];
+                    // 95% ~ 105% for once add
+                    T once_add_l = std::max(T(0), once_add_base - once_add_base / 20);
+                    T once_add_r = std::min(once_add_base + once_add_base / 20, sum);
+                    if (once_add_l > once_add_r) {
+                        return sum > 1000000;
+                    }
+                    once_add = rnd.next(once_add_l, once_add_r);
+                }while(v[add_pos] + once_add > limit);         
+                v[add_pos] += once_add;
+                sum -= once_add;
+                if(v[add_pos] >= limit) {
+                    std::swap(rand_v[last], rand_v[rand_pos]);
+                    last--;
+                }
+            }
+            return false;
+        }
+        
         // return a integer vector,which elements in range [from,to] and sum equals to sum
         template<typename T>
         std::vector<T> rand_sum(int size,T sum,T from,T to) {
@@ -659,10 +712,21 @@ namespace generator{
 
             std::vector<T> v(size,0);
             sum -= from * size;
-            T right = to - from;
-            for(int i = 0;i < size;i++){
-                v[i] = rnd.next(std::max(T(0),sum - T(size - i - 1) * right),std::min(sum,right));
-                sum -= v[i];
+            T limit = to - from;
+            if (sum <= 1000000) {
+                __rand_small_sum(v, sum, limit);
+            }
+            else if (limit * size - sum <=1000000){
+                __rand_small_sum(v, limit * size - sum, limit);
+                for (int i = 0; i < size; i++) {
+                    v[i] = limit - v[i];
+                }
+            }
+            else {
+                while(__rand_large_sum(v, sum, limit));
+                __rand_small_sum(v, sum, limit);
+            }
+            for (int i = 0; i < size; i++) {
                 v[i] += from;
             }
 
