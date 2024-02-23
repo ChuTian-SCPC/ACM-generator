@@ -1632,6 +1632,11 @@ namespace generator{
 
             };   
             
+            enum TreeGenerator {
+                RandomFather,
+                Pruefer
+            };
+
             //common tree
             class Tree {
             protected:
@@ -1643,20 +1648,23 @@ namespace generator{
                 int _root;                       
                 std::vector<Edge> _edge;  
                 std::vector<int> _p;
+
+                TreeGenerator _tree_generator;
                 // output format
                 bool _output_node;
                 bool _output_root;
                 bool _swap_node;// use if `_is_rooted` is true, output `father son` or `son father` by random
                 
-            public:
-                Tree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
+            public:                
+                Tree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, TreeGenerator tree_generator = RandomFather) :
                     _node(node),
                     _begin_node(begin_node),
                     _is_rooted(is_rooted),
                     _root(root - 1),
                     _output_node(true),
                     _output_root(true),
-                    _swap_node(false) {}
+                    _swap_node(false),
+                    _tree_generator(tree_generator){}
                 
                 void set_node(int node) { _node = node;}
                 void set_is_root(int is_rooted) { _is_rooted = is_rooted;}
@@ -1668,6 +1676,11 @@ namespace generator{
                 void set_output_node(bool output_node) { _output_node = output_node; }
                 void set_output_root(bool output_root) { _output_root = output_root; }
                 void set_swap_node(bool swap_node) { _swap_node = swap_node; }
+                void set_tree_generator(TreeGenerator tree_generator) { _tree_generator = tree_generator; }
+
+                void use_random_father() { _tree_generator = RandomFather;}
+                void use_pruefer() { _tree_generator = Pruefer;}
+
                 int root() {
                     if (!_is_rooted) {
                         msg::__warn_msg(msg::_err, "Unrooted Tree, root is useless.");   
@@ -1676,11 +1689,14 @@ namespace generator{
                 }
                 
                 std::vector<Edge> edge() { return _edge;}
-                
-                virtual void gen() {__gen_once();}
 
-                void gen(bool use_pruefer) {
-                    if (use_pruefer) {
+                virtual void gen() {
+                    if(_node == 1) {
+                        __init();
+                        return;
+                    }
+                    if (_tree_generator == Pruefer) {
+                        __init();
                         std::vector<int> times = rand::rand_sum(_node, _node - 2, 0);
                         std::vector<int> pruefer = rand::shuffle_index(times);
                         __pruefer_decode(pruefer);
@@ -1690,7 +1706,6 @@ namespace generator{
                     }
                 }
 
-                void gen_pruefer() { gen(true);}
 
                 friend std::ostream& operator<<(std::ostream& os, const Tree& tree) {
                     std::string first_line = "";
@@ -1704,11 +1719,14 @@ namespace generator{
                         first_line += std::to_string(tree._root + tree._begin_node);
                     }
                     if (first_line != "") {
-                        os<<first_line<<"\n";
+                        os<<first_line;
+                        if (tree._node > 1) {
+                            os<<"\n";
+                        }
                     }
                     int cnt = 0;
                     for (Edge e: tree._edge) {
-                        if (tree._is_rooted && tree._swap_node) {
+                        if (tree._is_rooted && tree._swap_node && rnd.next(2)) {
                             os<<e.__format("%v %u");
                         }
                         else {
@@ -1726,7 +1744,7 @@ namespace generator{
                         msg::__error_msg(msg::_err, "Number of nodes must be a positive integer, but found %d.",_node);
                     }
 
-                    if (_is_rooted && (_root <= 0 || _root > _node)) {
+                    if (_is_rooted && (_root < 0 || _root > _node)) {
                         msg::__error_msg(
                             msg::_err, 
                             "restriction of the root is [1, %d], but found %d.", _node, _root + 1);
@@ -1745,7 +1763,7 @@ namespace generator{
                     _edge.clear();
                     _p = rnd.perm(_node, 0);
                     if (_is_rooted) {
-                        for (int i = 0; i < _node; i++) {
+                        for (int i = 1; i < _node; i++) {
                             if (_p[i] == _root) {
                                 std::swap(_p[0], _p[i]);
                                 break;
@@ -1773,7 +1791,11 @@ namespace generator{
                 }
 
                 void __pruefer_decode(std::vector<int> pruefer) {
-                    __init();
+                    if (_node == 2) {
+                        __add_edge(_root, 1 ^ _root);
+                        return;
+                    }
+
                     if (_is_rooted) {
                         int n = pruefer.size();
                         bool exist = false;
@@ -1830,7 +1852,14 @@ namespace generator{
             public:
                 Chain(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
                     Tree(node, begin_node, is_rooted, root) {}
-            
+
+                virtual void gen() { 
+                    if (_node == 1) {
+                        __init();
+                        return;
+                    }
+                    __gen_once();
+                }
             protected:
                 virtual void __gen_tree() {
                     for (int i = 1; i < _node; i++) {
@@ -1845,6 +1874,13 @@ namespace generator{
                 Flower(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
                     Tree(node, begin_node, is_rooted, root) {}
                 
+                virtual void gen() { 
+                    if (_node == 1) {
+                        __init();
+                        return;
+                    }
+                    __gen_once();
+                }
             protected:
                 virtual void __gen_tree() {
                     for (int i = 1; i < _node; i++) {
@@ -1867,26 +1903,30 @@ namespace generator{
                 virtual void gen() {
                     if (_height == -1) {
                         _height = rnd.next(_node == 1 ? 1 : 2, _node);
+                    }                    
+                    if (_node == 1) {
+                        __init();
+                        return;
                     }
                     __gen_once();
                 }
                 
                 void gen(int height) {
                     _height = height;
-                    __gen_once();
+                    gen();
                 }
                 
                 template <typename T = int, typename U = int>
                 typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value, void>::type
                 gen(T l_limit, U r_limit) {
                     _height = (int)rand::rand_int(l_limit, r_limit);
-                    __gen_once();
+                    gen();
                 }
                 
                 void gen(const char* format,...) {
                     FMT_TO_RESULT(format, format, _format);
                     _height = (int)rand::rand_int(_format.c_str());
-                    __gen_once();
+                    gen();
                 }
                 
             protected:
@@ -1912,8 +1952,74 @@ namespace generator{
                         int f = rnd.next(l, r - 1);
                         __add_edge(_p[f], _p[i]);
                     }
+                }                
+            };
+
+            class DegreeTree : public Tree {
+            protected :
+                int _max_degree;
+
+            public:
+                DegreeTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1) :
+                    Tree(node, begin_node, is_rooted, root, Pruefer),
+                    _max_degree(max_degree) {}  
+
+                void set_max_degree(int max_degree) { _max_degree = max_degree; }
+
+                virtual void gen() {
+                    if (_max_degree == -1) {
+                        if (_node == 1) {
+                            _max_degree = 0;
+                        }
+                        else if (_node == 2) {
+                            _max_degree = 1;
+                        }
+                        else {
+                            _max_degree = rnd.next(2, _node - 1);
+                        }
+                    }                    
+                    if (_node == 1) {
+                        __init();
+                        return;
+                    }
+                    __init();
+                    std::vector<int> times = rand::rand_sum(_node, _node - 2, 0, _max_degree - 1);
+                    std::vector<int> pruefer = rand::shuffle_index(times);
+                    __pruefer_decode(pruefer);
+                }
+
+                void gen(int max_degree) {
+                    _max_degree = max_degree;
+                    gen();
                 }
                 
+                template <typename T = int, typename U = int>
+                typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value, void>::type
+                gen(T l_limit, U r_limit) {
+                    _max_degree = (int)rand::rand_int(l_limit, r_limit);
+                    gen();
+                }
+                
+                void gen(const char* format,...) {
+                    FMT_TO_RESULT(format, format, _format);
+                    _max_degree = (int)rand::rand_int(_format.c_str());
+                    gen();
+                }
+            protected:
+                virtual void __judge_self_limit() {
+                    if (_max_degree > _node - 1) {
+                        msg::__warn_msg(msg::_err, "The max degree limit %d is greater than node - 1, equivalent to use Tree::gen_pruefer", _max_degree);
+                    }
+                    if(_node == 1 && _max_degree < 0) {
+                        msg::__error_msg(msg::_err, "The max degree limit of 1 node's tree is greater than or equal to 0, but found %d.",_max_degree);
+                    } 
+                    if(_node == 2 && _max_degree < 1) {
+                        msg::__error_msg(msg::_err, "The max degree limit of 2 node's tree is greater than or equal to 1, but found %d.",_max_degree);
+                    }  
+                    if(_node > 2 && _max_degree < 2) {
+                        msg::__error_msg(msg::_err, "The max degree limit of 3 or more node's tree is greater than or equal to 2, but found %d.",_max_degree);
+                    }   
+                }
             };
         }
     }
