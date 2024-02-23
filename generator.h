@@ -1521,9 +1521,245 @@ namespace generator{
         }
     }
 
+    namespace graph {
+        namespace unweight{
+            class Edge {
+            private:
+                int _u, _v;
+            public:
+                Edge() : _u(0), _v(0){}
+                Edge(int u, int v) : _u(u), _v(v){}
+
+                int& u() { return _u; }
+                int& v() { return _v; }
+
+                std::tuple<int, int> edge() { return std::make_tuple(_u, _v); }
+                
+                friend std::ostream& operator<<(std::ostream& os, const Edge& edge) {
+                    os << edge._u << " " << edge._v;
+                    return os;
+                }
+            };   
+            
+            //common tree
+            class Tree {
+            protected:
+                int _begin_node; // index of the first node           
+                int _node; // the number of nodes in the tree                   
+                bool _is_rooted;
+                // use if `_is_rooted` is true,
+                // The root node is the `_root`-th node starting from `_begin_node`. 
+                int _root;                       
+                std::vector<Edge> _edge;  
+                std::vector<int> _p;
+                // output format
+                bool _output_node;
+                bool _output_root;
+                
+            public:
+                Tree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
+                    _node(node),
+                    _begin_node(begin_node),
+                    _is_rooted(is_rooted),
+                    _root(root),
+                    _output_node(true),
+                    _output_root(true) {}
+                
+                void set_node(int node) { _node = node;}
+                void set_is_root(int is_rooted) { _is_rooted = is_rooted;}
+                void set_root(int root) {
+                    _root = root;
+                    msg::__warn_msg(msg::_err, "Unrooted Tree, set root is useless.");
+                }
+                void set_begin_node(int begin_node) { _begin_node = begin_node; }
+                void set_output_node(bool output_node) { _output_node = output_node; }
+                void set_output_root(bool output_root) { _output_root = output_root; }
+                int root() {
+                    if (!_is_rooted) {
+                        msg::__warn_msg(msg::_err, "Unrooted Tree, root is useless.");   
+                    }
+                    return _root + _begin_node - 1;   
+                }
+                
+                std::vector<Edge> edge() { return _edge;}
+                
+                virtual void gen() {__gen_once();}
+
+                friend std::ostream& operator<<(std::ostream& os, const Tree& tree) {
+                    std::string first_line = "";
+                    if (tree._output_node) {
+                        first_line += std::to_string(tree._node);
+                    }
+                    if (tree._is_rooted && tree._output_root) {
+                        if (first_line != "") {
+                            first_line += " ";
+                        }
+                        first_line += std::to_string(tree._root + tree._begin_node - 1);
+                    }
+                    if (first_line != "") {
+                        os<<first_line<<"\n";
+                    }
+                    int cnt = 0;
+                    for (Edge e: tree._edge) {
+                        os<<e<<" \n"[++cnt < tree._node - 1];
+                    }                    
+                    return os;
+                }
+            protected:
+                void __judge_comman_limit() {
+                    if (_node <= 0) {
+                        msg::__error_msg(msg::_err, "Number of nodes must be a positive integer, but found %d.",_node);
+                    }
+
+                    if (_is_rooted && (_root <= 0 || _root > _node)) {
+                        msg::__error_msg(
+                            msg::_err, 
+                            "restriction of the root is [1, %d], but found %d.", _node, _root);
+                    }
+                }
+                
+                virtual void __judge_self_limit() {}
+                
+                void __judge_limits() {
+                    __judge_comman_limit();
+                    __judge_self_limit();
+                }
+                
+                void __init() {                 
+                    __judge_limits();
+                    _edge.clear();
+                    _p = rnd.perm(_node, 0);
+                    if (_is_rooted) {
+                        for (int i = 0; i < _node; i++) {
+                            if (_p[i] == _root) {
+                                std::swap(_p[0], _p[i]);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                void __add_edge(int u, int v) {
+                    u += _begin_node;
+                    v += _begin_node;
+                    if (_is_rooted || rnd.next(2)) {
+                        _edge.emplace_back(u, v);
+                    }
+                    else {
+                        _edge.emplace_back(v, u);
+                    }
+                }
+                
+                virtual void __gen_tree() {
+                    for (int i = 1; i < _node; i++) {
+                        int f = rnd.next(i);
+                        __add_edge(_p[f], _p[i]);
+                    }
+                }
+                
+                void __gen_once() {
+                    __init();
+                    __gen_tree();
+                    shuffle(_edge.begin(), _edge.end());
+                }
+            };
+            
+            class Chain : public Tree {
+            public:
+                Chain(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
+                    Tree(node, begin_node, is_rooted, root) {}
+            
+            protected:
+                virtual void __gen_tree() {
+                    for (int i = 1; i < _node; i++) {
+                        int f = rnd.next(i);
+                        __add_edge(_p[i - 1], _p[i]);
+                    }
+                }
+            };
+            
+            class Flower : public Tree {
+            public:
+                Flower(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
+                    Tree(node, begin_node, is_rooted, root) {}
+                
+            protected:
+                virtual void __gen_tree() {
+                    for (int i = 1; i < _node; i++) {
+                        int f = rnd.next(i);
+                        __add_edge(_p[0], _p[i]);
+                    }
+                }
+            };
+            
+            class HeightTree : public Tree {
+            protected:
+                int _height;
+            public:
+                HeightTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int height = -1) :
+                    Tree(node, begin_node, is_rooted, root),
+                    _height(height) {}  
+            
+                void set_height(int height) { _height = height; }
+                
+                virtual void gen() {
+                    if (_height == -1) {
+                        _height = rnd.next(_node == 1 ? 1 : 2, _node);
+                    }
+                    __gen_once();
+                }
+                
+                void gen(int height) {
+                    _height = height;
+                    __gen_once();
+                }
+                
+                template <typename T = int, typename U = int>
+                typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value, void>::type
+                gen(T l_limit, U r_limit) {
+                    _height = (int)rand::rand_int(l_limit, r_limit);
+                    __gen_once();
+                }
+                
+                void gen(const char* format,...) {
+                    FMT_TO_RESULT(format, format, _format);
+                    _height = (int)rand::rand_int(_format.c_str());
+                    __gen_once();
+                }
+                
+            protected:
+                virtual void __judge_self_limit() {
+                    if (_height > _node || (_node > 1 && _height <= 1) || _height < 1) {
+                        msg::__error_msg(msg::_err, "restriction of the height is [%d,%d].\n", _node == 1 ? 1 : 2, _node);
+                    }
+                }
+            
+                virtual void __gen_tree() {
+                    std::vector<int> number(_height, 1);
+                    int w = _node - _height;
+                    for (int i = 1; i <= w; i++) {
+                        number[rnd.next(1, _height - 1)]++;
+                    }
+                    int l = 0, r = 0, k = 0;
+                    for (int i = 1; i < _node; i++) {
+                        if (r + number[k] == i) {
+                            l = r;
+                            r += number[k];
+                            k++;
+                        }
+                        int f = rnd.next(l, r - 1);
+                        __add_edge(_p[f], _p[i]);
+                    }
+                }
+                
+            };
+        }
+    }
+    
     namespace all{
         using namespace generator::msg;
         using namespace generator::rand;
         using namespace generator::io;
+        using namespace generator::graph;
     }
 }
