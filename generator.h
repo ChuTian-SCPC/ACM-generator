@@ -807,6 +807,33 @@ namespace generator{
             return *(elements.begin() + pos);
         }
 
+        // use vector index + `offset` be new vector elements
+        // the value of the vector represents the number of times this index will appear in the new vector
+        // return the shuffled new vector
+        template<typename Iter>
+        std::vector<int> shuffle_index(Iter begin, Iter end, int offset = 0) {
+            int tot = 0;
+            std::vector<int> res;
+            for (Iter i = begin; i != end; i++) {
+                int x = *i;
+                if (x < 0) {
+                    msg::__error_msg(msg::_err, "Elements must be non negtive number.");
+                }
+                tot += x;
+                if (tot > 10000000) {
+                    msg::__error_msg(msg::_err, "Sum of the elements must equal or less than 10^7");
+                }
+                while (x--) {
+                    res.emplace_back((i - begin) + offset);
+                }
+                shuffle(res.begin(),res.end());
+            }
+            return res;
+        }
+
+        std::vector<int> shuffle_index(std::vector<int> v, int offset = 0) {
+            return shuffle_index(v.begin(), v.end(), 0);
+        }
     }
 
     namespace io{
@@ -1539,6 +1566,70 @@ namespace generator{
                     os << edge._u << " " << edge._v;
                     return os;
                 }
+
+                std::string __format() {
+                    std::ostringstream oss;
+                    oss<<_u<<" "<<_v;
+                    return oss.str();
+                }
+
+                std::string __format(const char *format) {
+                    std::ostringstream oss;
+                    int n = strlen(format);
+                    for(int i = 0; i < n; i++) {
+                        bool is_var = false;
+                        if (format[i] == '%') {
+                            if (i + 1 < n) {
+                                if (format[i + 1] == 'u' || format[i + 1] == 'U') {
+                                    oss<<_u;
+                                    is_var = true;
+                                }
+                                else if(format[i + 1] == 'v' || format[i + 1] == 'V') {
+                                    oss<<_v;
+                                    is_var = true;
+                                }
+                            }
+                        }
+                        if(is_var) {
+                            i++;
+                        }
+                        else {
+                            oss<<format[i];
+                        }
+                    }
+                    return oss.str();
+                }
+
+                std::string __format(std::string format) {
+                    return __format(format.c_str());
+                }
+                void print() {
+                    std::cout<<*this;
+                }
+
+                void print(const char *format) {
+                    std::cout<<__format(format);
+                }
+
+                void print(std::string format) {
+                    std::cout<<__format(format);
+                }
+
+                void println() {
+                    print();
+                    std::cout<<std::endl;
+                }
+
+                void println(const char *format) {
+                    print(format);
+                    std::cout<<std::endl;
+                }
+
+                void println(std::string format) {
+                    println(format);
+                    std::cout<<std::endl;
+                }
+
             };   
             
             //common tree
@@ -1555,15 +1646,17 @@ namespace generator{
                 // output format
                 bool _output_node;
                 bool _output_root;
+                bool _swap_node;// use if `_is_rooted` is true, output `father son` or `son father` by random
                 
             public:
                 Tree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
                     _node(node),
                     _begin_node(begin_node),
                     _is_rooted(is_rooted),
-                    _root(root),
+                    _root(root - 1),
                     _output_node(true),
-                    _output_root(true) {}
+                    _output_root(true),
+                    _swap_node(false) {}
                 
                 void set_node(int node) { _node = node;}
                 void set_is_root(int is_rooted) { _is_rooted = is_rooted;}
@@ -1574,16 +1667,30 @@ namespace generator{
                 void set_begin_node(int begin_node) { _begin_node = begin_node; }
                 void set_output_node(bool output_node) { _output_node = output_node; }
                 void set_output_root(bool output_root) { _output_root = output_root; }
+                void set_swap_node(bool swap_node) { _swap_node = swap_node; }
                 int root() {
                     if (!_is_rooted) {
                         msg::__warn_msg(msg::_err, "Unrooted Tree, root is useless.");   
                     }
-                    return _root + _begin_node - 1;   
+                    return _root + _begin_node;   
                 }
                 
                 std::vector<Edge> edge() { return _edge;}
                 
                 virtual void gen() {__gen_once();}
+
+                void gen(bool use_pruefer) {
+                    if (use_pruefer) {
+                        std::vector<int> times = rand::rand_sum(_node, _node - 2, 0);
+                        std::vector<int> pruefer = rand::shuffle_index(times);
+                        __pruefer_decode(pruefer);
+                    }   
+                    else {
+                        __gen_once();
+                    }
+                }
+
+                void gen_pruefer() { gen(true);}
 
                 friend std::ostream& operator<<(std::ostream& os, const Tree& tree) {
                     std::string first_line = "";
@@ -1594,14 +1701,22 @@ namespace generator{
                         if (first_line != "") {
                             first_line += " ";
                         }
-                        first_line += std::to_string(tree._root + tree._begin_node - 1);
+                        first_line += std::to_string(tree._root + tree._begin_node);
                     }
                     if (first_line != "") {
                         os<<first_line<<"\n";
                     }
                     int cnt = 0;
                     for (Edge e: tree._edge) {
-                        os<<e<<" \n"[++cnt < tree._node - 1];
+                        if (tree._is_rooted && tree._swap_node) {
+                            os<<e.__format("%v %u");
+                        }
+                        else {
+                            os<<e.__format("%u %v");
+                        }
+                        if(++cnt < tree._node - 1) {
+                            os<<"\n";
+                        }
                     }                    
                     return os;
                 }
@@ -1614,7 +1729,7 @@ namespace generator{
                     if (_is_rooted && (_root <= 0 || _root > _node)) {
                         msg::__error_msg(
                             msg::_err, 
-                            "restriction of the root is [1, %d], but found %d.", _node, _root);
+                            "restriction of the root is [1, %d], but found %d.", _node, _root + 1);
                     }
                 }
                 
@@ -1655,6 +1770,53 @@ namespace generator{
                         int f = rnd.next(i);
                         __add_edge(_p[f], _p[i]);
                     }
+                }
+
+                void __pruefer_decode(std::vector<int> pruefer) {
+                    __init();
+                    if (_is_rooted) {
+                        int n = pruefer.size();
+                        bool exist = false;
+                        for (int i = 0; i < n; i++) {
+                            if (pruefer[i] == _root) {
+                                std::swap(pruefer[i], pruefer[n - 1]);
+                                exist = true;
+                                break;
+                            }
+                        }
+                        if (!exist) {
+                            pruefer[n - 1] = _root;
+                        }
+                    }
+                    std::vector<int> degree(_node, 1);
+                    for (auto x : pruefer) {
+                        degree[x]++;
+                    }                    
+                    int ptr = 0;
+                    while (degree[ptr] != 1) {
+                        ptr++;
+                    }
+                    int leaf = ptr;
+                    for (auto u : pruefer) {
+                        __add_edge(u, leaf);
+                        degree[u]--;
+                        if (degree[u] == 1 && u < ptr) {
+                            leaf = u;
+                        }
+                        else {
+                            do {
+                                ptr ++;
+                            }while(degree[ptr] != 1);
+                            leaf = ptr;
+                        }
+                    }
+                    int u = leaf;
+                    int v = _node - 1;
+                    if (_is_rooted && v == _root) {
+                        std::swap(u, v);
+                    }
+                    __add_edge(u, v);
+                    shuffle(_edge.begin(), _edge.end());
                 }
                 
                 void __gen_once() {
