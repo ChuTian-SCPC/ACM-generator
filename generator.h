@@ -1780,10 +1780,10 @@ namespace generator{
                     }
                 }
                 
-                void __add_edge(int u, int v, bool swap) {
+                void __add_edge(int u, int v) {
                     u += _begin_node;
                     v += _begin_node;
-                    if (!swap || _is_rooted || rnd.next(2)) {
+                    if (!_swap_node || _is_rooted || rnd.next(2)) {
                         _edge.emplace_back(u, v);
                     }
                     else {
@@ -1794,17 +1794,17 @@ namespace generator{
                 virtual void __gen_tree() {
                     for (int i = 1; i < _node; i++) {
                         int f = rnd.next(i);
-                        __add_edge(_p[f], _p[i], _swap_node);
+                        __add_edge(_p[f], _p[i]);
                     }
                 }
                              
                 void __pruefer_decode(std::vector<int> pruefer) {
                     if (_node == 2) {
                         if (_is_rooted) {
-                            __add_edge(_root, 1 ^ _root, _swap_node);  
+                            __add_edge(_root, 1 ^ _root);  
                         }
                         else {
-                            __add_edge(0, 1, _swap_node);
+                            __add_edge(0, 1);
                         }
                         return;
                     }
@@ -1834,7 +1834,7 @@ namespace generator{
                     }
                     int leaf = ptr;
                     for (auto u : pruefer) {
-                        __add_edge(u, leaf, _swap_node);
+                        __add_edge(u, leaf);
                         degree[u]--;
                         if (degree[u] == 1 && u < ptr) {
                             leaf = u;
@@ -1851,7 +1851,7 @@ namespace generator{
                     if (_is_rooted && v == _root) {
                         std::swap(u, v);
                     }
-                    __add_edge(u, v, _swap_node);
+                    __add_edge(u, v);
                     shuffle(_edge.begin(), _edge.end());
                 }
                 
@@ -1877,7 +1877,7 @@ namespace generator{
                 virtual void __gen_tree() {
                     for (int i = 1; i < _node; i++) {
                         int f = rnd.next(i);
-                        __add_edge(_p[i - 1], _p[i], _swap_node);
+                        __add_edge(_p[i - 1], _p[i]);
                     }
                 }
             };
@@ -1898,7 +1898,7 @@ namespace generator{
                 virtual void __gen_tree() {
                     for (int i = 1; i < _node; i++) {
                         int f = rnd.next(i);
-                        __add_edge(_p[0], _p[i], _swap_node);
+                        __add_edge(_p[0], _p[i]);
                     }
                 }
             };
@@ -1963,7 +1963,7 @@ namespace generator{
                             k++;
                         }
                         int f = rnd.next(l, r - 1);
-                        __add_edge(_p[f], _p[i], _swap_node);
+                        __add_edge(_p[f], _p[i]);
                     }
                 }                
             };
