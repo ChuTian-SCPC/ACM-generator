@@ -2361,6 +2361,8 @@ namespace generator{
                 bool _different_part;
                 OutputNodeType _output_node_type;
                 std::vector<int> _part[2];
+                std::vector<int> _degree[2];
+                int _d[2];
             public:
                 BipartiteGraph(int node = 1, int side = 0, int begin_node = 1, int left = -1) :
                     BasicGraph(
@@ -2473,6 +2475,18 @@ namespace generator{
                             _part[1].push_back(p[i]);
                         }
                     }
+                    if(_connect) {
+                        _degree[0].resize(_left, 1);
+                        _degree[1].resize(_right, 1);
+                        for (int i = _left; i < _node - 1; i++) {
+                            _degree[0][rnd.next(_left)]++;
+                        }
+                        for (int i = _right; i < _node - 1; i++) {
+                            _degree[1][rnd.next(_right)]++;
+                        }
+                        _d[0] = _node - 1;
+                        _d[1] = _node - 1;              
+                    }
                 }
                 
                 virtual void __judge_self_limit() {
@@ -2502,50 +2516,36 @@ namespace generator{
                     return {u,v};
                 }
                 
+                void __add_part_edge(int f, int i, int j) {
+                    int u = _part[f][i];
+                    int v = _part[f ^ 1][j];
+                    if (f == 1) {
+                        std::swap(u, v);
+                    }
+                    __add_edge(u, v);
+                    _d[0]--;
+                    _d[1]--;
+                    _degree[f][i]--;
+                    _degree[f ^ 1][j]--;    
+                }
+                
                 virtual void __gen_connect() {
-                    std::vector<int> degree[2];
-                    degree[0].resize(_left, 1);
-                    degree[1].resize(_right, 1);
-                    for (int i = _left; i < _node - 1; i++) {
-                        degree[0][rnd.next(_left)]++;
-                    }
-                    for (int i = _right; i < _node - 1; i++) {
-                        degree[1][rnd.next(_right)]++;
-                    }
-                    int f = 0, d[2] = {_node - 1, _node - 1};
-                    while (d[0] + d[1] > 0) {
+                    int f = 0;
+                    while (_d[0] + _d[1] > 0) {
                         for (int i = 0; i < (f == 0 ? _left : _right); i++) {
-                            if (degree[f][i] == 1) {
-                                if (d[f] == 1) {
+                            if (_degree[f][i] == 1) {
+                                if (_d[f] == 1) {
                                     for (int j = 0; j < (f == 0 ? _right : _left); j++) {
-                                        if (degree[f ^ 1][j] == 1) {
-                                            int u = _part[f][i];
-                                            int v = _part[f ^ 1][j];
-                                            if (f == 1) {
-                                                std::swap(u, v);
-                                            }
-                                            __add_edge(u, v);
-                                            d[0]--;
-                                            d[1]--;
-                                            degree[f][i]--;
-                                            degree[f ^ 1][j]--;
+                                        if (_degree[f ^ 1][j] == 1) {
+                                            __add_part_edge(f, i, j);
                                         }
                                     }
                                 } else {
                                     int j;
                                     do {
                                         j = rnd.next(f == 0 ? _right : _left);
-                                    } while (degree[f ^ 1][j] < 2);
-                                    int u = _part[f][i];
-                                    int v = _part[f ^ 1][j];
-                                    if (f == 1) {
-                                        std::swap(u, v);
-                                    }
-                                    __add_edge(u, v);
-                                    d[0]--;
-                                    d[1]--;
-                                    degree[f][i]--;
-                                    degree[f ^ 1][j]--;
+                                    } while (_degree[f ^ 1][j] < 2);
+                                    __add_part_edge(f, i, j);
                                 }
                             }
                         }
