@@ -817,11 +817,11 @@ namespace generator{
             for (Iter i = begin; i != end; i++) {
                 int x = *i;
                 if (x < 0) {
-                    msg::__error_msg(msg::_err, "Elements must be non negtive number.");
+                    msg::__fail_msg(msg::_err, "Elements must be non negtive number.");
                 }
                 tot += x;
                 if (tot > 10000000) {
-                    msg::__error_msg(msg::_err, "Sum of the elements must equal or less than 10^7");
+                    msg::__fail_msg(msg::_err, "Sum of the elements must equal or less than 10^7");
                 }
                 while (x--) {
                     res.emplace_back((i - begin) + offset);
@@ -1566,7 +1566,14 @@ namespace generator{
                     os << edge._u << " " << edge._v;
                     return os;
                 }
-
+                
+                friend bool operator<(const Edge a, const Edge b) {
+                    if (a._u == b._u) {
+                        return a._v < b._v;
+                    }
+                    return a._u < b._u;
+                }
+                
                 std::string __format() {
                     std::ostringstream oss;
                     oss<<_u<<" "<<_v;
@@ -1632,13 +1639,15 @@ namespace generator{
 
             };   
             
-            enum TreeGenerator {
-                RandomFather,
-                Pruefer
-            };
+
 
             //common tree
             class Tree {
+            public:
+                enum TreeGenerator {
+                    RandomFather,
+                    Pruefer
+                };
             protected:
                 int _begin_node; // index of the first node           
                 int _node; // the number of nodes in the tree                   
@@ -1653,7 +1662,7 @@ namespace generator{
                 // output format
                 bool _output_node;
                 bool _output_root;
-                bool _swap_node;// use if `_is_rooted` is true, output `father son` or `son father` by random
+                bool _swap_node;// true means output `father son` or `son father` by random
                 
             public:                
                 Tree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, TreeGenerator tree_generator = RandomFather) :
@@ -1663,8 +1672,8 @@ namespace generator{
                     _root(root - 1),
                     _output_node(true),
                     _output_root(true),
-                    _swap_node(false),
-                    _tree_generator(tree_generator){}
+                    _tree_generator(tree_generator),
+                    _swap_node(_is_rooted ? false : true){}
                 
                 void set_node(int node) { _node = node;}
                 void set_is_root(int is_rooted) { _is_rooted = is_rooted;}
@@ -1677,7 +1686,7 @@ namespace generator{
                 void set_output_root(bool output_root) { _output_root = output_root; }
                 void set_swap_node(bool swap_node) { _swap_node = swap_node; }
                 void set_tree_generator(TreeGenerator tree_generator) { _tree_generator = tree_generator; }
-
+                
                 void use_random_father() { _tree_generator = RandomFather;}
                 void use_pruefer() { _tree_generator = Pruefer;}
 
@@ -1740,11 +1749,11 @@ namespace generator{
             protected:
                 void __judge_comman_limit() {
                     if (_node <= 0) {
-                        msg::__error_msg(msg::_err, "Number of nodes must be a positive integer, but found %d.",_node);
+                        msg::__fail_msg(msg::_err, "Number of nodes must be a positive integer, but found %d.",_node);
                     }
 
                     if (_is_rooted && (_root < 0 || _root > _node)) {
-                        msg::__error_msg(
+                        msg::__fail_msg(
                             msg::_err, 
                             "restriction of the root is [1, %d], but found %d.", _node, _root + 1);
                     }
@@ -1771,10 +1780,10 @@ namespace generator{
                     }
                 }
                 
-                void __add_edge(int u, int v) {
+                void __add_edge(int u, int v, bool swap) {
                     u += _begin_node;
                     v += _begin_node;
-                    if (_is_rooted || rnd.next(2)) {
+                    if (!swap || _is_rooted || rnd.next(2)) {
                         _edge.emplace_back(u, v);
                     }
                     else {
@@ -1785,17 +1794,17 @@ namespace generator{
                 virtual void __gen_tree() {
                     for (int i = 1; i < _node; i++) {
                         int f = rnd.next(i);
-                        __add_edge(_p[f], _p[i]);
+                        __add_edge(_p[f], _p[i], _swap_node);
                     }
                 }
                              
                 void __pruefer_decode(std::vector<int> pruefer) {
                     if (_node == 2) {
                         if (_is_rooted) {
-                            __add_edge(_root, 1 ^ _root);  
+                            __add_edge(_root, 1 ^ _root, _swap_node);  
                         }
                         else {
-                            __add_edge(0, 1);
+                            __add_edge(0, 1, _swap_node);
                         }
                         return;
                     }
@@ -1825,7 +1834,7 @@ namespace generator{
                     }
                     int leaf = ptr;
                     for (auto u : pruefer) {
-                        __add_edge(u, leaf);
+                        __add_edge(u, leaf, _swap_node);
                         degree[u]--;
                         if (degree[u] == 1 && u < ptr) {
                             leaf = u;
@@ -1842,7 +1851,7 @@ namespace generator{
                     if (_is_rooted && v == _root) {
                         std::swap(u, v);
                     }
-                    __add_edge(u, v);
+                    __add_edge(u, v, _swap_node);
                     shuffle(_edge.begin(), _edge.end());
                 }
                 
@@ -1868,7 +1877,7 @@ namespace generator{
                 virtual void __gen_tree() {
                     for (int i = 1; i < _node; i++) {
                         int f = rnd.next(i);
-                        __add_edge(_p[i - 1], _p[i]);
+                        __add_edge(_p[i - 1], _p[i], _swap_node);
                     }
                 }
             };
@@ -1889,7 +1898,7 @@ namespace generator{
                 virtual void __gen_tree() {
                     for (int i = 1; i < _node; i++) {
                         int f = rnd.next(i);
-                        __add_edge(_p[0], _p[i]);
+                        __add_edge(_p[0], _p[i], _swap_node);
                     }
                 }
             };
@@ -1936,7 +1945,7 @@ namespace generator{
             protected:
                 virtual void __judge_self_limit() {
                     if (_height > _node || (_node > 1 && _height <= 1) || _height < 1) {
-                        msg::__error_msg(msg::_err, "restriction of the height is [%d,%d].\n", _node == 1 ? 1 : 2, _node);
+                        msg::__fail_msg(msg::_err, "restriction of the height is [%d,%d].\n", _node == 1 ? 1 : 2, _node);
                     }
                 }
             
@@ -1954,7 +1963,7 @@ namespace generator{
                             k++;
                         }
                         int f = rnd.next(l, r - 1);
-                        __add_edge(_p[f], _p[i]);
+                        __add_edge(_p[f], _p[i], _swap_node);
                     }
                 }                
             };
@@ -2014,13 +2023,13 @@ namespace generator{
                         msg::__warn_msg(msg::_err, "The max degree limit %d is greater than node - 1, equivalent to use Tree::gen_pruefer", _max_degree);
                     }
                     if(_node == 1 && _max_degree < 0) {
-                        msg::__error_msg(msg::_err, "The max degree limit of 1 node's tree is greater than or equal to 0, but found %d.",_max_degree);
+                        msg::__fail_msg(msg::_err, "The max degree limit of 1 node's tree is greater than or equal to 0, but found %d.",_max_degree);
                     } 
                     if(_node == 2 && _max_degree < 1) {
-                        msg::__error_msg(msg::_err, "The max degree limit of 2 node's tree is greater than or equal to 1, but found %d.",_max_degree);
+                        msg::__fail_msg(msg::_err, "The max degree limit of 2 node's tree is greater than or equal to 1, but found %d.",_max_degree);
                     }  
                     if(_node > 2 && _max_degree < 2) {
-                        msg::__error_msg(msg::_err, "The max degree limit of 3 or more node's tree is greater than or equal to 2, but found %d.",_max_degree);
+                        msg::__fail_msg(msg::_err, "The max degree limit of 3 or more node's tree is greater than or equal to 2, but found %d.",_max_degree);
                     }   
                 }
             };
@@ -2089,17 +2098,713 @@ namespace generator{
                         msg::__warn_msg(msg::_err, "The max son limit %d is greater than node - 1, equivalent to use Tree::gen_pruefer", _max_son);
                     }
                     if(_node == 1 && _max_son < 0) {
-                        msg::__error_msg(msg::_err, "The max son limit of 1 node's tree is greater than or equal to 0, but found %d.",_max_son);
+                        msg::__fail_msg(msg::_err, "The max son limit of 1 node's tree is greater than or equal to 0, but found %d.",_max_son);
                     } 
                     if(_node == 2 && _max_son < 1) {
-                        msg::__error_msg(msg::_err, "The max son limit of 2 node's tree is greater than or equal to 1, but found %d.",_max_son);
+                        msg::__fail_msg(msg::_err, "The max son limit of 2 node's tree is greater than or equal to 1, but found %d.",_max_son);
                     }  
                     if(_node > 2 && _max_son < 2) {
-                        msg::__error_msg(msg::_err, "The max son limit of 3 or more node's tree is greater than or equal to 2, but found %d.",_max_son);
+                        msg::__fail_msg(msg::_err, "The max son limit of 3 or more node's tree is greater than or equal to 2, but found %d.",_max_son);
                     }   
                 }
             };                   
             
+            class BasicGraph {
+            protected:
+                int _node, _side;// number of node, number of edge
+                int _begin_node;
+                std::vector<Edge> _edge;
+                std::map<Edge, bool> _e;
+                bool _direction;
+                bool _multiply_edge;
+                bool _self_loop;
+                bool _connect;
+                bool _output_node;
+                bool _output_side;
+                bool _swap_node;
+            public:             
+                BasicGraph(
+                    int node,
+                    int side,
+                    int begin_node,
+                    bool direction,
+                    bool multiply_edge,
+                    bool self_loop,
+                    bool connect,
+                    bool output_node,
+                    bool output_side) :
+                    _node(node),
+                    _side(side),
+                    _begin_node(begin_node),
+                    _direction(direction),
+                    _multiply_edge(multiply_edge),
+                    _self_loop(self_loop),
+                    _connect(connect),
+                    _swap_node(_direction ? false : true),
+                    _output_node(output_node),
+                    _output_side(output_side)     
+                {}
+                
+                BasicGraph(
+                    int node,
+                    int side,
+                    int begin_node,
+                    bool direction,
+                    bool multiply_edge,
+                    bool self_loop,
+                    bool connect,
+                    bool swap_node,
+                    bool output_node,
+                    bool output_side) :
+                    _node(node),
+                    _side(side),
+                    _begin_node(begin_node),
+                    _direction(direction),
+                    _multiply_edge(multiply_edge),
+                    _self_loop(self_loop),
+                    _connect(connect),
+                    _swap_node(swap_node),
+                    _output_node(output_node),
+                    _output_side(output_side)     
+                {}
+                
+                void set_node(int node) { _node = node; }
+                void set_node_count(int count) { set_node(count); }
+                void set_side(int side) { _side = side; }
+                void set_side_count(int count) { set_side(count); }
+                void set_edge_count(int count) { set_side(count); }
+                void set_begin_node(int begin_node) { _begin_node = begin_node; }
+                
+                void set_direction(bool direction) { _direction = direction; }
+                void set_multiply_edge(bool multiply_edge) { _multiply_edge = multiply_edge; }
+                void set_self_loop(bool self_loop) { _self_loop = self_loop; }
+                void set_connect(bool connect) { _connect = connect; }
+                void set_swap_node(bool swap_node) { _swap_node = swap_node; }
+                
+                std::vector<Edge> edge() { return _edge;}
+                
+                virtual void gen() {
+                    __init();
+                    int m = _side;
+                    if(_connect) {
+                        m -= _node - 1;
+                        __gen_connect();
+                    }
+                    __gen_edges(m);
+                    shuffle(_edge.begin(), _edge.end());     
+                }
+                
+                void set_output_node(bool output_node) { _output_node = output_node;}
+                void set_output_node_count(bool output_node_count) { set_output_node(output_node_count);}
+                void set_output_side(bool output_side) { _output_side = output_side;}
+                void set_output_side_count(bool output_side_count) { set_output_side(output_side_count);}
+                void set_output_edge_count(bool output_edge_count) { set_output_side(output_edge_count);}
+                
+                friend std::ostream& operator<<(std::ostream& os, const BasicGraph& graph) {
+                    std::string first_line = "";
+                    first_line += graph.__format_output_node();
+                    if (graph._output_side) {
+                        if (first_line != "") {
+                            first_line += " ";
+                        }
+                        first_line += std::to_string(graph._side);
+                    }
+                    if (first_line != "") {
+                        os<<first_line;
+                        if (graph._side > 0) {
+                            os<<"\n";
+                        }
+                    }
+                    int cnt = 0;
+                    for (Edge e: graph._edge) {
+                        os<<e.__format("%u %v");
+                        if(++cnt < graph._side) {
+                            os<<"\n";
+                        }
+                    }                    
+                    return os;
+                }
+            protected:
+                virtual std::string __format_output_node() const {
+                    if (_output_node) {
+                        return std::to_string(_node);
+                    }
+                    return "";
+                }
+            
+                bool __judge_self_loop(int u, int v) {
+                    return !_self_loop && u == v;
+                }
+                
+                bool __judge_multiply_edge(int u, int v) {
+                    if(_multiply_edge) {
+                        return false;
+                    }
+                    if(_e[{u,v}]) {
+                        return true;
+                    }
+                    // if(!_direction && _e[{v, u}]) {
+                    //     return true;
+                    // }
+                    return false;
+                }
+                
+                void __add_edge(int u, int v) {
+                    if (!_multiply_edge) {
+                        _e[{u,v}] = true;
+                        if (!_direction) {
+                            _e[{v, u}] = true;
+                        }
+                    }
+                    u += _begin_node;
+                    v += _begin_node;
+                    if(!_swap_node || rnd.next(2)) {
+                        _edge.emplace_back(u, v);
+                    }
+                    else {
+                        _edge.emplace_back(v, u);
+                    }
+                }
+                
+                void __add_edge(Edge e) {
+                   int u = e.u();
+                   int v = e.v();
+                   __add_edge(u, v);
+                }
+                
+                virtual void __judge_upper_limit() {
+                    long long limit;
+                    if(!_multiply_edge) {
+                        limit = (long long)_node * (long long)(_node - 1) / 2;
+                        if(_direction) {
+                            limit *= 2;
+                        }
+                        if(_self_loop) {
+                            limit += _node;
+                        }
+                        if(_side > limit) {
+                            msg::__fail_msg(msg::_err, "number of edges must less than or equal to %lld.", limit);
+                        }
+                    }
+                }
+                
+                virtual void __judge_lower_limit() {
+                    if(_side < 0) {
+                        msg::__fail_msg(msg::_err, "number of edges must be a non-negative integer.");
+                    }
+                    if(_connect && _side < _node - 1) {
+                        msg::__fail_msg(msg::_err, "number of edges must greater than or equal to %d.", _node - 1);
+                    }
+                }
+                
+                virtual void __judge_self_limit() {}
+                void __judge_limits() {
+                    __judge_lower_limit();
+                    __judge_upper_limit();
+                    __judge_self_limit();
+                }
+                
+                virtual Edge __rand_edge() {
+                    int u, v;
+                    do {
+                        u = rnd.next(_node);
+                        v = rnd.next(_node);
+                    } while (__judge_self_loop(u, v) || __judge_multiply_edge(u, v));
+                    return {u,v};
+                }
+                virtual void __self_init(){}
+                void __init() {
+                    _edge.clear();
+                    if(!_multiply_edge) {
+                       _e.clear(); 
+                    }
+                    __self_init();
+                    __judge_limits();
+                }
+                
+                virtual void __gen_connect() {
+                    Tree tree(_node, 0);
+                    tree.gen();
+                    std::vector<Edge> edge = tree.edge();
+                    for(auto e : edge) {
+                        __add_edge(e);
+                    }
+                }
+                
+                virtual void __gen_edges(int m) {
+                    while(m--) {
+                        __add_edge(__rand_edge());
+                    }
+                }
+            };
+            
+            class Graph : public BasicGraph {
+            public:
+                Graph(int node = 1, int side = 0, int begin_node = 1) :
+                    BasicGraph(
+                        node, side, begin_node, 
+                        false, false, false, false,
+                        true,true)  
+                {}
+            };
+            
+            class BipartiteGraph : public BasicGraph {
+            public:
+                enum OutputNodeType {
+                    Node,
+                    LeftRight,
+                    NodeLeft,
+                    NodeRight
+                };
+            protected:
+                int _left, _right;
+                bool _different_part;
+                OutputNodeType _output_node_type;
+                std::vector<int> _part[2];
+            public:
+                BipartiteGraph(int node = 1, int side = 0, int begin_node = 1, int left = -1) :
+                    BasicGraph(
+                        node, side, begin_node,
+                        false, false, false, false, false,
+                        true, true),
+                    _left(left),
+                    _different_part(false),
+                    _output_node_type(Node)
+                {}
+                
+                void set_direction(bool direction) = delete;
+                void set_self_loop(bool self_loop) = delete;
+                
+                void set_swap_node(bool swap_node) { _swap_node = swap_node; }
+                void set_different_part(bool different_part) { _different_part = different_part; }
+                void set_left(int left) { _left = left; _right = _node - _left;}
+                void set_right(int right) { _right = right; _left = _node - _right;}
+                void set_left_right(int left, int right) {    
+                    if (left + right < 0) {
+                        msg::__fail_msg(
+                            msg::_err, 
+                            "number of left part nodes add right part nodes must greater than 0."
+                            "But found %d + %d = %d",
+                            left, right, left + right);
+                    }
+                    _left = left;
+                    _right = right;
+                    _node = left + right;
+                }
+                
+                void set_output_node_type(OutputNodeType type) { _output_node_type = type;}
+                void set_output_node() { _output_node_type = Node;}
+                void set_output_left_right() { _output_node_type = LeftRight;}
+                void set_output_node_left() { _output_node_type = NodeLeft;}
+                void set_output_node_right() { _output_node_type = NodeRight;}
+                
+            protected:
+                virtual std::string __format_output_node() const {
+                    std::string str = "";
+                    if (_output_node) {           
+                        if(_output_node_type == Node) {
+                            str += std::to_string(_node); 
+                        }
+                        else if(_output_node_type == LeftRight) {
+                            str += std::to_string(_left);
+                            str += " ";
+                            str += std::to_string(_right);
+                        }
+                        else if(_output_node_type == NodeLeft) {
+                            str += std::to_string(_node);
+                            str += " ";
+                            str += std::to_string(_left);                           
+                        }
+                        else if(_output_node_type == NodeRight) {
+                            str += std::to_string(_node);
+                            str += " ";
+                            str += std::to_string(_right); 
+                        }
+                    }
+                    return str;
+                }
+                
+                void __rand_left() {
+                    if(_left >= 0) {
+                        return;
+                    }
+                    int l = 0, r = _node / 2, limit;
+                    if (!_multiply_edge) {
+                        if (_side > r * (_node - r)) {
+                            msg::__fail_msg(
+                                msg::_err, 
+                                "number of edges must less than or equal to %d.", 
+                                r * (_node - r));
+                        }
+                        while (l <= r) {
+                            int mid = (l + r) / 2;
+                            if (mid * (_node - mid) < _side) {
+                                l = mid + 1;
+                            } else {
+                                limit = r;
+                                r = mid - 1;
+                            }
+                        }
+                    } else {
+                        limit = 1;
+                    }
+                    _left = rnd.next(limit, _node / 2);
+                    _right = _node - _left; 
+                }
+                
+                virtual void __self_init() {
+                    __rand_left();
+                    for(int i = 0; i < 2; i++) {
+                        _part[i].clear();
+                    }
+                    if(_different_part) {
+                        _part[0] = rnd.perm(_left, 0);
+                        _part[1] = rnd.perm(_right, 0);
+                        for (auto &x : _part[1]) {
+                            x += _left;
+                        }
+                    }
+                    else {
+                        std::vector<int> p = rnd.perm(_node, 0);
+                        for (int i = 0; i < _left; i++) {
+                            _part[0].push_back(p[i]);
+                        }
+                        for (int i = _left; i < _node; i++) {
+                            _part[1].push_back(p[i]);
+                        }
+                    }
+                }
+                
+                virtual void __judge_self_limit() {
+                    if(_left < 0) {
+                        msg::__fail_msg(msg::_err, "Left part size must greater than or equal to 0, but found %d", _left);
+                    }
+                    if(_right < 0) {
+                        msg::__fail_msg(msg::_err, "Left part size must greater than or equal to 0, but found %d", _right);
+                    }
+                }
+                
+                virtual void __judge_upper_limit() {
+                    if(!_multiply_edge) {
+                        long long limit = _left * _right;
+                        if(limit < _side) {
+                            msg::__fail_msg(msg::_err, "number of edges must less than or equal to %lld, but found %d.", limit, _side);
+                        }
+                    }
+                }
+                
+                virtual Edge __rand_edge() {
+                    int u, v;
+                    do {
+                        u = rnd.any(_part[0]);
+                        v = rnd.any(_part[1]);
+                    } while (__judge_multiply_edge(u, v));
+                    return {u,v};
+                }
+                
+                virtual void __gen_connect() {
+                    std::vector<int> degree[2];
+                    degree[0].resize(_left, 1);
+                    degree[1].resize(_right, 1);
+                    for (int i = _left; i < _node - 1; i++) {
+                        degree[0][rnd.next(_left)]++;
+                    }
+                    for (int i = _right; i < _node - 1; i++) {
+                        degree[1][rnd.next(_right)]++;
+                    }
+                    int f = 0, d[2] = {_node - 1, _node - 1};
+                    while (d[0] + d[1] > 0) {
+                        for (int i = 0; i < (f == 0 ? _left : _right); i++) {
+                            if (degree[f][i] == 1) {
+                                if (d[f] == 1) {
+                                    for (int j = 0; j < (f == 0 ? _right : _left); j++) {
+                                        if (degree[f ^ 1][j] == 1) {
+                                            int u = _part[f][i];
+                                            int v = _part[f ^ 1][j];
+                                            if (f == 1) {
+                                                std::swap(u, v);
+                                            }
+                                            __add_edge(u, v);
+                                            d[0]--;
+                                            d[1]--;
+                                            degree[f][i]--;
+                                            degree[f ^ 1][j]--;
+                                        }
+                                    }
+                                } else {
+                                    int j;
+                                    do {
+                                        j = rnd.next(f == 0 ? _right : _left);
+                                    } while (degree[f ^ 1][j] < 2);
+                                    int u = _part[f][i];
+                                    int v = _part[f ^ 1][j];
+                                    if (f == 1) {
+                                        std::swap(u, v);
+                                    }
+                                    __add_edge(u, v);
+                                    d[0]--;
+                                    d[1]--;
+                                    degree[f][i]--;
+                                    degree[f ^ 1][j]--;
+                                }
+                            }
+                        }
+                        f ^= 1;
+                    }
+                }
+                
+                virtual void __gen_edges(int m) {
+                    while(m--) {
+                        __add_edge(__rand_edge());
+                    }
+                    if(_different_part) {
+                        for (auto &edge : _edge) {
+                            int& u = edge.u();
+                            int& v = edge.v();
+                            if(u - _begin_node >= _left) {
+                                u -= _left;
+                            }
+                            if(v - _begin_node >= _left) {
+                                v -= _left;
+                            }
+                        }
+                    }
+                }
+            };
+            
+            class DAG : public BasicGraph {
+            protected:
+                std::vector<int> _p;
+            public:
+                DAG(int node = 1, int side = 0, int begin_node = 1) :
+                    BasicGraph(
+                        node, side, begin_node,
+                        true, false, false, false,
+                        true, true)
+                {}
+                
+                void set_direction(bool direction) = delete;
+                void set_self_loop(bool self_loop) = delete;
+            protected:
+                virtual void __self_init() {
+                    _p = rnd.perm(_node, 0);
+                }
+                
+                virtual void __gen_connect() {
+                    for (int i = 1; i < _node; i++) {
+                        int f = rnd.next(i);
+                        __add_edge(_p[f], _p[i]);
+                    }
+                }
+                
+                virtual Edge __rand_edge() {
+                    int u, v;
+                    do {
+                        u = rnd.next(_node);
+                        v = rnd.next(_node);
+                        if (u > v) {
+                            std::swap(u, v);
+                        }
+                        u = _p[u];
+                        v = _p[v];
+                    } while (__judge_self_loop(u, v) || __judge_multiply_edge(u, v));
+                    return {u,v};
+                }
+            };
+            
+            class CycleGraph : public BasicGraph {
+            public:
+                CycleGraph(int node = 3, int begin_node = 1):
+                    BasicGraph(
+                        node, node, begin_node,
+                        false, false, false, true,
+                        true, true)
+                {}
+                
+                void set_multiply_edge() = delete;
+                void set_connect() = delete;
+                void set_self_loop() = delete;
+                void set_side(int side) = delete;
+                void set_side_count(int count) = delete;
+                void set_edge_count(int count) = delete;
+                
+                virtual void gen() {
+                    __init();
+                    std::vector<int> p = rnd.perm(_node, 0);
+                    for (int i = 0; i < _node; i++) {
+                        __add_edge(p[i], p[(i + 1) % _node]);
+                    }
+                    shuffle(_edge.begin(), _edge.end());
+                }
+            protected:
+                virtual void __self_init() {
+                    _side = _node;
+                }
+                
+                virtual void __judge_lower_limit() {
+                    if(_node < 3) {
+                        msg::__fail_msg(msg::_err, "number of nodes must greater than or equal to 3, but found %d.", _node);
+                    }
+                }
+            };
+            
+            class WheelGraph : public BasicGraph {
+            public:
+                WheelGraph(int node = 4, int begin_node = 1) :
+                    BasicGraph(
+                        node, 2 * node - 2, begin_node,
+                        false, false, false, true, 
+                        true, true)
+                {}
+                
+                void set_multiply_edge() = delete;
+                void set_connect() = delete;
+                void set_self_loop() = delete;
+                void set_side(int side) = delete;
+                void set_side_count(int count) = delete;
+                void set_edge_count(int count) = delete;
+                
+                virtual void gen() {
+                    __init();
+                    std::vector<int> p = rnd.perm(_node, 0);
+                    for (int i = 0; i < _node - 1; i++) {
+                        __add_edge(p[i], p[(i + 1) % (_node - 1)]);
+                        __add_edge(p[i], p[_node - 1]);
+                    }
+                    shuffle(_edge.begin(), _edge.end());
+                }
+                
+            protected:
+                virtual void __self_init() {
+                    _side = 2 * _node - 2;
+                }
+                
+                virtual void __judge_lower_limit() {
+                    if(_node < 4) {
+                        msg::__fail_msg(msg::_err, "number of nodes must greater than or equal to 4, but found %d.", _node);
+                    }
+                }
+            };
+            
+            class GridGraph : public BasicGraph {
+            protected:
+                int  _row , _column;
+                std::vector<int> _p;
+            public:
+                GridGraph(int node = 1, int side = 0, int begin_node = 1, int row = -1):
+                    BasicGraph(
+                        node, side, begin_node,
+                        false, false, false, false,
+                        true, true),
+                    _row(row)
+                {}
+                
+                void set_self_loop(bool self_loop) = delete;
+
+                void set_side(int side) = delete;
+                void set_side_count(int count) = delete;
+                void set_edge_count(int count) = delete;
+                
+                void set_row(int row) { _row = row;}
+                
+                
+            protected:
+                int __count_side(int row, int column) {
+                    long long xl = (long long)row;
+                    long long yl = (long long)column;
+                    long long sum = xl * (yl - 1) + yl * (xl - 1) - 2 * (xl * yl - _node);
+                    if (_direction) {
+                        sum *= 2;
+                    }
+                    return (int)sum;           
+                }
+                
+                virtual void __judge_upper_limit() {
+                    long long limit = 0;
+                    if (!_multiply_edge) {
+                        limit = __count_side(_row, _column);
+                        if (_direction) {
+                            limit *= 2;
+                        }
+                        if (_side > limit) {
+                            msg::__fail_msg(msg::_err, "number of edges must less than or equal to %lld, but found %d.", limit, _side);
+                        }
+                    }
+                }
+                
+                virtual void __judge_self_limit() {
+                    if (_row < 0) {
+                        msg::__fail_msg(msg::_err, "number of rows must greater than 0, but found %d.", _row);
+                    }
+                    if (_column < 0) {
+                        msg::__fail_msg(msg::_err, "number of columns must greater than 0, but found %d.", _column);
+                    }
+                }
+                
+                void __rand_row() {
+                    if (!_multiply_edge) {
+                        std::pair<int, int> max = {0, 0};
+                        std::vector<int> possible;
+                        for (int i = 1; i <= _node; i++) {
+                            int x = i, y = (_node + i - 1) / i;
+                            long long w = __count_side(x, y);
+                            if (_direction) {
+                                w *= 2;
+                            }
+                            if (w > max.first) {
+                                max = {w, i};
+                            }
+                            if (w >= _side) {
+                                possible.push_back(i);
+                            }
+                        }
+                        if (possible.size() == 0) {
+                            _side = max.first;
+                            msg::__warn_msg(msg::_err, "number of edges is large than the maximum possible, use upper edges limit %d.", _side);
+                            _row = max.second;
+                        } else {
+                            _row = rnd.any(possible);
+                        }
+                    } else {
+                        _row = rnd.next(1, _node);
+                    }   
+                }
+                
+                virtual void __self_init() {
+                    _p = rnd.perm(_node, 0);
+                    if (_row == -1) {
+                        __rand_row();
+                    }
+                    _column = (_node + _row - 1) / _row;
+                }
+                
+                virtual void __gen_connect() {
+                    for (int i = 0; i < _row; i++) {
+                        for (int j = 1; j < _column; j++) {
+                            int x = i * _column + j, y = x - 1;
+                            if (x >= _node) continue;
+                            __add_edge(_p[x], _p[y]);
+                        }
+                        int x = i * _column, y = (i + 1) * _column;
+                        if (x < _node && y < _node) {
+                            __add_edge(_p[x], _p[y]);
+                        }
+                    }
+                }
+                
+                virtual Edge __rand_edge() {
+                    int d[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+                    int pos, k, px, py, nxt;
+                    do {
+                        pos = rnd.next(_node);
+                        k = rnd.next(4);
+                        px = pos / _column + d[k][0];
+                        py = pos % _column + d[k][1];
+                        nxt = px * _column + py;
+                    } while (px < 0 || px >= _row || py < 0 || py >= _column || nxt >= _node || __judge_multiply_edge(_p[pos], _p[nxt]));
+                    return {_p[pos], _p[nxt]};
+                }
+            };
         }
     }
     
