@@ -21,7 +21,7 @@
   - fill_outputs / fill_outputs_exe：生成所有.out
   - rand_odd：生成随机奇数。
   - rand_even：生成随机偶数。
-  - shuffle_index：根据传入的数列 $a$ ，生成一个整数数列 $b$ ，满足数字$i$出现的次数为 $a_{i-offset}$ 。
+  - shuffle_index：根据传入的数列 $a$ ，生成一个整数数列 $b$ ，满足数字 $i$ 出现的次数为 $a_{i-offset}$ 。
   - 新增无权树和图的生成函数，支持：
   
     - Tree：随机的树。
