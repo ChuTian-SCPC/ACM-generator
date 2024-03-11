@@ -563,6 +563,9 @@ namespace generator{
         char rand_char(const char* format,...) {
             FMT_TO_RESULT(format, format, _format);
             std::string s = rnd.next(_format);
+            if(s.empty()) {
+                msg::__fail_msg(msg::_err, "Can't generator a char from an empty string.");
+            }
             return s.c_str()[0];
         }
 
