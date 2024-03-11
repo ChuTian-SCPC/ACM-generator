@@ -487,7 +487,7 @@ namespace generator{
 
         // return a real number in range (-n,n)
         template <typename T>
-        typename std::enable_if<std::is_floating_point<T>::value, double>::type
+        typename std::enable_if<std::is_floating_point<T>::value, T>::type
         rand_abs(T from) {
             double x = rand_real(from);
             int op = rnd.next(0,1);
