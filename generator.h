@@ -485,22 +485,22 @@ namespace generator{
             return op?x:-x;
         }
 
-        // return a number in range (-n,n)
-        // return value type depend on the input type
+        // return a real number in range (-n,n)
         template <typename T>
-        auto rand_abs(T n) -> decltype(n) {
+        typename std::enable_if<std::is_floating_point<T>::value, double>::type
+        rand_abs(T from) {
+            double x = rand_real(from);
             int op = rnd.next(0,1);
-            if(std::is_integral<T>::value){
-                long long x = rnd.next(n);
-                return op?x:-x;
-            }
-            else if(std::is_floating_point<T>::value){
-                double x = rnd.next(n);
-                return op?x:-x;
-            }
-            else{
-                msg::__fail_msg(msg::_err,"Invalid type.");
-            }
+            return op?x:-x;
+        }
+
+        // return a integer number in range [-n,n]
+        template <typename T>
+        typename std::enable_if<std::is_integral<T>::value, T>::type
+        rand_abs(T from) {
+            T x = rand_int(from);
+            int op = rnd.next(0,1);
+            return op?x:-x;
         }
 
         // return a real number in range (-to,-from]U[from,to)
@@ -513,8 +513,8 @@ namespace generator{
         }
 
         // return a integer number in range [-to,-from]U[from,to]
-        template <typename T>
-        typename std::enable_if<std::is_integral<T>::value,long long>::type
+        template <typename T, typename U>
+        typename std::enable_if<std::is_integral<T>() && std::is_integral<U>(), long long>::type
         rand_abs(T from, T to) {
             long long x = rnd.next(from,to);
             int op = rnd.next(0,1);
