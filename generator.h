@@ -832,7 +832,7 @@ namespace generator{
         }
 
         std::vector<int> shuffle_index(std::vector<int> v, int offset = 0) {
-            return shuffle_index(v.begin(), v.end(), 0);
+            return shuffle_index(v.begin(), v.end(), offset);
         }
     }
 
