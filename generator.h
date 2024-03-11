@@ -414,7 +414,7 @@ namespace generator{
                     if(std::isinf(value)){
                         msg::__fail_msg(msg::_err,"Exist an inf number.");
                     }
-                    int digit = 0;
+                    int digit = 1;
                     bool is_decimal_part = false;
                     bool is_scientific_part = false;
                     std::string scientific_part = "";
