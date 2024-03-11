@@ -1,6 +1,13 @@
 [返回目录](../../home.md)
 
+### development
+
+- 修复bugs：
+  - 修正`rand_real`的精度范围问题。
+  - 修正`rand_abs(T, U)`函数在`T`和`U`均为整型的时候返回整数。 
+
 ### version 0.5.0
+
 2024-3-5
 - 修复bugs：
   - 修正在Linux上生成input数据的相关bug。

@@ -20,7 +20,7 @@
 
    返回一个整数类型为`long long`，范围为格式控制字符串所描述，且为偶数。
 
-   示例可见[rand_int](./rand_int.md)。
+   格式控制字符串示例可见[rand_int](./rand_int.md)。
 
 [示例代码](../../../examples/rand_even.cpp)
 

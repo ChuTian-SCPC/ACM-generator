@@ -11,3 +11,4 @@
   - [rand_odd](./user/rand_odd.md)
   - [rand_even](./user/rand/rand_even.md)
   - [rand_real](./user/rand/rand_real.md)
+  - [rand_abs](./user/rand/rand_abs.md)
