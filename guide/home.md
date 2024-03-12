@@ -1,10 +1,9 @@
 # 目录
 
 - 简介
-
   - [快速入门](./user/introduction/quick_start.md)
-  
   - [版本更迭](./user/introduction/version.md)
+  - [开发记录](./developer/introduction.md)
 - 随机函数
   - [rand_int](./user/rand/rand_int.md)
   - [rand_odd](./user/rand_odd.md)
@@ -13,3 +12,12 @@
   - [rand_abs](./user/rand/rand_abs.md)
   - [rand_char](./user/rand_char.md)
   - [rand_string](./user/rand/rand_string.md)
+  - [rand_p](./user/rand/rand_p.md)
+  - [rand_sum](./user/rand/rand_sum.md)
+  - [rand_vector](./user/rand/rand_vector.md)
+  - [rand_prob](./user/rand/rand_prob.md)
+  - [shuffle_index](./user/rand/shuffle_index.md)
+- 生成测试样例
+- 对拍
+- 树和图
+    - 无权(unweight) 

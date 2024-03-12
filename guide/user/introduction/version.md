@@ -5,6 +5,9 @@
 - 修复bugs：
   - 修正`rand_real`的精度范围问题。
   - 修正`rand_abs(T, U)`函数在`T`和`U`均为整型的时候返回整数。 
+- 其他 ：
+  - 给一些函数加上新的边界判定。
+  - 修改warning。
 
 ### version 0.5.0
 
@@ -17,7 +20,7 @@
   - 重构一个rand_sum函数，使他生成的数列更加均衡。
 - 新增功能：
   - rand_int：新增可以通过解析字符串随机。
-  - fill_inputs / fill_inputs_exe：生成未出现的num个.in
+  - fill_inputs / fill_inputs_exe：生成未出现的若干个.in
   - fill_outputs / fill_outputs_exe：生成所有.out
   - rand_odd：生成随机奇数。
   - rand_even：生成随机偶数。

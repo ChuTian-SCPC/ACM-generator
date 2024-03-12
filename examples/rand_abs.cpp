@@ -3,12 +3,14 @@
 
 using namespace std;
 using namespace generator::all;
-
-const char * ensure_type(auto x) {
+ 
+template<typename T>
+const char * ensure_type(T x) {
     if(typeid(x) == typeid(int)) return "int";
     if(typeid(x) == typeid(double))  return "double";
     if(typeid(x) == typeid(float))  return "float";
     if(typeid(x) == typeid(long long))   return "long long";
+    return "unknown";
 }
 int main()
 {
