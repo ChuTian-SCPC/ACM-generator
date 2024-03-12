@@ -15,8 +15,7 @@ int main()
       return rand_int(1, 3);
     });
     
-    double (*gen_func)() = gen_double;
-    vector<double> b = rand_vector<double>(5, 10, gen_func);
+    vector<double> b = rand_vector<double>(5, 10, gen_double);
     println(a);
     println(b);
     
