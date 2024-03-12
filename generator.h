@@ -201,11 +201,10 @@ namespace generator{
     namespace rand{
 
         std::pair<long long,long long> __format_to_int_range(std::string s){
-            int accuarcy = 1;
             size_t open = s.find_first_of("[(");
             size_t close = s.find_first_of(")]");
             size_t comma = s.find(',');
-            auto string_to_int = [&](size_t from, size_t to) -> double{
+            auto string_to_int = [&](size_t from, size_t to) -> long long{
                 std::string str = s.substr(from + 1, to - from - 1);
                 try {
                     long long value = std::stoll(str);
@@ -217,6 +216,7 @@ namespace generator{
                 catch (const std::out_of_range &e) {
                     msg::__fail_msg(msg::_err,"%s is out of range.", str.c_str());
                 }
+                return 0LL;
             };
             if(open == std::string::npos || close == std::string::npos || comma == std::string::npos){
                 msg::__fail_msg(msg::_err,"%s is an invalid range.",s.c_str());
@@ -450,6 +450,7 @@ namespace generator{
                 catch (const std::out_of_range &e) {
                     msg::__fail_msg(msg::_err,"%s is out of range.", str.c_str());
                 }
+                return 0.0;
             };
             if(open == std::string::npos || close == std::string::npos || comma == std::string::npos){
                 msg::__fail_msg(msg::_err,"%s is an invalid range.",s.c_str());
@@ -807,8 +808,15 @@ namespace generator{
             long long sum = 0;
             for(auto iter:map){
                 elements.emplace_back(iter.first);
-                sum += iter.second;
+                ValueType value = iter.second;
+                if (value < 0) {
+                    msg::__fail_msg(msg::_err, "Value can't less than 0.");
+                }
+                sum += value;
                 probs.emplace_back(sum);
+            }
+            if (sum <= 0) {
+                msg::__fail_msg(msg::_err, "Sum of the values must greater than 0.");
             }
             long long p = rand_int(1LL,sum);
             auto pos = lower_bound(probs.begin(),probs.end(),p) - probs.begin();
@@ -1004,19 +1012,16 @@ namespace generator{
         std::string __get_full_path(std::string& path){
         #ifdef _WIN32
             char buffer[MAX_PATH];
-            if (GetFullPathNameA(path.c_str(), MAX_PATH, buffer, nullptr) != 0) {
-                return std::string(buffer);
-            } else {
+            if (GetFullPathNameA(path.c_str(), MAX_PATH, buffer, nullptr) == 0) {
                 msg::__error_msg(msg::_err,"Error in get full path of file: %s.",path.c_str());
             }
         #else
             char buffer[PATH_MAX];
-            if (realpath(path.c_str(), buffer) != nullptr) {
-                return std::string(buffer);
-            } else {
+            if (realpath(path.c_str(), buffer) == nullptr) {
                 msg::__error_msg(msg::_err,"Error in get full path of file: %s.",path.c_str());
             }
         #endif
+        return std::string(buffer);
         }
 
         char** __split_string_to_char_array(const char* input) {
@@ -1395,6 +1400,9 @@ namespace generator{
                         output_file_path + " 2>" +
                         check_tmp_log_path;
                     int command_result = system(command.c_str());
+                    if (command_result) {
+                        result[x] = R_ERROR;
+                    }
                     std::string check_result = "";
                     std::ifstream check_stream(check_tmp_log_path);
                     std::string line;
@@ -1656,21 +1664,22 @@ namespace generator{
                     RandomFather,
                     Pruefer
                 };
-            protected:
-                int _begin_node; // index of the first node           
-                int _node; // the number of nodes in the tree                   
+            protected:      
+                int _node; // the number of nodes in the tree  
+                int _begin_node; // index of the first node                   
                 bool _is_rooted;
                 // use if `_is_rooted` is true,
                 // The root node is the `_root`-th node starting from `_begin_node`. 
                 int _root;
                 std::vector <Edge> _edge;
                 std::vector<int> _p;
-
-                TreeGenerator _tree_generator;
+                
                 // output format
                 bool _output_node;
                 bool _output_root;
                 bool _swap_node;// true means output `father son` or `son father` by random
+                
+                TreeGenerator _tree_generator;
 
             public:
                 Tree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
@@ -1681,8 +1690,9 @@ namespace generator{
                         _root(root - 1),
                         _output_node(true),
                         _output_root(true),
-                        _tree_generator(tree_generator),
-                        _swap_node(_is_rooted ? false : true) {}
+                        _swap_node(_is_rooted ? false : true),
+                        _tree_generator(tree_generator)
+                {}
 
                 void set_node(int node) { _node = node; }
 
@@ -1890,7 +1900,6 @@ namespace generator{
             protected:
                 virtual void __gen_tree() {
                     for (int i = 1; i < _node; i++) {
-                        int f = rnd.next(i);
                         __add_edge(_p[i - 1], _p[i]);
                     }
                 }
@@ -1912,7 +1921,6 @@ namespace generator{
             protected:
                 virtual void __gen_tree() {
                     for (int i = 1; i < _node; i++) {
-                        int f = rnd.next(i);
                         __add_edge(_p[0], _p[i]);
                     }
                 }
@@ -2150,9 +2158,9 @@ namespace generator{
                 bool _multiply_edge;
                 bool _self_loop;
                 bool _connect;
-                bool _output_node;
-                bool _output_side;
                 bool _swap_node;
+                bool _output_node;
+                bool _output_side;    
             public:
                 BasicGraph(
                         int node,
@@ -3031,7 +3039,7 @@ namespace generator{
                         cycles.emplace_back(1, i);
                     }
                     shuffle(cycles.begin() + 1, cycles.end());
-                    for(int i = 0; i < cycles.size(); i++) {
+                    for(size_t i = 0; i < cycles.size(); i++) {
                         std::vector<int> pre = cycles[i];
                         if (i != 0) {
                             int w = rnd.next(i);
