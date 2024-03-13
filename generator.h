@@ -1669,7 +1669,6 @@ namespace generator{
                 int _begin_node; // index of the first node                   
                 bool _is_rooted;
                 // use if `_is_rooted` is true,
-                // The root node is the `_root`-th node starting from `_begin_node`. 
                 int _root;
                 std::vector <Edge> _edge;
                 std::vector<int> _p;
@@ -1687,7 +1686,7 @@ namespace generator{
                         _node(node),
                         _begin_node(begin_node),
                         _is_rooted(is_rooted),
-                        _root(root - 1),
+                        _root(root - begin_node),
                         _output_node(true),
                         _output_root(true),
                         _swap_node(_is_rooted ? false : true),
@@ -1699,11 +1698,17 @@ namespace generator{
                 void set_is_root(int is_rooted) { _is_rooted = is_rooted; }
 
                 void set_root(int root) {
-                    _root = root;
+                    _root = root - _begin_node;
                     msg::__warn_msg(msg::_err, "Unrooted Tree, set root is useless.");
                 }
 
-                void set_begin_node(int begin_node) { _begin_node = begin_node; }
+                void set_begin_node(int begin_node) { 
+                    if (_is_rooted) {
+                        _root += _begin_node;
+                        _root -= begin_node;
+                    }
+                    _begin_node = begin_node; 
+                }
 
                 void set_output_node(bool output_node) { _output_node = output_node; }
 
@@ -1760,11 +1765,7 @@ namespace generator{
                     }
                     int cnt = 0;
                     for (Edge e: tree._edge) {
-                        if (tree._is_rooted && tree._swap_node && rnd.next(2)) {
-                            os << e.__format("%v %u");
-                        } else {
-                            os << e.__format("%u %v");
-                        }
+                        os << e;
                         if (++cnt < tree._node - 1) {
                             os << "\n";
                         }
@@ -1772,6 +1773,9 @@ namespace generator{
                     return os;
                 }
 
+                void println() {
+                    std::cout<<*this<<std::endl;
+                }
             protected:
                 void __judge_comman_limit() {
                     if (_node <= 0) {
@@ -1781,7 +1785,10 @@ namespace generator{
                     if (_is_rooted && (_root < 0 || _root > _node)) {
                         msg::__fail_msg(
                                 msg::_err,
-                                "restriction of the root is [1, %d], but found %d.", _node, _root + 1);
+                                "restriction of the root is [%d, %d], but found %d.",
+                                _begin_node, 
+                                _node + _begin_node - 1, 
+                                _root + _begin_node);
                     }
                 }
 
@@ -1809,7 +1816,7 @@ namespace generator{
                 void __add_edge(int u, int v) {
                     u += _begin_node;
                     v += _begin_node;
-                    if (!_swap_node || _is_rooted || rnd.next(2)) {
+                    if (!_swap_node || rnd.next(2)) {
                         _edge.emplace_back(u, v);
                     } else {
                         _edge.emplace_back(v, u);
@@ -2274,7 +2281,10 @@ namespace generator{
                     }
                     return os;
                 }
-
+                
+                void println() {
+                    std::cout<<*this<<std::endl;
+                }
             protected:
                 virtual std::string __format_output_node() const {
                     if (_output_node) {
