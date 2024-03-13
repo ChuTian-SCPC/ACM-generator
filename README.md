@@ -23,7 +23,7 @@ Generator可以方便的在本地进行对拍，内置testlib中常见的checker
 
 将`testlib.h`，`generator.h`，文件夹`checker`放入同一个目录下。放在**标准库位置**或**工作目录**均可。
 
-详细的使用文档见：[使用文档](https://github.com/ChuTian-SCPC/problem_tool/wiki/CN_Home)
+详细的使用文档见：[使用文档](./guide/home.md)
 
 ## 开源协议
 
