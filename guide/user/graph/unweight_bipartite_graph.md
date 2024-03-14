@@ -24,18 +24,21 @@ void set_self_loop(bool self_loop);
 二分图分成左右两部，可以通过以下函数修改左右部大小：
 
 1. `void set_left(int left)`
-    
+   
     设置左部的大小。
-    右部大小等于点数减去左部大小。
-
+    
+   右部大小等于点数减去左部大小。
+   
 2. `void set_right(int right)`
-    
+   
     设置右部的大小。
-    左部大小等于点数减去右部大小。
-
-3. `void set_left_right(int left, int right)`
     
+   左部大小等于点数减去右部大小。
+   
+3. `void set_left_right(int left, int right)`
+   
     设置左部和右部的大小。
+    
     点数大小等于左部与右部大小之和。
 
 默认情况下，左部大小是 $-1$ ，在生成的时候随机左右部大小。
@@ -45,15 +48,21 @@ void set_self_loop(bool self_loop);
 1. `different_part`
 
     表示的含义是左部和右部的编号是否用不同的集合。
-    如果为`true`，那么左部编号为从 $begin\_node$ 开始 $left$ 个数字，右部编号为从 $begin\_node$ 开始 $right$ 个数字。
-    如果为`false`，那么左部和右部的编号一起是从 $begin\_node$ 开始 $node$ 个数字。
+
+    如果为`true`，那么左部编号为从 `begin_node` 开始 $left$ 个数字，右部编号为从 `begin_node`开始 $right$ 个数字。
+
+    如果为`false`，那么左部和右部的编号一起是从 `begin_node`开始 $node$ 个数字。
+
     默认值是`false`。
+
     可以通过`void set_different_part(bool different_part)`设置。
 
 2. `output_node_type`
 
     表示的含义是点数输出时候的形式。
+
     内部有一个枚举类：
+
     ```cpp
     enum OutputNodeType {
         Node,       //输出格式："点数"
@@ -63,7 +72,9 @@ void set_self_loop(bool self_loop);
     };
     ```
     默认值是`Node`。
+
     可以通过以下函数修改：
+
     ```cpp
     void set_output_node_type(OutputNodeType type);
     void use_type_node();
@@ -71,8 +82,8 @@ void set_self_loop(bool self_loop);
     void use_type_node_left();
     void use_type_node_right();
     ```
-[示例代码1](../../../examples/unweight_bipartite_graph1.cpp)：
-生成一个 $5$ 个结点， $6$ 条边的二分图。
+    [示例代码1](../../../examples/unweight_bipartite_graph1.cpp)：
+    生成一个 $5$ 个结点， $6$ 条边的二分图。
 
 [示例代码2](../../../examples/unweight_bipartite_graph2.cpp)：
 生成一个左部大小为 $3$ ， 右部大小为 $4$ ， $10$ 条边的二分图。
