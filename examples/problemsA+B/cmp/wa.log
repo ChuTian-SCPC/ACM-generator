@@ -1,0 +1,6 @@
+Testcase 1 :WA ,Runtime = 63ms. checker return :
+wrong answer 1st lines differ - expected: '97', found: '96' 
+Testcase 2 :WA ,Runtime = 53ms. checker return :
+wrong answer 1st lines differ - expected: '71', found: '70' 
+Testcase 3 :AC ,Runtime = 51ms.
+Testcase 4 :AC ,Runtime = 61ms.

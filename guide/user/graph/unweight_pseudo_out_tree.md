@@ -23,6 +23,7 @@ void set_edge_count(int count);
 ```
 
 环的大小`cycle`可以通过`void set_cycle(int cycle)`设置。
+
 如果不设置，`cycle`的默认值为 $-1$ ，环的大小采取随机一个值。
 
 [示例代码](../../../examples/unweight_pseudo_out_tree.cpp)：

@@ -49,9 +49,9 @@ void set_self_loop(bool self_loop);
 
     表示的含义是左部和右部的编号是否用不同的集合。
 
-    如果为`true`，那么左部编号为从 `begin_node` 开始 $left$ 个数字，右部编号为从 `begin_node`开始 $right$ 个数字。
+    如果为`true`，那么左部编号为从  $begin\textunderscore node$ 开始 $left$ 个数字，右部编号为从  $begin\textunderscore node$ 开始 $right$ 个数字。
 
-    如果为`false`，那么左部和右部的编号一起是从 `begin_node`开始 $node$ 个数字。
+    如果为`false`，那么左部和右部的编号一起是从  $begin\textunderscore node$ 开始 $node$ 个数字。
 
     默认值是`false`。
 

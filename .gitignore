@@ -2,3 +2,4 @@
 .idea/
 debug/
 examples/*.exe
+examples/*/*.exe

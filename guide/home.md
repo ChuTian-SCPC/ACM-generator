@@ -18,11 +18,13 @@
   - [rand_prob](./user/rand/rand_prob.md)
   - [shuffle_index](./user/rand/shuffle_index.md)
 - 生成测试样例
-- 对拍
+    - [生成标准输入](./user/problem/make_inputs.md)
+    - [生成标准输出](./user/problem/make_outputs.md)
+- [对拍](./user/problem/compare.md)
 - 树和图
     - [树和图简介](./user/graph/summary.md)
       - [无权边简介](./user/graph/unweight_edge_summary.md)
-    
+
       - [无权树简介](./user/graph/unweight_tree_summary.md)
         - [树(Tree)](./user/graph/unweight_tree.md)
         - [链(Chain)](./user/graph/unweight_chain.md)
