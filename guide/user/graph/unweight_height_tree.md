@@ -41,3 +41,7 @@ HeightTree(
 [示例代码2](../../../examples/unweight_height_tree2.cpp)
 
 生成一棵 $5$ 个结点的有根树， 高度在 $[3,4]$ 之间。
+
+[返回上级](./summary.md)
+
+[返回目录](../../home.md)

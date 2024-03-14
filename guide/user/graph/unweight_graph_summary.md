@@ -22,7 +22,7 @@ bool output_node;            //是否输出结点数，默认是true
 bool output_side;            //是否输出边数，默认是true
 ```
 
-结点的起始编号是指第一个结点的编号。比如一个大小为 $node$ 的图， 结点编号是从 $begin\_node$ 到 $begin\_node + node - 1$ 。默认值都是 $1$ 。
+结点的起始编号是指第一个结点的编号。比如一个大小为 $node$ 的图，结点编号是从  `begin_node`  到    `begin_node + node - 1`  。默认值都是 $1$ 。
 
 `swap_node`的值是与边储存的相关。
 

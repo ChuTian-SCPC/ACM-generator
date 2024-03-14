@@ -23,7 +23,7 @@ bool swap_node;               //边的两个结点是否可能交换前后位置
 TreeGenerator tree_generator; //树的生成方式
 ```
 
-结点的起始编号是指第一个结点的编号。比如一棵大小为 $node$ 的树， 结点编号是从  $begin\_node$  到    $begin\_node + node - 1$  。默认值都是 $1$ 。
+结点的起始编号是指第一个结点的编号。比如一棵大小为 $node$ 的树， 结点编号是从  `begin_node`  到    `begin_node + node - 1`  。默认值都是 $1$ 。
 
 
 
