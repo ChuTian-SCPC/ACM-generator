@@ -1,6 +1,6 @@
 [返回目录](../../home.md)
 
-### development
+### version 0.5.1
 
 - 修复bugs：
   - 修正`rand_real`的精度范围问题。
@@ -8,8 +8,10 @@
   - 有根树 `set_root` 时不正确的warning。
   - 修复了二分图初始化存在的一些问题。
 - 其他 ：
+  - 用户文档更新完成。
   - 给一些函数加上新的边界判定。
   - 修改warning。
+
 
 ### version 0.5.0
 
