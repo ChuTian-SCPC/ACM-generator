@@ -1695,11 +1695,13 @@ namespace generator{
 
                 void set_node(int node) { _node = node; }
 
-                void set_is_root(int is_rooted) { _is_rooted = is_rooted; }
+                void set_is_rooted(int is_rooted) { _is_rooted = is_rooted; }
 
                 void set_root(int root) {
                     _root = root - _begin_node;
-                    msg::__warn_msg(msg::_err, "Unrooted Tree, set root is useless.");
+                    if (!_is_rooted) {
+                       msg::__warn_msg(msg::_err, "Unrooted Tree, set root is useless."); 
+                    }
                 }
 
                 void set_begin_node(int begin_node) { 
@@ -1937,10 +1939,11 @@ namespace generator{
             protected:
                 int _height;
             public:
-                HeightTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int height = -1) :
-                        Tree(node, begin_node, is_rooted, root),
+                HeightTree(int node = 1, int begin_node = 1, int root = 1, int height = -1) :
+                        Tree(node, begin_node, true, root),
                         _height(height) {}
-
+                
+                void set_is_rooted(bool is_rooted) = delete;
                 void set_height(int height) { _height = height; }
 
                 virtual void gen() {
@@ -2078,10 +2081,11 @@ namespace generator{
                 int _max_son;
 
             public:
-                SonTree(int node = 1, int begin_node = 1, int root = 1, int max_degree = -1) :
+                SonTree(int node = 1, int begin_node = 1, int root = 1, int max_son = -1) :
                         Tree(node, begin_node, true, root, Pruefer),
-                        _max_son(max_degree) {}
+                        _max_son(max_son) {}
 
+                void set_is_rooted(bool is_rooted) = delete;
                 void set_max_son(int max_son) { _max_son = max_son; }
 
                 virtual void gen() {
@@ -2468,13 +2472,13 @@ namespace generator{
 
                 void set_output_node_type(OutputNodeType type) { _output_node_type = type; }
 
-                void set_output_node() { _output_node_type = Node; }
+                void use_type_node() { _output_node_type = Node; }
 
-                void set_output_left_right() { _output_node_type = LeftRight; }
+                void use_type_left_right() { _output_node_type = LeftRight; }
 
-                void set_output_node_left() { _output_node_type = NodeLeft; }
+                void use_type_node_left() { _output_node_type = NodeLeft; }
 
-                void set_output_node_right() { _output_node_type = NodeRight; }
+                void use_type_node_right() { _output_node_type = NodeRight; }
 
             protected:
                 virtual std::string __format_output_node() const {
@@ -2529,6 +2533,7 @@ namespace generator{
 
                 virtual void __self_init() {
                     __rand_left();
+                    _right = _node - _left;
                     for (int i = 0; i < 2; i++) {
                         _part[i].clear();
                     }
@@ -2787,12 +2792,6 @@ namespace generator{
 
                 void set_self_loop(bool self_loop) = delete;
 
-                void set_side(int side) = delete;
-
-                void set_side_count(int count) = delete;
-
-                void set_edge_count(int count) = delete;
-
                 void set_row(int row) { _row = row; }
 
 
@@ -2937,7 +2936,7 @@ namespace generator{
                 }
 
             protected:
-                PseudoTree(int node = 3, int begin_node = 1, int cycle = -1, bool direction = false) :
+                PseudoTree(int node, int begin_node, int cycle, bool direction) :
                         BasicGraph(
                                 node, node, begin_node,
                                 direction, false, false, true,
