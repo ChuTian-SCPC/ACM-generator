@@ -5,6 +5,8 @@
 - 修复bugs：
   - 修正`rand_real`的精度范围问题。
   - 修正`rand_abs(T, U)`函数在`T`和`U`均为整型的时候返回整数。 
+  - 有根树 `set_root` 时不正确的warning。
+  - 修复了二分图初始化存在的一些问题。
 - 其他 ：
   - 给一些函数加上新的边界判定。
   - 修改warning。
@@ -41,7 +43,7 @@
     - GridGraph：网格图。
     - PseudoTree：基环树。
     - PseudoInTree：基环内向树。
-    - PseudoOutTree：基环树。
+    - PseudoOutTree：基环外向树。
     - Cactus：仙人掌。
   
 
