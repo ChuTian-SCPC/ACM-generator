@@ -8,7 +8,7 @@ int main()
 {
     init_gen();
     char a = rand_char();
-    char b = rand_char(CharType::Number);
+    char b = rand_char(Number);
     char c = rand_char("[a%cf]",'d');
     println(a, b ,c);
     return 0;
