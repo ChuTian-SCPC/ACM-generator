@@ -1,4 +1,11 @@
-Testcase 1 :AC ,Runtime = 55ms.
-Testcase 2 :AC ,Runtime = 65ms.
-Testcase 3 :AC ,Runtime = 64ms.
-Testcase 4 :AC ,Runtime = 69ms.
+Testcase 1 : AC ,Runtime = 77ms.
+Testcase 2 : AC ,Runtime = 56ms.
+Testcase 3 : AC ,Runtime = 59ms.
+Testcase 4 : AC ,Runtime = 58ms.
+Total results :
+AC : 4 / 4
+WA : 0 / 4
+TLE : 0 / 4
+TLE(AC) : 0 / 4
+TLE(WA) : 0 / 4
+ERROR : 0 / 4
