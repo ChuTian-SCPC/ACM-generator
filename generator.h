@@ -419,14 +419,14 @@ namespace generator{
             std::istringstream ss(path.path());
             std::string token;
             Path current_path("");
-            while (std::getline(ss, token, _path_split)) {
+            while (std::getline(ss, token, _path_splits)) {
                 current_path = __path_join(current_path, token);
             #ifdef _WIN32
-                if(current_path.path().find_first_of(_path_split) == std::string::npos && current_path.path().back() == ':') {
+                if(current_path.path().find_first_of(_path_splits) == std::string::npos && current_path.path().back() == ':') {
                     continue;
                 }
             #else
-                if(current_path.path() == std::to_string(_path_split)) {
+                if(current_path.path() == std::string(_path_split)) {
                     continue;
                 }
             #endif
