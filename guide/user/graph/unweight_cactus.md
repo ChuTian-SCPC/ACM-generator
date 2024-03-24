@@ -11,7 +11,7 @@ Cactus(
 );
 ```
 
-基环树是无重边，无自环，一定连通的无向图，所以以下函数被禁用：
+仙人掌是无重边，无自环，一定连通的无向图，所以以下函数被禁用：
 ```cpp
 void set_direction(bool direction);
 void set_multiply_edge(bool multiply_edge);

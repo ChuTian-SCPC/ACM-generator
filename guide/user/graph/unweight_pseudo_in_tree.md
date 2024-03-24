@@ -11,7 +11,7 @@ PseudoInTree(
 );
 ```
 
-基环树是无重边，无自环，一定连通，边数一定的有向图，所以以下函数被禁用：
+基环内向树是无重边，无自环，一定连通，边数一定的有向图，所以以下函数被禁用：
 ```cpp
 void set_direction(bool direction);
 void set_multiply_edge(bool multiply_edge);

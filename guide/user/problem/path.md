@@ -46,7 +46,6 @@ void change(Path other_path);
    // a 的路径依然是 ./folder1
    // b 的路径是 ./folder1/folder2/file1.txt
    // c 的路径是 ./folder1/file2.txt
-   /
    ```
 
 
