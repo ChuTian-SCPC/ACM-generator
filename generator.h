@@ -363,14 +363,7 @@ namespace generator{
         };
 
         OutStream::OutStream(Path& path) {
-            if (!path.__file_exists()) {
-                std::cerr << "Error opening file: " << path.cname() << std::endl;
-                output_stream_ptr_ = &std::cerr;
-                std::cerr << "Using std::cerr" << std::endl;
-            }
-            else {
-                open(path.path());
-            }
+            open(path.path());
         }
 
         template <typename T, typename... Args>

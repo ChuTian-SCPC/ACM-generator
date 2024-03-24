@@ -1,9 +1,9 @@
-Testcase 1 : WA ,Runtime = 62ms. checker return :
+Testcase 1 : WA ,Runtime = 59ms. checker return :
 wrong answer 1st lines differ - expected: '96', found: '97' 
-Testcase 2 : WA ,Runtime = 59ms. checker return :
+Testcase 2 : WA ,Runtime = 61ms. checker return :
 wrong answer 1st lines differ - expected: '70', found: '71' 
-Testcase 3 : AC ,Runtime = 58ms.
-Testcase 4 : AC ,Runtime = 59ms.
+Testcase 3 : AC ,Runtime = 60ms.
+Testcase 4 : AC ,Runtime = 60ms.
 Total results :
 AC : 2 / 4
 WA : 2 / 4
