@@ -419,7 +419,7 @@ namespace generator{
                     continue;
                 }
             #else
-                if(current_path.path() == std::string(_path_split)) {
+                if(current_path.path().size() == 1 && current_path.path()[0] == _path_split) {
                     continue;
                 }
             #endif
@@ -893,9 +893,6 @@ namespace generator{
                 if (result == 0) {
                     __terminate_process(reinterpret_cast<void*>(pid));
                 } 
-                else {
-                    return -1;
-                }
 
                 auto end_time = std::chrono::steady_clock::now();
                 return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
