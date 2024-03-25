@@ -17,10 +17,11 @@
   - [rand_vector](./user/rand/rand_vector.md)
   - [rand_prob](./user/rand/rand_prob.md)
   - [shuffle_index](./user/rand/shuffle_index.md)
-- 生成测试样例
+- 生成数据与测试
     - [生成标准输入](./user/problem/make_inputs.md)
     - [生成标准输出](./user/problem/make_outputs.md)
-- [对拍](./user/problem/compare.md)
+    - [路径(Path)](./user/problem/path.md)
+    - [对拍](./user/problem/compare.md)
 - 树和图
     - [树和图简介](./user/graph/summary.md)
       - [无权边简介](./user/graph/unweight_edge_summary.md)

@@ -12,7 +12,7 @@ BipartiteGraph(
 );
 ```
 
-二分图无自环和无向，所以以下函数被禁用：
+二分图是无自环的无向图，所以以下函数被禁用：
 
 ```cpp
 void set_direction(bool direction);

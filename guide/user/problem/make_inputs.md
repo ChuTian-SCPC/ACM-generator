@@ -34,23 +34,15 @@
 
 如果想调用其他已经写好的数据生成器的可执行文件，可以使用以下函数：
 
-1. `void make_inputs_exe(int start,int end,const char* format = "",...)`
-2. `void fill_inputs_exe(int sum,const char* format = "",...)`
+1. `void make_inputs_exe(int start,int end, T path, const char* format = "",...)`
+2. `void fill_inputs_exe(int sum, T path, const char* format = "",...)`
 
 
 
-函数调用生成输入文件的数据生成器可执行文件的路径为：
+函数调用生成输入文件的数据生成器可执行文件的路径为`path`, `path`的类型可以是`const char*`,`std::string`或者`generator::io::Path`类。
 
-工作目录下的`data.exe`(Windows)
+`generator::io::Path`类的介绍可以查看：[路径(Path)](./path.md)。
 
-工作目录下的`data`(Linux)
 
-这个文件路径也可以修改。
-
-代码中控制数据生成器文件路径的变量是`data_path`。
-
-可以通过它们的类函数`change_path(std::string path)`或者`change_path(const char* path)`修改。
-
-类似：`data_path.change_path("./test.exe")`。
 
 [返回目录](../../home.md)

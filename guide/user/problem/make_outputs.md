@@ -20,23 +20,15 @@
 
 如果想调用已经写好的标答的可执行文件，可以使用以下函数：
 
-1. `void make_outputs_exe(int start,int end)`
-2. `void fill_outputs_exe()`
+1. `void make_outputs_exe(int start, int end, T path)`
+2. `void fill_outputs_exe(T path)`
 
 
 
-函数调用生成输出文件的标答可执行文件的路径为：
+函数调用生成输出文件的标答可执行文件的路径为`path`, `path`的类型可以是`const char*`,`std::string`或者`generator::io::Path`类。
 
-工作目录下的`std.exe`(Windows)
+`generator::io::Path`类的介绍可以查看：[路径(Path)](./path.md)。
 
-工作目录下的`std`(Linux)
 
-这个文件路径也可以修改。
-
-代码中控制标答程序文件路径的变量是`std_path`。
-
-可以通过它们的类函数`change_path(std::string path)`或者`change_path(const char* path)`修改。
-
-类似：`std_path.change_path("./test.exe")`。
 
 [返回目录](../../home.md)

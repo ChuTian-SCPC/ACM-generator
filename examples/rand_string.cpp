@@ -8,7 +8,7 @@ int main()
 {
     init_gen();
     string a = rand_string(4);
-    string b = rand_string(3, 5, CharType::ZeroOne);
+    string b = rand_string(3, 5, ZeroOne);
     string c = rand_string(7, "[string]");
     string d = rand_string(3, 20, "[A%c2]",'d');
     println(a);

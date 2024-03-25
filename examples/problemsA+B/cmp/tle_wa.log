@@ -1,4 +1,13 @@
-Testcase 1 :TLE ,Runtime = 2010ms (killed).
-Testcase 2 :TLE ,Runtime = 2011ms (killed).
-Testcase 3 :TLE ,Runtime = 2000ms (killed).
-Testcase 4 :TLE ,Runtime = 2014ms (killed).
+Testcase 1 : TLE(WA) ,Runtime = 1265ms. checker return :
+wrong answer 1st lines differ - expected: '96', found: '97' 
+Testcase 2 : TLE(WA) ,Runtime = 1272ms. checker return :
+wrong answer 1st lines differ - expected: '70', found: '71' 
+Testcase 3 : TLE(AC) ,Runtime = 1285ms.
+Testcase 4 : TLE(AC) ,Runtime = 1269ms.
+Total results :
+AC : 0 / 4
+WA : 0 / 4
+TLE : 0 / 4
+TLE(AC) : 2 / 4
+TLE(WA) : 2 / 4
+ERROR : 0 / 4

@@ -19,7 +19,7 @@ Generator可以方便的在本地进行对拍，内置testlib中常见的checker
 
 ## 如何使用Generator
 
-除对拍之外的功能需要支持C++11。对拍需要本地能够支持命令`python`(Windows)。
+需要支持C++11。
 
 将`testlib.h`，`generator.h`，文件夹`checker`放入同一个目录下。放在**标准库位置**或**工作目录**均可。
 
@@ -30,8 +30,6 @@ Generator可以方便的在本地进行对拍，内置testlib中常见的checker
 MIT协议
 
 ## 功能实现
-
-**由于所有的测试均在Windows上面完成，所以在Linux上可能会存在较多的问题。**
 
 - [x] 基础数据生成函数
 

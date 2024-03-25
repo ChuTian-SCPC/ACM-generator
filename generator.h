@@ -14,12 +14,16 @@
 #include <limits.h>
 #include <dirent.h> 
 #include <sys/types.h>
+#include <sys/wait.h>
 #endif
 namespace generator{
-    namespace msg{
+    namespace io{
+        class Path;
         class OutStream {
         public:
-            OutStream(const std::string& filename = "") {
+            OutStream() : output_stream_ptr_(&std::cerr) {}
+            OutStream(Path& path);
+            OutStream(const std::string& filename) {
                 open(filename);
             }
 
@@ -33,7 +37,7 @@ namespace generator{
                     output_stream_ptr_ = &std::cerr;
                 }
                 else{
-                     file_.open(filename);
+                    file_.open(filename);
                     if (!file_.is_open()) {
                         std::cerr << "Error opening file: " << filename << std::endl;
                         output_stream_ptr_ = &std::cerr;
@@ -47,7 +51,7 @@ namespace generator{
             void close() {
                 if (file_.is_open()) {
                     file_.close();
-                    output_stream_ptr_ = &std::cout;
+                    output_stream_ptr_ = &std::cerr;
                 }
             }
 
@@ -62,13 +66,13 @@ namespace generator{
             }
 
             void printf(const char* format, ...) {
-                va_list args;
-                va_start(args, format);
-                char buffer[65536];
-                vsnprintf(buffer, sizeof(buffer), format, args);
-                va_end(args);
+                FMT_TO_RESULT(format, format, _format);
+                *output_stream_ptr_ << _format;
+            }
 
-                *output_stream_ptr_ << buffer;
+            void println(const char* format, ...) {
+                FMT_TO_RESULT(format, format, _format);
+                *output_stream_ptr_ << _format << std::endl;
             }
 
         private:
@@ -84,117 +88,1002 @@ namespace generator{
         OutStream _err("/dev/tty");
     #endif
 
-        // compare msg outstream, default on stderr
-        // same with quitf, use freopen redirect to log file
-        // may unsafe
-        OutStream _cmp;
+        enum Color {
+            Green,
+            Red,
+            Yellow,
+            None
+        };
+
+        std::string color(const char *text, Color color) {
+            std::string s = "";
+            if (color == None) {
+                return text;
+            }    
+            else if (color == Red) {
+                s += "\033[1;31m";
+            }
+            else if (color == Green) {
+                s += "\033[32m";
+            }
+            else if (color == Yellow) {
+                s += "\033[1;33m";
+            }
+            s += text;
+            s += "\033[0m";
+            return s;
+        }
 
         template <typename... Args>
         void __fail_msg(OutStream& out,const char* msg, Args... args) {
-            out.printf("\033[1;31mFAIL\033[0m ");
-            out.printf(msg,args...,nullptr);
-            out << std::endl;
+            out.printf("%s ", color("FAIL", Red).c_str());
+            out.println(msg,args...,nullptr);
             exit(EXIT_FAILURE);
         }
 
         template <typename... Args>
         void __success_msg(OutStream& out,const char* msg, Args... args) {
-            out.printf("\033[32mSUCCESS\033[0m ");
-            out.printf(msg,args..., nullptr);
-            out << std::endl;
+            out.printf("%s ", color("SUCCESS", Green).c_str());
+            out.println(msg,args..., nullptr);
             return;
         }
 
         template <typename... Args>
         void __info_msg(OutStream& out,const char* msg, Args... args) {
-            out.printf(msg,args..., nullptr);
-            out << std::endl;
+            out.println(msg,args..., nullptr);
             return;
         }
 
         template <typename... Args>
         void __warn_msg(OutStream& out,const char* msg, Args... args) {
-            out.printf("\033[1;33mWARN\033[0m ");
-            out.printf(msg,args..., nullptr);
-            out << std::endl;
+            out.printf("%s ", color("WARN", Yellow).c_str());
+            out.println(msg,args..., nullptr);
             return;
         }
 
         template <typename... Args>
         void __error_msg(OutStream& out,const char* msg, Args... args) {
-            out.printf("\033[1;31mERROR\033[0m ");
-            out.printf(msg,args...,nullptr);
-            out.printf("\n");
-            out << std::endl;
+            out.printf("%s ", color("ERROR", Red).c_str());
+            out.println(msg,args...,nullptr);
             exit(EXIT_FAILURE);
         }
 
-        void __ac_msg(OutStream& out,bool color,int case_id,int runtime){
-            if(color){
-                out.printf("Testcase %d :\033[32mAC\033[0m ,Runtime = %dms.",case_id,runtime);
-            }
-            else{
-                out.printf("Testcase %d :AC ,Runtime = %dms.",case_id,runtime);
-            }
-            out << std::endl;
+        std::string __color_ac(bool is_color = true) {
+            return color("AC", is_color ? Green : None);
         }
 
-        void __wa_msg(OutStream& out,bool color,int case_id,int runtime,std::string& result){
-            if(color){
-                out.printf("Testcase %d :\033[1;31mWA\033[0m ,Runtime = %dms. ",case_id,runtime);
-                out.printf("\033[1;31mchecker return\033[0m :\n");
-                out.printf("%s",result.c_str());
-            }
-            else{
-                out.printf("Testcase %d :WA ,Runtime = %dms. ",case_id,runtime);
-                out.printf("checker return :\n");
-                out.printf("%s",result.c_str());
-            }
-            out << std::endl;
+        std::string __color_wa(bool is_color = true) {
+            return color("WA", is_color ? Red : None);
         }
 
-        void __tleac_msg(OutStream& out,bool color,int case_id,int runtime){
-            if(color){
-                out.printf("Testcase %d :\033[1;33mTLE\033[0m(\033[32mAC\033[0m) ,Runtime = %dms.",case_id,runtime);
-            }
-            else{
-                out.printf("Testcase %d :TLE(AC) ,Runtime = %dms.",case_id,runtime);
-            }
-            out << std::endl;
+        std::string __color_tle(bool is_color = true) {
+            return color("TLE", is_color ? Yellow : None);
         }
 
-        void __tlewa_msg(OutStream& out,bool color,int case_id,int runtime,std::string& result){
-            if(color){
-                out.printf("Testcase %d :\033[1;33mTLE\033[0m(\033[1;31mWA\033[0m) ,Runtime = %dms. ",case_id,runtime);
-                out.printf("\033[1;31mchecker return :\033[0m\n");
-                out.printf("%s",result.c_str());
-            }
-            else{
-                out.printf("Testcase %d :TLE(WA) ,Runtime = %dms. ",case_id,runtime);
-                out.printf("checker return :\n");
-                out.printf("%s",result.c_str());
-            }
-            out << std::endl;
+        std::string __color_tle_ac(bool is_color = true) {
+            return __color_tle(is_color) + "(" + __color_ac(is_color) + ")";
         }
 
-        void __tle_msg(OutStream& out,bool color,int case_id,int runtime){
-            if(color){
-                out.printf("Testcase %d :\033[1;33mTLE\033[0m ,Runtime = %dms (killed).",case_id,runtime);  
-            }
-            else{
-                out.printf("Testcase %d :TLE ,Runtime = %dms (killed).",case_id,runtime);
-            }
-            out << std::endl;
+        std::string __color_tle_wa(bool is_color = true) {
+            return __color_tle(is_color) + "(" + __color_wa(is_color) + ")";
         }
 
-        void __run_err_msg(OutStream& out,bool color,int case_id){
-            if(color){
-                out.printf("Testcase %d :\033[1;31mERROR\033[0m ,meet some error,pleace check it or report.",case_id);
+        std::string __color_run_err(bool is_color = true) {
+            return color("ERROR", is_color ? Yellow : None);
+        }
+
+        void __ac_msg(OutStream& out,bool is_color,int case_id,int runtime){
+            out.println(
+                "Testcase %d : %s ,Runtime = %dms.",
+                case_id,
+                __color_ac(is_color).c_str(),
+                runtime);
+        }
+
+        void __wa_msg(OutStream& out,bool is_color,int case_id,int runtime,std::string& result){
+            out.printf(
+                "Testcase %d : %s ,Runtime = %dms. ",
+                case_id,
+                __color_wa(is_color).c_str(),
+                runtime);
+            out.println("%s", color("checker return :", is_color ? Red : None).c_str());
+            out.println("%s", result.c_str());
+        }
+
+        void __tle_ac_msg(OutStream& out,bool is_color,int case_id,int runtime){
+            out.println(
+                "Testcase %d : %s ,Runtime = %dms.",
+                case_id,
+                __color_tle_ac(is_color).c_str(),
+                runtime);
+        }
+
+        void __tle_wa_msg(OutStream& out,bool is_color,int case_id,int runtime,std::string& result){
+            out.printf(
+                "Testcase %d : %s ,Runtime = %dms. ",
+                case_id,
+                __color_tle_wa(is_color).c_str(),
+                runtime);
+            out.println("%s", color("checker return :", is_color ? Red : None).c_str());
+            out.println("%s", result.c_str());
+        }
+
+        void __tle_msg(OutStream& out,bool is_color,int case_id,int runtime){
+            out.println(
+                "Testcase %d : %s ,Runtime = %dms (killed).",
+                case_id,
+                __color_tle(is_color).c_str(),
+                runtime);
+        }
+
+        void __run_err_msg(OutStream& out,bool is_color,int case_id){
+            out.println(
+                "Testcase %d : %s ,meet some error,pleace check it or report.",
+                case_id,
+                __color_run_err(is_color).c_str());
+        }
+
+#ifdef WIN32
+        char _path_split = '\\';
+#else
+        char _path_split = '/';
+#endif
+        std::string _path_splits = "/\\";
+        template <typename U>
+        struct IsPath;
+
+        class Path {
+        private:
+            std::string _path;
+        public:
+            Path() : _path("") {}
+            Path(std::string s) : _path(s) {}
+            Path(const char *s) : _path(std::string(s)) {}
+
+            std::string path() const { return _path; }
+            const char* cname() const { return _path.c_str(); }
+
+            void change(std::string s) { _path = s; }
+            void change(const char *s) { _path = std::string(s); }
+            void change(Path other_path) { _path = other_path.path(); }
+
+            bool __file_exists() {
+                std::ifstream file(_path.c_str());
+                return file.good();
             }
-            else{
-                out.printf("Testcase %d :ERROR ,meet some error,pleace check it or report.",case_id);
+
+            bool __directory_exists() {
+            #ifdef _WIN32
+                struct _stat path_stat;
+                if (_stat(_path.c_str(), &path_stat) != 0) {
+                    return false;
+                }
+
+                return (path_stat.st_mode & _S_IFDIR) != 0;
+            #else
+                struct stat path_stat;
+                if (stat(_path.c_str(), &path_stat) != 0)
+                    return false;
+
+                return S_ISDIR(path_stat.st_mode);
+            #endif
             }
-            out << std::endl;
+
+            Path __folder_path() {
+                if(this->__directory_exists()) {
+                    return Path(_path);
+                }
+                else {
+                    size_t pos = _path.find_last_of(_path_splits);
+                    if (pos != std::string::npos) {
+                        return Path(_path.substr(0,pos));
+                    }
+                    else {
+                        return Path();
+                    }
+                }
+            }
+
+            std::string __file_name() {
+                if(!this->__file_exists()) {
+                    io::__fail_msg(io::_err, "%s is not a file path or the file doesn't exist.", _path.c_str());
+                    return "";
+                }
+                size_t pos = _path.find_last_of(_path_splits);
+                std::string file_full_name = pos == std::string::npos ? _path : _path.substr(pos + 1);
+                size_t pos_s = file_full_name.find_first_of(".");
+                std::string file_name = pos_s == std::string::npos ? file_full_name : file_full_name.substr(0, pos_s);
+                return file_name;
+            }
+
+            void full() {
+            #ifdef _WIN32
+                char buffer[MAX_PATH];
+                if (GetFullPathNameA(_path.c_str(), MAX_PATH, buffer, nullptr) == 0) {
+                    io::__fail_msg(io::_err, "can't find full path :%s.", _path.c_str());
+                }
+            #else
+                char buffer[1024];
+                if (realpath(_path.c_str(), buffer) == nullptr) {
+                    io::__fail_msg(io::_err, "can't find full path :%s.", _path.c_str());
+                }
+            #endif
+                _path = std::string(buffer);
+            }
+
+            void __delete_file() {
+                if(this->__file_exists()) {
+                    std::remove(_path.c_str());
+                }
+            }
+        private:
+            template <typename T>
+            Path join_helper(const T &arg) const {
+                std::string new_path = _path;
+            #ifdef _WIN32
+                if (!new_path.empty() && new_path.back() != _path_split)  {
+                    new_path += _path_split;
+                }
+            #else
+                if (new_path.empty() || new_path.back() != _path_split)  {
+                    new_path += _path_split;
+                }
+            #endif
+                return Path(new_path + arg);
+            }
+        public:
+            Path join() const {
+                return *this;
+            }
+
+            template <typename T, typename... Args>
+            typename std::enable_if<!IsPath<T>::value, Path>::type
+            join(const T &arg, const Args &... args) const {
+                return join_helper(arg).join(args...);
+            }
+
+            template <typename T, typename... Args>
+            typename std::enable_if<IsPath<T>::value, Path>::type
+            join(const T &arg, const Args &... args) const {
+                return join_helper(arg.path()).join(args...);
+            }
+        };
+
+        template <typename U>
+        struct IsPath {
+            template <typename V>
+            static constexpr auto check(V *)
+            -> decltype(std::declval<V>().path(), std::true_type());
+
+            template <typename V>
+            static constexpr std::false_type check(...);
+
+            static constexpr bool value =
+                    decltype(check<U>(nullptr))::value;
+        };
+
+        OutStream::OutStream(Path& path) {
+            open(path.path());
+        }
+
+        template <typename T, typename... Args>
+        Path __path_join(const T path, const Args &... args) {
+            return Path(path).join(args...);
+        }
+
+        Path __lib_path() {
+            return Path(__FILE__);
+        }
+
+        Path __current_path() {
+        #ifdef _WIN32
+            char buffer[MAX_PATH];
+            GetModuleFileName(NULL, buffer, MAX_PATH);
+        #else
+            char buffer[1024];
+            ssize_t length = readlink("/proc/self/exe", buffer, sizeof(buffer));
+            if (length != -1) {
+                buffer[length] = '\0';
+            }
+        #endif
+            std::string executable_path(buffer);
+
+            size_t pos = executable_path.find_last_of(_path_splits);
+            if (pos != std::string::npos) {
+                std::string folder_path = executable_path.substr(0, pos);
+                return Path(folder_path);
+            }
+            return Path("");
+        }
+
+        template <typename T>
+        Path __full_path(T p) {
+            Path path(p);
+            path.full();
+            return path;
+        }
+        
+        bool __create_directory(Path& path) {
+            if(path.__directory_exists())  return true;
+            return mkdir(path.cname(),0777) == 0;
+        }
+
+        void __create_directories(Path& path) {
+            std::istringstream ss(path.path());
+            std::string token;
+            Path current_path("");
+            while (std::getline(ss, token, _path_split)) {
+                current_path = __path_join(current_path, token);
+            #ifdef _WIN32
+                if(current_path.path().find_first_of(_path_splits) == std::string::npos && current_path.path().back() == ':') {
+                    continue;
+                }
+            #else
+                if(current_path.path().size() == 1 && current_path.path()[0] == _path_split) {
+                    continue;
+                }
+            #endif
+                if (!__create_directory(current_path)) {
+                    io::__fail_msg(io::_err, "Error in creating folder : %s.",current_path.cname());
+                }
+            }
+        }
+
+        void __close_output_file_to_console(){
+            #ifdef _WIN32
+                freopen("CON", "w", stdout);
+            #else
+                freopen("/dev/tty", "w", stdout);
+            #endif
+        }
+        
+        void __close_input_file_to_console(){
+            #ifdef _WIN32
+                freopen("CON", "r", stdin);
+            #else
+                freopen("/dev/tty", "r", stdin);
+            #endif
+        }
+
+        char** __split_string_to_char_array(const char* input) {
+            char** char_array = nullptr;
+            char* cinput = const_cast<char*>(input);
+            char* token = strtok(cinput, " ");
+            int count = 0;
+
+            while (token != nullptr) {
+                char_array = (char**)realloc(char_array, (count + 1) * sizeof(char*));
+                char_array[count] = strdup(token);
+                ++count;
+                token = strtok(nullptr, " ");
+            }
+
+            char_array = (char**)realloc(char_array, (count + 1) * sizeof(char*));
+            char_array[count] = nullptr;
+            return char_array;
+        }
+
+        void __fake_arg(const char* format="",...){
+            FMT_TO_RESULT(format, format, _format);
+            _format = "gengrator " + _format;
+            auto _fake_argvs = __split_string_to_char_array(_format.c_str());
+            int _fake_argc = 0;
+            while (_fake_argvs[_fake_argc] != nullptr) {
+                ++_fake_argc;
+            }
+            prepareOpts(_fake_argc,_fake_argvs);
+        }
+        
+        // equal to registerGen(argc, argv, 1);
+        void init_gen(int argc,char* argv[]) {
+            registerGen(argc, argv, 1);
+        }
+
+        // no argvs's register
+        // unsafe but may easier to use
+        void init_gen() {
+            char * __fake_argvs[] = {(char*)"generator"};
+            registerGen(1, __fake_argvs , 1);
+        }
+        
+        enum End{
+            In,
+            Out,
+            Ans,
+            Log,
+            Logc,
+            Exe,
+            MaxEnd  
+        };
+        std::string _file_end[MaxEnd] = {
+            ".in",
+            ".out",
+            ".ans",
+            ".log",
+            ".logc",
+            ".exe"
+        };
+        
+        std::string __end_with(int x, End end) {
+            return std::to_string(x) + _file_end[end];
+        }
+        
+        std::string __end_with(const char* text, End end) {
+            return std::string(text) + _file_end[end];
+        }
+        
+        std::string __end_with(std::string text, End end) {
+            return text + _file_end[end];
+        }
+        
+        void __write_input_file(int x) {
+            Path testcases_folder = __path_join(__current_path(), "testcases");
+            __create_directories(testcases_folder);
+            Path file_path = __path_join(testcases_folder, __end_with(x, In));
+            freopen(file_path.cname(), "w", stdout);
+            io::__success_msg(io::_err,"Successfully create input file %s",file_path.cname());
+        }
+        
+        void __write_output_file(int x) {
+            Path testcases_folder = __path_join(__current_path(), "testcases");
+            __create_directories(testcases_folder);
+            Path input_path = __path_join(testcases_folder, __end_with(x, In));
+            if(!input_path.__file_exists()) {
+                io::__fail_msg(io::_err,"Input file %s don't exist!",input_path.cname());
+            }
+            Path output_path = __path_join(testcases_folder, __end_with(x, Out));
+            freopen(input_path.cname(), "r", stdin);
+            freopen(output_path.cname(), "w", stdout);
+            io::__success_msg(io::_err,"Successfully create output file %s", output_path.cname());
+        }
+        
+        bool __input_file_exists(int x) {
+            Path file_path = __path_join(__current_path(), "testcases", __end_with(x, In));
+            return file_path.__file_exists();
+        }
+        
+        std::vector<int> __get_inputs() {
+            std::vector<int> inputs;
+            Path folder_path = __path_join(__current_path(), "testcases");
+        #ifdef _WIN32
+            WIN32_FIND_DATA findFileData;
+            HANDLE hFind = FindFirstFile(folder_path.join("*.in").cname(), &findFileData);
+
+            if (hFind != INVALID_HANDLE_VALUE) {
+                do {
+                    Path file_path(findFileData.cFileName);
+                    int num = std::stoi(file_path.__file_name());  
+                    inputs.emplace_back(num);  
+                } while (FindNextFile(hFind, &findFileData) != 0);
+
+                FindClose(hFind);
+            }
+        #else
+            DIR* dir = opendir(folder_path.cname());
+            if (dir != nullptr) {
+                struct dirent* entry;
+                while ((entry = readdir(dir)) != nullptr) {
+                    std::string file_name = entry->d_name;
+                    if (file_name.size() >= 3 && file_name.substr(file_name.size() - 3) == ".in") {
+                        int num = std::stoi(file_name.substr(0, file_name.size() - 3));
+                        inputs.emplace_back(num);
+                    }
+                }
+                closedir(dir);
+            }
+        #endif
+
+            return inputs;
+        }
+        
+        #define make_inputs(__start, __end, __Func, ...) do{ \
+            for(int __case = (__start); __case <= (__end); __case++){ \
+                __write_input_file(__case); \
+                __fake_arg(__VA_ARGS__); \
+                __Func; \
+                __close_output_file_to_console(); \
+            } \
+        } while(0)
+        
+        #define make_outputs(__start,__end,__Func) do{ \
+            for(int __case = (__start); __case <= (__end); __case++){ \
+                __write_output_file(__case); \
+                __Func; \
+                __close_input_file_to_console(); \
+                __close_output_file_to_console(); \
+            } \
+        } while(0)
+        
+        #define fill_inputs(__num,__Func,...) do{ \
+            int __sum = (__num); \
+            for(int __case = (1); __sum; __case++) { \
+                if(!__input_file_exists(__case)) { \
+                    __sum--; \
+                    __write_input_file(__case); \
+                    __fake_arg(__VA_ARGS__); \
+                    __Func; \
+                    __close_output_file_to_console(); \
+                } \
+            } \
+        }while(0)
+        
+        #define fill_outputs(__Func) do{ \
+            auto __inputs =  __get_inputs(); \
+            for(auto __case : __inputs) { \
+                __write_output_file(__case); \
+                __Func; \
+                __close_input_file_to_console(); \
+                __close_output_file_to_console(); \
+            } \
+        }while(0)
+        
+        template<typename T>
+        void make_inputs_exe(int start,int end,T path,const char* format = "",...){
+            Path data_path(path);
+            data_path.full();
+            if (!data_path.__file_exists()) {
+                io::__fail_msg(io::_err, "data file %s doesn't exist.", data_path.cname());
+            }
+            FMT_TO_RESULT(format,format,_format);
+            Path testcases_folder = __path_join(__current_path(), "testcases");
+            __create_directories(testcases_folder);
+            for(int i = start;i <= end; i++){
+                Path file_path = __path_join(testcases_folder, __end_with(i, In)) ;
+                std::string command = data_path.path() + " " + _format + " > " + file_path.path();
+                int return_code = std::system(command.c_str());
+                if(return_code == 0) {
+                    io::__success_msg(io::_err,"Successfully create input file %s",file_path.cname());
+                }
+                else {
+                    io::__error_msg(io::_err,"Someting error in creating input file %s",file_path.cname());
+                }   
+            }
+        }
+        
+        template<typename T>
+        void make_outputs_exe(int start,int end, T path){
+            Path std_path(path);
+            std_path.full();
+            if (!std_path.__file_exists()) {
+                io::__fail_msg(io::_err, "std file %s doesn't exist.", std_path.cname());
+            }
+            Path testcases_folder = __path_join(__current_path(), "testcases");
+            __create_directories(testcases_folder);
+            for(int i = start;i <= end; i++){
+                Path read_path = __path_join(testcases_folder, __end_with(i, In));
+                if(!read_path.__file_exists()) {
+                    io::__fail_msg(io::_err,"Input file %s don't exist!",read_path.cname());
+                }
+                Path write_path = __path_join(testcases_folder, __end_with(i, Out));
+                std::string command = std_path.path() + " < " + read_path.path() + " > " + write_path.path();
+                int return_code = std::system(command.c_str());
+                if(return_code == 0) {
+                    io::__success_msg(io::_err,"Successfully create output file %s",write_path.cname());
+                }
+                else {
+                    io::__error_msg(io::_err,"Someting error in creating output file %s",write_path.cname());
+                }
+            }
+        }
+        
+        template<typename T>
+        void fill_inputs_exe(int sum, T path, const char* format = "",...){
+            Path data_path(path);
+            data_path.full();
+            if (!data_path.__file_exists()) {
+                io::__fail_msg(io::_err, "data file %s doesn't exist.", data_path.cname());
+            }
+            FMT_TO_RESULT(format,format,_format);
+            Path testcases_folder = __path_join(__current_path(), "testcases");
+            __create_directories(testcases_folder);
+            for(int i = 1;sum; i++){
+                Path file_path = __path_join(testcases_folder, __end_with(i, In)) ;
+                if(file_path.__file_exists()){
+                    continue;
+                }
+                sum--;
+                std::string command = data_path.path() + " " + _format + " > " + file_path.path();
+                int return_code = std::system(command.c_str());
+                if(return_code == 0) {
+                    io::__success_msg(io::_err,"Successfully create/open input file %s",file_path.cname());
+                }
+                else {
+                    io::__error_msg(io::_err,"Someting error in creating/opening input file %s",file_path.cname());
+                }   
+            }
+        }
+        
+        template<typename T>
+        void fill_outputs_exe(T path){
+            Path std_path(path);
+            std_path.full();
+            if (!std_path.__file_exists()) {
+                io::__fail_msg(io::_err, "std file %s doesn't exist.", std_path.cname());
+            }
+            Path testcases_folder = __path_join(__current_path(), "testcases");
+            __create_directories(testcases_folder);
+            std::vector<int> inputs =  __get_inputs();
+            for(auto i:inputs){
+                Path read_path = __path_join(testcases_folder, __end_with(i, In));
+                Path write_path = __path_join(testcases_folder, __end_with(i, Out));
+                std::string command = std_path.path()+ " < " + read_path.path() + " > " + write_path.path();
+                int return_code = std::system(command.c_str());
+                if(return_code == 0) {
+                    io::__success_msg(io::_err,"Successfully create output file %s",write_path.cname());
+                }
+                else {
+                    io::__error_msg(io::_err,"Someting error in creating output file %s",write_path.cname());
+                }
+            }
+        }
+        
+        enum ResultState{
+            R_UNKNOWN,
+            R_AC,
+            R_WA,
+            R_TLE,
+            R_TLEANDAC,
+            R_TLEANDWA,
+            R_ERROR,
+            R_Max
+        };
+        
+        enum Checker{
+            lcmp,
+            yesno,
+            rcmp4,
+            rcmp6,
+            rcmp9,
+            wcmp,
+            MaxChecker
+        };
+        
+        std::string checker_name[MaxChecker] = {
+          "lcmp",
+          "yesno",
+          "rcmp4",
+          "rcmp6",
+          "rcmp9",
+          "wcmp"  
+        };
+
+        Path __get_default_checker_file(Checker checker) {
+            Path folder_path(__full_path(__path_join(__lib_path().__folder_path(), "checker")));
+        #ifdef _WIN32
+            Path checker_path(__path_join(folder_path, "windows", __end_with(checker_name[checker], Exe)));
+        #else
+            Path checker_path(__path_join(folder_path, "linux", checker_name[checker]));
+        #endif
+            return checker_path;
+        }
+        
+        std::vector<Path> __get_compare_files() {
+            return std::vector<Path>();
+        }
+
+        template<typename T, typename... Args>
+        std::vector<Path> __get_compare_files(T first, Args... args) {
+            std::vector<Path> result;
+            Path first_path(first);
+            first_path.full();
+            if(!first_path.__file_exists()) {
+                __warn_msg(_err, "Compare program file %s doesn't exits.",first_path.cname());
+            }
+            else {
+                result.emplace_back(first_path);
+            }
+            std::vector<Path> rest = __get_compare_files(args...);
+            result.insert(result.end(), rest.begin(), rest.end());
+            return result;
+        }
+        
+        void __terminate_process(void* process) {
+        #ifdef _WIN32
+            TerminateProcess(reinterpret_cast<HANDLE>(process), 0);
+            CloseHandle(reinterpret_cast<HANDLE>(process));
+        #else
+            pid_t pid = static_cast<pid_t>(reinterpret_cast<long long>(process));
+            kill(pid, SIGTERM);
+        #endif
+        }
+        
+        int __run_program(
+            Path& program,
+            Path& input_file,
+            Path& output_file,
+            int time_limit) 
+        {
+            auto start_time = std::chrono::steady_clock::now();
+        #ifdef _WIN32
+            SECURITY_ATTRIBUTES sa;
+            sa.nLength = sizeof(sa);
+            sa.lpSecurityDescriptor = NULL;
+            sa.bInheritHandle = TRUE;       
+            
+            HANDLE hInFile = CreateFileA(input_file.cname(),
+                GENERIC_READ | GENERIC_WRITE,
+                FILE_SHARE_READ | FILE_SHARE_WRITE,
+                &sa,
+                OPEN_EXISTING ,
+                FILE_ATTRIBUTE_NORMAL,
+                NULL );
+            
+            HANDLE hOutFile = CreateFileA(output_file.cname(),
+                GENERIC_READ | GENERIC_WRITE,
+                FILE_SHARE_WRITE | FILE_SHARE_READ,
+                &sa,
+                CREATE_ALWAYS ,
+                FILE_ATTRIBUTE_NORMAL,
+                NULL );
+
+            PROCESS_INFORMATION pi; 
+            STARTUPINFOA si;
+            BOOL ret = FALSE; 
+            DWORD flags = CREATE_NO_WINDOW;
+
+            ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
+            ZeroMemory(&si, sizeof(STARTUPINFOA));
+            si.cb = sizeof(STARTUPINFOA); 
+            si.dwFlags |= STARTF_USESTDHANDLES;
+            si.hStdInput = hInFile;
+            si.hStdError = NULL;
+            si.hStdOutput = hOutFile;
+            char *c_program = const_cast<char *>(program.cname());
+            ret = CreateProcessA(
+                    NULL,
+                    c_program,
+                    NULL,
+                    NULL,
+                    TRUE,
+                    flags,
+                    NULL,
+                    NULL,
+                    &si,
+                    &pi);
+            if (ret) 
+            {
+                if (WaitForSingleObject(pi.hProcess, time_limit) == WAIT_TIMEOUT) {
+                    __terminate_process(pi.hProcess);
+                };
+                auto end_time = std::chrono::steady_clock::now();
+                return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+            }
+            else {
+                return -1; 
+            }   
+        #else
+            pid_t pid = fork();
+
+            if (pid == 0) {
+                int input = open(input_file.cname(), O_RDONLY);
+                if (input == -1) {
+                    __warn_msg(_err, "Fail to open input file %s.", input_file.cname());
+                    exit(EXIT_FAILURE);
+                }
+
+                int output = open(output_file.cname(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                if (output == -1) {
+                    close(input);
+                    __warn_msg(_err, "Fail to open output file %s.", output_file.cname());
+                    exit(EXIT_FAILURE);
+                }
+
+                dup2(input, STDIN_FILENO);
+                dup2(output, STDOUT_FILENO);
+
+                close(input);
+                close(output);
+
+                execl(program.cname(), program.cname(), nullptr);
+                
+                __warn_msg(_err, "Fail to run program %s", program.cname());
+                exit(EXIT_FAILURE);
+            } 
+            else if (pid > 0) {
+                auto limit = std::chrono::milliseconds(time_limit);
+
+                int status;
+                auto result = waitpid(pid, &status, WNOHANG);
+
+                while (result == 0 && std::chrono::steady_clock::now() - start_time < limit) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                    result = waitpid(pid, &status, WNOHANG);
+                }
+
+                if (result == 0) {
+                    __terminate_process(reinterpret_cast<void*>(pid));
+                } 
+
+                auto end_time = std::chrono::steady_clock::now();
+                return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+            } 
+            else {
+                return -1;
+                __warn_msg(_err, "Fail to fork.");
+            }
+        #endif
+        }
+        
+        bool __enable_judge_ans(int runtime, int time_limit, ResultState& result) {
+            if (runtime == -1) {
+                result = R_ERROR;
+                return false;
+            }
+            if (runtime > time_limit) {
+                result = R_TLE;
+                return runtime <= (int)(time_limit * 1.5);
+            }
+            else {
+                return true;
+            }
+        }
+        
+        void __check_result(
+            Path& input_file, 
+            Path& output_file,
+            Path& ans_file,
+            Path& testlib_out_file,
+            Path& checker,
+            ResultState& result,
+            std::string& testlib_result)
+        {
+            std::string command = 
+                checker.path() + " " +
+                input_file.path() + " " +
+                output_file.path() + " " +
+                ans_file.path() + " 2> " +
+                testlib_out_file.path();
+            system(command.c_str());
+            std::ifstream check_stream(testlib_out_file.path());
+            std::string line;
+            while(check_stream >> line){
+                testlib_result += line;
+                testlib_result += " ";
+            }
+            check_stream.close();
+            if(testlib_result.substr(0,2) == "ok") {
+                result = result == R_TLE ? R_TLEANDAC : R_AC;
+            }
+            else {
+                result = result == R_TLE ? R_TLEANDWA : R_WA;
+            }
+            return;
+        } 
+
+        void __check_once(
+            int id,
+            Path& program,
+            int time_limit,
+            Path& checker,
+            Path& ans_file,
+            Path& testlib_out_file,
+            int& runtime,
+            ResultState& result,
+            std::string& testlib_result) 
+        {
+            Path input_file(__path_join(__current_path(), "testcases", __end_with(id, In)));
+            Path output_file(__path_join(__current_path(), "testcases", __end_with(id, Out)));
+            runtime = __run_program(program, input_file, ans_file, 2 * time_limit);
+            if(__enable_judge_ans(runtime, time_limit, result)) {
+                __check_result(
+                    input_file, output_file, ans_file, testlib_out_file,
+                    checker, result, testlib_result);
+            }   
+        }
+
+        void __report_results(
+            int start,
+            int end,
+            std::vector<int>& runtimes,
+            std::vector<ResultState>& results,
+            std::vector<std::string>& testlib_results,
+            std::vector<int>& results_count,
+            Path& log_path) 
+        {
+            OutStream log(log_path);       
+            for (int i = start; i <= end; i++) {
+                int idx = i - start;
+                if (results[idx] == R_UNKNOWN || results[idx] == R_ERROR) {
+                    __run_err_msg(_err, true, i);
+                    __run_err_msg(log, false, i);
+                }
+                if (results[idx] == R_AC) {
+                    __ac_msg(_err, true, i, runtimes[idx]);
+                    __ac_msg(log, false, i, runtimes[idx]);
+                }
+                if (results[idx] == R_WA) {
+                    __wa_msg(_err, true, i, runtimes[idx], testlib_results[idx]);
+                    __wa_msg(log, false, i, runtimes[idx], testlib_results[idx]);
+                }
+                if (results[idx] == R_TLEANDAC) {
+                    __tle_ac_msg(_err, true, i, runtimes[idx]);
+                    __tle_ac_msg(log, false, i, runtimes[idx]);
+                }
+                if (results[idx] == R_TLEANDWA) {
+                    __tle_wa_msg(_err, true, i, runtimes[idx], testlib_results[idx]);
+                    __tle_wa_msg(log, false, i, runtimes[idx], testlib_results[idx]);
+                }
+                if (results[idx] == R_TLE) {
+                    __tle_msg(_err, true, i, runtimes[idx]);
+                    __tle_msg(log, false, i, runtimes[idx]);
+                }
+            }
+            int case_count = end - start + 1;
+
+            __info_msg(_err, "Total results :");
+            __info_msg(_err, "%s : %d / %d", __color_ac(true).c_str(), results_count[R_AC], case_count);
+            __info_msg(_err, "%s : %d / %d", __color_wa(true).c_str(), results_count[R_WA], case_count);
+            __info_msg(_err, "%s : %d / %d", __color_tle(true).c_str(), results_count[R_TLE], case_count);
+            __info_msg(_err, "%s : %d / %d", __color_tle_ac(true).c_str(), results_count[R_TLEANDAC], case_count);
+            __info_msg(_err, "%s : %d / %d", __color_tle_wa(true).c_str(), results_count[R_TLEANDWA], case_count);
+            __info_msg(_err, "%s : %d / %d", __color_run_err(true).c_str(), results_count[R_UNKNOWN] + results_count[R_ERROR], case_count);
+            __info_msg(_err, "The report is in %s file.", log_path.cname());
+            _err.println("");
+
+            __info_msg(log, "Total results :");
+            __info_msg(log, "%s : %d / %d", __color_ac(false).c_str(), results_count[R_AC], case_count);
+            __info_msg(log, "%s : %d / %d", __color_wa(false).c_str(), results_count[R_WA], case_count);
+            __info_msg(log, "%s : %d / %d", __color_tle(false).c_str(), results_count[R_TLE], case_count);
+            __info_msg(log, "%s : %d / %d", __color_tle_ac(false).c_str(), results_count[R_TLEANDAC], case_count);
+            __info_msg(log, "%s : %d / %d", __color_tle_wa(false).c_str(), results_count[R_TLEANDWA], case_count);
+            __info_msg(log, "%s : %d / %d", __color_run_err(false).c_str(), results_count[R_UNKNOWN] + results_count[R_ERROR], case_count);
+
+            log.close();
+        }
+
+        void __compare_once(int start, int end, Path& program, int time_limit, Path& checker) {
+            Path compare_path(__path_join(__current_path(), "cmp"));
+            std::string program_name = program.__file_name();
+            Path ans_folder_path(__path_join(compare_path, program_name));
+            __create_directories(ans_folder_path);
+            Path testlib_out_file(__path_join(ans_folder_path, __end_with("__checker", Logc)));
+            int case_count = end - start + 1;
+            std::vector<int> runtimes(case_count, -1);
+            std::vector<ResultState> results(case_count, R_UNKNOWN);
+            std::vector<std::string> testlib_results(case_count);
+            std::vector<int> results_count(R_Max, 0);
+            for (int i = start; i <= end; i++) {
+                Path ans_file(__path_join(ans_folder_path, __end_with(i, Ans)));
+                int idx = i - start;
+                __check_once(
+                    i, program, time_limit, checker, ans_file, testlib_out_file,
+                    runtimes[idx], results[idx], testlib_results[idx]);
+                results_count[results[idx]]++;
+            }
+            testlib_out_file.__delete_file();
+            Path log_path(__path_join(compare_path, __end_with(program_name, Log)));
+            __info_msg(_err,"Test results for program %s :",program.cname());
+            __report_results(start, end, runtimes, results, testlib_results, results_count, log_path);
+            return;
+        }
+
+        template<typename... Args>
+        void compare(int start, int end, int time_limit, Path checker_path, Args ...args) {
+            checker_path.full();
+            if (!checker_path.__file_exists()) {
+                __fail_msg(_err, "Checker file %s doesn't exist.", checker_path.cname());
+            }
+            std::vector<Path> programs = __get_compare_files(args...);
+            for(Path& program : programs) {
+                __compare_once(start, end, program, time_limit, checker_path);
+            } 
+            return;
+        }
+
+        template<typename... Args>
+        void compare(int start, int end, int time_limit, std::string checker_path, Args ...args) {
+            compare(start, end, time_limit, Path(checker_path), args...);
+        }
+
+        template<typename... Args>
+        void compare(int start, int end, int time_limit, const char* checker_path, Args ...args) {
+            compare(start, end, time_limit, Path(checker_path), args...);
+        }
+
+        template<typename... Args>
+        void compare(int start, int end, int time_limit, Checker checker, Args ...args) {
+            Path checker_path = __get_default_checker_file(checker);
+            compare(start, end, time_limit, checker_path, args...);
         }
     }
 
@@ -211,15 +1100,15 @@ namespace generator{
                     return value;
                 }
                 catch (const std::invalid_argument &e) {
-                    msg::__fail_msg(msg::_err,"%s is an invalid argument.", str.c_str());
+                    io::__fail_msg(io::_err,"%s is an invalid argument.", str.c_str());
                 }
                 catch (const std::out_of_range &e) {
-                    msg::__fail_msg(msg::_err,"%s is out of range.", str.c_str());
+                    io::__fail_msg(io::_err,"%s is out of range.", str.c_str());
                 }
                 return 0LL;
             };
             if(open == std::string::npos || close == std::string::npos || comma == std::string::npos){
-                msg::__fail_msg(msg::_err,"%s is an invalid range.",s.c_str());
+                io::__fail_msg(io::_err,"%s is an invalid range.",s.c_str());
             }
             long long left = string_to_int(open, comma);
             long long right = string_to_int(comma, close);
@@ -271,7 +1160,7 @@ namespace generator{
             long long nl = (long long)n;
             long long r = (nl - (nl % 2 == 0) - 1LL)/2;
             if(r < 0) {
-                msg::__fail_msg(msg::_err,"There is no odd number between [1,%lld].",nl);
+                io::__fail_msg(io::_err,"There is no odd number between [1,%lld].",nl);
             }
             long long x = rnd.next(0LL,r);
             x = x * 2 + 1;
@@ -287,7 +1176,7 @@ namespace generator{
             long long l = (froml + (froml % 2 == 0) - 1LL)/2;
             long long r = (tol - (tol % 2 == 0) - 1LL)/2;
             if(l > r) {
-                msg::__fail_msg(msg::_err,"There is no odd number between [%lld,%lld].",froml,tol);
+                io::__fail_msg(io::_err,"There is no odd number between [%lld,%lld].",froml,tol);
             }
             long long x = rnd.next(l, r);
             x = x * 2 + 1;       
@@ -309,7 +1198,7 @@ namespace generator{
             long long nl = (long long)n;
             long long r = (nl - (nl % 2 == 1))/2;
             if(r < 0) {
-                msg::__fail_msg(msg::_err,"There is no even number between [0,%lld].",nl);
+                io::__fail_msg(io::_err,"There is no even number between [0,%lld].",nl);
             }
             long long x = rnd.next(0LL,r);
             x = x * 2;
@@ -325,7 +1214,7 @@ namespace generator{
             long long l = (froml + (froml % 2 == 1))/2;
             long long r = (tol - (tol % 2 == 1))/2;
             if(l > r) {
-                msg::__fail_msg(msg::_err,"There is no even number between [%lld,%lld].",froml,tol);
+                io::__fail_msg(io::_err,"There is no even number between [%lld,%lld].",froml,tol);
             }
             long long x = rnd.next(l, r);
             x = x * 2;       
@@ -355,10 +1244,10 @@ namespace generator{
             }
             else if(std::is_convertible<T, double>::value){
                 _n = static_cast<double>(n);
-                msg::__warn_msg(msg::_err,"Input is not a real number, change it to %lf.Please ensure it's correct.",_n);
+                io::__warn_msg(io::_err,"Input is not a real number, change it to %lf.Please ensure it's correct.",_n);
             }
             else{
-                msg::__fail_msg(msg::_err,"Input is not a real number, and can't be changed to it.");
+                io::__fail_msg(io::_err,"Input is not a real number, and can't be changed to it.");
             }
             return _n;
         }
@@ -409,10 +1298,10 @@ namespace generator{
                 try {
                     double value = std::stod(str);
                     if(std::isnan(value)){
-                        msg::__fail_msg(msg::_err,"Exist a nan number.");
+                        io::__fail_msg(io::_err,"Exist a nan number.");
                     }
                     if(std::isinf(value)){
-                        msg::__fail_msg(msg::_err,"Exist an inf number.");
+                        io::__fail_msg(io::_err,"Exist an inf number.");
                     }
                     int digit = 1;
                     bool is_decimal_part = false;
@@ -445,15 +1334,15 @@ namespace generator{
                     return value;
                 }
                 catch (const std::invalid_argument &e) {
-                    msg::__fail_msg(msg::_err,"%s is an invalid argument.", str.c_str());
+                    io::__fail_msg(io::_err,"%s is an invalid argument.", str.c_str());
                 }
                 catch (const std::out_of_range &e) {
-                    msg::__fail_msg(msg::_err,"%s is out of range.", str.c_str());
+                    io::__fail_msg(io::_err,"%s is out of range.", str.c_str());
                 }
                 return 0.0;
             };
             if(open == std::string::npos || close == std::string::npos || comma == std::string::npos){
-                msg::__fail_msg(msg::_err,"%s is an invalid range.",s.c_str());
+                io::__fail_msg(io::_err,"%s is an invalid range.",s.c_str());
             }
             double left = string_to_double(open, comma);
             double right = string_to_double(comma, close);
@@ -565,7 +1454,7 @@ namespace generator{
             FMT_TO_RESULT(format, format, _format);
             std::string s = rnd.next(_format);
             if(s.empty()) {
-                msg::__fail_msg(msg::_err, "Can't generator a char from an empty string.");
+                io::__fail_msg(io::_err, "Can't generator a char from an empty string.");
             }
             return s.c_str()[0];
         }
@@ -685,26 +1574,26 @@ namespace generator{
         template<typename T>
         std::vector<T> rand_sum(int size,T sum,T from,T to) {
             if(size < 0){
-                msg::__fail_msg(msg::_err,"Size of the vector can't less than zero.");
+                io::__fail_msg(io::_err,"Size of the vector can't less than zero.");
             }
             if(size > 10000000){
-                msg::__warn_msg(
-                    msg::_err,
+                io::__warn_msg(
+                    io::_err,
                     "Size of the vector is greater than %s,since it's too large!",
                     std::to_string(size).c_str()
                 );
             }
             if(from > to){
-                msg::__fail_msg(
-                    msg::_err,
+                io::__fail_msg(
+                    io::_err,
                     "Vaild range [%s,%s],to can't less than from.",
                     std::to_string(from).c_str(),
                     std::to_string(to).c_str()
                 );
             }
             if(size * from > sum || size * to < sum){
-                msg::__fail_msg(
-                    msg::_err,
+                io::__fail_msg(
+                    io::_err,
                     "Sum of the vector is in range [%s,%s],but need sum = %s.",
                     std::to_string(from * size).c_str(),
                     std::to_string(to * size).c_str(),
@@ -712,7 +1601,7 @@ namespace generator{
             }
             if(size == 0) {
                 if(sum != 0){
-                    msg::__fail_msg(msg::_err,"Sum of the empty vector must be 0.");
+                    io::__fail_msg(io::_err,"Sum of the empty vector must be 0.");
                 }
                 return std::vector<T>();
             }
@@ -742,8 +1631,8 @@ namespace generator{
             T result_sum = 0;
             for(int i = 0;i < size;i++){
                 if(v[i] < from || v[i] > to){
-                    msg::__error_msg(
-                        msg::_err,
+                    io::__error_msg(
+                        io::_err,
                         "The %d%s number %s is out of range [%s,%s].Please notice author to fix bug.",
                         i+1,
                         englishEnding(i+1).c_str(),
@@ -755,8 +1644,8 @@ namespace generator{
                 result_sum += v[i];
             }
             if (result_sum != ask_sum){
-                msg::__error_msg(
-                    msg::_err,
+                io::__error_msg(
+                    io::_err,
                     "Sum of the vector is equal to %s,not %s.Please notice author to fix bug.",
                     std::to_string(result_sum).c_str(),
                     std::to_string(ask_sum).c_str()
@@ -810,13 +1699,13 @@ namespace generator{
                 elements.emplace_back(iter.first);
                 ValueType value = iter.second;
                 if (value < 0) {
-                    msg::__fail_msg(msg::_err, "Value can't less than 0.");
+                    io::__fail_msg(io::_err, "Value can't less than 0.");
                 }
                 sum += value;
                 probs.emplace_back(sum);
             }
             if (sum <= 0) {
-                msg::__fail_msg(msg::_err, "Sum of the values must greater than 0.");
+                io::__fail_msg(io::_err, "Sum of the values must greater than 0.");
             }
             long long p = rand_int(1LL,sum);
             auto pos = lower_bound(probs.begin(),probs.end(),p) - probs.begin();
@@ -833,11 +1722,11 @@ namespace generator{
             for (Iter i = begin; i != end; i++) {
                 int x = *i;
                 if (x < 0) {
-                    msg::__fail_msg(msg::_err, "Elements must be non negtive number.");
+                    io::__fail_msg(io::_err, "Elements must be non negtive number.");
                 }
                 tot += x;
                 if (tot > 10000000) {
-                    msg::__fail_msg(msg::_err, "Sum of the elements must equal or less than 10^7");
+                    io::__fail_msg(io::_err, "Sum of the elements must equal or less than 10^7");
                 }
                 while (x--) {
                     res.emplace_back((i - begin) + offset);
@@ -849,718 +1738,6 @@ namespace generator{
 
         std::vector<int> shuffle_index(std::vector<int> v, int offset = 0) {
             return shuffle_index(v.begin(), v.end(), offset);
-        }
-    }
-
-    namespace io{
-        std::string __get_lib_path() {
-            return __FILE__;
-        }
-        std::string __get_current_path() {
-    #ifdef _WIN32
-        char buffer[MAX_PATH];
-        GetModuleFileName(NULL, buffer, MAX_PATH);
-        std::string executablePath(buffer);
-        // 提取文件夹路径
-        size_t lastSlashPos = executablePath.find_last_of('\\');
-        if (lastSlashPos != std::string::npos) {
-            std::string folderPath = executablePath.substr(0, lastSlashPos);
-            return folderPath;
-        }
-    #else
-        char buffer[1024];
-        ssize_t length = readlink("/proc/self/exe", buffer, sizeof(buffer));
-        if (length != -1) {
-            buffer[length] = '\0';
-            std::string executablePath(buffer);
-
-            // 提取文件夹路径
-            size_t lastSlashPos = executablePath.find_last_of('/');
-            if (lastSlashPos != std::string::npos) {
-                std::string folderPath = executablePath.substr(0, lastSlashPos);
-                return folderPath;
-            }
-        }
-    #endif
-
-        // 如果无法获取路径，则返回空字符串
-        return "";
-        }
-
-        std::string __get_folder_path(std::string& path){
-            size_t pos = path.find_last_of("/\\"); 
-            if (pos != std::string::npos) {
-                return path.substr(0,pos);
-            }
-            else{
-                return std::string("");
-            }
-        }
-
-        std::string __get_file_name(std::string& path){
-            size_t pos = path.find_last_of("/\\");
-            if (pos != std::string::npos) {
-                std::string file_full_name = path.substr(pos + 1);
-                size_t pos_s = file_full_name.find_first_of(".");
-                if( pos_s != std::string::npos) {
-                    std::string file_name = file_full_name.substr(0,pos_s);
-                    return file_name;
-                }
-                else{
-                    return file_full_name;
-                }
-            } else {
-                size_t pos_s = path.find_first_of(".");
-                if( pos_s != std::string::npos) {
-                    std::string file_name = path.substr(0,pos_s);
-                    return file_name;
-                }
-                else{
-                    return path;
-                }
-            }
-            return "";
-        }
-
-        bool __folder_exists(const std::string& folder_path) {
-            struct stat info;
-            if (stat(folder_path.c_str(), &info) != 0) {
-                return false;
-            }
-            return (info.st_mode & S_IFDIR) != 0;
-        }
-
-        bool __file_exists(const std::string& filename) {
-            std::ifstream file(filename);
-            return file.good();
-        }
-
-        bool __create_directory(const std::string& path) {
-            if(__folder_exists(path))  return true;
-            return mkdir(path.c_str(),0777) == 0;
-        }
-
-        void __create_directories(const std::string& path) {
-            std::istringstream ss(path);
-            std::string token;
-            std::string current_path = "";
-
-        #ifdef __WIN32
-            while (std::getline(ss, token, '\\')) {
-                current_path += token + "\\";
-                if (current_path=="\\") {
-                    continue;
-                }
-                if (!__create_directory(current_path)) {
-                    msg::__fail_msg(msg::_err,"Error in creating folder : %s",current_path.c_str());
-                }
-            }
-        #else
-            while (std::getline(ss, token, '/') ) {
-                current_path += token + "/";
-                if (current_path=="/") {
-                    continue;
-                }
-                if (!__create_directory(current_path)) {
-                    msg::__fail_msg(msg::_err,"Error in creating folder : %s",current_path.c_str());
-                }
-            }
-        #endif
-            return;
-        }
-
-        void __close_file(){
-            #ifdef _WIN32
-                freopen("CON", "w", stdout);
-            #else
-                freopen("/dev/tty", "w", stdout);
-            #endif
-        }
-
-        std::string __path_join(std::string s,std::string t){
-        #ifdef _WIN32
-            return s + "\\" + t;
-        #else 
-            return s + "/" + t;
-        #endif
-        }
-
-        std::string __path_join(std::string s,const char* t){
-        #ifdef _WIN32
-            return s + "\\" + std::string(t);
-        #else 
-            return s + "/" + std::string(t);
-        #endif
-        }
-
-        std::string __path_join(const char* s,std::string t){
-        #ifdef _WIN32
-            return std::string(s) + "\\" + t;
-        #else 
-            return std::string(s) + "/" + t;
-        #endif
-        }
-
-        std::string __path_join(const char* s,const char* t){
-        #ifdef _WIN32
-            return std::string(s) + "\\" + std::string(t);
-        #else 
-            return std::string(s) + "/" + std::string(t);
-        #endif
-        }
-
-        std::string __get_full_path(std::string& path){
-        #ifdef _WIN32
-            char buffer[MAX_PATH];
-            if (GetFullPathNameA(path.c_str(), MAX_PATH, buffer, nullptr) == 0) {
-                msg::__error_msg(msg::_err,"Error in get full path of file: %s.",path.c_str());
-            }
-        #else
-            char buffer[PATH_MAX];
-            if (realpath(path.c_str(), buffer) == nullptr) {
-                msg::__error_msg(msg::_err,"Error in get full path of file: %s.",path.c_str());
-            }
-        #endif
-        return std::string(buffer);
-        }
-
-        char** __split_string_to_char_array(const char* input) {
-            char** char_array = nullptr;
-            char* mutableInput = const_cast<char*>(input);
-            char* token = strtok(mutableInput, " ");
-            int count = 0;
-
-            while (token != nullptr) {
-                char_array = (char**)realloc(char_array, (count + 1) * sizeof(char*));
-                char_array[count] = strdup(token);
-                ++count;
-                token = strtok(nullptr, " ");
-            }
-
-            char_array = (char**)realloc(char_array, (count + 1) * sizeof(char*));
-            char_array[count] = nullptr;
-            return char_array;
-        }
-
-        void __fake_arg(const char* format="",...){
-            FMT_TO_RESULT(format, format, _format);
-            _format = "gengrator " + _format;
-            auto _fake_argvs = __split_string_to_char_array(_format.c_str());
-            int _fake_argc = 0;
-            while (_fake_argvs[_fake_argc] != nullptr) {
-                ++_fake_argc;
-            }
-            prepareOpts(_fake_argc,_fake_argvs);
-        }
-
-        struct Path{
-            std::string _path;
-            Path() = default;
-            Path(std::string &s) {
-                _path = __get_current_path();
-                _path += s;
-            };
-            Path(const char *s) {
-                _path = __get_current_path();
-                _path += std::string(s);
-            };
-            void change_path(std::string &s) {
-                std::string path = s;
-                path = __get_full_path(path);
-                if(!__file_exists(path)){
-                    msg::__warn_msg(msg::_err,"Fail to find generator file %s.",path.c_str());
-                    return;
-                }
-                _path = path;
-            }
-            void change_path(const char *s) {
-                std::string path = std::string(s);
-                path = __get_full_path(path);
-                if(!__file_exists(path)){
-                    msg::__warn_msg(msg::_err,"Fail to find generator file %s.",path.c_str());
-                    return;
-                }
-                _path = path;
-            }
-            void join_current_path(std::string &s) {
-                _path = __get_current_path();
-                _path += s;
-            }
-            void join_current_path(const char *s) {
-                _path = __get_current_path();
-                _path += std::string(s);
-            }
-        };
-
-    #ifdef _WIN32       
-        Path testcases_folder_path("\\testcases");
-        Path compare_folder_path("\\cmp");
-        Path std_path("\\std.exe");
-        Path data_path("\\data.exe");
-        Path checker_path("\\checker.exe");
-    #else
-        Path testcases_folder_path("/testcases");
-        Path compare_folder_path("/cmp");
-        Path std_path("/std");
-        Path data_path("/data");
-        Path checker_path("/checker");
-    #endif
-
-        void __write_input_file(int x){
-            std::string folder_path = testcases_folder_path._path;
-            __create_directories(folder_path);
-            std::string in_file = std::to_string(x) + ".in";
-            std::string file_path = __path_join(folder_path,in_file) ;
-            freopen(file_path.c_str(), "w", stdout);
-            msg::__success_msg(msg::_err,"Successfully create input file %s",file_path.c_str());
-        }
-
-        void __write_output_file(int x){
-            std::string folder_path = testcases_folder_path._path;
-            __create_directories(folder_path);
-            std::string read_file = std::to_string(x) + ".in";
-            std::string read_path = __path_join(folder_path, read_file);
-            if(!__file_exists(read_path)) {
-                msg::__fail_msg(msg::_err,"Input file %s don't exist!",read_path.c_str());
-            }
-            freopen(read_path.c_str(), "r", stdin);
-            std::string write_file = std::to_string(x) + ".out";
-            std::string write_path = __path_join(folder_path, write_file);
-            freopen(write_path.c_str(), "w", stdout);
-            msg::__success_msg(msg::_err,"Successfully create output file %s",write_path.c_str());
-        }
-
-        bool __input_file_exists(int x){
-            std::string folder_path = testcases_folder_path._path;
-            std::string in_file = std::to_string(x) + ".in";
-            std::string file_path = __path_join(folder_path,in_file);
-            return __file_exists(file_path);
-        }
-
-        std::vector<int> __get_inputs() {
-            std::vector<int> inputs;
-            std::string folder_path = testcases_folder_path._path;
-        #ifdef _WIN32
-            WIN32_FIND_DATA findFileData;
-            HANDLE hFind = FindFirstFile((folder_path + "\\*.in").c_str(), &findFileData);
-
-            if (hFind != INVALID_HANDLE_VALUE) {
-                do {
-                    std::string file_name = findFileData.cFileName;
-                    int num = std::stoi(__get_file_name(file_name));
-                    std::string output_file = __path_join(folder_path, std::to_string(num) + ".out");
-                    if(!__file_exists(output_file)){
-                        inputs.push_back(num);
-                    }      
-                } while (FindNextFile(hFind, &findFileData) != 0);
-
-                FindClose(hFind);
-            }
-        #else
-            DIR* dir = opendir(folder_path.c_str());
-            if (dir != nullptr) {
-                struct dirent* entry;
-                while ((entry = readdir(dir)) != nullptr) {
-                    std::string file_name = entry->d_name;
-                    if (file_name.size() >= 3 && file_name.substr(file_name.size() - 3) == ".in") {
-                        int num = std::stoi(__get_file_name(file_name));
-                        std::string output_file = __path_join(folder_path, std::to_string(num) + ".out");
-                        if(!__file_exists(output_file)){
-                            inputs.push_back(num);
-                        }
-                    }
-                }
-                closedir(dir);
-            }
-        #endif
-
-            return inputs;
-        }
-
-        // make(generator) input files from __start to __end
-        // store in folder testcases, name is #number.in
-        // can given testlib style arguments
-        #define make_inputs(__start, __end, __Func, ...) do{ \
-            for(int __case = (__start);__case <= __end;__case++){ \
-                __write_input_file(__case); \
-                __fake_arg(__VA_ARGS__); \
-                __Func; \
-                __close_file(); \
-            } \
-        } while(0)
-
-        // make(generator) output files from __start to __end
-        // store in folder testcases, name is #number.iout
-        #define make_outputs(__start,__end,__Func) do{ \
-            for(int __case = (__start);__case <= __end;__case++){ \
-                __write_output_file(__case); \
-                __Func; \
-                __close_file(); \
-            } \
-        } while(0)
-
-        // make(generator) __num input files if files don't exist
-        // use __Func
-        #define fill_inputs(__num,__Func,...) do{ \
-            int __sum = (__num); \
-            for(int __case = (1);__sum;__case++) { \
-                if(!__input_file_exists(__case)) { \
-                    __sum--; \
-                    __write_input_file(__case); \
-                    __fake_arg(__VA_ARGS__); \
-                    __Func; \
-                    __close_file(); \
-                } \
-            } \
-        }while(0)
-
-        // make(generator) all output files use __Func
-        #define fill_outputs(__Func) do{ \
-            auto __inputs =  __get_inputs(); \
-            for(auto __case:__inputs) { \
-                __write_output_file(__case); \
-                __Func; \
-                __close_file(); \
-            } \
-        }while(0)
-
-        // make(generator) input files from start to end
-        // use ".\\data.exe"(default) ["./data" on Linux]
-        void make_inputs_exe(int start,int end,const char* format = "",...){
-            FMT_TO_RESULT(format,format,_format);
-            std::string folder_path = testcases_folder_path._path;
-            __create_directories(folder_path);
-            for(int i = start;i <= end; i++){
-                std::string in_file = std::to_string(i) + ".in";
-                std::string file_path = __path_join(folder_path,in_file) ;
-                std::string command = data_path._path + " " + _format + " >" + file_path;
-                int return_code = std::system(command.c_str());
-                if(return_code == 0) {
-                    msg::__success_msg(msg::_err,"Successfully create input file %s",file_path.c_str());
-                }
-                else {
-                    msg::__error_msg(msg::_err,"Someting error in creating input file %s",file_path.c_str());
-                }   
-            }
-        }
-
-        // make(generator) input files from start to end
-        // use ".\\std.exe"(default) ["./std" on Linux]
-        void make_outputs_exe(int start,int end){
-            std::string folder_path = testcases_folder_path._path;
-            __create_directories(folder_path);
-            for(int i = start;i <= end; i++){
-                std::string read_file = std::to_string(i) + ".in";
-                std::string read_path = __path_join(folder_path, read_file);
-                if(!__file_exists(read_path)) {
-                    msg::__fail_msg(msg::_err,"Input file %s don't exist!",read_path.c_str());
-                }
-                std::string write_file = std::to_string(i) + ".out";
-                std::string write_path = __path_join(folder_path, write_file);
-                std::string command = std_path._path + " <" + read_path + " >" + write_path;
-                int return_code = std::system(command.c_str());
-                if(return_code == 0) {
-                    msg::__success_msg(msg::_err,"Successfully create output file %s",write_path.c_str());
-                }
-                else {
-                    msg::__error_msg(msg::_err,"Someting error in creating output file %s",write_path.c_str());
-                }
-            }
-        }
-
-        void fill_inputs_exe(int sum,const char* format = "",...){
-            FMT_TO_RESULT(format,format,_format);
-            std::string folder_path = testcases_folder_path._path;
-            __create_directories(folder_path);
-            for(int i = 1;sum; i++){
-                std::string in_file = std::to_string(i) + ".in";
-                std::string file_path = __path_join(folder_path,in_file) ;
-                if(__file_exists(file_path)){
-                    continue;
-                }
-                sum--;
-                std::string command = data_path._path + " " + _format + " >" + file_path;
-                int return_code = std::system(command.c_str());
-                if(return_code == 0) {
-                    msg::__success_msg(msg::_err,"Successfully create/open input file %s",file_path.c_str());
-                }
-                else {
-                    msg::__error_msg(msg::_err,"Someting error in creating/opening input file %s",file_path.c_str());
-                }   
-            }
-        }
-
-        void fill_outputs_exe(){
-            std::string folder_path = testcases_folder_path._path;
-            __create_directories(folder_path);
-            auto inputs =  __get_inputs();
-            for(auto x:inputs){
-                std::string read_file = std::to_string(x) + ".in";
-                std::string read_path = __path_join(folder_path, read_file);
-                std::string write_file = std::to_string(x) + ".out";
-                std::string write_path = __path_join(folder_path, write_file);
-                std::string command = std_path._path + " <" + read_path + " >" + write_path;
-                int return_code = std::system(command.c_str());
-                if(return_code == 0) {
-                    msg::__success_msg(msg::_err,"Successfully create output file %s",write_path.c_str());
-                }
-                else {
-                    msg::__error_msg(msg::_err,"Someting error in creating output file %s",write_path.c_str());
-                }
-            }
-        }
-
-        // equal to registerGen(argc, argv, 1);
-        void init_gen(int argc,char* argv[]) {
-            registerGen(argc, argv, 1);
-        }
-
-        // no argvs's register
-        // unsafe but may easier to use
-        void init_gen() {
-            char * __fake_argvs[] = {(char*)"generator"};
-            registerGen(1, __fake_argvs , 1);
-        }
-
-        void __run_program(int x,std::string& program,int time_limit,std::string& logv_file) {
-            std::string input_file = std::to_string(x) + ".in";
-            std::string output_file = std::to_string(x) + ".ans";
-            std::string program_name = __get_file_name(program);
-            std::string input_file_path = __path_join(testcases_folder_path._path, input_file);
-            std::string output_file_path = __path_join(compare_folder_path._path, program_name);
-            output_file_path = __path_join(output_file_path, output_file);
-            std::string command = program;
-            std::string lib_path = __get_lib_path();
-            std::string judger_path = __path_join(__get_folder_path(lib_path),"checker");
-            judger_path = __path_join(judger_path,"judger.py");
-            std::string py_command = 
-                "python " + 
-                judger_path + " " +
-                command + " " +
-                std::to_string(x) + " " +
-                input_file_path + " " +
-                output_file_path + " " +
-                logv_file + " " +
-                std::to_string(time_limit);
-
-            int result = system(py_command.c_str());
-            
-            if (result != 0) {
-                msg::__fail_msg(msg::_err, "Fail in test %lld, program = %s.", x, program_name.c_str());
-            }
-        }
-
-        enum ResultState{
-            R_UNKNOWN,
-            R_AC,
-            R_WA,
-            R_TLE,
-            R_TLEANDAC,
-            R_TLEANDWA,
-            R_ERROR
-        };
-
-        void __compare_once(int start,int end,std::string& program,int time_limit,std::string& checker){
-            std::string program_name = __get_file_name(program);
-            std::string logv_file = __path_join(compare_folder_path._path,program_name + std::string(".logv"));
-            std::string ans_folder_path = __path_join(compare_folder_path._path,program_name);
-            __create_directories(ans_folder_path);
-            for(int i = start;i <= end; i++){
-                __run_program(i,program,time_limit * 2,logv_file);
-            }
-            msg::OutStream log_file(logv_file.substr(0,logv_file.length() - 1));
-            std::vector<ResultState> result(end - start + 1,R_UNKNOWN);
-            std::vector<int> runtime(end - start + 1, -1);
-            std::vector<std::string> testlib_result(end - start + 1);
-            std::ifstream read_logv(logv_file);
-
-            for(int i = start; i <= end ;i++){
-                int x,t;
-                read_logv >> x >> t;
-                x -= start;
-                runtime[x] = t;
-                if(t == -1){
-                    result[x] = R_ERROR;
-                }
-                else if(t > 1.5 * time_limit) {
-                    result[x] = R_TLE;
-                }
-                else{
-                    std::string input_file = std::to_string(i) + ".in";
-                    std::string output_file = std::to_string(i) + ".out";
-                    std::string ans_file = std::to_string(i) + ".ans";
-                    std::string input_file_path = __path_join(testcases_folder_path._path, input_file);
-                    std::string output_file_path = __path_join(testcases_folder_path._path, output_file);
-                    std::string ans_file_path = __path_join(ans_folder_path, ans_file);
-                    std::string check_tmp_log_path = __path_join(ans_folder_path, "__checker.logc");
-                    std::string command = 
-                        checker + " " +
-                        input_file_path + " " +
-                        ans_file_path + " " +
-                        output_file_path + " 2>" +
-                        check_tmp_log_path;
-                    int command_result = system(command.c_str());
-                    if (command_result) {
-                        result[x] = R_ERROR;
-                    }
-                    std::string check_result = "";
-                    std::ifstream check_stream(check_tmp_log_path);
-                    std::string line;
-                    while(check_stream >> line){
-                        check_result += line;
-                        check_result += " ";
-                    }
-                    check_stream.close();
-                    if(check_result.substr(0,2) == "ok"){
-                        if(t > time_limit){
-                            result[x] = R_TLEANDAC;
-                        }
-                        else{
-                            result[x] = R_AC;
-                        }
-                    }
-                    else{
-                        if(t > time_limit){
-                            result[x] = R_TLEANDWA;
-                        }
-                        else{
-                            result[x] = R_WA;
-                        }
-                        testlib_result[x] = check_result;
-                    }
-                }
-            }
-            read_logv.close();
-            std::remove(logv_file.c_str());
-            std::remove(__path_join(ans_folder_path, "__checker.logc").c_str());
-            msg::__info_msg(msg::_err,"test for program %s :",program.c_str());
-            int number_ac = 0, number_wa = 0, number_tle = 0,number_err = 0;
-            for (int i = start; i <= end; i++){
-                int index = i - start;
-                if(result[index] == R_UNKNOWN || result[index] == R_ERROR){
-                    msg::__run_err_msg(log_file,false,i);
-                    msg::__run_err_msg(msg::_err,true,i);
-                    number_err ++;
-                }
-                if(result[index] == R_AC){
-                    msg::__ac_msg(log_file,false,i,runtime[index]);
-                    msg::__ac_msg(msg::_err,true,i,runtime[index]);
-                    number_ac ++;
-                }
-                if(result[index] == R_WA){
-                    msg::__wa_msg(log_file,false,i,runtime[index],testlib_result[index]);
-                    msg::__wa_msg(msg::_err,true,i,runtime[index],testlib_result[index]);
-                    number_wa ++;
-                }
-                if(result[index] == R_TLEANDAC){
-                    msg::__tleac_msg(log_file,false,i,runtime[index]);
-                    msg::__tleac_msg(msg::_err,true,i,runtime[index]);
-                    number_tle ++;
-                }
-                if(result[index] == R_TLEANDWA){
-                    msg::__tlewa_msg(log_file,false,i,runtime[index],testlib_result[index]);
-                    msg::__tlewa_msg(msg::_err,true,i,runtime[index],testlib_result[index]);
-                    number_tle ++;
-                }
-                if(result[index] == R_TLE){
-                    msg::__tle_msg(log_file,false,i,runtime[index]);
-                    msg::__tle_msg(msg::_err,true,i,runtime[index]);
-                    number_tle ++;
-                }
-            }
-            msg::__info_msg(msg::_err,"program test done.");
-            msg::__info_msg(msg::_err,"\033[32mAC\033[0m :%d/%d",number_ac,end - start + 1);
-            msg::__info_msg(msg::_err,"\033[1;31mWA\033[0m :%d/%d",number_wa,end - start + 1);
-            msg::__info_msg(msg::_err,"\033[1;33mTLE\033[0m :%d/%d",number_tle,end - start + 1);
-            msg::__info_msg(msg::_err,"\033[1;31mERROR\033[0m :%d/%d",number_err,end - start + 1);
-            msg::__info_msg(msg::_err,"\n");
-            return;
-        }
-
-        std::vector<std::string> __get_checker_files() {
-            return std::vector<std::string>();
-        }
-
-        template<typename T, typename... Args>
-        std::vector<std::string> __get_checker_files(T first, Args... args) {       
-            std::vector<std::string> result = {};
-            std::string first_arg = std::string(first);
-            std::string file = __get_full_path(first_arg);
-            if(__file_exists(file)){
-                result.emplace_back(file);
-            }
-            else{
-                msg::__warn_msg(
-                    msg::_err,
-                    "Compare program file %s doesn't exist, full path is %s.",
-                    std::string(first).c_str(),
-                    file.c_str());
-            }
-            std::vector<std::string> rest = __get_checker_files(args...);
-            result.insert(result.end(), rest.begin(), rest.end());
-            
-            return result;
-        }
-
-        // run program args_1,args_2,...,args_n from case start to end
-        // set time limit, 2 * time_limit for run , 1.5 * time_limit for check
-        // checker is the checker.exe path(writen by testlib)
-        template<typename... Args>
-        void compare(int start,int end,int time_limit,std::string checker,Args ... args){
-            init_gen();
-            std::string checker_file = __get_full_path(checker);
-            if(!__file_exists(checker_file)){
-                msg::__fail_msg(msg::_err,"Checker file %s doesn't exist, full path is %s.",checker.c_str(),checker_file.c_str());
-            }
-            std::vector<std::string> programs = __get_checker_files(args...);
-            for(auto program:programs){
-                __compare_once(start,end,program,time_limit,checker_file);
-            }
-        }
-
-        enum Checker{
-            lcmp,
-            yesno,
-            rcmp4,
-            rcmp6,
-            rcmp9,
-            wcmp
-        };
-
-        // run program args_1,args_2,...,args_n from case start to end
-        // set time limit, 2 * time_limit for run , 1.5 * time_limit for check
-        // checker is the default checker
-        template<typename... Args>
-        void compare(int start,int end,int time_limit,Checker checker,Args ... args){
-            init_gen();
-            std::string lib_path = __get_lib_path();
-            std::string checker_folder = __path_join(__get_folder_path(lib_path) ,"checker");
-            std::string checker_file;
-            if(checker == lcmp){
-                checker_file = __path_join(checker_folder,"lcmp.exe");
-            }
-            else if(checker == yesno){
-                checker_file = __path_join(checker_folder,"yesno.exe"); 
-            }
-            else if(checker == rcmp4){
-                checker_file = __path_join(checker_folder,"rcmp4.exe"); 
-            }
-            else if(checker == rcmp6){
-                checker_file = __path_join(checker_folder,"rcmp6.exe"); 
-            }
-            else if(checker == rcmp9){
-                checker_file = __path_join(checker_folder,"rcmp9.exe"); 
-            }
-            else if(checker == wcmp){
-                checker_file = __path_join(checker_folder,"wcmp.exe"); 
-            }
-            if(!__file_exists(checker_file)){
-                msg::__fail_msg(msg::_err,"Checker file %s doesn't exist, some thing may wrong!",checker_file.c_str());
-            }
-            std::vector<std::string> programs = __get_checker_files(args...);
-            for(auto program:programs){
-                __compare_once(start,end,program,time_limit,checker_file);
-            }
         }
     }
 
@@ -1700,7 +1877,7 @@ namespace generator{
                 void set_root(int root) {
                     _root = root - _begin_node;
                     if (!_is_rooted) {
-                       msg::__warn_msg(msg::_err, "Unrooted Tree, set root is useless."); 
+                       io::__warn_msg(io::_err, "Unrooted Tree, set root is useless."); 
                     }
                 }
 
@@ -1726,7 +1903,7 @@ namespace generator{
 
                 int root() {
                     if (!_is_rooted) {
-                        msg::__warn_msg(msg::_err, "Unrooted Tree, root is useless.");
+                        io::__warn_msg(io::_err, "Unrooted Tree, root is useless.");
                     }
                     return _root + _begin_node;
                 }
@@ -1781,12 +1958,12 @@ namespace generator{
             protected:
                 void __judge_comman_limit() {
                     if (_node <= 0) {
-                        msg::__fail_msg(msg::_err, "Number of nodes must be a positive integer, but found %d.", _node);
+                        io::__fail_msg(io::_err, "Number of nodes must be a positive integer, but found %d.", _node);
                     }
 
                     if (_is_rooted && (_root < 0 || _root > _node)) {
-                        msg::__fail_msg(
-                                msg::_err,
+                        io::__fail_msg(
+                                io::_err,
                                 "restriction of the root is [%d, %d], but found %d.",
                                 _begin_node, 
                                 _node + _begin_node - 1, 
@@ -1978,7 +2155,7 @@ namespace generator{
             protected:
                 virtual void __judge_self_limit() {
                     if (_height > _node || (_node > 1 && _height <= 1) || _height < 1) {
-                        msg::__fail_msg(msg::_err, "restriction of the height is [%d,%d].\n", _node == 1 ? 1 : 2,
+                        io::__fail_msg(io::_err, "restriction of the height is [%d,%d].\n", _node == 1 ? 1 : 2,
                                         _node);
                     }
                 }
@@ -2054,22 +2231,22 @@ namespace generator{
             protected:
                 virtual void __judge_self_limit() {
                     if (_max_degree > _node - 1) {
-                        msg::__warn_msg(msg::_err,
+                        io::__warn_msg(io::_err,
                                         "The max degree limit %d is greater than node - 1, equivalent to use Tree::gen_pruefer",
                                         _max_degree);
                     }
                     if (_node == 1 && _max_degree < 0) {
-                        msg::__fail_msg(msg::_err,
+                        io::__fail_msg(io::_err,
                                         "The max degree limit of 1 node's tree is greater than or equal to 0, but found %d.",
                                         _max_degree);
                     }
                     if (_node == 2 && _max_degree < 1) {
-                        msg::__fail_msg(msg::_err,
+                        io::__fail_msg(io::_err,
                                         "The max degree limit of 2 node's tree is greater than or equal to 1, but found %d.",
                                         _max_degree);
                     }
                     if (_node > 2 && _max_degree < 2) {
-                        msg::__fail_msg(msg::_err,
+                        io::__fail_msg(io::_err,
                                         "The max degree limit of 3 or more node's tree is greater than or equal to 2, but found %d.",
                                         _max_degree);
                     }
@@ -2137,22 +2314,22 @@ namespace generator{
             protected:
                 virtual void __judge_self_limit() {
                     if (_max_son > _node - 1) {
-                        msg::__warn_msg(msg::_err,
+                        io::__warn_msg(io::_err,
                                         "The max son limit %d is greater than node - 1, equivalent to use Tree::gen_pruefer",
                                         _max_son);
                     }
                     if (_node == 1 && _max_son < 0) {
-                        msg::__fail_msg(msg::_err,
+                        io::__fail_msg(io::_err,
                                         "The max son limit of 1 node's tree is greater than or equal to 0, but found %d.",
                                         _max_son);
                     }
                     if (_node == 2 && _max_son < 1) {
-                        msg::__fail_msg(msg::_err,
+                        io::__fail_msg(io::_err,
                                         "The max son limit of 2 node's tree is greater than or equal to 1, but found %d.",
                                         _max_son);
                     }
                     if (_node > 2 && _max_son < 2) {
-                        msg::__fail_msg(msg::_err,
+                        io::__fail_msg(io::_err,
                                         "The max son limit of 3 or more node's tree is greater than or equal to 2, but found %d.",
                                         _max_son);
                     }
@@ -2347,17 +2524,17 @@ namespace generator{
                             limit += _node;
                         }
                         if (_side > limit) {
-                            msg::__fail_msg(msg::_err, "number of edges must less than or equal to %lld.", limit);
+                            io::__fail_msg(io::_err, "number of edges must less than or equal to %lld.", limit);
                         }
                     }
                 }
 
                 virtual void __judge_lower_limit() {
                     if (_side < 0) {
-                        msg::__fail_msg(msg::_err, "number of edges must be a non-negative integer.");
+                        io::__fail_msg(io::_err, "number of edges must be a non-negative integer.");
                     }
                     if (_connect && _side < _node - 1) {
-                        msg::__fail_msg(msg::_err, "number of edges must greater than or equal to %d.", _node - 1);
+                        io::__fail_msg(io::_err, "number of edges must greater than or equal to %d.", _node - 1);
                     }
                 }
 
@@ -2459,8 +2636,8 @@ namespace generator{
 
                 void set_left_right(int left, int right) {
                     if (left + right < 0) {
-                        msg::__fail_msg(
-                                msg::_err,
+                        io::__fail_msg(
+                                io::_err,
                                 "number of left part nodes add right part nodes must greater than 0."
                                 "But found %d + %d = %d",
                                 left, right, left + right);
@@ -2510,8 +2687,8 @@ namespace generator{
                     int l = 0, r = _node / 2, limit;
                     if (!_multiply_edge) {
                         if (_side > r * (_node - r)) {
-                            msg::__fail_msg(
-                                    msg::_err,
+                            io::__fail_msg(
+                                    io::_err,
                                     "number of edges must less than or equal to %d.",
                                     r * (_node - r));
                         }
@@ -2568,11 +2745,11 @@ namespace generator{
 
                 virtual void __judge_self_limit() {
                     if (_left < 0) {
-                        msg::__fail_msg(msg::_err, "Left part size must greater than or equal to 0, but found %d",
+                        io::__fail_msg(io::_err, "Left part size must greater than or equal to 0, but found %d",
                                         _left);
                     }
                     if (_right < 0) {
-                        msg::__fail_msg(msg::_err, "Left part size must greater than or equal to 0, but found %d",
+                        io::__fail_msg(io::_err, "Left part size must greater than or equal to 0, but found %d",
                                         _right);
                     }
                 }
@@ -2581,7 +2758,7 @@ namespace generator{
                     if (!_multiply_edge) {
                         long long limit = _left * _right;
                         if (limit < _side) {
-                            msg::__fail_msg(msg::_err, "number of edges must less than or equal to %lld, but found %d.",
+                            io::__fail_msg(io::_err, "number of edges must less than or equal to %lld, but found %d.",
                                             limit, _side);
                         }
                     }
@@ -2729,7 +2906,7 @@ namespace generator{
 
                 virtual void __judge_lower_limit() {
                     if (_node < 3) {
-                        msg::__fail_msg(msg::_err, "number of nodes must greater than or equal to 3, but found %d.",
+                        io::__fail_msg(io::_err, "number of nodes must greater than or equal to 3, but found %d.",
                                         _node);
                     }
                 }
@@ -2772,7 +2949,7 @@ namespace generator{
 
                 virtual void __judge_lower_limit() {
                     if (_node < 4) {
-                        msg::__fail_msg(msg::_err, "number of nodes must greater than or equal to 4, but found %d.",
+                        io::__fail_msg(io::_err, "number of nodes must greater than or equal to 4, but found %d.",
                                         _node);
                     }
                 }
@@ -2814,7 +2991,7 @@ namespace generator{
                             limit *= 2;
                         }
                         if (_side > limit) {
-                            msg::__fail_msg(msg::_err, "number of edges must less than or equal to %lld, but found %d.",
+                            io::__fail_msg(io::_err, "number of edges must less than or equal to %lld, but found %d.",
                                             limit, _side);
                         }
                     }
@@ -2822,10 +2999,10 @@ namespace generator{
 
                 virtual void __judge_self_limit() {
                     if (_row < 0) {
-                        msg::__fail_msg(msg::_err, "number of rows must greater than 0, but found %d.", _row);
+                        io::__fail_msg(io::_err, "number of rows must greater than 0, but found %d.", _row);
                     }
                     if (_column < 0) {
-                        msg::__fail_msg(msg::_err, "number of columns must greater than 0, but found %d.", _column);
+                        io::__fail_msg(io::_err, "number of columns must greater than 0, but found %d.", _column);
                     }
                 }
 
@@ -2848,7 +3025,7 @@ namespace generator{
                         }
                         if (possible.size() == 0) {
                             _side = max.first;
-                            msg::__warn_msg(msg::_err,
+                            io::__warn_msg(io::_err,
                                             "number of edges is large than the maximum possible, use upper edges limit %d.",
                                             _side);
                             _row = max.second;
@@ -2953,13 +3130,13 @@ namespace generator{
 
                 virtual void __judge_self_limit() {
                     if (_cycle < 3 || _cycle > _node) {
-                        msg::__fail_msg(msg::_err, "cycle size must in range [3, %d], but found %d.", _node, _cycle);
+                        io::__fail_msg(io::_err, "cycle size must in range [3, %d], but found %d.", _node, _cycle);
                     }
                 }
 
                 virtual void __judge_lower_limit() {
                     if (_node < 3) {
-                        msg::__fail_msg(msg::_err,
+                        io::__fail_msg(io::_err,
                                         "number of nodes in cycle graph must greater than or equal to 3, but found %d.",
                                         _cycle);
                     }
@@ -3075,7 +3252,7 @@ namespace generator{
                 virtual void __judge_upper_limit() {
                     int limit = _node - 1 + (_node - 1) / 2;
                     if (_side > limit) {
-                        msg::__fail_msg(msg::_err, "number of edges must less than or equal to %d, but found %d.",
+                        io::__fail_msg(io::_err, "number of edges must less than or equal to %d, but found %d.",
                                         limit, _side);
                     }
                 }
@@ -3088,9 +3265,8 @@ namespace generator{
     }
     
     namespace all{
-        using namespace generator::msg;
-        using namespace generator::rand;
         using namespace generator::io;
+        using namespace generator::rand;
         using namespace generator::graph;
     }
 }
