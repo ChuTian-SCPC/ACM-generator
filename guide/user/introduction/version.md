@@ -9,6 +9,7 @@
   - 重构`make_inputs_exe`,`fill_inputs_exe`,`make_outputs_exe`,`fill_outputs_exe`部分，使文件路径为可传入的参数。
   - 重构`msg`中输出颜色部分。
   - 修改默认checker的路径。
+  - 修改`rand_vector`，让生成函数传参由模板类`FUNC`改成`std::function<T()>`，增加类型检查。
 - 新增功能：
   - 已经支持Linux对拍。
 
