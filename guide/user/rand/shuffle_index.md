@@ -20,7 +20,7 @@
     ```
     在数组 $b$ 中， $0$ 会出现 $3$ 次； $1$ 会出现 $1$ 次； $2$ 会出现 $2$ 次。
 
-3. `vector<int> shuffle_index(vector<int> v, int offset = 0)`
+2. `vector<int> shuffle_index(vector<int> v, int offset = 0)`
    传入一个类型为`vector<int>`的数组 $v$ 和一个类型为 `int` 的参数 $offset$ , 默认值为 $0$ 。
 
    等同于函数：`shuffle_index(v.begin(), v.end(), offset)` 。
