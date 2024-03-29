@@ -10,7 +10,7 @@
   - [rand_even](./user/rand/rand_even.md)
   - [rand_real](./user/rand/rand_real.md)
   - [rand_abs](./user/rand/rand_abs.md)
-  - [rand_char](./user/rand_char.md)
+  - [rand_char](./user/rand/rand_char.md)
   - [rand_string](./user/rand/rand_string.md)
   - [rand_p](./user/rand/rand_p.md)
   - [rand_sum](./user/rand/rand_sum.md)

@@ -551,7 +551,7 @@ namespace generator{
 
             if (hFind != INVALID_HANDLE_VALUE) {
                 do {
-                    Path file_path(findFileData.cFileName);
+                    Path file_path(__path_join(folder_path,findFileData.cFileName));
                     int num = std::stoi(file_path.__file_name());  
                     inputs.emplace_back(num);  
                 } while (FindNextFile(hFind, &findFileData) != 0);
