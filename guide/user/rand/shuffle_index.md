@@ -1,7 +1,7 @@
 ## shuffle_index
 
 1. `std::vector<int> shuffle_index(Iter begin, Iter end, int offset = 0)`
-   传入两个类型为`Iter`的参数 $\beginend$ 和一个类型为 `int` 的参数 $offset$ , 默认值为 $0$ 。
+   传入两个类型为`Iter`的参数 $\begind$ 和一个类型为 `int` 的参数 $offset$ , 默认值为 $0$ 。
 
    `Iter`的类型为迭代器，且需要满足：
     
