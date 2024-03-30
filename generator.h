@@ -1742,6 +1742,35 @@ namespace generator{
     }
 
     namespace graph {
+        namespace basic {
+            class BasicEdge {
+            private:
+                int _u, _v;
+            public:
+                Edge(int u, int v) : _u(u), _v(v) {}
+
+                int &u() {return _u;}
+                int &v() {return _v;}
+
+                std::tuple<int, int> edge() { return std::make_tuple(_u, _v); }
+
+                void defaultOutput(std::ostream&os, BasicEdge& edge) {
+                    os << edge.u() << " " << edge.v();
+                }
+            
+                void (*output)(std::ostream&, BasicEdge&) = defaultOutput;
+
+                void print() {
+                    std::cout << *this;
+                }
+
+                void println() {
+                    std::cout << *this << std::endl;
+                }
+            }
+
+        }
+
         namespace unweight {
             class Edge {
             private:
@@ -3270,3 +3299,6 @@ namespace generator{
         using namespace generator::graph;
     }
 }
+#ifdef _WIN32
+#undef mkdir(dir, mode)
+#endif
