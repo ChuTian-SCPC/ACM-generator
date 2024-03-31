@@ -1746,122 +1746,136 @@ namespace generator{
             class BasicEdge {
             private:
                 int _u, _v;
+
             public:
-                Edge(int u, int v) : _u(u), _v(v) {}
-
-                int &u() {return _u;}
-                int &v() {return _v;}
-
-                std::tuple<int, int> edge() { return std::make_tuple(_u, _v); }
-
-                void defaultOutput(std::ostream&os, BasicEdge& edge) {
-                    os << edge.u() << " " << edge.v();
-                }
-            
-                void (*output)(std::ostream&, BasicEdge&) = defaultOutput;
-
-                void print() {
-                    std::cout << *this;
+                BasicEdge(int u, int v) : _u(u), _v(v) {
+                   
                 }
 
-                void println() {
-                    std::cout << *this << std::endl;
-                }
-            }
+                int cu() const { return _u; }
+                int cv() const { return _v; }
 
-        }
+                int& u() { return _u; }
+                int& v() { return _v;}
 
-        namespace unweight {
-            class Edge {
-            private:
-                int _u, _v;
-            public:
-                Edge() : _u(0), _v(0) {}
+                void set_u(int u) { _u = u; }
+                void set_v(int v) { _v = v; } 
 
-                Edge(int u, int v) : _u(u), _v(v) {}
-
-                int &u() { return _u; }
-
-                int &v() { return _v; }
-
-                std::tuple<int, int> edge() { return std::make_tuple(_u, _v); }
-
-                friend std::ostream &operator<<(std::ostream &os, const Edge &edge) {
-                    os << edge._u << " " << edge._v;
-                    return os;
-                }
-
-                friend bool operator<(const Edge a, const Edge b) {
+                friend bool operator<(const BasicEdge a, const BasicEdge b) {
                     if (a._u == b._u) {
                         return a._v < b._v;
                     }
                     return a._u < b._u;
                 }
 
-                std::string __format() {
-                    std::ostringstream oss;
-                    oss << _u << " " << _v;
-                    return oss.str();
-                }
-
-                std::string __format(const char *format) {
-                    std::ostringstream oss;
-                    int n = strlen(format);
-                    for (int i = 0; i < n; i++) {
-                        bool is_var = false;
-                        if (format[i] == '%') {
-                            if (i + 1 < n) {
-                                if (format[i + 1] == 'u' || format[i + 1] == 'U') {
-                                    oss << _u;
-                                    is_var = true;
-                                } else if (format[i + 1] == 'v' || format[i + 1] == 'V') {
-                                    oss << _v;
-                                    is_var = true;
-                                }
-                            }
-                        }
-                        if (is_var) {
-                            i++;
-                        } else {
-                            oss << format[i];
-                        }
+                friend bool operator<=(const BasicEdge a, const BasicEdge b) {
+                    if (a._u == b._u) {
+                        return a._v <= b._v;
                     }
-                    return oss.str();
+                    return a._u <= b._u;
                 }
 
-                std::string __format(std::string format) {
-                    return __format(format.c_str());
+                friend bool operator>(const BasicEdge a, const BasicEdge b) {
+                    if (a._u == b._u) {
+                        return a._v > b._v;
+                    }
+                    return a._u > b._u;
                 }
 
-                void print() {
-                    std::cout << *this;
+                friend bool operator>=(const BasicEdge a, const BasicEdge b) {
+                    if (a._u == b._u) {
+                        return a._v >= b._v;
+                    }
+                    return a._u >= b._u;
+                }     
+
+                friend bool operator==(const BasicEdge a, const BasicEdge b) {
+                    return a._u == b._u && a._v == b._v;
                 }
 
-                void print(const char *format) {
-                    std::cout << __format(format);
-                }
-
-                void print(std::string format) {
-                    std::cout << __format(format);
-                }
-
-                void println() {
-                    print();
-                    std::cout << std::endl;
-                }
-
-                void println(const char *format) {
-                    print(format);
-                    std::cout << std::endl;
-                }
-
-                void println(std::string format) {
-                    println(format);
-                    std::cout << std::endl;
+                friend bool operator!=(const BasicEdge a, const BasicEdge b) {
+                    return a._u != b._u|| a._v != b._v;
                 }
 
             };
 
+            template<typename T>
+            class _Edge : public BasicEdge {
+            private:
+                T _w;
+                typedef std::function<void(std::ostream&, const _Edge<T>&)> OutputFunction;
+                OutputFunction _output_function;
+            public:
+                _Edge(int u, int v, T w) : BasicEdge(u, v), _w(w) {
+                    _output_function = 
+                        [this](std::ostream& os, const _Edge<T>& edge) { 
+                            this->default_output(os); 
+                        };
+                }
+
+                T cw() const { return _w; }
+                T& w() { return _w; }
+
+                void set_w(T w) { _w = w; }
+
+               void default_output(std::ostream& os) const {
+                    os << this->cu() << " " << this->cv() << " " << _w;
+                }
+
+                void set_output(OutputFunction func) {
+                    _output_function = func;
+                }
+
+                void set_output_default() {
+                    _output_function = 
+                        [this](std::ostream& os, const _Edge<T>& edge) { 
+                            this->default_output(os); 
+                        };
+                }
+
+                friend std::ostream& operator<<(std::ostream& os, const _Edge<T>& edge) {
+                    edge._output_function(os, edge);
+                    return os;
+                }
+            };
+
+            template<>
+            class _Edge<void> : public BasicEdge {
+            private:
+                typedef std::function<void(std::ostream&, const _Edge<void>&)> OutputFunction;
+                OutputFunction _output_function;
+            public:
+                _Edge(int u, int v) : BasicEdge(u, v) {
+                    _output_function = 
+                        [this](std::ostream& os, const _Edge<void>& edge) { 
+                            this->default_output(os); 
+                        };
+                }
+
+                void default_output(std::ostream& os) const {
+                    os << this->cu() << " " << this->cv() ;
+                }
+
+                void set_output(OutputFunction func) {
+                    _output_function = func;
+                }
+
+                void set_output_default() {
+                    _output_function = 
+                        [this](std::ostream& os, const _Edge<void>& edge) { 
+                            this->default_output(os); 
+                        };
+                }
+
+                friend std::ostream& operator<<(std::ostream& os, const _Edge<void>& edge) {
+                    edge._output_function(os, edge);
+                    return os;
+                }
+            };
+        }
+
+        namespace unweight {
+            typedef basic::_Edge<void> Edge;
 
             //common tree
             class Tree {
@@ -2484,7 +2498,7 @@ namespace generator{
                     }
                     int cnt = 0;
                     for (Edge e: graph._edge) {
-                        os << e.__format("%u %v");
+                        os << e;
                         if (++cnt < graph._side) {
                             os << "\n";
                         }
@@ -3291,6 +3305,10 @@ namespace generator{
                 }
             };
         }
+
+        namespace edge_weight{}
+        namespace point_weight{}
+        namespace both_weight{}
     }
     
     namespace all{
@@ -3300,5 +3318,5 @@ namespace generator{
     }
 }
 #ifdef _WIN32
-#undef mkdir(dir, mode)
+#undef mkdir
 #endif
