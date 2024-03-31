@@ -1,7 +1,8 @@
 [返回目录](../../home.md)
 
 ### development
-
+- 修复bugs：
+  - 修复制作输出的bug。
 - 重构：
   - 重构`msg`和`io`模块，将它们合并成一个`namespace io`。
   - Windows对拍抛弃使用python。
