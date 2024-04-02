@@ -1744,7 +1744,7 @@ namespace generator{
     namespace graph {
         namespace basic {
             class BasicEdge {
-            private:
+            protected:
                 int _u, _v;
 
             public:
@@ -1808,8 +1808,8 @@ namespace generator{
             public:
                 _Edge(int u, int v, T w) : BasicEdge(u, v), _w(w) {
                     _output_function = 
-                        [this](std::ostream& os, const _Edge<T>& edge) { 
-                            this->default_output(os); 
+                        [](std::ostream& os, const _Edge<T>& edge) { 
+                            edge.default_output(os); 
                         };
                 }
 
@@ -1819,7 +1819,7 @@ namespace generator{
                 void set_w(T w) { _w = w; }
 
                void default_output(std::ostream& os) const {
-                    os << this->cu() << " " << this->cv() << " " << _w;
+                    os << _u << " " << _v << " " << _w;
                 }
 
                 void set_output(OutputFunction func) {
@@ -1828,8 +1828,8 @@ namespace generator{
 
                 void set_output_default() {
                     _output_function = 
-                        [this](std::ostream& os, const _Edge<T>& edge) { 
-                            this->default_output(os); 
+                        [](std::ostream& os, const _Edge<T>& edge) { 
+                            edge.default_output(os); 
                         };
                 }
 
@@ -1847,13 +1847,13 @@ namespace generator{
             public:
                 _Edge(int u, int v) : BasicEdge(u, v) {
                     _output_function = 
-                        [this](std::ostream& os, const _Edge<void>& edge) { 
-                            this->default_output(os); 
+                        [](std::ostream& os, const _Edge<void>& edge) { 
+                            edge.default_output(os); 
                         };
                 }
 
                 void default_output(std::ostream& os) const {
-                    os << this->cu() << " " << this->cv() ;
+                    os << _u << " " << _v ;
                 }
 
                 void set_output(OutputFunction func) {
@@ -1862,8 +1862,8 @@ namespace generator{
 
                 void set_output_default() {
                     _output_function = 
-                        [this](std::ostream& os, const _Edge<void>& edge) { 
-                            this->default_output(os); 
+                        [](std::ostream& os, const _Edge<void>& edge) { 
+                            edge.default_output(os); 
                         };
                 }
 
