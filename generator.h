@@ -635,7 +635,7 @@ namespace generator{
                     io::__success_msg(io::_err,"Successfully create input file %s",file_path.cname());
                 }
                 else {
-                    io::__error_msg(io::_err,"Someting error in creating input file %s",file_path.cname());
+                    io::__error_msg(io::_err,"Something error in creating input file %s",file_path.cname());
                 }   
             }
         }
@@ -661,7 +661,7 @@ namespace generator{
                     io::__success_msg(io::_err,"Successfully create output file %s",write_path.cname());
                 }
                 else {
-                    io::__error_msg(io::_err,"Someting error in creating output file %s",write_path.cname());
+                    io::__error_msg(io::_err,"Something error in creating output file %s",write_path.cname());
                 }
             }
         }
@@ -688,7 +688,7 @@ namespace generator{
                     io::__success_msg(io::_err,"Successfully create/open input file %s",file_path.cname());
                 }
                 else {
-                    io::__error_msg(io::_err,"Someting error in creating/opening input file %s",file_path.cname());
+                    io::__error_msg(io::_err,"Something error in creating/opening input file %s",file_path.cname());
                 }   
             }
         }
@@ -712,7 +712,7 @@ namespace generator{
                     io::__success_msg(io::_err,"Successfully create output file %s",write_path.cname());
                 }
                 else {
-                    io::__error_msg(io::_err,"Someting error in creating output file %s",write_path.cname());
+                    io::__error_msg(io::_err,"Something error in creating output file %s",write_path.cname());
                 }
             }
         }
@@ -1930,25 +1930,32 @@ namespace generator{
                 std::vector<int> _p;
                 
                 // output format
-                bool _output_node;
+                bool _output_node_count;
                 bool _output_root;
                 bool _swap_node;// true means output `father son` or `son father` by random
                 
             public:
-                _BasicTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
-                    _node_count(node),
+                _BasicTree(
+                    int node_count, int begin_node, bool is_rooted, int root,
+                    bool output_node_count, bool output_root) :
+                    _node_count(node_count),
                     _begin_node(begin_node),
                     _is_rooted(is_rooted),
                     _root(root - begin_node),
-                    _output_node(true),
-                    _output_root(true),
+                    _output_node_count(output_node_count),
+                    _output_root(output_root),
                     _swap_node(_is_rooted ? false : true)
                 {}
                 
-                void set_node(int node) { _node_count = node; }
                 void set_node_count(int node_count) { _node_count = node_count; }
 
-                void set_is_rooted(int is_rooted) { _is_rooted = is_rooted; }
+                void set_is_rooted(int is_rooted) { 
+                    if (_is_rooted != is_rooted) {
+                        _swap_node = is_rooted ? false : true;
+                        io::__warn_msg(io::_err, "Setting `swap_node` to %s, becase `is_rooted` changed!", (_swap_node ? "true" : "false"));
+                    }
+                    _is_rooted = is_rooted; 
+                }
 
                 void set_root(int root) {
                     _root = root - _begin_node;
@@ -1965,17 +1972,15 @@ namespace generator{
                     _begin_node = begin_node; 
                 }
 
-                void set_output_node(bool output_node) { _output_node = output_node; }
+                void set_output_node_count(bool output_node_count) { _output_node_count = output_node_count; }
 
                 void set_output_root(bool output_root) { _output_root = output_root; }
 
                 void set_swap_node(bool swap_node) { _swap_node = swap_node; }
                 
-                int node() { return _node_count; }
-                int node_count() { return _node_count; }
+                int& node_count() { return _node_count; }
                 
-                int cnode() const { return _node_count; }
-                int cnode_count() { return _node_count; }
+                int cnode_count() const { return _node_count; }
                 
                 int root() {
                     if (!_is_rooted) {
@@ -1990,8 +1995,10 @@ namespace generator{
                     }
                     return _root + _begin_node;
                 }
-                          
-            };
+
+                int& beign_node() { return _begin_node; }
+                int cbegin_node() const { return _begin_node; }
+            }; 
             
             template<typename T, typename U>
             using _IsBothWeight = typename std::enable_if<!std::is_void<T>::value &&
@@ -2075,7 +2082,6 @@ namespace generator{
             protected:
                 typedef _Tree<NodeType,EdgeType> _Self;
                 _OUTPUT_FUNCTION(_Self)
-            protected:
                 _DEF_GEN_FUNCTION
                 std::vector<_Edge<EdgeType>> _edges;
                 std::vector<_Node<NodeType>> _nodes_weight; 
@@ -2083,11 +2089,11 @@ namespace generator{
             public:
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
                 _Tree(
-                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr,
                     TreeGenerator tree_generator = RandomFather) :
-                    _BasicTree(node, begin_node, is_rooted, root),
+                    _BasicTree(node_count, begin_node, is_rooted, root, true, true),
                     _RandomFunction<NodeType, EdgeType>(nodes_weight_function, edges_weight_function),
                     _tree_generator(tree_generator)
                 {
@@ -2096,10 +2102,10 @@ namespace generator{
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
                 _Tree(
-                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     EdgeGenFunction edges_weight_function = nullptr,
                     TreeGenerator tree_generator = RandomFather) :
-                    _BasicTree(node, begin_node, is_rooted, root),
+                    _BasicTree(node_count, begin_node, is_rooted, root, true, true),
                     _RandomFunction<NodeType, EdgeType>(nullptr, edges_weight_function),
                     _tree_generator(tree_generator)
                 {
@@ -2108,10 +2114,10 @@ namespace generator{
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
                 _Tree(
-                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     TreeGenerator tree_generator = RandomFather) :
-                    _BasicTree(node, begin_node, is_rooted, root),
+                    _BasicTree(node_count, begin_node, is_rooted, root, true, true),
                     _RandomFunction<NodeType, EdgeType>(nodes_weight_function, nullptr),
                     _tree_generator(tree_generator)
                 {
@@ -2120,9 +2126,9 @@ namespace generator{
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
                 _Tree(
-                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     TreeGenerator tree_generator = RandomFather) :
-                    _BasicTree(node, begin_node, is_rooted, root),
+                    _BasicTree(node_count, begin_node, is_rooted, root, true, true),
                     _RandomFunction<NodeType, EdgeType>(nullptr, nullptr),
                     _tree_generator(tree_generator)
                 {
@@ -2134,12 +2140,10 @@ namespace generator{
                 void use_pruefer() { _tree_generator = Pruefer; }
                 
                 std::vector<_Edge<EdgeType>>& edges() { return _edges; }
-                
+                std::vector<_Edge<EdgeType>> cedges() const { return _edges; }
+
                 template<typename T = NodeType, _HasT<T> = 0>
                 std::vector<_Node<NodeType>>& nodes_weight(){ return _nodes_weight; }
-                
-                std::vector<_Edge<EdgeType>> cedges() const { return _edges; }
-            
                 template<typename T = NodeType, _HasT<T> = 0>
                 std::vector<_Node<NodeType>> cnodes_weight() const { return _nodes_weight; }
             
@@ -2155,7 +2159,7 @@ namespace generator{
                 
                 void default_output(std::ostream& os) const {
                     std::string first_line = "";
-                    if (_output_node) {
+                    if (_output_node_count) {
                         first_line += std::to_string(_node_count);
                     }
                     if (_is_rooted && _output_root) {
@@ -2233,6 +2237,7 @@ namespace generator{
                     this->__check_edges_weight_function();
                     __judge_limits();
                     _edges.clear();
+                    _nodes_weight.clear();
                     _p = rnd.perm(_node_count, 0);
                     if (_is_rooted) {
                         for (int i = 1; i < _node_count; i++) {
@@ -2255,7 +2260,7 @@ namespace generator{
                 void __add_edge(int u, int v) {
                     u += _begin_node;
                     v += _begin_node;
-                    T w = this->_edges_weight_function();
+                    EdgeType w = this->_edges_weight_function();
                     _edges.emplace_back(u, v, w);
                 }
                 
@@ -2265,7 +2270,7 @@ namespace generator{
                 template<typename T = NodeType, _HasT<T> = 0>
                 void __generator_nodes_weight() {
                     for (int i = 0; i < _node_count ; i++) {
-                        T w = this->_nodes_weight_function();
+                        NodeType w = this->_nodes_weight_function();
                         _nodes_weight.emplace_back(w);
                     }
                 }
@@ -2413,11 +2418,11 @@ namespace generator{
             public:
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
                 _Flower(
-                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr) :
                     _Tree<NodeType, EdgeType>(
-                        node, begin_node, is_rooted, root, 
+                        node_count, begin_node, is_rooted, root, 
                         nodes_weight_function, edges_weight_function)
                 {
                     _output_function = this->default_function();
@@ -2425,26 +2430,26 @@ namespace generator{
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
                 _Flower(
-                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<void, EdgeType>(node, begin_node, is_rooted, root, edges_weight_function)
+                    _Tree<void, EdgeType>(node_count, begin_node, is_rooted, root, edges_weight_function)
                 {
                     _output_function = this->default_function();
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
                 _Flower(
-                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     NodeGenFunction nodes_weight_function = nullptr) :
-                    _Tree<NodeType, void>(node, begin_node, is_rooted, root, nodes_weight_function)
+                    _Tree<NodeType, void>(node_count, begin_node, is_rooted, root, nodes_weight_function)
                 {
                     _output_function = this->default_function();
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
                 _Flower(
-                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
-                    _Tree<void, void>(node, begin_node, is_rooted, root)
+                    int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
+                    _Tree<void, void>(node_count, begin_node, is_rooted, root)
                 {
                     _output_function = this->default_function();
                 }
@@ -2473,11 +2478,11 @@ namespace generator{
 
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
                 _HeightTree(
-                    int node = 1, int begin_node = 1, int root = 1, int height = -1,
+                    int node_count = 1, int begin_node = 1, int root = 1, int height = -1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr) :
                     _Tree<NodeType, EdgeType>(
-                        node, begin_node, true, root, 
+                        node_count, begin_node, true, root, 
                         nodes_weight_function, edges_weight_function),
                     _height(height)
                 {
@@ -2486,9 +2491,9 @@ namespace generator{
 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
                 _HeightTree(
-                    int node = 1, int begin_node = 1, int root = 1, int height = -1,
+                    int node_count = 1, int begin_node = 1, int root = 1, int height = -1,
                     NodeGenFunction nodes_weight_function = nullptr) :
-                    _Tree<NodeType, void>(node, begin_node, true, root, nodes_weight_function),
+                    _Tree<NodeType, void>(node_count, begin_node, true, root, nodes_weight_function),
                     _height(height)
                 {
                     _output_function = this->default_function();
@@ -2496,17 +2501,17 @@ namespace generator{
 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
                 _HeightTree(
-                    int node = 1, int begin_node = 1, int root = 1, int height = -1,
+                    int node_count = 1, int begin_node = 1, int root = 1, int height = -1,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<void, EdgeType>(node, begin_node, true, root, edges_weight_function),
+                    _Tree<void, EdgeType>(node_count, begin_node, true, root, edges_weight_function),
                     _height(height)
                 {
                     _output_function = this->default_function();
                 }
 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
-                _HeightTree(int node = 1, int begin_node = 1, int root = 1, int height = -1) :
-                    _Tree<void, void>(node, begin_node, true, root),
+                _HeightTree(int node_count = 1, int begin_node = 1, int root = 1, int height = -1) :
+                    _Tree<void, void>(node_count, begin_node, true, root),
                     _height(height)
                 {
                     _output_function = this->default_function();
@@ -2567,11 +2572,11 @@ namespace generator{
 
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
                 _DegreeTree(
-                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
+                    int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr) :
                     _Tree<NodeType, EdgeType>(
-                        node, begin_node, is_rooted, root, 
+                        node_count, begin_node, is_rooted, root, 
                         nodes_weight_function, edges_weight_function),
                     _max_degree(max_degree)
                 {
@@ -2580,9 +2585,9 @@ namespace generator{
 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
                 _DegreeTree(
-                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
+                    int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
                     NodeGenFunction nodes_weight_function = nullptr) :
-                    _Tree<NodeType, void>(node, begin_node, is_rooted, root, nodes_weight_function),
+                    _Tree<NodeType, void>(node_count, begin_node, is_rooted, root, nodes_weight_function),
                     _max_degree(max_degree)
                 {
                     _output_function = this->default_function();
@@ -2590,9 +2595,9 @@ namespace generator{
 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
                 _DegreeTree(
-                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
+                    int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<void, EdgeType>(node, begin_node, is_rooted, root,edges_weight_function),
+                    _Tree<void, EdgeType>(node_count, begin_node, is_rooted, root,edges_weight_function),
                     _max_degree(max_degree)
                 {
                     _output_function = this->default_function();
@@ -2600,8 +2605,8 @@ namespace generator{
 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
                 _DegreeTree(
-                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1) :
-                    _Tree<void, EdgeType>(node, begin_node, is_rooted, root),
+                    int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1) :
+                    _Tree<void, EdgeType>(node_count, begin_node, is_rooted, root),
                     _max_degree(max_degree)
                 {
                     _output_function = this->default_function();
@@ -2665,11 +2670,11 @@ namespace generator{
 
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
                 _SonTree(
-                    int node = 1, int begin_node = 1,  int root = 1, int max_son = -1,
+                    int node_count = 1, int begin_node = 1,  int root = 1, int max_son = -1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr) :
                     _Tree<NodeType, EdgeType>(
-                        node, begin_node, true, root, 
+                        node_count, begin_node, true, root, 
                         nodes_weight_function, edges_weight_function),
                     _max_son(max_son)
                 {
@@ -2678,9 +2683,9 @@ namespace generator{
 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
                 _SonTree(
-                    int node = 1, int begin_node = 1,  int root = 1, int max_son = -1,
+                    int node_count = 1, int begin_node = 1,  int root = 1, int max_son = -1,
                     NodeGenFunction nodes_weight_function = nullptr) :
-                    _Tree<NodeType, void>(node, begin_node, true, root, nodes_weight_function),
+                    _Tree<NodeType, void>(node_count, begin_node, true, root, nodes_weight_function),
                     _max_son(max_son)
                 {
                     _output_function = this->default_function();
@@ -2688,17 +2693,17 @@ namespace generator{
 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
                 _SonTree(
-                    int node = 1, int begin_node = 1,  int root = 1, int max_son = -1,
+                    int node_count = 1, int begin_node = 1,  int root = 1, int max_son = -1,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<void, EdgeType>(node, begin_node, true, root, edges_weight_function),
+                    _Tree<void, EdgeType>(node_count, begin_node, true, root, edges_weight_function),
                     _max_son(max_son)
                 {
                     _output_function = this->default_function();
                 }
 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
-                _SonTree(int node = 1, int begin_node = 1,  int root = 1, int max_son = -1) :
-                    _Tree<void, void>(node, begin_node, true, root),
+                _SonTree(int node_count = 1, int begin_node = 1,  int root = 1, int max_son = -1) :
+                    _Tree<void, void>(node_count, begin_node, true, root),
                     _max_son(max_son)
                 {
                     _output_function = this->default_function();
@@ -2764,11 +2769,816 @@ namespace generator{
                 }
             }; 
             
+            class _BasicGraph {
+            protected:
+                int _node_count;
+                int _edge_count;
+                int _begin_node;
+                bool _direction;
+                bool _multiply_edge;
+                bool _self_loop;
+                bool _connect;
+                bool _swap_node;
+                bool _output_node_count;
+                bool _output_edge_count; 
+
+            public:
+                _BasicGraph(
+                    int node_count, int edge_count, int begin_node,
+                    bool direction, bool multiply_edge, bool self_loop, bool connect,
+                    bool output_node_count, bool output_edge_count) :
+                    _node_count(node_count),
+                    _edge_count(edge_count),
+                    _begin_node(begin_node),
+                    _direction(direction),
+                    _multiply_edge(multiply_edge),
+                    _self_loop(self_loop),
+                    _connect(connect),
+                    _swap_node(_direction ? false : true),
+                    _output_node_count(output_node_count),
+                    _output_edge_count(output_edge_count) 
+                {}
+
+                _BasicGraph(
+                    int node_count, int edge_count, int begin_node,
+                    bool direction, bool multiply_edge, bool self_loop, bool connect,
+                    bool swap_node, bool output_node_count, bool output_edge_count) :
+                    _node_count(node_count),
+                    _edge_count(edge_count),
+                    _begin_node(begin_node),
+                    _direction(direction),
+                    _multiply_edge(multiply_edge),
+                    _self_loop(self_loop),
+                    _connect(connect),
+                    _swap_node(swap_node),
+                    _output_node_count(output_node_count),
+                    _output_edge_count(output_edge_count) 
+                {}
+
+                void set_node_count(int node_count) { _node_count = node_count; }
+
+                void set_edge_count(int edge_count) { _edge_count = edge_count; }
+
+                void set_begin_node(int begin_node) { _begin_node = begin_node; }
+
+                void set_direction(bool direction) { 
+                    if (_direction != direction) {
+                        _swap_node = direction ? false : true;
+                        io::__warn_msg(io::_err, "Setting `swap_node` to %s, becase `direction` changed!", (_swap_node ? "true" : "false"));
+                    }
+                    _direction = direction; 
+                }
+
+                void set_multiply_edge(bool multiply_edge) { _multiply_edge = multiply_edge; }
+
+                void set_self_loop(bool self_loop) { _self_loop = self_loop; }
+
+                void set_connect(bool connect) { _connect = connect; }
+
+                void set_swap_node(bool swap_node) { _swap_node = swap_node; }
+
+                int& node_count() { return _node_count; }
+                int cnode_count() const { return _node_count; }
+
+                int& edge_count() { return _edge_count; }
+                int cedge_count() const { return _edge_count; }
+
+                int& begin_node() { return _begin_node; }
+                int cbegin_node() const { return _begin_node; }
+            };
+
+            template<typename NodeType, typename EdgeType>
+            class _Graph : public _BasicGraph, public _RandomFunction<NodeType, EdgeType> {
+            protected:
+                typedef _Graph<NodeType,EdgeType> _Self;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+                std::vector<_Edge<EdgeType>> _edges;
+                std::vector<_Node<NodeType>> _nodes_weight; 
+                std::map<_BasicEdge, bool> _e;
+            
+            public:
+
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                _Graph(
+                    int node_count = 1, int edge_count = 1, int begin_node = 1, 
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _BasicGraph(
+                        node_count, edge_count, begin_node, 
+                        false, false, false, false,
+                        true, true),
+                    _RandomFunction<NodeType, EdgeType>(nodes_weight_function, edges_weight_function)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                _Graph(
+                    int node_count = 1, int edge_count = 1, int begin_node = 1, 
+                    NodeGenFunction nodes_weight_function = nullptr) :
+                    _BasicGraph(
+                        node_count, edge_count, begin_node, 
+                        false, false, false, false,
+                        true, true),
+                    _RandomFunction<NodeType, void>(nodes_weight_function, nullptr)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                _Graph(
+                    int node_count = 1, int edge_count = 1, int begin_node = 1, 
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _BasicGraph(
+                        node_count, edge_count, begin_node, 
+                        false, false, false, false,
+                        true, true),
+                    _RandomFunction<void, EdgeType>(nullptr, edges_weight_function)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                _Graph(int node_count = 1, int edge_count = 1, int begin_node = 1) :
+                    _BasicGraph(
+                        node_count, edge_count, begin_node, 
+                        false, false, false, false,
+                        true, true),
+                    _RandomFunction<void, void>(nullptr, nullptr)
+                {
+                    _output_function = default_function();
+                }
+
+                std::vector<_Edge<EdgeType>>& edges() { return _edges; }
+                std::vector<_Edge<EdgeType>> cedges() const { return _edges; }
+
+                template<typename T = NodeType, _HasT<T> = 0>
+                std::vector<_Node<NodeType>>& nodes_weight(){ return _nodes_weight; }
+                template<typename T = NodeType, _HasT<T> = 0>
+                std::vector<_Node<NodeType>> cnodes_weight() const { return _nodes_weight; }
+
+                void default_output(std::ostream& os) const {
+                    std::string first_line = "";
+                    first_line += __format_output_node();
+                    if (_output_edge_count) {
+                        if (first_line != "") {
+                            first_line += " ";
+                        }
+                        first_line += std::to_string(_edge_count);
+                    }
+                    int node_cnt = 0;
+                    for (_Node<NodeType> node : _nodes_weight) {
+                        node_cnt ++;
+                        if(node_cnt == 1) {
+                            if (first_line != "") {
+                                os << first_line << "\n";
+                            }
+                        }
+                        os << node << " ";
+                    }
+                    if (node_cnt >= 1) {
+                        if (_edge_count >= 1) {
+                            os << "\n";
+                        }
+                    }
+                    else {
+                        if (first_line != "") {
+                            os << first_line;
+                            if (_edge_count >= 1) {
+                                os << "\n";
+                            }
+                        }
+                    }
+                    int edge_cnt = 0;
+                    for (_Edge<EdgeType> e: _edges) {
+                        if (_swap_node && rnd.next(2)) {
+                            e.set_output_default(true);
+                        }
+                        os << e;
+                        e.set_output_default();
+                        if (++edge_cnt < _edge_count) {
+                            os << "\n";
+                        }
+                    }
+                }
+
+                void gen() {
+                    if (_edge_count == 0) {
+                        return ;
+                    }
+                    __init();
+                    __generator_graph();
+                    __generator_nodes_weight();
+                    shuffle(_edges.begin(),_edges.end());
+                }
+
+                _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+            
+            protected:
+
+                virtual std::string __format_output_node() const {
+                    if (_output_node_count) {
+                        return std::to_string(_node_count);
+                    }
+                    return "";
+                }
+
+                virtual void __judge_upper_limit() {
+                    if (!_multiply_edge) {
+                        long long limit = (long long) _node_count * (long long) (_node_count - 1) / 2;
+                        if (_direction) {
+                            limit *= 2;
+                        }
+                        if (_self_loop) {
+                            limit += _node_count;
+                        }
+                        if (_node_count > limit) {
+                            io::__fail_msg(io::_err, "number of edges must less than or equal to %lld.", limit);
+                        }
+                    }
+                    else {
+                        if (_node_count == 1 && !_self_loop && _edge_count > 0) {
+                            io::__fail_msg(io::_err, "number of edges must equal to 0.");
+                        }
+                    }
+                }
+
+                virtual void __judge_lower_limit() {
+                    if (_edge_count < 0) {
+                        io::__fail_msg(io::_err, "number of edges must be a non-negative integer.");
+                    }
+                    if (_connect && _edge_count < _node_count - 1) {
+                        io::__fail_msg(io::_err, "number of edges must greater than or equal to %d.", _node_count - 1);
+                    }
+                }
+
+                virtual void __judge_self_limit() {}
+
+                void __judge_limits() {
+                    __judge_upper_limit();
+                    __judge_lower_limit();
+                    __judge_self_limit();
+                }
+                
+                virtual void __self_init(){};
+                
+                void __init() {
+                    __self_init();
+                    this->__check_nodes_weight_function();
+                    this->__check_edges_weight_function();
+                    __judge_limits();
+                    _edges.clear();
+                    _nodes_weight.clear();   
+                    if (!_multiply_edge) {
+                        _e.clear();
+                    }
+                }
+                
+                bool __judge_self_loop(int u, int v) {
+                    return !_self_loop && u == v;
+                }
+
+                bool __judge_multiply_edge(int u, int v) {
+                    if (_multiply_edge) {
+                        return false;
+                    }
+                    if (_e[{u, v}]) {
+                        return true;
+                    }
+                    return false;
+                }
+
+                void __add_edge_into_map(int u, int v) {
+                    if (!_multiply_edge) {
+                        _e[{u, v}] = true;
+                        if (!_direction) {
+                            _e[{v, u}] = true;
+                        }
+                    }
+                }
+                
+                void __add_edge(_Edge<EdgeType> edge) {
+                    int &u = edge.u();
+                    int &v = edge.v();
+                    __add_edge_into_map(u, v);
+                    u += _begin_node;
+                    v += _begin_node;
+                    _edges.emplace_back(edge);
+                }
+                template<typename T = NodeType, _NotHasT<T> = 0>
+                void __generator_nodes_weight() { return; }
+                
+                template<typename T = NodeType, _HasT<T> = 0>
+                void __generator_nodes_weight() {
+                    for (int i = 0; i < _node_count ; i++) {
+                        NodeType w = this->_nodes_weight_function();
+                        _nodes_weight.emplace_back(w);
+                    }
+                }
+
+                template<typename T = EdgeType, _NotHasT<T> = 0>
+                _Edge<void> __convert_edge(int u, int v) {
+                    return _Edge<void>(u, v);
+                }
+
+                template<typename T = EdgeType, _HasT<T> = 0>
+                _Edge<EdgeType> __convert_edge(int u, int v) {
+                    EdgeType w = this->_edges_weight_function();
+                    return _Edge<EdgeType>(u, v, w);
+                }
+
+                virtual _Edge<EdgeType> __rand_edge() {
+                    int u, v;
+                    do {
+                        u = rnd.next(_node_count);
+                        v = rnd.next(_node_count);
+                    } while (__judge_self_loop(u, v) || __judge_multiply_edge(u, v));
+                    return this->__convert_edge(u, v);
+                }
+
+                virtual void __generator_connect() {
+                    _Tree<NodeType, EdgeType> tree(_node_count, 0);
+                    tree.gen();
+                    std::vector <_Edge<EdgeType>> edge = tree.edges();
+                    for (auto e: edge) {
+                        __add_edge(e);
+                    }
+                }
+
+                virtual void __generator_graph() {
+                    int m = _edge_count;
+                    if (_connect) {
+                        m -= _node_count - 1;
+                        __generator_connect();
+                    }
+                    while (m--) {
+                        __add_edge(__rand_edge());
+                    }
+                }
+            
+            protected :
+
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                _Graph(
+                    int node_count, int edge_count, int begin_node, 
+                    bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node,
+                    NodeGenFunction nodes_weight_function,
+                    EdgeGenFunction edges_weight_function) :
+                    _BasicGraph(
+                        node_count, edge_count, begin_node, 
+                        direction, multiply_edge, self_loop, connect, swap_node, 
+                        true, true),
+                    _RandomFunction<NodeType, EdgeType>(nodes_weight_function, edges_weight_function)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                _Graph(
+                    int node_count, int edge_count, int begin_node, 
+                    bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node,
+                    NodeGenFunction nodes_weight_function) :
+                    _BasicGraph(
+                        node_count, edge_count, begin_node, 
+                        direction, multiply_edge, self_loop, connect, swap_node, 
+                        true, true),
+                    _RandomFunction<NodeType, void>(nodes_weight_function, nullptr)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                _Graph(
+                    int node_count, int edge_count, int begin_node, 
+                    bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node,
+                    EdgeGenFunction edges_weight_function) :
+                    _BasicGraph(
+                        node_count, edge_count, begin_node, 
+                        direction, multiply_edge, self_loop, connect, swap_node, 
+                        true, true),
+                    _RandomFunction<void, EdgeType>(nullptr, edges_weight_function)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                _Graph(
+                    int node_count, int edge_count, int begin_node, 
+                    bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node) :
+                    _BasicGraph(
+                        node_count, edge_count, begin_node, 
+                        direction, multiply_edge, self_loop, connect, swap_node, 
+                        true, true),
+                    _RandomFunction<void, void>(nullptr, nullptr)
+                {
+                    _output_function = default_function();
+                }
+            };
+
+            #define _DISABLE_EDGE_COUNT void set_edge_count(int edge_count) = delete;
+            #define _DISABLE_DIRECTION  void set_direction(bool direction) = delete;
+            #define _DISABLE_MULTIPLY_EDGE void set_multiply_edge(bool multiply_edge) = delete;
+            #define _DISABLE_SELF_LOOP void set_self_loop(bool self_loop) = delete;
+            #define _DISABLE_CONNECT void set_connect(bool connect) = delete;
+
+            template<typename NodeType, typename EdgeType>
+            class _BipartiteGraph : public _Graph<NodeType, EdgeType> {
+            public:
+                enum NodeOutputFormat {
+                    Node,
+                    LeftRight,
+                    NodeLeft,
+                    NodeRight
+                };
+            protected:
+                NodeOutputFormat _node_output_format;
+                int _left, _right;
+                bool _different_part;
+                std::vector<int> _part[2];
+                std::vector<int> _degree[2];
+                int _d[2];
+                typedef _BipartiteGraph<NodeType, EdgeType> _Self;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+            public :
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                _BipartiteGraph(
+                    int node_count = 1, int edge_count = 1, int begin_node = 1, int left = -1,
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Graph<NodeType,EdgeType>(
+                        node_count, edge_count, begin_node, 
+                        false, false, false, false, false, 
+                        nodes_weight_function, edges_weight_function),
+                    _left(left),
+                    _different_part(false),
+                    _node_output_format(Node)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                _BipartiteGraph(
+                    int node_count = 1, int edge_count = 1, int begin_node = 1, int left = -1,
+                    NodeGenFunction nodes_weight_function = nullptr) :
+                    _Graph<NodeType, void>(
+                        node_count, edge_count, begin_node,
+                        false, false, false, false, false,
+                        nodes_weight_function),
+                    _left(left),
+                    _different_part(false),
+                    _node_output_format(Node)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                _BipartiteGraph(
+                    int node_count = 1, int edge_count = 1, int begin_node = 1, int left = -1,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Graph<void, EdgeType>(
+                        node_count, edge_count, begin_node,
+                        false, false, false, false, false,
+                        edges_weight_function),
+                    _left(left),
+                    _different_part(false),
+                    _node_output_format(Node)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                _BipartiteGraph(int node_count = 1, int edge_count = 1, int begin_node = 1, int left = -1) :
+                    _Graph<void, void>(
+                        node_count, edge_count, begin_node,
+                        false, false, false, false, false),
+                    _left(left),
+                    _different_part(false),
+                    _node_output_format(Node)
+                {
+                    _output_function = default_function();
+                }
+
+                void set_different_part(bool different_part) { _different_part = different_part; }
+
+                void set_left(int left) {
+                    _left = left;
+                    _right = this->_node_count - _left;
+                }
+
+                void set_right(int right) {
+                    _right = right;
+                    _left = this->_node_count - _right;
+                }
+
+                void set_left_right(int left, int right) {
+                    if (left + right < 0) {
+                        io::__fail_msg(
+                                io::_err,
+                                "number of left part nodes add right part nodes must greater than 0."
+                                "But found %d + %d = %d",
+                                left, right, left + right);
+                    }
+                    _left = left;
+                    _right = right;
+                    this->_node_count = left + right;
+                }
+
+                int& left() { return _left; }
+                int cleft() const { return _left; }
+
+                int& right() { return _right; }
+                int cright() const { return _right; }
+
+                void set_node_output_format(NodeOutputFormat format) { _node_output_format = format; }
+                void use_format_node() {  _node_output_format = Node; }
+                void use_format_left_right() { _node_output_format = LeftRight; }
+                void use_format_node_left() { _node_output_format = NodeLeft; }
+                void use_format_node_right() { _node_output_format = NodeRight; }
+
+                _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+            
+            protected:
+
+                virtual std::string __format_output_node() const override{
+                    std::string str = "";
+                    if (this->_output_node_count) {
+                        if (_node_output_format == Node) {
+                            str += std::to_string(this->_node_count);
+                        } else if (_node_output_format == LeftRight) {
+                            str += std::to_string(_left);
+                            str += " ";
+                            str += std::to_string(_right);
+                        } else if (_node_output_format == NodeLeft) {
+                            str += std::to_string(this->_node_count);
+                            str += " ";
+                            str += std::to_string(_left);
+                        } else if (_node_output_format == NodeRight) {
+                            str += std::to_string(this->_node_count);
+                            str += " ";
+                            str += std::to_string(_right);
+                        }
+                    }
+                    return str;
+                }
+
+                void __rand_left() {
+                    if (_left >= 0) {
+                        return;
+                    }
+                    int node = this->_node_count, edge = this->_edge_count;
+                    int l = 0, r = node / 2, limit;
+                    if (!this->_multiply_edge) {
+                        if (edge > r * (node - r)) {
+                            io::__fail_msg(
+                                    io::_err,
+                                    "number of edges must less than or equal to %d.",
+                                    r * (node - r));
+                        }
+                        while (l <= r) {
+                            int mid = (l + r) / 2;
+                            if (mid * (node - mid) < edge) {
+                                l = mid + 1;
+                            } else {
+                                limit = r;
+                                r = mid - 1;
+                            }
+                        }
+                    } else {
+                        limit = 1;
+                    }
+                    _left = rnd.next(limit, node / 2);
+                    _right = node - _left;
+                }
+
+                virtual void __self_init() override {
+                    __rand_left();
+                    int node = this->_node_count;
+                    _right = node - _left;
+                    for (int i = 0; i < 2; i++) {
+                        _part[i].clear();
+                    }
+                    if (_different_part) {
+                        _part[0] = rnd.perm(_left, 0);
+                        _part[1] = rnd.perm(_right, 0);
+                        for (auto &x: _part[1]) {
+                            x += _left;
+                        }
+                    } else {
+                        std::vector<int> p = rnd.perm(node, 0);
+                        for (int i = 0; i < _left; i++) {
+                            _part[0].push_back(p[i]);
+                        }
+                        for (int i = _left; i < node; i++) {
+                            _part[1].push_back(p[i]);
+                        }
+                    }
+                    if (this->_connect) {
+                        _degree[0].resize(_left, 1);
+                        _degree[1].resize(_right, 1);
+                        for (int i = _left; i < node - 1; i++) {
+                            _degree[0][rnd.next(_left)]++;
+                        }
+                        for (int i = _right; i < node - 1; i++) {
+                            _degree[1][rnd.next(_right)]++;
+                        }
+                        _d[0] = node - 1;
+                        _d[1] = node - 1;
+                    }
+                }
+
+                virtual void __judge_self_limit() override {
+                    if (_left < 0) {
+                        io::__fail_msg(io::_err, "Left part size must greater than or equal to 0, but found %d",_left);
+                    }
+                    if (_right < 0) {
+                        io::__fail_msg(io::_err, "Left part size must greater than or equal to 0, but found %d",_right);
+                    }
+                }
+
+                virtual void __judge_upper_limit() override {
+                    if (!this->_multiply_edge) {
+                        long long limit = (long long)_left * (long long)_right;
+                        if (limit < this->_edge_count) {
+                            io::__fail_msg(
+                                io::_err, "number of edges must less than or equal to %lld, but found %d.",
+                                limit, this->_edge_count);
+                        }
+                    }
+                    else {
+                        if (this->_node_count == 1 && this->_edge_count > 0) {
+                            io::__fail_msg(io::_err, "number of edges must less than or equal to 0, but found %d.", this->_edge_count);
+                        }
+                    }
+                }
+
+                virtual _Edge<EdgeType> __rand_edge() override{
+                    int u, v;
+                    do {
+                        u = rnd.any(_part[0]);
+                        v = rnd.any(_part[1]);
+                    } while (this->__judge_multiply_edge(u, v));
+                    return this->__convert_edge(u, v);
+                }
+
+                void __add_part_edge(int f, int i, int j) {
+                    int u = _part[f][i];
+                    int v = _part[f ^ 1][j];
+                    if (f == 1) {
+                        std::swap(u, v);
+                    }
+                    this->__add_edge(this->__convert_edge(u, v));
+                    _d[0]--;
+                    _d[1]--;
+                    _degree[f][i]--;
+                    _degree[f ^ 1][j]--;
+                }
+
+                virtual void __generator_connect() override {
+                    int f = 0;
+                    while (_d[0] + _d[1] > 0) {
+                        for (int i = 0; i < (f == 0 ? _left : _right); i++) {
+                            if (_degree[f][i] == 1) {
+                                if (_d[f] == 1) {
+                                    for (int j = 0; j < (f == 0 ? _right : _left); j++) {
+                                        if (_degree[f ^ 1][j] == 1) {
+                                            __add_part_edge(f, i, j);
+                                        }
+                                    }
+                                } else {
+                                    int j;
+                                    do {
+                                        j = rnd.next(f == 0 ? _right : _left);
+                                    } while (_degree[f ^ 1][j] < 2);
+                                    __add_part_edge(f, i, j);
+                                }
+                            }
+                        }
+                        f ^= 1;
+                    }
+                }
+
+                virtual void __generator_graph() override {
+                    int m = this->_edge_count;
+                    if (this->_connect) {
+                        m -= this->_node_count - 1;
+                        __generator_connect();
+                    }
+                    while (m--) {
+                        this->__add_edge(__rand_edge());
+                    }
+                    if (_different_part) {
+                        for (auto &edge: this->_edges) {
+                            int &u = edge.u();
+                            int &v = edge.v();
+                            if (u - this->_begin_node >= _left) {
+                                u -= _left;
+                            }
+                            if (v - this->_begin_node >= _left) {
+                                v -= _left;
+                            }
+                        }
+                    }
+                }
+            };
+            
+            template<typename NodeType, typename EdgeType>
+            class _DAG : public _Graph<NodeType, EdgeType> {
+            protected:
+                std::vector<int> _p;
+                typedef _DAG<NodeType, EdgeType> _Self;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+            public:
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                _DAG(
+                    int node_count = 1, int edge_count = 1, int begin_node = 1,
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Graph<NodeType,EdgeType>(
+                        node_count, edge_count, begin_node, 
+                        true, false, false, false, false, 
+                        nodes_weight_function, edges_weight_function)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                _DAG(
+                    int node_count = 1, int edge_count = 1, int begin_node = 1,
+                    NodeGenFunction nodes_weight_function = nullptr) :
+                    _Graph<NodeType, void>(
+                        node_count, edge_count, begin_node,
+                        true, false, false, false, false,
+                        nodes_weight_function)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                _DAG(
+                    int node_count = 1, int edge_count = 1, int begin_node = 1,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Graph<void, EdgeType>(
+                        node_count, edge_count, begin_node,
+                        true, false, false, false, false,
+                        edges_weight_function)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                _DAG(int node_count = 1, int edge_count = 1, int begin_node = 1) :
+                    _Graph<void, void>(
+                        node_count, edge_count, begin_node,
+                        true, false, false, false, false)
+                {
+                    _output_function = default_function();
+                }
+                _DISABLE_DIRECTION
+                _DISABLE_SELF_LOOP
+                _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+            
+            protected:
+
+                virtual void __self_init() override{
+                    _p = rnd.perm(this->_node_count, 0);
+                }
+
+                virtual void __generator_connect() override{
+                    for (int i = 1; i < this->_node_count; i++) {
+                        int f = rnd.next(i);
+                        this->__add_edge(this->__convert_edge(_p[f], _p[i]));
+                    }
+                }
+
+                virtual _Edge<EdgeType> __rand_edge() override {
+                    int u, v;
+                    do {
+                        u = rnd.next(this->_node_count);
+                        v = rnd.next(this->_node_count);
+                        if (u > v) {
+                            std::swap(u, v);
+                        }
+                        u = _p[u];
+                        v = _p[v];
+                    } while (this->__judge_self_loop(u, v) || this->__judge_multiply_edge(u, v));
+                    return this->__convert_edge(u, v);
+                }
+
+            };
+            
             #undef _OTHER_OUTPUT_FUNCTION_SETTING
             #undef _OUTPUT_FUNCTION
             #undef _DEF_GEN_FUNCTION
             #undef _DISABLE_CHOOSE_GEN
             #undef _MUST_IS_ROOTED
+            #undef _DISABLE_EDGE_COUNT
+            #undef _DISABLE_DIRECTION
+            #undef _DISABLE_MULTIPLY_EDGE
+            #undef _DISABLE_SELF_LOOP
+            #undef _DISABLE_CONNECT
         }
 
         namespace unweight {
@@ -2790,7 +3600,7 @@ namespace generator{
                 std::vector<int> _p;
                 
                 // output format
-                bool _output_node;
+                bool _output_node_count;
                 bool _output_root;
                 bool _swap_node;// true means output `father son` or `son father` by random
                 
@@ -2803,7 +3613,7 @@ namespace generator{
                         _begin_node(begin_node),
                         _is_rooted(is_rooted),
                         _root(root - begin_node),
-                        _output_node(true),
+                        _output_node_count(true),
                         _output_root(true),
                         _swap_node(_is_rooted ? false : true),
                         _tree_generator(tree_generator)
@@ -2828,7 +3638,7 @@ namespace generator{
                     _begin_node = begin_node; 
                 }
 
-                void set_output_node(bool output_node) { _output_node = output_node; }
+                void set_output_node_count(bool output_node_count) { _output_node_count = output_node_count; }
 
                 void set_output_root(bool output_root) { _output_root = output_root; }
 
@@ -2866,7 +3676,7 @@ namespace generator{
 
                 friend std::ostream &operator<<(std::ostream &os, const Tree &tree) {
                     std::string first_line = "";
-                    if (tree._output_node) {
+                    if (tree._output_node_count) {
                         first_line += std::to_string(tree._node);
                     }
                     if (tree._is_rooted && tree._output_root) {
@@ -3285,8 +4095,8 @@ namespace generator{
                 bool _self_loop;
                 bool _connect;
                 bool _swap_node;
-                bool _output_node;
-                bool _output_side;    
+                bool _output_node_count;
+                bool _output_edge_count;    
             public:
                 BasicGraph(
                         int node,
@@ -3296,8 +4106,8 @@ namespace generator{
                         bool multiply_edge,
                         bool self_loop,
                         bool connect,
-                        bool output_node,
-                        bool output_side) :
+                        bool output_node_count,
+                        bool output_edge_count) :
                         _node(node),
                         _side(side),
                         _begin_node(begin_node),
@@ -3306,8 +4116,8 @@ namespace generator{
                         _self_loop(self_loop),
                         _connect(connect),
                         _swap_node(_direction ? false : true),
-                        _output_node(output_node),
-                        _output_side(output_side) {}
+                        _output_node_count(output_node_count),
+                        _output_edge_count(output_edge_count) {}
 
                 BasicGraph(
                         int node,
@@ -3318,8 +4128,8 @@ namespace generator{
                         bool self_loop,
                         bool connect,
                         bool swap_node,
-                        bool output_node,
-                        bool output_side) :
+                        bool output_node_count,
+                        bool output_edge_count) :
                         _node(node),
                         _side(side),
                         _begin_node(begin_node),
@@ -3328,8 +4138,8 @@ namespace generator{
                         _self_loop(self_loop),
                         _connect(connect),
                         _swap_node(swap_node),
-                        _output_node(output_node),
-                        _output_side(output_side) {}
+                        _output_node_count(output_node_count),
+                        _output_edge_count(output_edge_count) {}
 
                 void set_node(int node) { _node = node; }
 
@@ -3366,20 +4176,14 @@ namespace generator{
                     shuffle(_edge.begin(), _edge.end());
                 }
 
-                void set_output_node(bool output_node) { _output_node = output_node; }
+                void set_output_node_count(bool output_node_count) { _output_node_count = output_node_count; }
 
-                void set_output_node_count(bool output_node_count) { set_output_node(output_node_count); }
-
-                void set_output_side(bool output_side) { _output_side = output_side; }
-
-                void set_output_side_count(bool output_side_count) { set_output_side(output_side_count); }
-
-                void set_output_edge_count(bool output_edge_count) { set_output_side(output_edge_count); }
+                void set_output_edge_count(bool output_edge_count) { _output_edge_count = output_edge_count; }
 
                 friend std::ostream &operator<<(std::ostream &os, const BasicGraph &graph) {
                     std::string first_line = "";
                     first_line += graph.__format_output_node();
-                    if (graph._output_side) {
+                    if (graph._output_edge_count) {
                         if (first_line != "") {
                             first_line += " ";
                         }
@@ -3406,7 +4210,7 @@ namespace generator{
                 }
             protected:
                 virtual std::string __format_output_node() const {
-                    if (_output_node) {
+                    if (_output_node_count) {
                         return std::to_string(_node);
                     }
                     return "";
@@ -3598,7 +4402,7 @@ namespace generator{
             protected:
                 virtual std::string __format_output_node() const {
                     std::string str = "";
-                    if (_output_node) {
+                    if (_output_node_count) {
                         if (_output_node_type == Node) {
                             str += std::to_string(_node);
                         } else if (_output_node_type == LeftRight) {
