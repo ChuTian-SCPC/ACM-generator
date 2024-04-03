@@ -1743,12 +1743,12 @@ namespace generator{
 
     namespace graph {
         namespace basic {
-            class BasicEdge {
+            class _BasicEdge {
             protected:
                 int _u, _v;
 
             public:
-                BasicEdge(int u, int v) : _u(u), _v(v) {
+                _BasicEdge(int u, int v) : _u(u), _v(v) {
                    
                 }
 
@@ -1761,122 +1761,1018 @@ namespace generator{
                 void set_u(int u) { _u = u; }
                 void set_v(int v) { _v = v; } 
 
-                friend bool operator<(const BasicEdge a, const BasicEdge b) {
+                friend bool operator<(const _BasicEdge a, const _BasicEdge b) {
                     if (a._u == b._u) {
                         return a._v < b._v;
                     }
                     return a._u < b._u;
                 }
 
-                friend bool operator<=(const BasicEdge a, const BasicEdge b) {
+                friend bool operator<=(const _BasicEdge a, const _BasicEdge b) {
                     if (a._u == b._u) {
                         return a._v <= b._v;
                     }
                     return a._u <= b._u;
                 }
 
-                friend bool operator>(const BasicEdge a, const BasicEdge b) {
+                friend bool operator>(const _BasicEdge a, const _BasicEdge b) {
                     if (a._u == b._u) {
                         return a._v > b._v;
                     }
                     return a._u > b._u;
                 }
 
-                friend bool operator>=(const BasicEdge a, const BasicEdge b) {
+                friend bool operator>=(const _BasicEdge a, const _BasicEdge b) {
                     if (a._u == b._u) {
                         return a._v >= b._v;
                     }
                     return a._u >= b._u;
                 }     
 
-                friend bool operator==(const BasicEdge a, const BasicEdge b) {
+                friend bool operator==(const _BasicEdge a, const _BasicEdge b) {
                     return a._u == b._u && a._v == b._v;
                 }
 
-                friend bool operator!=(const BasicEdge a, const BasicEdge b) {
-                    return a._u != b._u|| a._v != b._v;
+                friend bool operator!=(const _BasicEdge a, const _BasicEdge b) {
+                    return a._u != b._u || a._v != b._v;
                 }
 
             };
-
-            template<typename T>
-            class _Edge : public BasicEdge {
-            private:
-                T _w;
-                typedef std::function<void(std::ostream&, const _Edge<T>&)> OutputFunction;
+            
+            #define _OUTPUT_FUNCTION(_TYPE) \
+                typedef std::function<void(std::ostream&, const _TYPE&)> OutputFunction; \
                 OutputFunction _output_function;
+            
+            #define _COMMON_OUTPUT_FUNCTION_SETTING(_TYPE) \
+                void set_output(OutputFunction func) { \
+                    _output_function = func; \
+                } \
+                friend std::ostream& operator<<(std::ostream& os, const _TYPE& type) { \
+                    type._output_function(os, type); \
+                    return os; \
+                } \
+                void println() { \
+                    std::cout<<*this<<std::endl; \
+                } \
+
+            #define _OTHER_OUTPUT_FUNCTION_SETTING(_TYPE) \
+                _COMMON_OUTPUT_FUNCTION_SETTING(_TYPE) \
+                void set_output_default() { \
+                   _output_function = default_function(); \
+                } \
+                OutputFunction default_function() { \
+                    OutputFunction func =  \
+                        [](std::ostream& os, const _TYPE& type) { \
+                            type.default_output(os); \
+                        }; \
+                    return func; \
+                } \
+
+            #define _EDGE_OUTPUT_FUNCTION_SETTING(_TYPE) \
+                _COMMON_OUTPUT_FUNCTION_SETTING(_TYPE) \
+                void set_output_default(bool swap_node = false) { \
+                   _output_function = default_function(swap_node); \
+                } \
+                OutputFunction default_function(bool swap_node = false) { \
+                    OutputFunction func =  \
+                        [swap_node](std::ostream& os, const _TYPE& type) { \
+                            type.default_output(os, swap_node); \
+                        }; \
+                    return func; \
+                } \
+            
+            template<typename T>
+            class _Edge : public _BasicEdge {
+            protected:
+                T _w;
+                _OUTPUT_FUNCTION(_Edge<T>)
             public:
-                _Edge(int u, int v, T w) : BasicEdge(u, v), _w(w) {
-                    _output_function = 
-                        [](std::ostream& os, const _Edge<T>& edge) { 
-                            edge.default_output(os); 
-                        };
+                _Edge(int u, int v, T w) : _BasicEdge(u, v), _w(w) {
+                    _output_function = default_function();
                 }
 
                 T cw() const { return _w; }
                 T& w() { return _w; }
 
                 void set_w(T w) { _w = w; }
-
-               void default_output(std::ostream& os) const {
-                    os << _u << " " << _v << " " << _w;
+                
+                void default_output(std::ostream& os, bool swap_node = false) const {
+                    if (swap_node) {
+                        os << _v << " " << _u << " " << _w;
+                    }
+                    else {
+                        os << _u << " " << _v << " " << _w;
+                    }    
                 }
 
-                void set_output(OutputFunction func) {
-                    _output_function = func;
-                }
+                _EDGE_OUTPUT_FUNCTION_SETTING(_Edge<T>)
 
-                void set_output_default() {
-                    _output_function = 
-                        [](std::ostream& os, const _Edge<T>& edge) { 
-                            edge.default_output(os); 
-                        };
-                }
-
-                friend std::ostream& operator<<(std::ostream& os, const _Edge<T>& edge) {
-                    edge._output_function(os, edge);
-                    return os;
-                }
             };
 
             template<>
-            class _Edge<void> : public BasicEdge {
-            private:
-                typedef std::function<void(std::ostream&, const _Edge<void>&)> OutputFunction;
-                OutputFunction _output_function;
+            class _Edge<void> : public _BasicEdge {
+            protected:
+                _OUTPUT_FUNCTION(_Edge<void>)
             public:
-                _Edge(int u, int v) : BasicEdge(u, v) {
-                    _output_function = 
-                        [](std::ostream& os, const _Edge<void>& edge) { 
-                            edge.default_output(os); 
-                        };
+                _Edge(int u, int v) : _BasicEdge(u, v) {
+                    _output_function = default_function();
                 }
 
+                void default_output(std::ostream& os, bool swap_node = false) const {
+                    if (swap_node) {
+                        os << _v << " " << _u ;
+                    }
+                    else {
+                        os << _u << " " << _v ;
+                    }     
+                }
+
+                _EDGE_OUTPUT_FUNCTION_SETTING(_Edge<void>)
+            };
+            
+            template<typename U>
+            class _Node {
+            protected:
+                U _w;
+                _OUTPUT_FUNCTION(_Node<U>)
+            public:
+                _Node(U w) : _w(w) {
+                    _output_function = default_function();
+                }
+                
+                U& w() { return _w; }
+                U cw() const { return _w; }
+                void set_w(U w) { _w = w; }
+                
                 void default_output(std::ostream& os) const {
-                    os << _u << " " << _v ;
+                    os << _w ;
                 }
 
-                void set_output(OutputFunction func) {
-                    _output_function = func;
-                }
-
-                void set_output_default() {
-                    _output_function = 
-                        [](std::ostream& os, const _Edge<void>& edge) { 
-                            edge.default_output(os); 
-                        };
-                }
-
-                friend std::ostream& operator<<(std::ostream& os, const _Edge<void>& edge) {
-                    edge._output_function(os, edge);
+                _OTHER_OUTPUT_FUNCTION_SETTING(_Node<U>)
+            };
+            
+            template<>
+            class _Node<void> {
+            public:
+                _Node(){}
+                friend std::ostream& operator<<(std::ostream& os, const _Node<void>&) {
                     return os;
                 }
             };
+        
+            class _BasicTree {
+            protected:
+                int _node_count; // the number of nodes in the tree  
+                int _begin_node; // index of the first node                   
+                bool _is_rooted;
+                // use if `_is_rooted` is true,
+                int _root;
+                std::vector<int> _p;
+                
+                // output format
+                bool _output_node;
+                bool _output_root;
+                bool _swap_node;// true means output `father son` or `son father` by random
+                
+            public:
+                _BasicTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
+                    _node_count(node),
+                    _begin_node(begin_node),
+                    _is_rooted(is_rooted),
+                    _root(root - begin_node),
+                    _output_node(true),
+                    _output_root(true),
+                    _swap_node(_is_rooted ? false : true)
+                {}
+                
+                void set_node(int node) { _node_count = node; }
+                void set_node_count(int node_count) { _node_count = node_count; }
+
+                void set_is_rooted(int is_rooted) { _is_rooted = is_rooted; }
+
+                void set_root(int root) {
+                    _root = root - _begin_node;
+                    if (!_is_rooted) {
+                       io::__warn_msg(io::_err, "Unrooted Tree, set root is useless."); 
+                    }
+                }
+
+                void set_begin_node(int begin_node) { 
+                    if (_is_rooted) {
+                        _root += _begin_node;
+                        _root -= begin_node;
+                    }
+                    _begin_node = begin_node; 
+                }
+
+                void set_output_node(bool output_node) { _output_node = output_node; }
+
+                void set_output_root(bool output_root) { _output_root = output_root; }
+
+                void set_swap_node(bool swap_node) { _swap_node = swap_node; }
+                
+                int node() { return _node_count; }
+                int node_count() { return _node_count; }
+                
+                int cnode() const { return _node_count; }
+                int cnode_count() { return _node_count; }
+                
+                int root() {
+                    if (!_is_rooted) {
+                        io::__warn_msg(io::_err, "Unrooted Tree, root is useless.");
+                    }
+                    return _root + _begin_node;
+                }
+                
+                int croot() const {
+                    if (!_is_rooted) {
+                        io::__warn_msg(io::_err, "Unrooted Tree, root is useless.");
+                    }
+                    return _root + _begin_node;
+                }
+                          
+            };
+            
+            template<typename T, typename U>
+            using _IsBothWeight = typename std::enable_if<!std::is_void<T>::value &&
+                                                        !std::is_void<U>::value, int>::type;
+
+            template<typename T, typename U>
+            using _IsEdgeWeight = typename std::enable_if<std::is_void<T>::value &&
+                                                        !std::is_void<U>::value, int>::type;
+
+            template<typename T, typename U>
+            using _IsNodeWeight = typename std::enable_if<!std::is_void<T>::value &&
+                                                        std::is_void<U>::value, int>::type;
+
+            template<typename T, typename U>
+            using _IsUnweight = typename std::enable_if<std::is_void<T>::value &&
+                                                        std::is_void<U>::value, int>::type;
+
+            template<typename T>
+            using _HasT = typename std::enable_if<!std::is_void<T>::value, int>::type;
+
+            template<typename T>
+            using _NotHasT = typename std::enable_if<std::is_void<T>::value, int>::type;
+            
+            #define _DEF_GEN_FUNCTION \
+                typedef std::function<NodeType()> NodeGenFunction; \
+                typedef std::function<EdgeType()> EdgeGenFunction;
+            
+            template<typename NodeType, typename EdgeType>
+            class _RandomFunction {
+            protected:
+                _DEF_GEN_FUNCTION
+                NodeGenFunction _nodes_weight_function;
+                EdgeGenFunction _edges_weight_function;
+            public:
+                _RandomFunction(
+                    NodeGenFunction nodes_weight_function,
+                    EdgeGenFunction edges_weight_function) :
+                    _nodes_weight_function(nodes_weight_function),
+                    _edges_weight_function(edges_weight_function) 
+                {}
+                
+                template<typename T = NodeType, _HasT<T> = 0>
+                void set_nodes_weight_function(NodeGenFunction nodes_weight_function) {
+                    _nodes_weight_function = nodes_weight_function;
+                }
+                
+                template<typename T = EdgeType, _HasT<T> = 0>
+                void set_edges_weight_function(EdgeGenFunction edges_weight_function) {
+                    _edges_weight_function = edges_weight_function;
+                }
+            protected:
+                                                           
+                template<typename T = NodeType, _HasT<T> = 0>
+                void __check_nodes_weight_function() {
+                    if (_nodes_weight_function == nullptr) {
+                        io::__fail_msg(io::_err, "Nodes weight generator function is nullptr, please set it.");
+                    }
+                }
+                
+                template<typename T = NodeType, _NotHasT<T> = 0>
+                void __check_nodes_weight_function() {}
+                
+                template<typename T = EdgeType, _HasT<T> = 0>
+                void __check_edges_weight_function() {
+                    if (_edges_weight_function == nullptr) {
+                        io::__fail_msg(io::_err, "Edges weight generator function is nullptr, please set it.");
+                    }
+                }
+                
+                template<typename T = EdgeType, _NotHasT<T> = 0>
+                void __check_edges_weight_function() {}
+            };
+
+            enum TreeGenerator {
+                RandomFather,
+                Pruefer
+            };
+
+            template<typename NodeType, typename EdgeType>
+            class _Tree : public _BasicTree, public _RandomFunction<NodeType, EdgeType> {
+            protected:
+                typedef _Tree<NodeType,EdgeType> _Self;
+                _OUTPUT_FUNCTION(_Self)
+            protected:
+                _DEF_GEN_FUNCTION
+                std::vector<_Edge<EdgeType>> _edges;
+                std::vector<_Node<NodeType>> _nodes_weight; 
+                TreeGenerator _tree_generator;
+            public:
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                _Tree(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr,
+                    TreeGenerator tree_generator = RandomFather) :
+                    _BasicTree(node, begin_node, is_rooted, root),
+                    _RandomFunction<NodeType, EdgeType>(nodes_weight_function, edges_weight_function),
+                    _tree_generator(tree_generator)
+                {
+                    _output_function = default_function();
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                _Tree(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    EdgeGenFunction edges_weight_function = nullptr,
+                    TreeGenerator tree_generator = RandomFather) :
+                    _BasicTree(node, begin_node, is_rooted, root),
+                    _RandomFunction<NodeType, EdgeType>(nullptr, edges_weight_function),
+                    _tree_generator(tree_generator)
+                {
+                    _output_function = default_function();
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                _Tree(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    TreeGenerator tree_generator = RandomFather) :
+                    _BasicTree(node, begin_node, is_rooted, root),
+                    _RandomFunction<NodeType, EdgeType>(nodes_weight_function, nullptr),
+                    _tree_generator(tree_generator)
+                {
+                    _output_function = default_function();
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                _Tree(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    TreeGenerator tree_generator = RandomFather) :
+                    _BasicTree(node, begin_node, is_rooted, root),
+                    _RandomFunction<NodeType, EdgeType>(nullptr, nullptr),
+                    _tree_generator(tree_generator)
+                {
+                    _output_function = default_function();
+                }
+                
+                void set_tree_generator(TreeGenerator tree_generator) { _tree_generator = tree_generator; }
+                void use_random_father() { _tree_generator = RandomFather; }
+                void use_pruefer() { _tree_generator = Pruefer; }
+                
+                std::vector<_Edge<EdgeType>>& edges() { return _edges; }
+                
+                template<typename T = NodeType, _HasT<T> = 0>
+                std::vector<_Node<NodeType>>& nodes_weight(){ return _nodes_weight; }
+                
+                std::vector<_Edge<EdgeType>> cedges() const { return _edges; }
+            
+                template<typename T = NodeType, _HasT<T> = 0>
+                std::vector<_Node<NodeType>> cnodes_weight() const { return _nodes_weight; }
+            
+                void gen() {
+                    if (_node_count == 1) {
+                        return ;
+                    }
+                    __init();
+                    __generator_tree();
+                    __generator_nodes_weight();
+                    shuffle(_edges.begin(),_edges.end());
+                }
+                
+                void default_output(std::ostream& os) const {
+                    std::string first_line = "";
+                    if (_output_node) {
+                        first_line += std::to_string(_node_count);
+                    }
+                    if (_is_rooted && _output_root) {
+                        if (first_line != "") {
+                            first_line += " ";
+                        }
+                        first_line += std::to_string(_root + _begin_node);
+                    }
+                    int node_cnt = 0;
+                    for (_Node<NodeType> node : _nodes_weight) {
+                        node_cnt ++;
+                        if(node_cnt == 1) {
+                            if (first_line != "") {
+                                os << first_line << "\n";
+                            }
+                        }
+                        os << node << " ";
+                    }
+                    if (node_cnt >= 1) {
+                        if (_node_count > 1) {
+                            os << "\n";
+                        }
+                    }
+                    else {
+                        if (first_line != "") {
+                            os << first_line;
+                            if (_node_count > 1) {
+                                os << "\n";
+                            }
+                        }
+                    }
+                    int edge_cnt = 0;
+                    for (_Edge<EdgeType> e: _edges) {
+                        if (_swap_node && rnd.next(2)) {
+                            e.set_output_default(true);
+                        }
+                        os << e;
+                        e.set_output_default();
+                        if (++edge_cnt < _node_count - 1) {
+                            os << "\n";
+                        }
+                    }
+                }
+                _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+
+            protected:
+                
+                void __judge_comman_limit() {
+                    if (_node_count <= 0) {
+                        io::__fail_msg(io::_err, "Number of nodes must be a positive integer, but found %d.", _node_count);
+                    }
+
+                    if (_is_rooted && (_root < 0 || _root > _node_count)) {
+                        io::__fail_msg(
+                            io::_err,
+                            "restriction of the root is [%d, %d], but found %d.",
+                            _begin_node, 
+                            _node_count + _begin_node - 1, 
+                            _root + _begin_node);
+                    }
+                }
+
+                virtual void __judge_self_limit() {}
+
+                void __judge_limits() {
+                    __judge_comman_limit();
+                    __judge_self_limit();
+                }
+                
+                virtual void __self_init(){};
+                
+                void __init() {
+                    __self_init();
+                    this->__check_nodes_weight_function();
+                    this->__check_edges_weight_function();
+                    __judge_limits();
+                    _edges.clear();
+                    _p = rnd.perm(_node_count, 0);
+                    if (_is_rooted) {
+                        for (int i = 1; i < _node_count; i++) {
+                            if (_p[i] == _root) {
+                                std::swap(_p[0], _p[i]);
+                                break;
+                            }
+                        }
+                    }      
+                }
+                
+                template<typename T = EdgeType, _NotHasT<T> = 0>
+                void __add_edge(int u, int v) {
+                    u += _begin_node;
+                    v += _begin_node;
+                    _edges.emplace_back(u, v);
+                }
+                
+                template<typename T = EdgeType, _HasT<T> = 0>
+                void __add_edge(int u, int v) {
+                    u += _begin_node;
+                    v += _begin_node;
+                    T w = this->_edges_weight_function();
+                    _edges.emplace_back(u, v, w);
+                }
+                
+                template<typename T = NodeType, _NotHasT<T> = 0>
+                void __generator_nodes_weight() { return; }
+                
+                template<typename T = NodeType, _HasT<T> = 0>
+                void __generator_nodes_weight() {
+                    for (int i = 0; i < _node_count ; i++) {
+                        T w = this->_nodes_weight_function();
+                        _nodes_weight.emplace_back(w);
+                    }
+                }
+                
+                void __random_father() {
+                    for (int i = 1; i < _node_count; i++) {
+                        int f = rnd.next(i);
+                        __add_edge(_p[f], _p[i]);
+                    }
+                }
+
+                void __pruefer_decode(std::vector<int> pruefer) {
+                    if (_node_count == 2) {
+                        int u = _is_rooted ? _root : 0;
+                        __add_edge(u, 1 ^ u);
+                        return;
+                    }
+
+                    if (_is_rooted) {
+                        int n = pruefer.size();
+                        bool exist = false;
+                        for (int i = 0; i < n; i++) {
+                            if (pruefer[i] == _root) {
+                                std::swap(pruefer[i], pruefer[n - 1]);
+                                exist = true;
+                                break;
+                            }
+                        }
+                        if (!exist) {
+                            pruefer[n - 1] = _root;
+                        }
+                    }
+
+                    std::vector<int> degree(_node_count, 1);
+                    for (auto x: pruefer) {
+                        degree[x]++;
+                    }
+                    int ptr = 0;
+                    while (degree[ptr] != 1) {
+                        ptr++;
+                    }
+                    int leaf = ptr;
+                    for (auto u: pruefer) {
+                        __add_edge(u, leaf);
+                        degree[u]--;
+                        if (degree[u] == 1 && u < ptr) {
+                            leaf = u;
+                        } else {
+                            do {
+                                ptr++;
+                            } while (degree[ptr] != 1);
+                            leaf = ptr;
+                        }
+                    }
+                    int u = leaf;
+                    int v = _node_count - 1;
+                    if (_is_rooted && v == _root) {
+                        std::swap(u, v);
+                    }
+                    __add_edge(u, v);
+                }
+                
+                virtual void __generator_tree() {
+                    if (_tree_generator == Pruefer) {
+                        std::vector<int> times = rand::rand_sum(_node_count, _node_count - 2, 0);
+                        std::vector<int> pruefer = rand::shuffle_index(times);
+                        __pruefer_decode(pruefer);
+                    } else {
+                        __random_father();
+                    }
+                }
+            };
+            
+            #define _DISABLE_CHOOSE_GEN \
+                void set_tree_generator(TreeGenerator tree_generator) = delete; \
+                void use_random_father() = delete; \
+                void use_pruefer() = delete; 
+            
+            #define _MUST_IS_ROOTED void set_is_rooted(int is_rooted) = delete;
+
+            template<typename NodeType, typename EdgeType>
+            class _Chain : public _Tree<NodeType, EdgeType> {
+            protected:
+                typedef _Chain<NodeType,EdgeType> _Self;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+            public:
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                _Chain(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Tree<NodeType, EdgeType>(
+                        node, begin_node, is_rooted, root, 
+                        nodes_weight_function, edges_weight_function)
+                {
+                    _output_function = this->default_function();
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                _Chain(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Tree<void, EdgeType>(node, begin_node, is_rooted, root, edges_weight_function)
+                {
+                    _output_function = this->default_function();
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                _Chain(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    NodeGenFunction nodes_weight_function = nullptr) :
+                    _Tree<NodeType, void>(node, begin_node, is_rooted, root, nodes_weight_function)
+                {
+                    _output_function = this->default_function();
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                _Chain(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
+                    _Tree<void, void>(node, begin_node, is_rooted, root)
+                {
+                    _output_function = this->default_function();
+                }
+
+                _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+                _DISABLE_CHOOSE_GEN
+                
+            protected:
+                                                        
+                virtual void __generator_tree() override {
+                    for (int i = 1; i < this->_node_count; i++) {
+                        this->__add_edge(this->_p[i - 1], this->_p[i]);
+                    }
+                }
+                
+            };
+
+            template<typename NodeType, typename EdgeType>
+            class _Flower : public _Tree<NodeType, EdgeType> {
+            protected:
+                typedef _Flower<NodeType,EdgeType> _Self;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+            public:
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                _Flower(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Tree<NodeType, EdgeType>(
+                        node, begin_node, is_rooted, root, 
+                        nodes_weight_function, edges_weight_function)
+                {
+                    _output_function = this->default_function();
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                _Flower(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Tree<void, EdgeType>(node, begin_node, is_rooted, root, edges_weight_function)
+                {
+                    _output_function = this->default_function();
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                _Flower(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
+                    NodeGenFunction nodes_weight_function = nullptr) :
+                    _Tree<NodeType, void>(node, begin_node, is_rooted, root, nodes_weight_function)
+                {
+                    _output_function = this->default_function();
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                _Flower(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
+                    _Tree<void, void>(node, begin_node, is_rooted, root)
+                {
+                    _output_function = this->default_function();
+                }
+                
+                _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+                _DISABLE_CHOOSE_GEN
+                
+            protected:
+                                                        
+                virtual void __generator_tree() override {
+                    for (int i = 1; i < this->_node_count; i++) {
+                        this->__add_edge(this->_p[0], this->_p[i]);
+                    }
+                }
+                
+            };
+
+            template<typename NodeType, typename EdgeType> 
+            class _HeightTree : public _Tree<NodeType, EdgeType> {
+            protected:
+                typedef _HeightTree<NodeType,EdgeType> _Self;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+                int _height;
+            public:
+
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                _HeightTree(
+                    int node = 1, int begin_node = 1, int root = 1, int height = -1,
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Tree<NodeType, EdgeType>(
+                        node, begin_node, true, root, 
+                        nodes_weight_function, edges_weight_function),
+                    _height(height)
+                {
+                    _output_function = this->default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                _HeightTree(
+                    int node = 1, int begin_node = 1, int root = 1, int height = -1,
+                    NodeGenFunction nodes_weight_function = nullptr) :
+                    _Tree<NodeType, void>(node, begin_node, true, root, nodes_weight_function),
+                    _height(height)
+                {
+                    _output_function = this->default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                _HeightTree(
+                    int node = 1, int begin_node = 1, int root = 1, int height = -1,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Tree<void, EdgeType>(node, begin_node, true, root, edges_weight_function),
+                    _height(height)
+                {
+                    _output_function = this->default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                _HeightTree(int node = 1, int begin_node = 1, int root = 1, int height = -1) :
+                    _Tree<void, void>(node, begin_node, true, root),
+                    _height(height)
+                {
+                    _output_function = this->default_function();
+                }
+
+                void set_height(int height) { _height = height; }
+                int& height() { return _height; }
+                int cheight() const { return _height; }
+
+                _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+                _DISABLE_CHOOSE_GEN
+                _MUST_IS_ROOTED
+
+            protected:
+                virtual void __self_init() override {
+                    if (_height == -1) {
+                        _height = rnd.next(this->_node_count == 1 ? 1 : 2, this->_node_count);
+                    }
+                }
+
+                virtual void __judge_self_limit() override{
+                    if (_height > this->_node_count || (this->_node_count > 1 && _height <= 1) || _height < 1) {
+                        io::__fail_msg(
+                            io::_err, 
+                            "restriction of the height is [%d,%d].\n", 
+                            this->_node_count == 1 ? 1 : 2,
+                            this->_node_count);
+                    }
+                }
+
+                virtual void __generator_tree() override {
+                    std::vector<int> number(_height, 1);
+                    int w = this->_node_count - _height;
+                    for (int i = 1; i <= w; i++) {
+                        number[rnd.next(1, _height - 1)]++;
+                    }
+                    int l = 0, r = 0, k = 0;
+                    for (int i = 1; i < this->_node_count; i++) {
+                        if (r + number[k] == i) {
+                            l = r;
+                            r += number[k];
+                            k++;
+                        }
+                        int f = rnd.next(l, r - 1);
+                        this->__add_edge(this->_p[f], this->_p[i]);
+                    }
+                }
+            };
+            
+            template<typename NodeType, typename EdgeType>
+            class _DegreeTree : public _Tree<NodeType, EdgeType> {
+            protected:
+                typedef _DegreeTree<NodeType,EdgeType> _Self;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+                int _max_degree;
+            public:
+
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                _DegreeTree(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Tree<NodeType, EdgeType>(
+                        node, begin_node, is_rooted, root, 
+                        nodes_weight_function, edges_weight_function),
+                    _max_degree(max_degree)
+                {
+                    _output_function = this->default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                _DegreeTree(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
+                    NodeGenFunction nodes_weight_function = nullptr) :
+                    _Tree<NodeType, void>(node, begin_node, is_rooted, root, nodes_weight_function),
+                    _max_degree(max_degree)
+                {
+                    _output_function = this->default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                _DegreeTree(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Tree<void, EdgeType>(node, begin_node, is_rooted, root,edges_weight_function),
+                    _max_degree(max_degree)
+                {
+                    _output_function = this->default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                _DegreeTree(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1) :
+                    _Tree<void, EdgeType>(node, begin_node, is_rooted, root),
+                    _max_degree(max_degree)
+                {
+                    _output_function = this->default_function();
+                }
+
+                void set_max_degree(int max_degree) { _max_degree = max_degree; }
+                int& max_degree() { return max_degree; }
+                int cmax_degree() const { return max_degree; }
+
+                _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+                _DISABLE_CHOOSE_GEN
+            protected:
+
+                virtual void __self_int() override {
+                    if (_max_degree == -1) {
+                        if (this->_node_count == 1) {
+                            _max_degree = 0;
+                        } else if (this->_node_count == 2) {
+                            _max_degree = 1;
+                        } else {
+                            _max_degree = rnd.next(2, this->_node_count - 1);
+                        }
+                    }
+                }
+
+                virtual void __judge_self_limit() override {
+                    if (_max_degree > this->_node_count - 1) {
+                        io::__warn_msg(io::_err,
+                                        "The max degree limit %d is greater than node - 1, equivalent to use Tree::gen_pruefer",
+                                        _max_degree);
+                    }
+                    int max_degree_limit = 
+                        this->_node_count == 1 ? 0 : 
+                        (this->_node_count == 2 ? 1 : 2);
+                    
+                    if (_max_degree < max_degree_limit) {
+                        io::__fail_msg(
+                            io::_err,
+                            "The max degree limit of %s node's tree is greater than or equal to %d, but found %d.",
+                            this->_node_count > 2 ? "3 or more" : std::to_string(this->_node_count).c_str(),
+                            max_degree_limit,
+                            _max_degree);
+                    }
+                }
+
+                virtual void __generator_tree() override {
+                    std::vector<int> times = rand::rand_sum(this->_node_count, this->_node_count - 2, 0, _max_degree - 1);
+                    std::vector<int> pruefer = rand::shuffle_index(times);
+                    this->__pruefer_decode(pruefer);
+                }
+            };
+
+            template<typename NodeType, typename EdgeType>
+            class _SonTree : public _Tree<NodeType, EdgeType> {
+            protected:
+                typedef _SonTree<NodeType,EdgeType> _Self;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+                int _max_son;  
+            public:
+
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                _SonTree(
+                    int node = 1, int begin_node = 1,  int root = 1, int max_son = -1,
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Tree<NodeType, EdgeType>(
+                        node, begin_node, true, root, 
+                        nodes_weight_function, edges_weight_function),
+                    _max_son(max_son)
+                {
+                    _output_function = this->default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                _SonTree(
+                    int node = 1, int begin_node = 1,  int root = 1, int max_son = -1,
+                    NodeGenFunction nodes_weight_function = nullptr) :
+                    _Tree<NodeType, void>(node, begin_node, true, root, nodes_weight_function),
+                    _max_son(max_son)
+                {
+                    _output_function = this->default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                _SonTree(
+                    int node = 1, int begin_node = 1,  int root = 1, int max_son = -1,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Tree<void, EdgeType>(node, begin_node, true, root, edges_weight_function),
+                    _max_son(max_son)
+                {
+                    _output_function = this->default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                _SonTree(int node = 1, int begin_node = 1,  int root = 1, int max_son = -1) :
+                    _Tree<void, void>(node, begin_node, true, root),
+                    _max_son(max_son)
+                {
+                    _output_function = this->default_function();
+                }
+
+                void set_max_son(int max_son) { _max_son = max_son; }
+                int& max_son() { return _max_son; }
+                int cmax_son() const { return _max_son; }
+
+                _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+                _DISABLE_CHOOSE_GEN
+                _MUST_IS_ROOTED
+
+            protected:
+
+                virtual void __self_init() override {
+                    if (_max_son == -1) {
+                        if (this->_node_count == 1) {
+                            _max_son = 0;
+                        } else if (this->_node_count == 2) {
+                            _max_son = 1;
+                        } else {
+                            _max_son = rnd.next(2, this->_node_count - 1);
+                        }
+                    }
+                }
+
+                virtual void __judge_self_limit() override {
+                    if (_max_son > this->_node_count - 1) {
+                        io::__warn_msg(
+                            io::_err,
+                            "The max son limit %d is greater than node - 1 (%d), equivalent to use Tree::gen_pruefer",
+                            this->_node_count - 1,
+                            _max_son);
+                    }
+
+                    int max_son_limit =
+                        this->_node_count == 1 ? 0 :
+                        (this->_node_count == 2 ? 1 : 2);
+                    
+                    if (_max_son < max_son_limit) {
+                        io::__fail_msg(
+                            io::_err,
+                            "The max son limit of %s node's tree is greater than or equal to %d, but found %d.",
+                            this->_node_count > 2 ? "3 or more" : std::to_string(this->_node_count).c_str(),
+                            max_son_limit,
+                            _max_son);
+                    }
+                }
+
+                virtual void __generator_tree() override {
+                    int max_degree = _max_son + 1;
+                    std::vector<int> times = rand::rand_sum(this->_node_count, this->_node_count - 2, 0, max_degree - 1);
+                    if (times[this->_root] == max_degree - 1) {
+                        int p;
+                        do {
+                            p = rnd.next(0, this->_node_count - 1);
+                        } while (p == this->_root || times[p] == max_degree - 1);
+                        std::swap(times[this->_root], times[p]);
+                    }
+                    std::vector<int> pruefer = rand::shuffle_index(times);
+                    this->__pruefer_decode(pruefer);
+                }
+            }; 
+            
+            #undef _OTHER_OUTPUT_FUNCTION_SETTING
+            #undef _OUTPUT_FUNCTION
+            #undef _DEF_GEN_FUNCTION
+            #undef _DISABLE_CHOOSE_GEN
+            #undef _MUST_IS_ROOTED
         }
 
         namespace unweight {
             typedef basic::_Edge<void> Edge;
-
             //common tree
             class Tree {
             public:
@@ -2112,7 +3008,6 @@ namespace generator{
                     shuffle(_edge.begin(), _edge.end());
                 }
             };
-
             class Chain : public Tree {
             public:
                 Chain(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
