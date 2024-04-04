@@ -4503,7 +4503,7 @@ namespace generator{
             using Cactus = basic::_Cactus<void, EdgeType>;
         }
 
-        namespace point_weight{
+        namespace node_weight{
             using Edge = basic::_Edge<void>;
 
             template<typename NodeType>
