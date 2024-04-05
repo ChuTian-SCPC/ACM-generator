@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <unordered_map>
 #include <thread>
+#include <chrono>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -1730,9 +1731,9 @@ namespace generator{
                 }
                 while (x--) {
                     res.emplace_back((i - begin) + offset);
-                }
-                shuffle(res.begin(),res.end());
+                }   
             }
+            shuffle(res.begin(),res.end());
             return res;
         }
 
