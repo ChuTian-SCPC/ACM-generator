@@ -1814,7 +1814,7 @@ namespace generator{
                 } \
                 void println() { \
                     std::cout<<*this<<std::endl; \
-                } \
+                } 
 
             #define _OTHER_OUTPUT_FUNCTION_SETTING(_TYPE) \
                 _COMMON_OUTPUT_FUNCTION_SETTING(_TYPE) \
@@ -1827,7 +1827,7 @@ namespace generator{
                             type.default_output(os); \
                         }; \
                     return func; \
-                } \
+                } 
 
             #define _EDGE_OUTPUT_FUNCTION_SETTING(_TYPE) \
                 _COMMON_OUTPUT_FUNCTION_SETTING(_TYPE) \
@@ -1942,7 +1942,7 @@ namespace generator{
                     _node_count(node_count),
                     _begin_node(begin_node),
                     _is_rooted(is_rooted),
-                    _root(root - begin_node),
+                    _root(root - 1),
                     _output_node_count(output_node_count),
                     _output_root(output_root),
                     _swap_node(_is_rooted ? false : true)
@@ -1959,17 +1959,13 @@ namespace generator{
                 }
 
                 void set_root(int root) {
-                    _root = root - _begin_node;
+                    _root = root - 1;
                     if (!_is_rooted) {
                        io::__warn_msg(io::_err, "Unrooted Tree, set root is useless."); 
                     }
                 }
 
                 void set_begin_node(int begin_node) { 
-                    if (_is_rooted) {
-                        _root += _begin_node;
-                        _root -= begin_node;
-                    }
                     _begin_node = begin_node; 
                 }
 
@@ -1983,11 +1979,11 @@ namespace generator{
                 
                 int cnode_count() const { return _node_count; }
                 
-                int root() {
+                int& root() {
                     if (!_is_rooted) {
                         io::__warn_msg(io::_err, "Unrooted Tree, root is useless.");
                     }
-                    return _root + _begin_node;
+                    return _root;
                 }
                 
                 int croot() const {
@@ -2167,7 +2163,7 @@ namespace generator{
                         if (first_line != "") {
                             first_line += " ";
                         }
-                        first_line += std::to_string(_root + _begin_node);
+                        first_line += std::to_string(croot());
                     }
                     int node_cnt = 0;
                     for (_Node<NodeType> node : _nodes_weight) {
@@ -2213,13 +2209,12 @@ namespace generator{
                         io::__fail_msg(io::_err, "Number of nodes must be a positive integer, but found %d.", _node_count);
                     }
 
-                    if (_is_rooted && (_root < 0 || _root > _node_count)) {
+                    if (_is_rooted && (_root < 0 || _root >= _node_count)) {
                         io::__fail_msg(
                             io::_err,
-                            "restriction of the root is [%d, %d], but found %d.",
-                            _begin_node, 
-                            _node_count + _begin_node - 1, 
-                            _root + _begin_node);
+                            "restriction of the root is [1, %d], but found %d.", 
+                            _node_count, 
+                            _root + 1);
                     }
                 }
 
