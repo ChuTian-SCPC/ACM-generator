@@ -1,14 +1,23 @@
 ## 简介
 
-树和图目前只有无权一种类型。
-
 树和图都在命名空间`generator::graph`中。在`generator::all`中已经被包括。
 
-无权树和图都在命名空间`generator::graph::unweight`中。
+树和图分成四种，无权，带点权，带边权，带点权和边权。
 
-- [无权边简介](./unweight_edge_summary.md)
+分别在以下命名空间中：
 
-- [无权树简介](./unweight_tree_summary.md)
+1. `generator::graph::unweight`：无权
+2. `generator::graph::node_weight`：带点权
+3. `generator::graph::edge_weight`：带边权
+4. `generator::graph::both_weight`：带点权和边权
+
+对于点和边详见：
+
+- [点简介](./node_summary.md)
+
+- [边简介](./edge_summary.md)
+
+- [树简介](./tree_summary.md)
 
     - [树(Tree)](./unweight_tree.md)
     - [链(Chain)](./unweight_chain.md)

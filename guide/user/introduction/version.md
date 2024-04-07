@@ -1,7 +1,6 @@
 [返回目录](../../home.md)
 
 ### development
-
 - 重构：
   - 重构`msg`和`io`模块，将它们合并成一个`namespace io`。
   - Windows对拍抛弃使用python。
@@ -12,6 +11,7 @@
   - 修改`rand_vector`，让生成函数传参由模板类`FUNC`改成`std::function<T()>`，增加类型检查。
 - 新增功能：
   - 已经支持Linux对拍。
+  - 带权树和图的生成函数。
 
 ### version 0.5.1
 
