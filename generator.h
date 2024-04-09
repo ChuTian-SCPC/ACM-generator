@@ -2616,7 +2616,7 @@ namespace generator{
                 _DISABLE_CHOOSE_GEN
             protected:
 
-                virtual void __self_int() override {
+                virtual void __self_init() override {
                     if (_max_degree == -1) {
                         if (this->_node_count == 1) {
                             _max_degree = 0;
@@ -2832,6 +2832,9 @@ namespace generator{
                 void set_connect(bool connect) { _connect = connect; }
 
                 void set_swap_node(bool swap_node) { _swap_node = swap_node; }
+
+                void set_output_node_count(bool output_node_count) { _output_node_count = output_node_count; }
+                void set_output_edge_count(bool output_edge_count) { _output_edge_count = output_edge_count; } 
 
                 int& node_count() { return _node_count; }
                 int cnode_count() const { return _node_count; }
@@ -3725,8 +3728,8 @@ namespace generator{
                     int node = this->_node_count;
                     std::vector<int> p = rnd.perm(node, 0);
                     for (int i = 0; i < node - 1; i++) {
-                        this->__add_edge(p[i], p[(i + 1) % (node - 1)]);
-                        this->__add_edge(p[i], p[node - 1]);
+                        this->__add_edge(this->__convert_edge(p[i], p[(i + 1) % (node - 1)]));
+                        this->__add_edge(this->__convert_edge(p[i], p[node - 1]));
                     }
                 }
             };
