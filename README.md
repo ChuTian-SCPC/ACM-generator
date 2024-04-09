@@ -2,7 +2,7 @@
     <h1>Generator</h1>
 </div>
 
-[![version](https://img.shields.io/badge/version-v0.6.0_beta-blue)](https://github.com/ChuTian-SCPC/problem_tool)
+[![version](https://img.shields.io/badge/version-v0.7.0_beta-blue)](https://github.com/ChuTian-SCPC/problem_tool)
 [![license](https://img.shields.io/badge/license-MIT-green)](https://github.com/ChuTian-SCPC/problem_tool/blob/main/LICENSE)
 
 ## Generator是什么
@@ -37,9 +37,6 @@ MIT协议
 
 - [x] 对拍
 
-- [ ] 树和图生成函数
+- [x] 树和图生成函数
 
-  - [x] 无权树和图的生成
-
-  - [ ] 带权树和图的生成
 

@@ -13,7 +13,7 @@ int main()
     tree.gen(); // success
     cout<<tree<<endl;
     cout<<"Tree 2:"<<endl;
-    tree.set_begin_node(2);
+    tree.set_root(6);
     tree.gen(); // fail
     cout<<tree<<endl;
     return 0;
@@ -27,5 +27,5 @@ Tree 1:
 1 4
 4 3
 Tree 2:
-FAIL restriction of the root is [2, 6], but found 1.
+FAIL restriction of the root is [1, 5], but found 6.
 */
