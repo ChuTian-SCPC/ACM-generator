@@ -1,8 +1,17 @@
 ### 树
 
-树的类型分成无权，带点权，带边权，带点权和边权四种类型。
-
 #### 基本用法
+
+有点权的树点权类型为`NodeType`，有边权的树边权类型为`EdgeType`，均为泛型。
+
+四种类型分别为：
+
+```cpp
+unweight::Tree;                         //无权
+node_weight::Tree<NodeType>;            //带点权
+edge_weight::Tree<EdgeType>;            //带边权
+both_weight::Tree<NodeType,EdgeType>;   //带点权和边权
+```
 
 树在设置好各个属性后，使用函数`void gen()`完成生成一棵树。
 
@@ -83,6 +92,28 @@ void set_begin_node(int begin_node);
 void set_output_node(bool output_node);
 void set_output_root(bool output_root);
 void set_swap_node(bool swap_node);
+```
+
+
+
+#### 权值随机函数
+
+`NodeGenFunction`和`EdgeGenFunction`分别是点权和边权的随机生成函数。
+
+使用方式可以查看[示例代码](../../../examples/tree1.cpp)。
+
+函数是无传参，返回值为`NodeType`和`EdgeType`的。
+
+```cpp
+typedef std::function<NodeType()> NodeGenFunction; 
+typedef std::function<EdgeType()> EdgeGenFunction;
+```
+
+可以通过以下函数设置：
+
+```cpp
+void set_nodes_weight_function(NodeGenFunction nodes_weight_function);
+void set_edges_weight_function(EdgeGenFunction edges_weight_function);
 ```
 
 
