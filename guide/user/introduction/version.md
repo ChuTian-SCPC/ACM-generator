@@ -12,6 +12,7 @@
   - 重构`msg`中输出颜色部分。
   - 修改默认checker的路径。
   - 修改`rand_vector`，让生成函数传参由模板类`FUNC`改成`std::function<T()>`，增加类型检查。
+  - 修改`make_inputs`,`make_outputs`,`fill_inputs`,`fill_outputs`,将他们由宏修改成函数。
 - 新增功能：
   - 已经支持Linux对拍。
   - 带权树和图的生成函数。
