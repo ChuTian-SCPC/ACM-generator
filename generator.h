@@ -464,10 +464,9 @@ namespace generator{
             return char_array;
         }
 
-        void __fake_arg(const char* format="",...){
-            FMT_TO_RESULT(format, format, _format);
-            _format = "gengrator " + _format;
-            auto _fake_argvs = __split_string_to_char_array(_format.c_str());
+        void __fake_arg(std::string args = ""){
+            args = "gengrator " + args;
+            auto _fake_argvs = __split_string_to_char_array(args.c_str());
             int _fake_argc = 0;
             while (_fake_argvs[_fake_argc] != nullptr) {
                 ++_fake_argc;
@@ -543,6 +542,11 @@ namespace generator{
             return file_path.__file_exists();
         }
         
+        bool __output_file_exists(int x) {
+            Path file_path = __path_join(__current_path(), "testcases", __end_with(x, Out));
+            return file_path.__file_exists();
+        }
+        
         std::vector<int> __get_inputs() {
             std::vector<int> inputs;
             Path folder_path = __path_join(__current_path(), "testcases");
@@ -577,46 +581,51 @@ namespace generator{
             return inputs;
         }
         
-        #define make_inputs(__start, __end, __Func, ...) do{ \
-            for(int __case = (__start); __case <= (__end); __case++){ \
-                __write_input_file(__case); \
-                __fake_arg(__VA_ARGS__); \
-                __Func; \
-                __close_output_file_to_console(); \
-            } \
-        } while(0)
+        void make_inputs(int start, int end, std::function<void()> func, const char* format = "", ...) {
+            FMT_TO_RESULT(format, format, _format);
+            for (int i = start; i <= end; i++) {
+                __write_input_file(i);
+                __fake_arg(_format);
+                func();
+                __close_output_file_to_console();
+            }
+        }
         
-        #define make_outputs(__start,__end,__Func) do{ \
-            for(int __case = (__start); __case <= (__end); __case++){ \
-                __write_output_file(__case); \
-                __Func; \
-                __close_input_file_to_console(); \
-                __close_output_file_to_console(); \
-            } \
-        } while(0)
+        void make_outputs(int start, int end, std::function<void()> func) {
+            for (int i = start; i <= end; i++) {
+                __write_output_file(i);
+                func();
+                __close_input_file_to_console();
+                __close_output_file_to_console();
+            }
+        }
         
-        #define fill_inputs(__num,__Func,...) do{ \
-            int __sum = (__num); \
-            for(int __case = (1); __sum; __case++) { \
-                if(!__input_file_exists(__case)) { \
-                    __sum--; \
-                    __write_input_file(__case); \
-                    __fake_arg(__VA_ARGS__); \
-                    __Func; \
-                    __close_output_file_to_console(); \
-                } \
-            } \
-        }while(0)
+        void fill_inputs(int number, std::function<void()> func, const char *format, ...) {
+            FMT_TO_RESULT(format, format, _format);
+            int sum = number;
+            for (int i = 1; sum; i++) {
+                if (!__input_file_exists(i)) {
+                    sum--;
+                    __write_input_file(i);
+                    __fake_arg(_format);
+                    func();
+                    __close_output_file_to_console();
+                }
+            }
+        }
         
-        #define fill_outputs(__Func) do{ \
-            auto __inputs =  __get_inputs(); \
-            for(auto __case : __inputs) { \
-                __write_output_file(__case); \
-                __Func; \
-                __close_input_file_to_console(); \
-                __close_output_file_to_console(); \
-            } \
-        }while(0)
+        void fill_outputs(std::function<void()> func, bool cover_exist = true) {
+            std::vector<int> inputs = __get_inputs();
+            for (int i : inputs) {
+                if (!cover_exist && __output_file_exists(i)) {
+                    continue;
+                }
+                __write_output_file(i);
+                func();
+                __close_input_file_to_console();
+                __close_output_file_to_console();
+            }
+        }
         
         template<typename T>
         void make_inputs_exe(int start,int end,T path,const char* format = "",...){
@@ -695,7 +704,7 @@ namespace generator{
         }
         
         template<typename T>
-        void fill_outputs_exe(T path){
+        void fill_outputs_exe(T path, bool cover_exist = true){
             Path std_path(path);
             std_path.full();
             if (!std_path.__file_exists()) {
@@ -705,6 +714,9 @@ namespace generator{
             __create_directories(testcases_folder);
             std::vector<int> inputs =  __get_inputs();
             for(auto i:inputs){
+                if (!cover_exist && __output_file_exists(i)) {
+                    continue;
+                }
                 Path read_path = __path_join(testcases_folder, __end_with(i, In));
                 Path write_path = __path_join(testcases_folder, __end_with(i, Out));
                 std::string command = std_path.path()+ " < " + read_path.path() + " > " + write_path.path();
