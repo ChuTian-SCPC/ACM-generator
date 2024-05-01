@@ -36,7 +36,7 @@
         - [限制最大度数的树(DegreeTree)](./user/graph/degree_tree.md)
         - [限制最大儿子数的树(SonTree)](./user/graph/son_tree.md)
     
-      - [图简介](./user/graph/unweight_graph_summary.md)
+      - [图简介](./user/graph/graph_summary.md)
         - [图(Graph)](./user/graph/graph.md)
         - [二分图(BipartiteGraph)](./user/graph/bipartite_graph.md)
         - [有向无环图(DAG)](./user/graph/dag.md)
