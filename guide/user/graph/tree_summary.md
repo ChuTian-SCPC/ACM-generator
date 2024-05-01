@@ -38,13 +38,13 @@ bool swap_node;               //边的两个结点输出时是否可能交换前
 TreeGenerator tree_generator; //树的生成方式
 ```
 
-结点的起始编号是指第一个结点的编号。比如一棵大小为 $node\textunderscore count$ 的树， 结点编号是从   $begin\textunderscore node$   到     $begin\textunderscore node + node\textunderscore count - 1$   。默认值都是 $1$ 。
+结点的起始编号是指第一个结点的编号。比如一棵大小为 $node\textunderscore count$ 的树， 结点编号是从 $ begin\textunderscore node $   到 $ begin\textunderscore node+node\textunderscore count-1 $   。默认值都是 $1$ 。
 
 
 
 根在**设置**的时候要注意它的范围是 $[1, node\textunderscore count]$ ，表示根是第几个结点。
 
-比如原本有一棵树的 $node\textunderscore count$  是$5$ ，设置它的根是 $1$ ，可以正确的生成。现在将他的根改成 $6$ ，那么根就超出结点的个数了，会造成生成失败。可以看[相关示例](../../../examples/tree_root.cpp)。
+比如原本有一棵树的 $node\textunderscore count$  是 $5$ ，设置它的根是 $1$ ，可以正确的生成。现在将他的根改成 $6$ ，那么根就超出结点的个数了，会造成生成失败。可以看[相关示例](../../../examples/tree_root.cpp)。
 
 
 
