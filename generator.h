@@ -1,7 +1,5 @@
 #include"testlib.h"
 #include <sstream>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unordered_map>
 #include <thread>
 #include <chrono>
@@ -16,6 +14,7 @@
 #include <dirent.h> 
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #endif
 namespace generator{
     namespace io{
@@ -226,10 +225,11 @@ namespace generator{
 
 #ifdef WIN32
         char _path_split = '\\';
+        char _other_split = '/';
 #else
         char _path_split = '/';
+        char _other_spilt = '\\';
 #endif
-        std::string _path_splits = "/\\";
         template <typename U>
         struct IsPath;
 
@@ -269,13 +269,22 @@ namespace generator{
                 return S_ISDIR(path_stat.st_mode);
             #endif
             }
+            
+            void __unify_split() {
+                for (auto& c : _path) {
+                    if (c == _other_spilt) {
+                        c = _path_split;
+                    }
+                }
+            }
 
             Path __folder_path() {
                 if(this->__directory_exists()) {
                     return Path(_path);
                 }
                 else {
-                    size_t pos = _path.find_last_of(_path_splits);
+                    __unify_split();
+                    size_t pos = _path.find_last_of(_path_split);
                     if (pos != std::string::npos) {
                         return Path(_path.substr(0,pos));
                     }
@@ -290,7 +299,8 @@ namespace generator{
                     io::__fail_msg(io::_err, "%s is not a file path or the file doesn't exist.", _path.c_str());
                     return "";
                 }
-                size_t pos = _path.find_last_of(_path_splits);
+                __unify_split();
+                size_t pos = _path.find_last_of(_path_split);
                 std::string file_full_name = pos == std::string::npos ? _path : _path.substr(pos + 1);
                 size_t pos_s = file_full_name.find_first_of(".");
                 std::string file_name = pos_s == std::string::npos ? file_full_name : file_full_name.substr(0, pos_s);
@@ -387,14 +397,8 @@ namespace generator{
                 buffer[length] = '\0';
             }
         #endif
-            std::string executable_path(buffer);
-
-            size_t pos = executable_path.find_last_of(_path_splits);
-            if (pos != std::string::npos) {
-                std::string folder_path = executable_path.substr(0, pos);
-                return Path(folder_path);
-            }
-            return Path("");
+            Path executable_path(buffer);
+            return executable_path.__folder_path();
         }
 
         template <typename T>
@@ -410,13 +414,14 @@ namespace generator{
         }
 
         void __create_directories(Path& path) {
+            path.__unify_split();
             std::istringstream ss(path.path());
             std::string token;
             Path current_path("");
             while (std::getline(ss, token, _path_split)) {
                 current_path = __path_join(current_path, token);
             #ifdef _WIN32
-                if(current_path.path().find_first_of(_path_splits) == std::string::npos && current_path.path().back() == ':') {
+                if(current_path.path().find_first_of(_path_split) == std::string::npos && current_path.path().back() == ':') {
                     continue;
                 }
             #else
