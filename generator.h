@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <thread>
 #include <chrono>
+#include <sys/stat.h>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -14,7 +15,6 @@
 #include <dirent.h> 
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/stat.h>
 #endif
 namespace generator{
     namespace io{
@@ -250,7 +250,7 @@ namespace generator{
 
             bool __file_exists() {
                 std::ifstream file(_path.c_str());
-                return file.good();
+                return file.is_open();
             }
 
             bool __directory_exists() {
@@ -272,7 +272,7 @@ namespace generator{
             
             void __unify_split() {
                 for (auto& c : _path) {
-                    if (c == _other_spilt) {
+                    if (c == _other_split) {
                         c = _path_split;
                     }
                 }
