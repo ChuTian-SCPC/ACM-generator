@@ -1509,8 +1509,8 @@ namespace generator{
             return s;
         }
 
-        std::string rand_string(int from, std::string format) {
-            return rand_string(from, format.c_str());
+        std::string rand_string(int n, std::string format) {
+            return rand_string(n, format.c_str());
         }
 
         std::string rand_string(int from, int to, std::string format) {
@@ -1815,6 +1815,10 @@ namespace generator{
         std::string rand_palindrome(int n, int p, const char* format, ...) {
             FMT_TO_RESULT(format, format, _format);
             return __rand_palindrome_impl(n, p, _format);
+        }
+
+        std::string rand_palindrome(int n, int p, std::string format) {
+            return __rand_palindrome_impl(n, p, format);
         }
     }
 
