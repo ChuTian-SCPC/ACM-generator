@@ -1517,6 +1517,16 @@ namespace generator{
             return rand_string(from, to, format.c_str());
         }
 
+        std::string rand_string(const char* format, ...) {
+            FMT_TO_RESULT(format, format, _format);
+            return rnd.next(_format);
+        }
+
+        std::string rand_string(std::string format) {
+            return rnd.next(format);
+        }
+
+
         // equal to rnd.perm(n)
         // return a permutation length is n,begin from 0
         template <typename T>
