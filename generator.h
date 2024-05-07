@@ -228,7 +228,7 @@ namespace generator{
         char _other_split = '/';
 #else
         char _path_split = '/';
-        char _other_spilt = '\\';
+        char _other_split = '\\';
 #endif
         template <typename U>
         struct IsPath;
