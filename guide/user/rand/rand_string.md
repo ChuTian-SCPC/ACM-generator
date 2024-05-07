@@ -26,6 +26,30 @@
    
    返回一个字符串长度在范围 $[from,to]$ 内，字符集由该正则表达式所描述。
 
+5. `string rand_string(int n, string format)`
+   
+   传入一个整数 $n$ 和一个`testlib.h`中的极简正则表达式。
+
+   返回一个字符串长度为 $n$ ，字符集由该正则表达式所描述。
+
+6. `string rand_string(int from, int to, string format)`
+
+   传入两个整数 $from,to$ 和一个`testlib.h`中的极简正则表达式。
+   
+   返回一个字符串长度在范围 $[from,to]$ 内，字符集由该正则表达式所描述。
+
+7. `string rand_string(const char* format, ...)`
+   
+   传入一个`testlib.h`中的极简正则表达式。
+   
+   返回一个字符串由该正则表达式所描述。
+
+8. `string rand_string(string format)`
+    
+   传入一个`testlib.h`中的极简正则表达式。
+   
+   返回一个字符串由该正则表达式所描述。
+
 [示例代码](../../../examples/rand_string.cpp)
 
 [返回目录](../../home.md)

@@ -16,6 +16,7 @@
 - 新增功能：
   - 已经支持Linux对拍。
   - 带权树和图的生成函数。
+  - rand_palindrome：随机回文串。
 
 ### version 0.5.1
 
