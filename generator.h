@@ -1781,20 +1781,22 @@ namespace generator{
         }
 
         std::string __rand_palindrome_impl(int n, int p, std::string char_type) {
-            if (p > n) {
-                io::__fail_msg(
-                    io::_err, 
-                    "Palindrome length must less than or equal to string length %d, but found %d.",
-                    n,
-                    p);
+            if (n < 0) {
+                io::__fail_msg(io::_err, "String length must be a non-negative integer, but found %d.", n);
             }
-            std::string palindrome_part(p, ' ');
+            if (p < 0) {
+                io::__fail_msg(io::_err, "Palindrome part length must be a non-negative integer, but found %d.", n);
+            }
+            if (p > n) {
+                io::__fail_msg(io::_err, "Palindrome length must less than or equal to string length %d, but found %d.", n, p);
+            }
+            std::string palindrome_part(p);
             for (int i = 0; i < (p + 1) / 2; i++) {
-                char c =  rand_char(char_type);
+                char c = rand_char(char_type);
                 palindrome_part[i] = c;
                 palindrome_part[p - i - 1] = c;
             }
-            std::string result(n, ' ');
+            std::string result(n);
             int pos_l = rnd.next(0, n - p);
             int pos_r = pos_l + p - 1;
             for (int i = 0; i < n; i++) {
