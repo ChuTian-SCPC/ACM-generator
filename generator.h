@@ -1477,6 +1477,10 @@ namespace generator{
             return s.c_str()[0];
         }
 
+        char rand_char(std::string format) {
+            return rand_char(format.c_str());
+        }
+
         // return a string length is n, use CharType
         // CharType default is LowerLetter
         std::string rand_string(int n,CharType type = LowerLetter){
@@ -1503,6 +1507,14 @@ namespace generator{
             FMT_TO_RESULT(format, format, _format);
             std::string s = rnd.next("%s{%d,%d}",_format.c_str(),from,to);
             return s;
+        }
+
+        std::string rand_string(int from, std::string format) {
+            return rand_string(from, format.c_str());
+        }
+
+        std::string rand_string(int from, int to, std::string format) {
+            return rand_string(from, to, format.c_str());
         }
 
         // equal to rnd.perm(n)
@@ -1756,6 +1768,43 @@ namespace generator{
 
         std::vector<int> shuffle_index(std::vector<int> v, int offset = 0) {
             return shuffle_index(v.begin(), v.end(), offset);
+        }
+
+        std::string __rand_palindrome_impl(int n, int p, std::string char_type) {
+            if (p > n) {
+                io::__fail_msg(
+                    io::_err, 
+                    "Palindrome length must less than or equal to string length %d, but found %d.",
+                    n,
+                    p);
+            }
+            std::string palindrome_part(p, ' ');
+            for (int i = 0; i < (p + 1) / 2; i++) {
+                char c =  rand_char(char_type);
+                palindrome_part[i] = c;
+                palindrome_part[p - i - 1] = c;
+            }
+            std::string result(n, ' ');
+            int pos_l = rnd.next(0, n - p);
+            int pos_r = pos_l + p - 1;
+            for (int i = 0; i < n; i++) {
+                if (i < pos_l || i > pos_r) {
+                    result[i] = rand_char(char_type);
+                }
+                else {
+                    result[i] = palindrome_part[i - pos_l];
+                }
+            }
+            return result;
+        }
+
+        std::string rand_palindrome(int n, int p, CharType type = LowerLetter) {
+            return __rand_palindrome_impl(n, p, _PATTERN[type]);
+        }
+
+        std::string rand_palindrome(int n, int p, const char* format, ...) {
+            FMT_TO_RESULT(format, format, _format);
+            return __rand_palindrome_impl(n, p, _format);
         }
     }
 
