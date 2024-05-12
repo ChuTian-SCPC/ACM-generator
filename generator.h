@@ -469,14 +469,17 @@ namespace generator{
             return char_array;
         }
 
-        void __fake_arg(std::string args = ""){
+        void __fake_arg(std::string args = "", bool need_seed = false){
             args = "gengrator " + args;
             auto _fake_argvs = __split_string_to_char_array(args.c_str());
             int _fake_argc = 0;
             while (_fake_argvs[_fake_argc] != nullptr) {
                 ++_fake_argc;
             }
-            prepareOpts(_fake_argc,_fake_argvs);
+            if (need_seed) {
+                rnd.setSeed(_fake_argc, _fake_argvs);
+            }
+            prepareOpts(_fake_argc, _fake_argvs);
         }
         
         // equal to registerGen(argc, argv, 1);
@@ -586,14 +589,23 @@ namespace generator{
             return inputs;
         }
         
-        void make_inputs(int start, int end, std::function<void()> func, const char* format = "", ...) {
-            FMT_TO_RESULT(format, format, _format);
+        void __make_inputs_impl(int start, int end, std::function<void()> func, std::string format, bool need_seed) {
             for (int i = start; i <= end; i++) {
                 __write_input_file(i);
-                __fake_arg(_format);
+                __fake_arg(format, need_seed);
                 func();
                 __close_output_file_to_console();
             }
+        }
+
+        void make_inputs(int start, int end, std::function<void()> func, const char* format = "", ...) {
+            FMT_TO_RESULT(format, format, _format);
+            __make_inputs_impl(start, end, func, _format, false);
+        }
+
+        void make_inputs_seed(int start, int end, std::function<void()> func, const char* format = "", ...) {
+            FMT_TO_RESULT(format, format, _format);
+            __make_inputs_impl(start, end, func, _format, true);          
         }
         
         void make_outputs(int start, int end, std::function<void()> func) {
@@ -605,18 +617,27 @@ namespace generator{
             }
         }
         
-        void fill_inputs(int number, std::function<void()> func, const char *format, ...) {
-            FMT_TO_RESULT(format, format, _format);
+        void __fill_inputs_impl(int number, std::function<void()> func, std::string format, bool need_seed) {
             int sum = number;
             for (int i = 1; sum; i++) {
                 if (!__input_file_exists(i)) {
                     sum--;
                     __write_input_file(i);
-                    __fake_arg(_format);
+                    __fake_arg(format, need_seed);
                     func();
                     __close_output_file_to_console();
                 }
             }
+        }
+
+        void fill_inputs(int number, std::function<void()> func, const char *format = "", ...) {
+            FMT_TO_RESULT(format, format, _format);
+            __fill_inputs_impl(number, func, _format, false);
+        }
+
+        void fill_inputs_seed(int number, std::function<void()> func, const char *format = "", ...) {
+            FMT_TO_RESULT(format, format, _format);
+            __fill_inputs_impl(number, func, _format, true);
         }
         
         void fill_outputs(std::function<void()> func, bool cover_exist = true) {
