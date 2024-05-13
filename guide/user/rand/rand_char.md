@@ -4,7 +4,7 @@
 
 1. `char rand_char(CharType type = LowerLetter)`
 
-   传入一个类型为`CharTyoe`的参数 $type$ ，默认为 `LowerLetter`（小写字母）。
+   传入一个类型为`CharType`的参数 $type$ ，默认为 `LowerLetter`（小写字母）。
 
    返回一个字符，字符集由参数 $type$ 所描述。
 
