@@ -123,7 +123,7 @@ int cright() const;
 
 [示例代码3](../../../examples/bipartite_graph3.cpp)：
 生成一个 $7$ 个结点， $10$ 条边, 结点起始编号为 $0$ ，左部大小为 $3$ 的二分图。
-它左部的编号为 $0\sim3$ ,右部的编号为 $0\sim4$ 。
+它左部的编号为 $0\sim2$ ,右部的编号为 $0\sim3$ 。
 输出的形式是`LeftRight`。
 
 [返回上级](./summary.md)
