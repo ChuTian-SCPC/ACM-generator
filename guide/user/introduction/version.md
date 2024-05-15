@@ -1,6 +1,9 @@
 [返回目录](../../home.md)
 
-### development
+### version 0.7.0
+
+2024-5-15
+
 - 修复bugs：
   - 修复制作输出的bug。
   - 修复用户手册中的部分bug。
