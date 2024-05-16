@@ -3399,7 +3399,9 @@ namespace generator{
                 void use_format_left_right() { _node_output_format = LeftRight; }
                 void use_format_node_left() { _node_output_format = NodeLeft; }
                 void use_format_node_right() { _node_output_format = NodeRight; }
-
+                
+                _DISABLE_SELF_LOOP
+                _DISABLE_DIRECTION
                 _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
             
             protected:
