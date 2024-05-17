@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include <sys/stat.h>
+#include <queue>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -2255,6 +2256,48 @@ namespace generator{
                     __generator_tree();
                     __generator_nodes_weight();
                     shuffle(_edges.begin(),_edges.end());
+                }
+                
+                void reroot(int root) {
+                    if (!_is_rooted) {
+                        io::__warn_msg(io::_err, "unrooted tree can't re-root.");
+                        return;
+                    }
+                    if (root < 1 || root > _node_count) {
+                        io::__warn_msg(io::_err, "restriction of the root is [1, %d], but found %d.", _node_count, root);
+                        return;
+                    }
+                    if ((int)_edges.size() < _node_count - 1) {
+                        io::__warn_msg(io::_err, "Tree should generate first.");
+                        return;
+                    }
+                    _root = root - 1;
+                    std::vector<_Edge<EdgeType>> result;
+                    std::vector<std::vector<_Edge<EdgeType>>> node_edges(_node_count);
+                    for (auto edge : _edges) {
+                        node_edges[edge.u() - _begin_node].emplace_back(edge);
+                        node_edges[edge.v() - _begin_node].emplace_back(edge);
+                    }
+                    std::vector<int> visit(_node_count, 0);
+                    std::queue<int> q;
+                    q.push(_root);
+                    while(!q.empty()) {
+                        int u = q.front();
+                        q.pop();
+                        visit[u] = 1;
+                        for (auto& edge : node_edges[u]) {
+                            int v = (edge.u() - _begin_node == u ? edge.v() : edge.u()) - _begin_node;
+                            if (visit[v]) {
+                                continue;
+                            }
+                            edge.u() = u + _begin_node;
+                            edge.v() = v + _begin_node;
+                            result.emplace_back(edge);
+                            q.push(v);
+                        }
+                    }
+                    shuffle(result.begin(), result.end());
+                    _edges = result;                    
                 }
                 
                 void default_output(std::ostream& os) const {
