@@ -1,4 +1,10 @@
 [返回目录](../../home.md)
+### development
+
+- 修复bugs：
+  - 禁用二分图相关set函数。
+- 新增功能：
+  - 有根树添加重定根函数`reroot`。
 
 ### version 0.7.0
 
