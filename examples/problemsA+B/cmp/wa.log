@@ -1,13 +1,13 @@
-Testcase 1 : WA ,Runtime = 64ms. checker return :
-wrong answer 1st lines differ - expected: '96', found: '97' 
+Testcase 1 : TLE(WA) ,Runtime = 1387ms. checker return :
+wrong answer 1st lines differ - expected: '97', found: '96' 
 Testcase 2 : WA ,Runtime = 66ms. checker return :
-wrong answer 1st lines differ - expected: '70', found: '71' 
-Testcase 3 : AC ,Runtime = 66ms.
-Testcase 4 : AC ,Runtime = 68ms.
+wrong answer 1st lines differ - expected: '71', found: '70' 
+Testcase 3 : AC ,Runtime = 65ms.
+Testcase 4 : AC ,Runtime = 64ms.
 Total results :
 AC : 2 / 4
-WA : 2 / 4
+WA : 1 / 4
 TLE : 0 / 4
 TLE(AC) : 0 / 4
-TLE(WA) : 0 / 4
+TLE(WA) : 1 / 4
 ERROR : 0 / 4

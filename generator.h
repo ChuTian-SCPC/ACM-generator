@@ -960,7 +960,7 @@ namespace generator{
         
         void __check_result(
             Path& input_file, 
-            Path& output_file,
+            Path& std_output_file,
             Path& ans_file,
             Path& testlib_out_file,
             Path& checker,
@@ -970,8 +970,8 @@ namespace generator{
             std::string command = 
                 checker.path() + " " +
                 input_file.path() + " " +
-                output_file.path() + " " +
-                ans_file.path() + " 2> " +
+                ans_file.path() + " " +
+                std_output_file.path() + " 2> " +
                 testlib_out_file.path();
             system(command.c_str());
             std::ifstream check_stream(testlib_out_file.path());
