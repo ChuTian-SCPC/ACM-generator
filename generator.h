@@ -1047,8 +1047,6 @@ namespace generator{
             __info_msg(log, "%s : %d / %d", __color_tle_ac(false).c_str(), results_count[R_TLEANDAC], case_count);
             __info_msg(log, "%s : %d / %d", __color_tle_wa(false).c_str(), results_count[R_TLEANDWA], case_count);
             __info_msg(log, "%s : %d / %d", __color_run_err(false).c_str(), results_count[R_UNKNOWN] + results_count[R_ERROR], case_count);
-
-            log.close();
         }
 
         void __report_case_result(
@@ -1109,6 +1107,7 @@ namespace generator{
             }
             testlib_out_file.__delete_file();
             __report_total_results(end - start + 1, log, results_count);
+            log.close();
             return;
         }
 
