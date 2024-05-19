@@ -22,7 +22,7 @@ namespace generator{
         class Path;
         class OutStream {
         public:
-            OutStream() : output_stream_ptr_(&std::cerr) {}
+            OutStream() : output_stream_ptr_(&std::cerr), path_("std::cerr") {}
             OutStream(Path& path);
             OutStream(const std::string& filename) {
                 open(filename);
@@ -36,15 +36,18 @@ namespace generator{
                 close();
                 if (filename.empty()) {
                     output_stream_ptr_ = &std::cerr;
+                    path_ = "std::cerr";
                 }
                 else{
                     file_.open(filename);
                     if (!file_.is_open()) {
                         std::cerr << "Error opening file: " << filename << std::endl;
                         output_stream_ptr_ = &std::cerr;
+                        path_ = "std::cerr";
                         std::cerr << "Using std::cerr" << std::endl;
                     } else {
                         output_stream_ptr_ = &file_;
+                        path_ = filename;
                     }
                 }
             }
@@ -53,6 +56,7 @@ namespace generator{
                 if (file_.is_open()) {
                     file_.close();
                     output_stream_ptr_ = &std::cerr;
+                    path_ = "std::cerr";
                 }
             }
 
@@ -76,9 +80,18 @@ namespace generator{
                 *output_stream_ptr_ << _format << std::endl;
             }
 
+            std::string path() {
+                return path_;
+            }
+
+            const char* cpath() {
+                return path_.c_str();
+            }
+
         private:
             std::ostream* output_stream_ptr_;
             std::ofstream file_;
+            std::string path_;
         };
 
         // error msg outstream, default on console
@@ -1011,44 +1024,11 @@ namespace generator{
             }   
         }
 
-        void __report_results(
-            int start,
-            int end,
-            std::vector<int>& runtimes,
-            std::vector<ResultState>& results,
-            std::vector<std::string>& testlib_results,
-            std::vector<int>& results_count,
-            Path& log_path) 
+        void __report_total_results(
+            int case_count,
+            OutStream& log,
+            std::vector<int>& results_count) 
         {
-            OutStream log(log_path);       
-            for (int i = start; i <= end; i++) {
-                int idx = i - start;
-                if (results[idx] == R_UNKNOWN || results[idx] == R_ERROR) {
-                    __run_err_msg(_err, true, i);
-                    __run_err_msg(log, false, i);
-                }
-                if (results[idx] == R_AC) {
-                    __ac_msg(_err, true, i, runtimes[idx]);
-                    __ac_msg(log, false, i, runtimes[idx]);
-                }
-                if (results[idx] == R_WA) {
-                    __wa_msg(_err, true, i, runtimes[idx], testlib_results[idx]);
-                    __wa_msg(log, false, i, runtimes[idx], testlib_results[idx]);
-                }
-                if (results[idx] == R_TLEANDAC) {
-                    __tle_ac_msg(_err, true, i, runtimes[idx]);
-                    __tle_ac_msg(log, false, i, runtimes[idx]);
-                }
-                if (results[idx] == R_TLEANDWA) {
-                    __tle_wa_msg(_err, true, i, runtimes[idx], testlib_results[idx]);
-                    __tle_wa_msg(log, false, i, runtimes[idx], testlib_results[idx]);
-                }
-                if (results[idx] == R_TLE) {
-                    __tle_msg(_err, true, i, runtimes[idx]);
-                    __tle_msg(log, false, i, runtimes[idx]);
-                }
-            }
-            int case_count = end - start + 1;
 
             __info_msg(_err, "Total results :");
             __info_msg(_err, "%s : %d / %d", __color_ac(true).c_str(), results_count[R_AC], case_count);
@@ -1057,7 +1037,7 @@ namespace generator{
             __info_msg(_err, "%s : %d / %d", __color_tle_ac(true).c_str(), results_count[R_TLEANDAC], case_count);
             __info_msg(_err, "%s : %d / %d", __color_tle_wa(true).c_str(), results_count[R_TLEANDWA], case_count);
             __info_msg(_err, "%s : %d / %d", __color_run_err(true).c_str(), results_count[R_UNKNOWN] + results_count[R_ERROR], case_count);
-            __info_msg(_err, "The report is in %s file.", log_path.cname());
+            __info_msg(_err, "The report is in %s file.", log.cpath());
             _err.println("");
 
             __info_msg(log, "Total results :");
@@ -1071,6 +1051,39 @@ namespace generator{
             log.close();
         }
 
+        void __report_case_result(
+            OutStream& log,
+            int case_index,
+            int runtime,
+            ResultState result,
+            std::string testlib_result) 
+        {
+            if (result == R_UNKNOWN || result == R_ERROR) {
+                __run_err_msg(_err, true, case_index);
+                __run_err_msg(log, false, case_index);
+            }
+            if (result == R_AC) {
+                __ac_msg(_err, true, case_index, runtime);
+                __ac_msg(log, false, case_index, runtime);
+            }
+            if (result == R_WA) {
+                __wa_msg(_err, true, case_index, runtime, testlib_result);
+                __wa_msg(log, false, case_index, runtime, testlib_result);
+            }
+            if (result == R_TLEANDAC) {
+                __tle_ac_msg(_err, true, case_index, runtime);
+                __tle_ac_msg(log, false, case_index, runtime);
+            }
+            if (result == R_TLEANDWA) {
+                __tle_wa_msg(_err, true, case_index, runtime, testlib_result);
+                __tle_wa_msg(log, false, case_index, runtime, testlib_result);
+            }
+            if (result == R_TLE) {
+                __tle_msg(_err, true, case_index, runtime);
+                __tle_msg(log, false, case_index, runtime);
+            }
+        }
+
         void __compare_once(int start, int end, Path& program, int time_limit, Path& checker) {
             Path compare_path(__path_join(__current_path(), "cmp"));
             std::string program_name = program.__file_name();
@@ -1082,6 +1095,9 @@ namespace generator{
             std::vector<ResultState> results(case_count, R_UNKNOWN);
             std::vector<std::string> testlib_results(case_count);
             std::vector<int> results_count(R_Max, 0);
+            __info_msg(_err,"Test results for program %s :",program.cname());
+            Path log_path(__path_join(compare_path, __end_with(program_name, Log)));
+            OutStream log(log_path); 
             for (int i = start; i <= end; i++) {
                 Path ans_file(__path_join(ans_folder_path, __end_with(i, Ans)));
                 int idx = i - start;
@@ -1089,11 +1105,10 @@ namespace generator{
                     i, program, time_limit, checker, ans_file, testlib_out_file,
                     runtimes[idx], results[idx], testlib_results[idx]);
                 results_count[results[idx]]++;
+                __report_case_result(log, i, runtimes[idx], results[idx], testlib_results[idx]);
             }
             testlib_out_file.__delete_file();
-            Path log_path(__path_join(compare_path, __end_with(program_name, Log)));
-            __info_msg(_err,"Test results for program %s :",program.cname());
-            __report_results(start, end, runtimes, results, testlib_results, results_count, log_path);
+            __report_total_results(end - start + 1, log, results_count);
             return;
         }
 
