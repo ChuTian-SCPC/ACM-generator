@@ -141,7 +141,13 @@ void set_edges_weight_function(EdgeGenFunction edges_weight_function);
 
 树的输出可以通过重载的`std::ostream& <<`输出，也可以通过`println`输出。区别在于`std::ostream& <<`不会换行，而`println`会换行，即等价于`std::cout<<tree<<std::endl;`。
 
+#### 其他函数
 
+##### 有根树重定根(reroot)
+
+对于所有有根树，都可以用函数`void reroot(int root)`在树的生成之后进行重定根。
+
+使用方式可以查看[示例代码](../../../examples/reroot.cpp)。
 
 
 [返回上级](./summary.md)
