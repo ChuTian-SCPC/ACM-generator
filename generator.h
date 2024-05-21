@@ -2405,19 +2405,26 @@ namespace generator{
                     }      
                 }
                 
+                void __add_edge(_Edge<EdgeType> edge, bool change = true) {
+                    if (change) {
+                        int& u = edge.u();
+                        int& v = edge.v();
+                        u += _begin_node;
+                        v += _begin_node;
+                    }
+                    _edges.emplace_back(edge);
+                }
+                
                 template<typename T = EdgeType, _NotHasT<T> = 0>
                 void __add_edge(int u, int v) {
-                    u += _begin_node;
-                    v += _begin_node;
-                    _edges.emplace_back(u, v);
+                    __add_edge(_Edge<void>(u, v));
+
                 }
                 
                 template<typename T = EdgeType, _HasT<T> = 0>
                 void __add_edge(int u, int v) {
-                    u += _begin_node;
-                    v += _begin_node;
                     EdgeType w = this->_edges_weight_function();
-                    _edges.emplace_back(u, v, w);
+                    __add_edge(_Edge<EdgeType>(u, v, w));
                 }
                 
                 template<typename T = NodeType, _NotHasT<T> = 0>
@@ -3217,13 +3224,26 @@ namespace generator{
                     }
                 }
                 
-                void __add_edge(_Edge<EdgeType> edge) {
+                void __add_edge(_Edge<EdgeType> edge, bool change = true) {
                     int &u = edge.u();
                     int &v = edge.v();
                     __add_edge_into_map(u, v);
-                    u += _begin_node;
-                    v += _begin_node;
+                    if (change) {
+                        u += _begin_node;
+                        v += _begin_node;                        
+                    }
                     _edges.emplace_back(edge);
+                }
+                
+                template<typename T = EdgeType, _NotHasT<T> = 0>
+                void __add_edge(int u, int v) {
+                    __add_edge(_Edge<void>(u, v));
+                }
+
+                template<typename T = EdgeType, _HasT<T> = 0>
+                void __add_edge(int u, int v) {
+                    EdgeType w = this->_edges_weight_function();
+                    __add_edge(_Edge<EdgeType>(u, v, w));
                 }
 
                 template<typename T = NodeType, _NotHasT<T> = 0>
@@ -3590,7 +3610,7 @@ namespace generator{
                     if (f == 1) {
                         std::swap(u, v);
                     }
-                    this->__add_edge(this->__convert_edge(u, v));
+                    this->__add_edge(u, v);
                     _d[0]--;
                     _d[1]--;
                     _degree[f][i]--;
@@ -3713,7 +3733,7 @@ namespace generator{
                 virtual void __generator_connect() override{
                     for (int i = 1; i < this->_node_count; i++) {
                         int f = rnd.next(i);
-                        this->__add_edge(this->__convert_edge(_p[f], _p[i]));
+                        this->__add_edge(_p[f], _p[i]);
                     }
                 }
 
@@ -3809,7 +3829,7 @@ namespace generator{
                     int node = this->_node_count;
                     std::vector<int> p = rnd.perm(node, 0);
                     for (int i = 0; i < node; i++) {
-                        this->__add_edge(this->__convert_edge(p[i], p[(i + 1) % node]));
+                        this->__add_edge(p[i], p[(i + 1) % node]);
                     }
                 }
             };
@@ -3890,8 +3910,8 @@ namespace generator{
                     int node = this->_node_count;
                     std::vector<int> p = rnd.perm(node, 0);
                     for (int i = 0; i < node - 1; i++) {
-                        this->__add_edge(this->__convert_edge(p[i], p[(i + 1) % (node - 1)]));
-                        this->__add_edge(this->__convert_edge(p[i], p[node - 1]));
+                        this->__add_edge(p[i], p[(i + 1) % (node - 1)]);
+                        this->__add_edge(p[i], p[node - 1]);
                     }
                 }
             };
@@ -4088,11 +4108,11 @@ namespace generator{
                         for (int j = 1; j < _column; j++) {
                             int x = i * _column + j, y = x - 1;
                             if (x >= this->_node_count) continue;
-                            this->__add_edge(this->__convert_edge(_p[x], _p[y]));
+                            this->__add_edge(_p[x], _p[y]);
                         }
                         int x = i * _column, y = (i + 1) * _column;
                         if (x < this->_node_count && y < this->_node_count) {
-                            this->__add_edge(this->__convert_edge(_p[x], _p[y]));
+                            this->__add_edge(_p[x], _p[y]);
                         }
                     }
                 }
@@ -4247,7 +4267,7 @@ namespace generator{
                 virtual void __generator_other_edges() {
                     for (int i = _cycle; i < this->_node_count; i++) {
                         int f = rnd.next(i);
-                        this->__add_edge(this->__convert_edge(_p[i], _p[f]));
+                        this->__add_edge(_p[i], _p[f]);
                     }
                 }
 
@@ -4415,7 +4435,7 @@ namespace generator{
                 virtual void __generator_other_edges() override {
                     for (int i = this->_cycle; i < this->_node_count; i++) {
                         int f = rnd.next(i);
-                        this->__add_edge(this->__convert_edge(this->_p[f], this->_p[i]));
+                        this->__add_edge(this->_p[f], this->_p[i]);
                     }
                 }
             };
@@ -4554,7 +4574,7 @@ namespace generator{
                             continue;
                         }
                         else if(current.size() == 2) {
-                            this->__add_edge(this->__convert_edge(_p[current[0]], _p[current[1]]));
+                            this->__add_edge(_p[current[0]], _p[current[1]]);
                         }
                         else {
                             _CycleGraph<NodeType, EdgeType> cycle = __get_cycle_graph(current.size());
@@ -4570,8 +4590,10 @@ namespace generator{
                         }
                     }
                 }
-
+            
             };
+            
+            
 
             #undef _OTHER_OUTPUT_FUNCTION_SETTING
             #undef _OUTPUT_FUNCTION
