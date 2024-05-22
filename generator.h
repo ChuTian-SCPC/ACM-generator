@@ -617,9 +617,14 @@ namespace generator{
             __make_inputs_impl(start, end, func, _format, false);
         }
 
-        void make_inputs_seed(int number, std::function<void()> func, const char* format = "", ...) {
+        void make_inputs(int index, std::function<void()> func, const char* format = "", ...) {
             FMT_TO_RESULT(format, format, _format);
-            __make_inputs_impl(number, number, func, _format, true);          
+            __make_inputs_impl(index, index, func, _format, false);
+        }
+
+        void make_inputs_seed(int index, std::function<void()> func, const char* format = "", ...) {
+            FMT_TO_RESULT(format, format, _format);
+            __make_inputs_impl(index, index, func, _format, true);          
         }
         
         void make_outputs(int start, int end, std::function<void()> func) {
@@ -647,6 +652,11 @@ namespace generator{
         void fill_inputs(int number, std::function<void()> func, const char *format = "", ...) {
             FMT_TO_RESULT(format, format, _format);
             __fill_inputs_impl(number, func, _format, false);
+        }
+
+        void fill_inputs(std::function<void()> func, const char *format = "", ...) {
+            FMT_TO_RESULT(format, format, _format);
+            __fill_inputs_impl(1, func, _format, false);
         }
 
         void fill_inputs_seed(std::function<void()> func, const char *format = "", ...) {
