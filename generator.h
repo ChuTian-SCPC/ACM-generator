@@ -840,11 +840,12 @@ namespace generator{
         #endif
         }
         
-        int __run_program(
+        void __run_program(
             Path& program,
             Path& input_file,
             Path& output_file,
-            int time_limit) 
+            int time_limit,
+            int& runtime) 
         {
             auto start_time = std::chrono::steady_clock::now();
         #ifdef _WIN32
@@ -899,10 +900,10 @@ namespace generator{
                     __terminate_process(pi.hProcess);
                 };
                 auto end_time = std::chrono::steady_clock::now();
-                return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+                runtime = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
             }
             else {
-                return -1; 
+                runtime = -1; 
             }   
         #else
             pid_t pid = fork();
@@ -946,12 +947,19 @@ namespace generator{
                 if (result == 0) {
                     __terminate_process(reinterpret_cast<void*>(pid));
                 } 
-
+                
                 auto end_time = std::chrono::steady_clock::now();
-                return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+                result = waitpid(pid, &status, WNOHANG);
+                int exit_status = WEXITSTATUS(status);
+                if (WIFEXITED(status) && exit_status == EXIT_FAILURE) {
+                    runtime = -1;
+                }
+                else {
+                    runtime = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();   
+                }          
             } 
             else {
-                return -1;
+                runtime = -1;
                 __warn_msg(_err, "Fail to fork.");
             }
         #endif
@@ -1016,7 +1024,7 @@ namespace generator{
         {
             Path input_file(__path_join(__current_path(), "testcases", __end_with(id, In)));
             Path output_file(__path_join(__current_path(), "testcases", __end_with(id, Out)));
-            runtime = __run_program(program, input_file, ans_file, 2 * time_limit);
+            __run_program(program, input_file, ans_file, 2 * time_limit, runtime);
             if(__enable_judge_ans(runtime, time_limit, result)) {
                 __check_result(
                     input_file, output_file, ans_file, testlib_out_file,
@@ -1082,13 +1090,13 @@ namespace generator{
             }
         }
 
-        void __compare_once(int start, int end, Path& program, int time_limit, Path& checker) {
+        void __compare_once(std::map<int, int> case_indices, Path& program, int time_limit, Path& checker) {
             Path compare_path(__path_join(__current_path(), "cmp"));
             std::string program_name = program.__file_name();
             Path ans_folder_path(__path_join(compare_path, program_name));
             __create_directories(ans_folder_path);
             Path testlib_out_file(__path_join(ans_folder_path, __end_with("__checker", Logc)));
-            int case_count = end - start + 1;
+            int case_count = case_indices.size();
             std::vector<int> runtimes(case_count, -1);
             std::vector<ResultState> results(case_count, R_UNKNOWN);
             std::vector<std::string> testlib_results(case_count);
@@ -1096,17 +1104,18 @@ namespace generator{
             __info_msg(_err,"Test results for program %s :",program.cname());
             Path log_path(__path_join(compare_path, __end_with(program_name, Log)));
             OutStream log(log_path); 
-            for (int i = start; i <= end; i++) {
-                Path ans_file(__path_join(ans_folder_path, __end_with(i, Ans)));
-                int idx = i - start;
+            for (auto cas : case_indices) {
+                int real_index = cas.first;
+                int vec_index = cas.second;
+                Path ans_file(__path_join(ans_folder_path, __end_with(real_index, Ans)));
                 __check_once(
-                    i, program, time_limit, checker, ans_file, testlib_out_file,
-                    runtimes[idx], results[idx], testlib_results[idx]);
-                results_count[results[idx]]++;
-                __report_case_result(log, i, runtimes[idx], results[idx], testlib_results[idx]);
+                    real_index, program, time_limit, checker, ans_file, testlib_out_file,
+                    runtimes[vec_index], results[vec_index], testlib_results[vec_index]);
+                results_count[results[vec_index]]++;
+                __report_case_result(log, real_index, runtimes[vec_index], results[vec_index], testlib_results[vec_index]);
             }
             testlib_out_file.__delete_file();
-            __report_total_results(end - start + 1, log, results_count);
+            __report_total_results(case_count, log, results_count);
             log.close();
             return;
         }
@@ -1118,8 +1127,16 @@ namespace generator{
                 __fail_msg(_err, "Checker file %s doesn't exist.", checker_path.cname());
             }
             std::vector<Path> programs = __get_compare_files(args...);
+            std::map<int, int> case_indices;
+            int count = 0;
+            for (int i = start; i <= end; i++) {
+                if (__input_file_exists(i) && __output_file_exists(i)) {
+                    case_indices[i] = count;
+                    count ++;
+                }
+            }
             for(Path& program : programs) {
-                __compare_once(start, end, program, time_limit, checker_path);
+                __compare_once(case_indices, program, time_limit, checker_path);
             } 
             return;
         }
@@ -1138,6 +1155,44 @@ namespace generator{
         void compare(int start, int end, int time_limit, Checker checker, Args ...args) {
             Path checker_path = __get_default_checker_file(checker);
             compare(start, end, time_limit, checker_path, args...);
+        }
+        
+        template<typename... Args>
+        void compare(int time_limit, Path checker_path, Args ...args) {
+            checker_path.full();
+            if (!checker_path.__file_exists()) {
+                __fail_msg(_err, "Checker file %s doesn't exist.", checker_path.cname());
+            }
+            std::vector<Path> programs = __get_compare_files(args...);
+            std::map<int, int> case_indices;
+            int count = 0;
+            std::vector<int> inputs = __get_inputs();
+            for(int idx : inputs) {
+                if (__output_file_exists(idx)) {
+                    case_indices[idx] = count;
+                    count++;
+                }
+            }
+            for(Path& program : programs) {
+                __compare_once(case_indices, program, time_limit, checker_path);
+            } 
+            return;
+        }
+        
+        template<typename... Args>
+        void compare(int time_limit, std::string checker_path, Args ...args) {
+            compare(time_limit, Path(checker_path), args...);
+        }
+
+        template<typename... Args>
+        void compare(int time_limit, const char* checker_path, Args ...args) {
+            compare(time_limit, Path(checker_path), args...);
+        }
+
+        template<typename... Args>
+        void compare(int time_limit, Checker checker, Args ...args) {
+            Path checker_path = __get_default_checker_file(checker);
+            compare(time_limit, checker_path, args...);
         }
     }
 
@@ -2405,19 +2460,26 @@ namespace generator{
                     }      
                 }
                 
+                void __add_edge(_Edge<EdgeType> edge, bool change = true) {
+                    if (change) {
+                        int& u = edge.u();
+                        int& v = edge.v();
+                        u += _begin_node;
+                        v += _begin_node;
+                    }
+                    _edges.emplace_back(edge);
+                }
+                
                 template<typename T = EdgeType, _NotHasT<T> = 0>
                 void __add_edge(int u, int v) {
-                    u += _begin_node;
-                    v += _begin_node;
-                    _edges.emplace_back(u, v);
+                    __add_edge(_Edge<void>(u, v));
+
                 }
                 
                 template<typename T = EdgeType, _HasT<T> = 0>
                 void __add_edge(int u, int v) {
-                    u += _begin_node;
-                    v += _begin_node;
                     EdgeType w = this->_edges_weight_function();
-                    _edges.emplace_back(u, v, w);
+                    __add_edge(_Edge<EdgeType>(u, v, w));
                 }
                 
                 template<typename T = NodeType, _NotHasT<T> = 0>
@@ -3217,13 +3279,26 @@ namespace generator{
                     }
                 }
                 
-                void __add_edge(_Edge<EdgeType> edge) {
+                void __add_edge(_Edge<EdgeType> edge, bool change = true) {
                     int &u = edge.u();
                     int &v = edge.v();
                     __add_edge_into_map(u, v);
-                    u += _begin_node;
-                    v += _begin_node;
+                    if (change) {
+                        u += _begin_node;
+                        v += _begin_node;                        
+                    }
                     _edges.emplace_back(edge);
+                }
+                
+                template<typename T = EdgeType, _NotHasT<T> = 0>
+                void __add_edge(int u, int v) {
+                    __add_edge(_Edge<void>(u, v));
+                }
+
+                template<typename T = EdgeType, _HasT<T> = 0>
+                void __add_edge(int u, int v) {
+                    EdgeType w = this->_edges_weight_function();
+                    __add_edge(_Edge<EdgeType>(u, v, w));
                 }
 
                 template<typename T = NodeType, _NotHasT<T> = 0>
@@ -3590,7 +3665,7 @@ namespace generator{
                     if (f == 1) {
                         std::swap(u, v);
                     }
-                    this->__add_edge(this->__convert_edge(u, v));
+                    this->__add_edge(u, v);
                     _d[0]--;
                     _d[1]--;
                     _degree[f][i]--;
@@ -3713,7 +3788,7 @@ namespace generator{
                 virtual void __generator_connect() override{
                     for (int i = 1; i < this->_node_count; i++) {
                         int f = rnd.next(i);
-                        this->__add_edge(this->__convert_edge(_p[f], _p[i]));
+                        this->__add_edge(_p[f], _p[i]);
                     }
                 }
 
@@ -3809,7 +3884,7 @@ namespace generator{
                     int node = this->_node_count;
                     std::vector<int> p = rnd.perm(node, 0);
                     for (int i = 0; i < node; i++) {
-                        this->__add_edge(this->__convert_edge(p[i], p[(i + 1) % node]));
+                        this->__add_edge(p[i], p[(i + 1) % node]);
                     }
                 }
             };
@@ -3890,8 +3965,8 @@ namespace generator{
                     int node = this->_node_count;
                     std::vector<int> p = rnd.perm(node, 0);
                     for (int i = 0; i < node - 1; i++) {
-                        this->__add_edge(this->__convert_edge(p[i], p[(i + 1) % (node - 1)]));
-                        this->__add_edge(this->__convert_edge(p[i], p[node - 1]));
+                        this->__add_edge(p[i], p[(i + 1) % (node - 1)]);
+                        this->__add_edge(p[i], p[node - 1]);
                     }
                 }
             };
@@ -4088,11 +4163,11 @@ namespace generator{
                         for (int j = 1; j < _column; j++) {
                             int x = i * _column + j, y = x - 1;
                             if (x >= this->_node_count) continue;
-                            this->__add_edge(this->__convert_edge(_p[x], _p[y]));
+                            this->__add_edge(_p[x], _p[y]);
                         }
                         int x = i * _column, y = (i + 1) * _column;
                         if (x < this->_node_count && y < this->_node_count) {
-                            this->__add_edge(this->__convert_edge(_p[x], _p[y]));
+                            this->__add_edge(_p[x], _p[y]);
                         }
                     }
                 }
@@ -4247,7 +4322,7 @@ namespace generator{
                 virtual void __generator_other_edges() {
                     for (int i = _cycle; i < this->_node_count; i++) {
                         int f = rnd.next(i);
-                        this->__add_edge(this->__convert_edge(_p[i], _p[f]));
+                        this->__add_edge(_p[i], _p[f]);
                     }
                 }
 
@@ -4415,7 +4490,7 @@ namespace generator{
                 virtual void __generator_other_edges() override {
                     for (int i = this->_cycle; i < this->_node_count; i++) {
                         int f = rnd.next(i);
-                        this->__add_edge(this->__convert_edge(this->_p[f], this->_p[i]));
+                        this->__add_edge(this->_p[f], this->_p[i]);
                     }
                 }
             };
@@ -4554,7 +4629,7 @@ namespace generator{
                             continue;
                         }
                         else if(current.size() == 2) {
-                            this->__add_edge(this->__convert_edge(_p[current[0]], _p[current[1]]));
+                            this->__add_edge(_p[current[0]], _p[current[1]]);
                         }
                         else {
                             _CycleGraph<NodeType, EdgeType> cycle = __get_cycle_graph(current.size());
@@ -4570,8 +4645,10 @@ namespace generator{
                         }
                     }
                 }
-
+            
             };
+            
+            
 
             #undef _OTHER_OUTPUT_FUNCTION_SETTING
             #undef _OUTPUT_FUNCTION
