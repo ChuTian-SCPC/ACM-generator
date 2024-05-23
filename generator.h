@@ -677,19 +677,16 @@ namespace generator{
             }
         }
         
-        template<typename T>
-        void make_inputs_exe(int start,int end,T path,const char* format = "",...){
-            Path data_path(path);
+        void __make_inputs_exe(int start, int end, Path data_path, std::string seed) {
             data_path.full();
             if (!data_path.__file_exists()) {
                 io::__fail_msg(io::_err, "data file %s doesn't exist.", data_path.cname());
             }
-            FMT_TO_RESULT(format,format,_format);
             Path testcases_folder = __path_join(__current_path(), "testcases");
             __create_directories(testcases_folder);
             for(int i = start;i <= end; i++){
                 Path file_path = __path_join(testcases_folder, __end_with(i, In)) ;
-                std::string command = data_path.path() + " " + _format + " > " + file_path.path();
+                std::string command = data_path.path() + " " + seed + " > " + file_path.path();
                 int return_code = std::system(command.c_str());
                 if(return_code == 0) {
                     io::__success_msg(io::_err,"Successfully create input file %s",file_path.cname());
@@ -698,6 +695,18 @@ namespace generator{
                     io::__error_msg(io::_err,"Something error in creating input file %s",file_path.cname());
                 }   
             }
+        }
+
+        template<typename T>
+        void make_inputs_exe(int start,int end,T path,const char* format = "",...){
+            FMT_TO_RESULT(format,format,_format);
+            __make_inputs_exe(start, end, Path(path), _format);
+        }
+
+        template<typename T>
+        void make_inputs_exe(int index, T path,const char* format = "",...){
+            FMT_TO_RESULT(format,format,_format);
+            __make_inputs_exe(index, index, Path(path), _format);
         }
         
         template<typename T>
