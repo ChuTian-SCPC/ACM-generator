@@ -18,7 +18,7 @@
 
    如果你想要和`testlib.h`一样，或者存在传入参数的需求，可以调用这个函数。
 
-如果又想像`testlib.h`一样解析命令行参数，又希望能够在一个`cpp`中实现编写`generator`并批量生成，可以使用以下的宏：
+如果又想像`testlib.h`一样解析命令行参数，又希望能够在一个`cpp`中实现编写`generator`并批量生成，可以使用以下的函数：
 
 1. `make_inputs(int start, int end, std::function<void()> func, const char* format = "", ...)`
 
@@ -26,16 +26,21 @@
 
    后面的可选参数为传入命令行参数，支持类似`printf`中的格式控制字符串。
 
+2. `make_inputs(int index, std::function<void()> func, const char* format = "", ...)`
    
+   生成编号为`index`的标准输入文件，以`func`函数生成。
 
-2. `fill_inputs(int num, std::function<void()> func, const char* format = "", ...)`
+   后面的可选参数为传入命令行参数，支持类似`printf`中的格式控制字符串。
+
+3. `fill_inputs(int num, std::function<void()> func, const char* format = "", ...)`
 
    与第一个函数不同的方式在于，该函数是从 $1$ 开始，寻找编号最小的还没生成的 `num`个编号生成。
 
 如果想调用其他已经写好的数据生成器的可执行文件，可以使用以下函数：
 
 1. `void make_inputs_exe(int start,int end, T path, const char* format = "",...)`
-2. `void fill_inputs_exe(int sum, T path, const char* format = "",...)`
+2. `void make_inputs_exe(int index, T path, const char* format = "", ...)`
+3. `void fill_inputs_exe(int sum, T path, const char* format = "",...)`
 
 
 
