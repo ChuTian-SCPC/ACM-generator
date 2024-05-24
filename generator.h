@@ -2136,6 +2136,8 @@ namespace generator{
                 bool _output_node_count;
                 bool _output_root;
                 bool _swap_node;// true means output `father son` or `son father` by random
+
+                std::vector<int> _node_indices;
                 
             public:
                 _BasicTree(
@@ -2197,6 +2199,9 @@ namespace generator{
 
                 int& beign_node() { return _begin_node; }
                 int cbegin_node() const { return _begin_node; }
+
+                std::vector<int>& node_indices() { return _node_indices; }
+                std::vector<int> cnode_indices() const { return _node_indices; }
             }; 
             
             template<typename T, typename U>
@@ -2486,7 +2491,12 @@ namespace generator{
                                 break;
                             }
                         }
-                    }      
+                    }    
+                    _node_indices.clear();
+                    for (int i = 0; i < _node_count; i++) {
+                        _node_indices.emplace_back(i + _begin_node);
+                    }
+
                 }
                 
                 void __add_edge(_Edge<EdgeType> edge, bool change = true) {
@@ -3029,6 +3039,8 @@ namespace generator{
                 bool _output_node_count;
                 bool _output_edge_count; 
 
+                std::vector<int> _node_indices;
+
             public:
                 _BasicGraph(
                     int node_count, int edge_count, int begin_node,
@@ -3095,6 +3107,9 @@ namespace generator{
 
                 int& begin_node() { return _begin_node; }
                 int cbegin_node() const { return _begin_node; }
+
+                std::vector<int>& node_indices() { return _node_indices; }
+                std::vector<int> cnode_indices() { return _node_indices; }
             };
 
             template<typename NodeType, typename EdgeType>
@@ -3282,6 +3297,10 @@ namespace generator{
                     _nodes_weight.clear();   
                     if (!_multiply_edge) {
                         _e.clear();
+                    }
+                    _node_indices.clear();
+                    for (int i = 0; i < _node_count; i++) {
+                        _node_indices.emplace_back(i + _begin_node);
                     }
                 }
                 
@@ -4677,7 +4696,7 @@ namespace generator{
             
             };
             
-            
+
 
             #undef _OTHER_OUTPUT_FUNCTION_SETTING
             #undef _OUTPUT_FUNCTION
