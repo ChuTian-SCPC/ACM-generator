@@ -617,9 +617,14 @@ namespace generator{
             __make_inputs_impl(start, end, func, _format, false);
         }
 
-        void make_inputs_seed(int number, std::function<void()> func, const char* format = "", ...) {
+        void make_inputs(int index, std::function<void()> func, const char* format = "", ...) {
             FMT_TO_RESULT(format, format, _format);
-            __make_inputs_impl(number, number, func, _format, true);          
+            __make_inputs_impl(index, index, func, _format, false);
+        }
+
+        void make_inputs_seed(int index, std::function<void()> func, const char* format = "", ...) {
+            FMT_TO_RESULT(format, format, _format);
+            __make_inputs_impl(index, index, func, _format, true);          
         }
         
         void make_outputs(int start, int end, std::function<void()> func) {
@@ -649,6 +654,11 @@ namespace generator{
             __fill_inputs_impl(number, func, _format, false);
         }
 
+        void fill_inputs(std::function<void()> func, const char *format = "", ...) {
+            FMT_TO_RESULT(format, format, _format);
+            __fill_inputs_impl(1, func, _format, false);
+        }
+
         void fill_inputs_seed(std::function<void()> func, const char *format = "", ...) {
             FMT_TO_RESULT(format, format, _format);
             __fill_inputs_impl(1, func, _format, true);
@@ -667,19 +677,16 @@ namespace generator{
             }
         }
         
-        template<typename T>
-        void make_inputs_exe(int start,int end,T path,const char* format = "",...){
-            Path data_path(path);
+        void __make_inputs_exe(int start, int end, Path data_path, std::string seed) {
             data_path.full();
             if (!data_path.__file_exists()) {
                 io::__fail_msg(io::_err, "data file %s doesn't exist.", data_path.cname());
             }
-            FMT_TO_RESULT(format,format,_format);
             Path testcases_folder = __path_join(__current_path(), "testcases");
             __create_directories(testcases_folder);
             for(int i = start;i <= end; i++){
                 Path file_path = __path_join(testcases_folder, __end_with(i, In)) ;
-                std::string command = data_path.path() + " " + _format + " > " + file_path.path();
+                std::string command = data_path.path() + " " + seed + " > " + file_path.path();
                 int return_code = std::system(command.c_str());
                 if(return_code == 0) {
                     io::__success_msg(io::_err,"Successfully create input file %s",file_path.cname());
@@ -688,6 +695,18 @@ namespace generator{
                     io::__error_msg(io::_err,"Something error in creating input file %s",file_path.cname());
                 }   
             }
+        }
+
+        template<typename T>
+        void make_inputs_exe(int start,int end,T path,const char* format = "",...){
+            FMT_TO_RESULT(format,format,_format);
+            __make_inputs_exe(start, end, Path(path), _format);
+        }
+
+        template<typename T>
+        void make_inputs_exe(int index, T path,const char* format = "",...){
+            FMT_TO_RESULT(format,format,_format);
+            __make_inputs_exe(index, index, Path(path), _format);
         }
         
         template<typename T>
@@ -716,14 +735,12 @@ namespace generator{
             }
         }
         
-        template<typename T>
-        void fill_inputs_exe(int sum, T path, const char* format = "",...){
+        void __fill_inputs_exe_impl(int sum, Path path, std::string seed) {
             Path data_path(path);
             data_path.full();
             if (!data_path.__file_exists()) {
                 io::__fail_msg(io::_err, "data file %s doesn't exist.", data_path.cname());
             }
-            FMT_TO_RESULT(format,format,_format);
             Path testcases_folder = __path_join(__current_path(), "testcases");
             __create_directories(testcases_folder);
             for(int i = 1;sum; i++){
@@ -732,7 +749,7 @@ namespace generator{
                     continue;
                 }
                 sum--;
-                std::string command = data_path.path() + " " + _format + " > " + file_path.path();
+                std::string command = data_path.path() + " " + seed + " > " + file_path.path();
                 int return_code = std::system(command.c_str());
                 if(return_code == 0) {
                     io::__success_msg(io::_err,"Successfully create/open input file %s",file_path.cname());
@@ -741,6 +758,18 @@ namespace generator{
                     io::__error_msg(io::_err,"Something error in creating/opening input file %s",file_path.cname());
                 }   
             }
+        }
+
+        template<typename T>
+        void fill_inputs_exe(int sum, T path, const char* format = "",...){
+            FMT_TO_RESULT(format,format,_format);
+            __fill_inputs_exe_impl(sum, Path(path), _format);
+        }
+
+        template<typename T>
+        void fill_inputs_exe(T path, const char* format = "",...) {
+            FMT_TO_RESULT(format,format,_format);
+            __fill_inputs_exe_impl(1, Path(path), _format);
         }
         
         template<typename T>
@@ -840,11 +869,12 @@ namespace generator{
         #endif
         }
         
-        int __run_program(
+        void __run_program(
             Path& program,
             Path& input_file,
             Path& output_file,
-            int time_limit) 
+            int time_limit,
+            int& runtime) 
         {
             auto start_time = std::chrono::steady_clock::now();
         #ifdef _WIN32
@@ -899,10 +929,10 @@ namespace generator{
                     __terminate_process(pi.hProcess);
                 };
                 auto end_time = std::chrono::steady_clock::now();
-                return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+                runtime = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
             }
             else {
-                return -1; 
+                runtime = -1; 
             }   
         #else
             pid_t pid = fork();
@@ -946,12 +976,19 @@ namespace generator{
                 if (result == 0) {
                     __terminate_process(reinterpret_cast<void*>(pid));
                 } 
-
+                
                 auto end_time = std::chrono::steady_clock::now();
-                return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+                result = waitpid(pid, &status, WNOHANG);
+                int exit_status = WEXITSTATUS(status);
+                if (WIFEXITED(status) && exit_status == EXIT_FAILURE) {
+                    runtime = -1;
+                }
+                else {
+                    runtime = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();   
+                }          
             } 
             else {
-                return -1;
+                runtime = -1;
                 __warn_msg(_err, "Fail to fork.");
             }
         #endif
@@ -1016,7 +1053,7 @@ namespace generator{
         {
             Path input_file(__path_join(__current_path(), "testcases", __end_with(id, In)));
             Path output_file(__path_join(__current_path(), "testcases", __end_with(id, Out)));
-            runtime = __run_program(program, input_file, ans_file, 2 * time_limit);
+            __run_program(program, input_file, ans_file, 2 * time_limit, runtime);
             if(__enable_judge_ans(runtime, time_limit, result)) {
                 __check_result(
                     input_file, output_file, ans_file, testlib_out_file,
@@ -1082,13 +1119,13 @@ namespace generator{
             }
         }
 
-        void __compare_once(int start, int end, Path& program, int time_limit, Path& checker) {
+        void __compare_once(std::map<int, int> case_indices, Path& program, int time_limit, Path& checker) {
             Path compare_path(__path_join(__current_path(), "cmp"));
             std::string program_name = program.__file_name();
             Path ans_folder_path(__path_join(compare_path, program_name));
             __create_directories(ans_folder_path);
             Path testlib_out_file(__path_join(ans_folder_path, __end_with("__checker", Logc)));
-            int case_count = end - start + 1;
+            int case_count = case_indices.size();
             std::vector<int> runtimes(case_count, -1);
             std::vector<ResultState> results(case_count, R_UNKNOWN);
             std::vector<std::string> testlib_results(case_count);
@@ -1096,17 +1133,18 @@ namespace generator{
             __info_msg(_err,"Test results for program %s :",program.cname());
             Path log_path(__path_join(compare_path, __end_with(program_name, Log)));
             OutStream log(log_path); 
-            for (int i = start; i <= end; i++) {
-                Path ans_file(__path_join(ans_folder_path, __end_with(i, Ans)));
-                int idx = i - start;
+            for (auto cas : case_indices) {
+                int real_index = cas.first;
+                int vec_index = cas.second;
+                Path ans_file(__path_join(ans_folder_path, __end_with(real_index, Ans)));
                 __check_once(
-                    i, program, time_limit, checker, ans_file, testlib_out_file,
-                    runtimes[idx], results[idx], testlib_results[idx]);
-                results_count[results[idx]]++;
-                __report_case_result(log, i, runtimes[idx], results[idx], testlib_results[idx]);
+                    real_index, program, time_limit, checker, ans_file, testlib_out_file,
+                    runtimes[vec_index], results[vec_index], testlib_results[vec_index]);
+                results_count[results[vec_index]]++;
+                __report_case_result(log, real_index, runtimes[vec_index], results[vec_index], testlib_results[vec_index]);
             }
             testlib_out_file.__delete_file();
-            __report_total_results(end - start + 1, log, results_count);
+            __report_total_results(case_count, log, results_count);
             log.close();
             return;
         }
@@ -1118,8 +1156,16 @@ namespace generator{
                 __fail_msg(_err, "Checker file %s doesn't exist.", checker_path.cname());
             }
             std::vector<Path> programs = __get_compare_files(args...);
+            std::map<int, int> case_indices;
+            int count = 0;
+            for (int i = start; i <= end; i++) {
+                if (__input_file_exists(i) && __output_file_exists(i)) {
+                    case_indices[i] = count;
+                    count ++;
+                }
+            }
             for(Path& program : programs) {
-                __compare_once(start, end, program, time_limit, checker_path);
+                __compare_once(case_indices, program, time_limit, checker_path);
             } 
             return;
         }
@@ -1138,6 +1184,44 @@ namespace generator{
         void compare(int start, int end, int time_limit, Checker checker, Args ...args) {
             Path checker_path = __get_default_checker_file(checker);
             compare(start, end, time_limit, checker_path, args...);
+        }
+        
+        template<typename... Args>
+        void compare(int time_limit, Path checker_path, Args ...args) {
+            checker_path.full();
+            if (!checker_path.__file_exists()) {
+                __fail_msg(_err, "Checker file %s doesn't exist.", checker_path.cname());
+            }
+            std::vector<Path> programs = __get_compare_files(args...);
+            std::map<int, int> case_indices;
+            int count = 0;
+            std::vector<int> inputs = __get_inputs();
+            for(int idx : inputs) {
+                if (__output_file_exists(idx)) {
+                    case_indices[idx] = count;
+                    count++;
+                }
+            }
+            for(Path& program : programs) {
+                __compare_once(case_indices, program, time_limit, checker_path);
+            } 
+            return;
+        }
+        
+        template<typename... Args>
+        void compare(int time_limit, std::string checker_path, Args ...args) {
+            compare(time_limit, Path(checker_path), args...);
+        }
+
+        template<typename... Args>
+        void compare(int time_limit, const char* checker_path, Args ...args) {
+            compare(time_limit, Path(checker_path), args...);
+        }
+
+        template<typename... Args>
+        void compare(int time_limit, Checker checker, Args ...args) {
+            Path checker_path = __get_default_checker_file(checker);
+            compare(time_limit, checker_path, args...);
         }
     }
 

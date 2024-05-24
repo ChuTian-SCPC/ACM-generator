@@ -58,6 +58,12 @@ void compare(int start,int end,int time_limit,Path checker,Args ... args);
 
 其余参数的含义是：对 $start$ 和 $end$ 的样例测试，时间限制为 $time\textunderscore limit(ms)$ 。对拍的程序路径为 $args$，可以对**多个**程序同时对拍。
 
-
+现在还可以不指定`start`和`end`，表示测试所以数据。
+```cpp
+void compare(int time_limit,Checker checker,Args ... args);
+void compare(int time_limit,std::string checker,Args ... args);
+void compare(int time_limit,const char* checker,Args ... args);
+void compare(int time_limit,Path checker,Args ... args);
+```
 
 [返回目录](../../home.md)
