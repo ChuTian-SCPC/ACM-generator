@@ -14,7 +14,7 @@
 
    
 
-2. `fill_outputs(int num, std::function<void()> func, bool cover_exist = true)`
+2. `fill_outputs(std::function<void()> func, bool cover_exist = true)`
 
    与第一个函数不同的方式在于，该函数是将所有`.in`标准输入文件都生成对应的`.out`标准输出文件。
    
@@ -27,9 +27,7 @@
 
 
 
-函数调用生成输出文件的标答可执行文件的路径为`path`, `path`的类型可以是`const char*`,`std::string`或者`generator::io::Path`类。
-
-`generator::io::Path`类的介绍可以查看：[路径(Path)](./path.md)。
+函数调用生成输出文件的标答可执行文件的路径为`path`, `path`的类型可以是`const char*`,`std::string`或者[路径(Path)](./path.md)类。
 
 
 
