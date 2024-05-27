@@ -2202,6 +2202,28 @@ namespace generator{
 
                 std::vector<int>& node_indices() { return _node_indices; }
                 std::vector<int> cnode_indices() const { return _node_indices; }
+                void set_node_indices(std::vector<int> node_indices) {
+                    if (node_indices.size() != _node_count) {
+                        io::__warn_msg(
+                            io::_err, 
+                            "Node indices size must equal to node count %d, but found %d.", 
+                            _node_count, 
+                            node_indices.size());
+                        return;
+                    }
+                    _node_indices = node_indices;
+                }
+                void set_node_indices(int index, int number) {
+                    if (index < 1 || index > _node_count) {
+                        io::__warn_msg(
+                            io::_err,
+                            "Node index must in range [1, %d], but found %d.",
+                            _node_count,
+                            index);
+                        return;
+                    }
+                    _node_indices[index - 1] = number;
+                }
             }; 
             
             template<typename T, typename U>
