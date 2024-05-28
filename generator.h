@@ -2391,8 +2391,9 @@ namespace generator{
                 void use_random_father() { _tree_generator = RandomFather; }
                 void use_pruefer() { _tree_generator = Pruefer; }
                 
-                std::vector<_Edge<EdgeType>>& edges() { return _edges; }
-                std::vector<_Edge<EdgeType>> cedges() const { return _edges; }
+                // std::vector<_Edge<EdgeType>>& edges() { return _edges; }
+                // std::vector<_Edge<EdgeType>> cedges() const { return _edges; }
+                std::vector<_Edge<EdgeType>> edges() { return __get_output_edges(); }
 
                 template<typename T = NodeType, _HasT<T> = 0>
                 std::vector<_Node<NodeType>>& nodes_weight(){ return _nodes_weight; }
@@ -2484,7 +2485,8 @@ namespace generator{
                         }
                     }
                     int edge_cnt = 0;
-                    for (_Edge<EdgeType> e: _edges) {
+                    std::vector<_Edge<EdgeType>> output_edges = __get_output_edges();
+                    for (_Edge<EdgeType> e: output_edges) {
                         if (_swap_node && rnd.next(2)) {
                             e.set_output_default(true);
                         }
@@ -2499,6 +2501,24 @@ namespace generator{
 
             protected:
                 
+            template<typename T = EdgeType, _NotHasT<T> = 0>
+            std::vector<_Edge<EdgeType>> __get_output_edges() const {
+                std::vector<_Edge<EdgeType>> output_edges;
+                for (const auto& edge : _edges) {
+                    output_edges.emplace_back(_node_indices[edge.cu()], _node_indices[edge.cv()]);
+                }
+                return output_edges;
+            }
+
+            template<typename T = EdgeType, _HasT<T> = 0>
+            std::vector<_Edge<EdgeType>> __get_output_edges() const {
+                std::vector<_Edge<EdgeType>> output_edges;
+                for (const auto& edge : _edges) {
+                    output_edges.emplace_back(_node_indices[edge.cu()], _node_indices[edge.cv()], edge.cw());
+                }
+                return output_edges;
+            }
+
                 void __judge_comman_limit() {
                     if (_node_count <= 0) {
                         io::__fail_msg(io::_err, "Number of nodes must be a positive integer, but found %d.", _node_count);
