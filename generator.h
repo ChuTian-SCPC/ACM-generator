@@ -2150,9 +2150,16 @@ namespace generator{
                     _output_node_count(output_node_count),
                     _output_root(output_root),
                     _swap_node(_is_rooted ? false : true)
-                {}
+                {
+                    __init_node_indices();
+                }
                 
-                void set_node_count(int node_count) { _node_count = node_count; }
+                void set_node_count(int node_count) { 
+                    if (node_count != _node_count) {
+                        __init_node_indices();
+                        _node_count = node_count; 
+                    }             
+                }
 
                 void set_is_rooted(int is_rooted) { 
                     if (_is_rooted != is_rooted) {
@@ -2170,7 +2177,10 @@ namespace generator{
                 }
 
                 void set_begin_node(int begin_node) { 
-                    _begin_node = begin_node; 
+                    if (begin_node != _begin_node) {
+                        __init_node_indices();
+                        _begin_node = begin_node; 
+                    }                 
                 }
 
                 void set_output_node_count(bool output_node_count) { _output_node_count = output_node_count; }
@@ -2190,11 +2200,18 @@ namespace generator{
                     return _root;
                 }
                 
+                int& root_ref() {
+                    if (!_is_rooted) {
+                        io::__warn_msg(io::_err, "Unrooted Tree, root is useless.");
+                    }
+                    return _node_indices[_root];
+                }
+                
                 int croot() const {
                     if (!_is_rooted) {
                         io::__warn_msg(io::_err, "Unrooted Tree, root is useless.");
                     }
-                    return _root + _begin_node;
+                    return _node_indices[_root];
                 }
 
                 int& beign_node() { return _begin_node; }
@@ -2223,6 +2240,15 @@ namespace generator{
                         return;
                     }
                     _node_indices[index - 1] = number;
+                }
+                
+            protected:
+                
+                void __init_node_indices() {
+                    _node_indices.clear();
+                    for (int i = 0 ; i < _node_count; i++) {
+                        _node_indices.emplace_back(i + _begin_node);
+                    }
                 }
             }; 
             
@@ -2400,8 +2426,8 @@ namespace generator{
                     std::vector<_Edge<EdgeType>> result;
                     std::vector<std::vector<_Edge<EdgeType>>> node_edges(_node_count);
                     for (auto edge : _edges) {
-                        node_edges[edge.u() - _begin_node].emplace_back(edge);
-                        node_edges[edge.v() - _begin_node].emplace_back(edge);
+                        node_edges[edge.u()].emplace_back(edge);
+                        node_edges[edge.v()].emplace_back(edge);
                     }
                     std::vector<int> visit(_node_count, 0);
                     std::queue<int> q;
@@ -2411,12 +2437,10 @@ namespace generator{
                         q.pop();
                         visit[u] = 1;
                         for (auto& edge : node_edges[u]) {
-                            int v = (edge.u() - _begin_node == u ? edge.v() : edge.u()) - _begin_node;
+                            int v = (edge.u() == u ? edge.v() : edge.u());
                             if (visit[v]) {
                                 continue;
                             }
-                            edge.u() = u + _begin_node;
-                            edge.v() = v + _begin_node;
                             result.emplace_back(edge);
                             q.push(v);
                         }
@@ -2514,20 +2538,9 @@ namespace generator{
                             }
                         }
                     }    
-                    _node_indices.clear();
-                    for (int i = 0; i < _node_count; i++) {
-                        _node_indices.emplace_back(i + _begin_node);
-                    }
-
                 }
                 
-                void __add_edge(_Edge<EdgeType> edge, bool change = true) {
-                    if (change) {
-                        int& u = edge.u();
-                        int& v = edge.v();
-                        u += _begin_node;
-                        v += _begin_node;
-                    }
+                void __add_edge(_Edge<EdgeType> edge) {
                     _edges.emplace_back(edge);
                 }
                 
