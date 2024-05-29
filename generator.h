@@ -4883,6 +4883,7 @@ namespace generator{
                 std::vector<int> _node_indices[2];
                 LinkType _link_type;
                 int _extra_edges;
+                std::vector<int> _father;
             
             public:
                 template<template<typename, typename> class TG1, template<typename, typename> class TG2>
@@ -4913,6 +4914,14 @@ namespace generator{
                     __init_result_graph(source1);
                     __dump_source_data(0, source1);
                     __dump_source_data(1, source2);
+                }
+
+                _Graph<NodeType, EdgeType> get_result() {
+                    __merge_node_indices();
+                    __merge_edges();
+                    __judge_limits();
+                    __gen_extra_edges();
+                    return _result;
                 }
             
             private:
@@ -4945,6 +4954,22 @@ namespace generator{
                     println(_edges[index]);
                     println(_nodes_weight[index]);
                     println(_node_indices[index]);
+                }
+
+                void __merge_node_indices() {
+
+                }
+
+                void __merge_edges() {
+
+                }
+
+                void __judge_limits() {
+
+                }
+
+                void __gen_extra_edges() {
+
                 }
             };
 
