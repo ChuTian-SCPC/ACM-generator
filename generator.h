@@ -4897,6 +4897,8 @@ namespace generator{
                     _extra_edges(extra_edges)
                 {
                     __init_result_graph();
+                    __dump_source_data(0, source1);
+                    __dump_source_data(1, source2);
                 }
                 
                 template<template<typename, typename> class TG1, template<typename, typename> class TG2>
@@ -4909,6 +4911,8 @@ namespace generator{
                     _extra_edges(extra_edges)
                 {
                     __init_result_graph(source1);
+                    __dump_source_data(0, source1);
+                    __dump_source_data(1, source2);
                 }
             
             private:
@@ -4927,7 +4931,20 @@ namespace generator{
                 }
                 
                 void __init_result_graph(_Tree<NodeType, EdgeType> tree) {
-                    std::cout<<"todo"<<std::endl;
+                    _result = _Graph<NodeType, EdgeType>();
+                    __init_result_graph();
+                    _result._direction = tree._is_rooted;
+                    _result._swap_node = tree._swap_node;
+                }
+
+                template<template<typename, typename> class TG>
+                void __dump_source_data(int index, TG<NodeType, EdgeType> source) {
+                    _edges[index] = source._edges;
+                    _nodes_weight[index] = source._nodes_weight;
+                    _node_indices[index] = source._node_indices;
+                    println(_edges[index]);
+                    println(_nodes_weight[index]);
+                    println(_node_indices[index]);
                 }
             };
 
