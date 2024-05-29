@@ -1955,11 +1955,11 @@ namespace generator{
                    
                 }
 
-                int cu() const { return _u; }
-                int cv() const { return _v; }
+                int u() const { return _u; }
+                int v() const { return _v; }
 
-                int& u() { return _u; }
-                int& v() { return _v;}
+                int& u_ref() { return _u; }
+                int& v_ref() { return _v;}
 
                 void set_u(int u) { _u = u; }
                 void set_v(int v) { _v = v; } 
@@ -2054,8 +2054,8 @@ namespace generator{
                     _output_function = default_function();
                 }
 
-                T cw() const { return _w; }
-                T& w() { return _w; }
+                T w() const { return _w; }
+                T& w_ref() { return _w; }
 
                 void set_w(T w) { _w = w; }
                 
@@ -2103,8 +2103,8 @@ namespace generator{
                     _output_function = default_function();
                 }
                 
-                U& w() { return _w; }
-                U cw() const { return _w; }
+                U& w_ref() { return _w; }
+                U w() const { return _w; }
                 void set_w(U w) { _w = w; }
                 
                 void default_output(std::ostream& os) const {
@@ -2156,8 +2156,8 @@ namespace generator{
                 
                 void set_node_count(int node_count) { 
                     if (node_count != _node_count) {
-                        __init_node_indices();
                         _node_count = node_count; 
+                        __init_node_indices();               
                     }             
                 }
 
@@ -2178,8 +2178,8 @@ namespace generator{
 
                 void set_begin_node(int begin_node) { 
                     if (begin_node != _begin_node) {
-                        __init_node_indices();
                         _begin_node = begin_node; 
+                        __init_node_indices();                 
                     }                 
                 }
 
@@ -2189,38 +2189,37 @@ namespace generator{
 
                 void set_swap_node(bool swap_node) { _swap_node = swap_node; }
                 
-                int& node_count() { return _node_count; }
+                bool is_rooted() const { return _is_rooted; }
+                bool& is_rooted_ref() { return _is_rooted; }
                 
-                int cnode_count() const { return _node_count; }
+                bool swap_node() const { return _swap_node; }
+                bool& swap_node_ref() { return _swap_node; }
                 
-                int& root() {
+                int node_count() const { return _node_count; }         
+                int& node_count_ref() { return _node_count; }
+                
+                int root() const {
                     if (!_is_rooted) {
                         io::__warn_msg(io::_err, "Unrooted Tree, root is useless.");
                     }
-                    return _root;
+                    return _node_indices[_root];
                 }
                 
                 int& root_ref() {
                     if (!_is_rooted) {
                         io::__warn_msg(io::_err, "Unrooted Tree, root is useless.");
                     }
-                    return _node_indices[_root];
+                    return _root;
                 }
+
+                int beign_node() const { return _begin_node; }
+                int& begin_node_ref() { return _begin_node; }
+
+                std::vector<int> node_indices() const { return _node_indices; }
+                std::vector<int>& node_indices_ref() { return _node_indices; }
                 
-                int croot() const {
-                    if (!_is_rooted) {
-                        io::__warn_msg(io::_err, "Unrooted Tree, root is useless.");
-                    }
-                    return _node_indices[_root];
-                }
-
-                int& beign_node() { return _begin_node; }
-                int cbegin_node() const { return _begin_node; }
-
-                std::vector<int>& node_indices() { return _node_indices; }
-                std::vector<int> cnode_indices() const { return _node_indices; }
                 void set_node_indices(std::vector<int> node_indices) {
-                    if (node_indices.size() != _node_count) {
+                    if ((int)node_indices.size() != _node_count) {
                         io::__warn_msg(
                             io::_err, 
                             "Node indices size must equal to node count %d, but found %d.", 
@@ -2230,6 +2229,7 @@ namespace generator{
                     }
                     _node_indices = node_indices;
                 }
+                
                 void set_node_indices(int index, int number) {
                     if (index < 1 || index > _node_count) {
                         io::__warn_msg(
@@ -2324,6 +2324,9 @@ namespace generator{
                 void __check_edges_weight_function() {}
             };
 
+            template<typename NodeType, typename EdgeType> 
+            class _LinkImpl;
+
             enum TreeGenerator {
                 RandomFather,
                 Pruefer
@@ -2338,6 +2341,10 @@ namespace generator{
                 std::vector<_Edge<EdgeType>> _edges;
                 std::vector<_Node<NodeType>> _nodes_weight; 
                 TreeGenerator _tree_generator;
+                
+            public:
+                friend class _LinkImpl<NodeType, EdgeType>;
+                
             public:
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
                 _Tree(
@@ -2391,14 +2398,13 @@ namespace generator{
                 void use_random_father() { _tree_generator = RandomFather; }
                 void use_pruefer() { _tree_generator = Pruefer; }
                 
-                // std::vector<_Edge<EdgeType>>& edges() { return _edges; }
-                // std::vector<_Edge<EdgeType>> cedges() const { return _edges; }
-                std::vector<_Edge<EdgeType>> edges() { return __get_output_edges(); }
+                std::vector<_Edge<EdgeType>> edges() const { return __get_output_edges(); }
+                std::vector<_Edge<EdgeType>> edges_ref() { return _edges; }
 
                 template<typename T = NodeType, _HasT<T> = 0>
-                std::vector<_Node<NodeType>>& nodes_weight(){ return _nodes_weight; }
+                std::vector<_Node<NodeType>> nodes_weight() const { return _nodes_weight; }
                 template<typename T = NodeType, _HasT<T> = 0>
-                std::vector<_Node<NodeType>> cnodes_weight() const { return _nodes_weight; }
+                std::vector<_Node<NodeType>>& nodes_weight_ref() { return _nodes_weight; }
             
                 void gen() {
                     if (_node_count == 1) {
@@ -2459,7 +2465,7 @@ namespace generator{
                         if (first_line != "") {
                             first_line += " ";
                         }
-                        first_line += std::to_string(croot());
+                        first_line += std::to_string(root());
                     }
                     int node_cnt = 0;
                     for (_Node<NodeType> node : _nodes_weight) {
@@ -2501,23 +2507,23 @@ namespace generator{
 
             protected:
                 
-            template<typename T = EdgeType, _NotHasT<T> = 0>
-            std::vector<_Edge<EdgeType>> __get_output_edges() const {
-                std::vector<_Edge<EdgeType>> output_edges;
-                for (const auto& edge : _edges) {
-                    output_edges.emplace_back(_node_indices[edge.cu()], _node_indices[edge.cv()]);
+                template<typename T = EdgeType, _NotHasT<T> = 0>
+                std::vector<_Edge<EdgeType>> __get_output_edges() const {
+                    std::vector<_Edge<EdgeType>> output_edges;
+                    for (const auto& edge : _edges) {
+                        output_edges.emplace_back(_node_indices[edge.u()], _node_indices[edge.v()]);
+                    }
+                    return output_edges;
                 }
-                return output_edges;
-            }
 
-            template<typename T = EdgeType, _HasT<T> = 0>
-            std::vector<_Edge<EdgeType>> __get_output_edges() const {
-                std::vector<_Edge<EdgeType>> output_edges;
-                for (const auto& edge : _edges) {
-                    output_edges.emplace_back(_node_indices[edge.cu()], _node_indices[edge.cv()], edge.cw());
+                template<typename T = EdgeType, _HasT<T> = 0>
+                std::vector<_Edge<EdgeType>> __get_output_edges() const {
+                    std::vector<_Edge<EdgeType>> output_edges;
+                    for (const auto& edge : _edges) {
+                        output_edges.emplace_back(_node_indices[edge.u()], _node_indices[edge.v()], edge.w());
+                    }
+                    return output_edges;
                 }
-                return output_edges;
-            }
 
                 void __judge_comman_limit() {
                     if (_node_count <= 0) {
@@ -2558,6 +2564,9 @@ namespace generator{
                             }
                         }
                     }    
+                    if ((int)_node_indices.size() != _node_count) {
+                        this->__init_node_indices();
+                    }
                 }
                 
                 void __add_edge(_Edge<EdgeType> edge) {
@@ -2661,7 +2670,9 @@ namespace generator{
                 void use_random_father() = delete; \
                 void use_pruefer() = delete; 
             
-            #define _MUST_IS_ROOTED void set_is_rooted(int is_rooted) = delete;
+            #define _MUST_IS_ROOTED \
+                void set_is_rooted(int is_rooted) = delete; \
+                bool& is_rooted_ref() = delete;
 
             template<typename NodeType, typename EdgeType>
             class _Chain : public _Tree<NodeType, EdgeType> {
@@ -2830,8 +2841,8 @@ namespace generator{
                 }
 
                 void set_height(int height) { _height = height; }
-                int& height() { return _height; }
-                int cheight() const { return _height; }
+                int height() const { return _height; }
+                int& height_ref() { return _height; }
 
                 _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
                 _DISABLE_CHOOSE_GEN
@@ -2925,8 +2936,8 @@ namespace generator{
                 }
 
                 void set_max_degree(int max_degree) { _max_degree = max_degree; }
-                int& max_degree() { return max_degree; }
-                int cmax_degree() const { return max_degree; }
+                int max_degree() const { return max_degree; }
+                int& max_degree_ref() { return max_degree; }
 
                 _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
                 _DISABLE_CHOOSE_GEN
@@ -3022,8 +3033,8 @@ namespace generator{
                 }
 
                 void set_max_son(int max_son) { _max_son = max_son; }
-                int& max_son() { return _max_son; }
-                int cmax_son() const { return _max_son; }
+                int max_son() const { return _max_son; }
+                int& max_son_ref() { return _max_son; }
 
                 _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
                 _DISABLE_CHOOSE_GEN
@@ -3127,13 +3138,25 @@ namespace generator{
                     _swap_node(swap_node),
                     _output_node_count(output_node_count),
                     _output_edge_count(output_edge_count) 
-                {}
+                {
+                    __init_node_indices();
+                }
 
-                void set_node_count(int node_count) { _node_count = node_count; }
+                void set_node_count(int node_count) { 
+                    if (node_count != _node_count) {
+                        _node_count = node_count; 
+                        __init_node_indices();                      
+                    }             
+                }
 
                 void set_edge_count(int edge_count) { _edge_count = edge_count; }
 
-                void set_begin_node(int begin_node) { _begin_node = begin_node; }
+                void set_begin_node(int begin_node) { 
+                    if (begin_node != _begin_node) {
+                        _begin_node = begin_node; 
+                        __init_node_indices();                      
+                    }                 
+                }
 
                 void set_direction(bool direction) { 
                     if (_direction != direction) {
@@ -3153,18 +3176,63 @@ namespace generator{
 
                 void set_output_node_count(bool output_node_count) { _output_node_count = output_node_count; }
                 void set_output_edge_count(bool output_edge_count) { _output_edge_count = output_edge_count; } 
+                
+                bool direction() const { return _direction; }
+                bool& direction_ref() { return _direction; }
+                
+                bool multiply_edge() const { return _multiply_edge; }
+                bool& multiply_edge_ref() { return _multiply_edge; }
+                
+                bool self_loop() const { return _self_loop; }
+                bool& self_loop_ref() { return _self_loop; }
+                
+                bool connect() const { return _connect; }
+                bool& connect_ref() { return _connect; } 
+                
+                int node_count() const { return _node_count; }
+                int& node_count_ref() { return _node_count; }
 
-                int& node_count() { return _node_count; }
-                int cnode_count() const { return _node_count; }
+                int edge_count() const { return _edge_count; }
+                int& edge_count_ref() { return _edge_count; }
 
-                int& edge_count() { return _edge_count; }
-                int cedge_count() const { return _edge_count; }
+                int begin_node() const { return _begin_node; }
+                int& begin_node_ref() { return _begin_node; }
 
-                int& begin_node() { return _begin_node; }
-                int cbegin_node() const { return _begin_node; }
-
-                std::vector<int>& node_indices() { return _node_indices; }
-                std::vector<int> cnode_indices() { return _node_indices; }
+                std::vector<int> node_indices() const { return _node_indices; }
+                std::vector<int>& node_indices_ref() { return _node_indices; }
+                
+                void set_node_indices(std::vector<int> node_indices) {
+                    if ((int)node_indices.size() != _node_count) {
+                        io::__warn_msg(
+                            io::_err, 
+                            "Node indices size must equal to node count %d, but found %d.", 
+                            _node_count, 
+                            node_indices.size());
+                        return;
+                    }
+                    _node_indices = node_indices;
+                }
+                
+                void set_node_indices(int index, int number) {
+                    if (index < 1 || index > _node_count) {
+                        io::__warn_msg(
+                            io::_err,
+                            "Node index must in range [1, %d], but found %d.",
+                            _node_count,
+                            index);
+                        return;
+                    }
+                    _node_indices[index - 1] = number;
+                }
+                
+            protected:
+                
+                void __init_node_indices() {
+                    _node_indices.clear();
+                    for (int i = 0 ; i < _node_count; i++) {
+                        _node_indices.emplace_back(i + _begin_node);
+                    }
+                }
             };
 
             template<typename NodeType, typename EdgeType>
@@ -3176,6 +3244,9 @@ namespace generator{
                 std::vector<_Edge<EdgeType>> _edges;
                 std::vector<_Node<NodeType>> _nodes_weight; 
                 std::map<_BasicEdge, bool> _e;
+            
+            public:
+                friend class _LinkImpl<NodeType, EdgeType>;
             
             public:
 
@@ -3230,13 +3301,13 @@ namespace generator{
                     _output_function = default_function();
                 }
 
-                std::vector<_Edge<EdgeType>>& edges() { return _edges; }
-                std::vector<_Edge<EdgeType>> cedges() const { return _edges; }
+                std::vector<_Edge<EdgeType>> edges() const { return __get_output_edges(); }
+                std::vector<_Edge<EdgeType>>& edges_ref() { return _edges; }
 
                 template<typename T = NodeType, _HasT<T> = 0>
                 std::vector<_Node<NodeType>>& nodes_weight(){ return _nodes_weight; }
                 template<typename T = NodeType, _HasT<T> = 0>
-                std::vector<_Node<NodeType>> cnodes_weight() const { return _nodes_weight; }
+                std::vector<_Node<NodeType>> nodes_weight_ref() const { return _nodes_weight; }
 
                 void default_output(std::ostream& os) const {
                     std::string first_line = "";
@@ -3271,7 +3342,7 @@ namespace generator{
                         }
                     }
                     int edge_cnt = 0;
-                    for (_Edge<EdgeType> e: _edges) {
+                    for (_Edge<EdgeType> e: __get_output_edges()) {
                         if (_swap_node && rnd.next(2)) {
                             e.set_output_default(true);
                         }
@@ -3353,9 +3424,8 @@ namespace generator{
                     if (!_multiply_edge) {
                         _e.clear();
                     }
-                    _node_indices.clear();
-                    for (int i = 0; i < _node_count; i++) {
-                        _node_indices.emplace_back(i + _begin_node);
+                    if ((int)_node_indices.size() != _node_count) {
+                        this->__init_node_indices();
                     }
                 }
                 
@@ -3382,14 +3452,10 @@ namespace generator{
                     }
                 }
                 
-                void __add_edge(_Edge<EdgeType> edge, bool change = true) {
-                    int &u = edge.u();
-                    int &v = edge.v();
+                void __add_edge(_Edge<EdgeType> edge) {
+                    int u = edge.u();
+                    int v = edge.v();
                     __add_edge_into_map(u, v);
-                    if (change) {
-                        u += _begin_node;
-                        v += _begin_node;                        
-                    }
                     _edges.emplace_back(edge);
                 }
                 
@@ -3457,6 +3523,24 @@ namespace generator{
             
             protected :
 
+                template<typename T = EdgeType, _NotHasT<T> = 0>
+                std::vector<_Edge<EdgeType>> __get_output_edges() const {
+                    std::vector<_Edge<EdgeType>> output_edges;
+                    for (const auto& edge : _edges) {
+                        output_edges.emplace_back(_node_indices[edge.u()], _node_indices[edge.v()]);
+                    }
+                    return output_edges;
+                }
+
+                template<typename T = EdgeType, _HasT<T> = 0>
+                std::vector<_Edge<EdgeType>> __get_output_edges() const {
+                    std::vector<_Edge<EdgeType>> output_edges;
+                    for (const auto& edge : _edges) {
+                        output_edges.emplace_back(_node_indices[edge.u()], _node_indices[edge.v()], edge.w());
+                    }
+                    return output_edges;
+                }
+
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
                 _Graph(
                     int node_count, int edge_count, int begin_node, 
@@ -3514,11 +3598,25 @@ namespace generator{
                 }
             };
 
-            #define _DISABLE_EDGE_COUNT void set_edge_count(int edge_count) = delete;
-            #define _DISABLE_DIRECTION  void set_direction(bool direction) = delete;
-            #define _DISABLE_MULTIPLY_EDGE void set_multiply_edge(bool multiply_edge) = delete;
-            #define _DISABLE_SELF_LOOP void set_self_loop(bool self_loop) = delete;
-            #define _DISABLE_CONNECT void set_connect(bool connect) = delete;
+            #define _DISABLE_EDGE_COUNT \
+                void set_edge_count(int edge_count) = delete; \
+                int& edge_count_ref() = delete;
+            
+            #define _DISABLE_DIRECTION  \
+                void set_direction(bool direction) = delete; \
+                bool& direction_ref() = delete;
+            
+            #define _DISABLE_MULTIPLY_EDGE \
+                void set_multiply_edge(bool multiply_edge) = delete; \
+                bool& multiply_edge_ref() = delete;
+            
+            #define _DISABLE_SELF_LOOP \
+                void set_self_loop(bool self_loop) = delete; \
+                bool& self_loop_ref() = delete;
+            
+            #define _DISABLE_CONNECT \
+                void set_connect(bool connect) = delete; \
+                bool& connect_ref() = delete;
 
             template<typename NodeType, typename EdgeType>
             class _BipartiteGraph : public _Graph<NodeType, EdgeType> {
@@ -3529,13 +3627,13 @@ namespace generator{
                     NodeLeft,
                     NodeRight
                 };
-            protected:
-                NodeOutputFormat _node_output_format;
+            protected:       
                 int _left, _right;
                 bool _different_part;
                 std::vector<int> _part[2];
                 std::vector<int> _degree[2];
                 int _d[2];
+                NodeOutputFormat _node_output_format;
                 typedef _BipartiteGraph<NodeType, EdgeType> _Self;
                 _OUTPUT_FUNCTION(_Self)
                 _DEF_GEN_FUNCTION
@@ -3598,7 +3696,12 @@ namespace generator{
                     _output_function = default_function();
                 }
 
-                void set_different_part(bool different_part) { _different_part = different_part; }
+                void set_different_part(bool different_part) { 
+                    if (_different_part != different_part) {
+                        _different_part = different_part; 
+                        __remark_node_indices();
+                    }             
+                }
 
                 void set_left(int left) {
                     _left = left;
@@ -3620,14 +3723,19 @@ namespace generator{
                     }
                     _left = left;
                     _right = right;
-                    this->_node_count = left + right;
+                    int node_count = left + right;
+                    if (this->_node_count != node_count) {
+                        this->_node_count = node_count;
+                        this->__init_node_indices();
+                    }
+                    
                 }
 
-                int& left() { return _left; }
-                int cleft() const { return _left; }
+                int left() const { return _left; }
+                int& left_ref() { return _left; }
 
-                int& right() { return _right; }
-                int cright() const { return _right; }
+                int right() const { return _right; }
+                int& right_ref() { return _right; }
 
                 void set_node_output_format(NodeOutputFormat format) { _node_output_format = format; }
                 void use_format_node() {  _node_output_format = Node; }
@@ -3640,7 +3748,30 @@ namespace generator{
                 _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
             
             protected:
-
+                
+                void __remark_node_indices_by_part(std::vector<int>& part) {
+                    int index = this->_begin_node;
+                    for(int x : part) {
+                        this->_node_indices[x] = index;
+                        index++;
+                    }
+                }
+                
+                // node indices modified by different part change
+                void __remark_node_indices() {
+                    if (_different_part) {
+                        if (_part[0].empty() && _part[1].empty()) {
+                            return;
+                        }
+                        this->_node_indices.resize(this->_node_count);
+                        __remark_node_indices_by_part(_part[0]);
+                        __remark_node_indices_by_part(_part[1]);
+                    }
+                    else {
+                        this->__init_node_indices();
+                    }
+                }
+                
                 virtual std::string __format_output_node() const override{
                     std::string str = "";
                     if (this->_output_node_count) {
@@ -3699,20 +3830,15 @@ namespace generator{
                     for (int i = 0; i < 2; i++) {
                         _part[i].clear();
                     }
+                    std::vector<int> p = rnd.perm(node, 0);
+                    for (int i = 0; i < _left; i++) {
+                        _part[0].push_back(p[i]);
+                    }
+                    for (int i = _left; i < node; i++) {
+                        _part[1].push_back(p[i]);
+                    }
                     if (_different_part) {
-                        _part[0] = rnd.perm(_left, 0);
-                        _part[1] = rnd.perm(_right, 0);
-                        for (auto &x: _part[1]) {
-                            x += _left;
-                        }
-                    } else {
-                        std::vector<int> p = rnd.perm(node, 0);
-                        for (int i = 0; i < _left; i++) {
-                            _part[0].push_back(p[i]);
-                        }
-                        for (int i = _left; i < node; i++) {
-                            _part[1].push_back(p[i]);
-                        }
+                        __remark_node_indices();
                     }
                     if (this->_connect) {
                         _degree[0].resize(_left, 1);
@@ -3799,28 +3925,6 @@ namespace generator{
                     }
                 }
 
-                virtual void __generator_graph() override {
-                    int m = this->_edge_count;
-                    if (this->_connect) {
-                        m -= this->_node_count - 1;
-                        __generator_connect();
-                    }
-                    while (m--) {
-                        this->__add_edge(__rand_edge());
-                    }
-                    if (_different_part) {
-                        for (auto &edge: this->_edges) {
-                            int &u = edge.u();
-                            int &v = edge.v();
-                            if (u - this->_begin_node >= _left) {
-                                u -= _left;
-                            }
-                            if (v - this->_begin_node >= _left) {
-                                v -= _left;
-                            }
-                        }
-                    }
-                }
             };
             
             template<typename NodeType, typename EdgeType>
@@ -4166,14 +4270,17 @@ namespace generator{
                     }
                     _row = row;
                     _column = column;
-                    this->_node_count = node;
+                    if (this->_node_count != node) {
+                        this->_node_count = node;
+                        this->__init_node_indices();
+                    }                   
                 }
 
-                int& row() { return _row; }
-                int crow() const { return _row; }
+                int row() const { return _row; }
+                int& row_ref() { return _row; }
 
-                int& column() { return _column; }
-                int ccolumn() const { return _column; }
+                int column() const { return _column; }
+                int& column_ref() { return _column; }
 
                 _DISABLE_SELF_LOOP
                 _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
@@ -4351,8 +4458,8 @@ namespace generator{
                 }
 
                 void set_cycle(int cycle) { _cycle = cycle; }
-                int& cycle() { return _cycle; }
-                int ccycle() const { return _cycle; }
+                int cycle() const { return _cycle; }
+                int& cycle_ref() { return _cycle; }
 
                 _DISABLE_EDGE_COUNT
                 _DISABLE_CONNECT
@@ -4414,8 +4521,8 @@ namespace generator{
                     cycle.gen(); 
                     std::vector <_Edge<EdgeType>> edge = cycle.edges();
                     for (_Edge<EdgeType>& e: edge) {
-                        int& u = e.u();
-                        int& v = e.v();
+                        int& u = e.u_ref();
+                        int& v = e.v_ref();
                         u = _p[u];
                         v = _p[v];
                         this->__add_edge(e);
@@ -4739,8 +4846,8 @@ namespace generator{
                             cycle.gen();
                             std::vector<_Edge<EdgeType>> edge = cycle.edges();
                             for(_Edge<EdgeType>& e : edge) {
-                                int& u = e.u();
-                                int& v = e.v();
+                                int& u = e.u_ref();
+                                int& v = e.v_ref();
                                 u = _p[current[u]];
                                 v = _p[current[v]];
                                 this->__add_edge(e);
@@ -4751,7 +4858,78 @@ namespace generator{
             
             };
             
-
+            // TODO
+            enum class LinkType {
+                Increase,
+                Shuffle,
+                Direct,
+                Dedupe
+            };
+            
+            using MergeType = LinkType;
+            
+            enum class TreeLinkType {
+                Increase,
+                Shuffle,
+                Direct
+            };
+            
+            template<typename NodeType, typename EdgeType> 
+            class _LinkImpl {
+            private:
+                _Graph<NodeType, EdgeType> _result;
+                std::vector<_Edge<EdgeType>> _edges[2];
+                std::vector<_Node<NodeType>> _nodes_weight[2];
+                std::vector<int> _node_indices[2];
+                LinkType _link_type;
+                int _extra_edges;
+            
+            public:
+                template<template<typename, typename> class TG1, template<typename, typename> class TG2>
+                _LinkImpl(
+                    _Graph<NodeType, EdgeType> result_graph,
+                    TG1<NodeType, EdgeType> source1,
+                    TG2<NodeType, EdgeType> source2,
+                    int extra_edges,
+                    LinkType link_type) :
+                    _result(result_graph),
+                    _link_type(link_type),
+                    _extra_edges(extra_edges)
+                {
+                    __init_result_graph();
+                }
+                
+                template<template<typename, typename> class TG1, template<typename, typename> class TG2>
+                _LinkImpl(
+                    TG1<NodeType, EdgeType> source1,
+                    TG2<NodeType, EdgeType> source2,
+                    int extra_edges,
+                    LinkType link_type) :
+                    _link_type(link_type),
+                    _extra_edges(extra_edges)
+                {
+                    __init_result_graph(source1);
+                }
+            
+            private:
+                
+                void __init_result_graph() {
+                    _result._edge_count = 0;
+                    _result._node_count = 0;
+                    _result._edges.clear();
+                    _result._nodes_weight.clear();
+                    _result._e.clear();
+                }
+                
+                void __init_result_graph(_Graph<NodeType, EdgeType> graph) {
+                    _result = graph;
+                    __init_result_graph();
+                }
+                
+                void __init_result_graph(_Tree<NodeType, EdgeType> tree) {
+                    std::cout<<"todo"<<std::endl;
+                }
+            };
 
             #undef _OTHER_OUTPUT_FUNCTION_SETTING
             #undef _OUTPUT_FUNCTION
