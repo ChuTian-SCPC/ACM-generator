@@ -5216,7 +5216,7 @@ namespace generator{
                 }
                 
                 template<typename T = NodeType, _NotHasT<T> = 0>
-                void __reset_nodes_weight_function(_Graph<NodeType, EdgeType>& graph) {
+                void __reset_nodes_weight_function(_Graph<NodeType, EdgeType>&) {
                     return;
                 }
                 
@@ -5228,7 +5228,7 @@ namespace generator{
                 }
                 
                 template<typename T = EdgeType, _NotHasT<T> = 0>
-                void __reset_edges_weight_function(_Graph<NodeType, EdgeType>& graph) {
+                void __reset_edges_weight_function(_Graph<NodeType, EdgeType>&) {
                     return;
                 }
                 
@@ -5252,8 +5252,210 @@ namespace generator{
                     _Graph<NodeType, EdgeType> graph = impl.get_result();
                     __convert_graph_to_tree(graph);
                 } 
-                  
             };
+            
+            // merge 2 tree or graph to a graph
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> merge(
+                _Graph<NodeType, EdgeType> setting_graph,
+                _Graph<NodeType, EdgeType> graph1,
+                _Graph<NodeType, EdgeType> graph2,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(setting_graph, graph1, graph2, 0, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> merge(
+                _Graph<NodeType, EdgeType> setting_graph,
+                _Tree<NodeType, EdgeType> tree1,
+                _Graph<NodeType, EdgeType> graph2,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(setting_graph, tree1, graph2, 0, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> merge(
+                _Graph<NodeType, EdgeType> setting_graph,
+                _Graph<NodeType, EdgeType> graph1,
+                _Tree<NodeType, EdgeType> tree2,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(setting_graph, graph1, tree2, 0, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> merge(
+                _Graph<NodeType, EdgeType> setting_graph,
+                _Tree<NodeType, EdgeType> tree1,
+                _Tree<NodeType, EdgeType> tree2,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(setting_graph, tree1, tree2, 0, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> merge(
+                _Graph<NodeType, EdgeType> graph1,
+                _Graph<NodeType, EdgeType> graph2,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(graph1, graph2, 0, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> merge(
+                _Tree<NodeType, EdgeType> tree1,
+                _Graph<NodeType, EdgeType> graph2,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(tree1, graph2, 0, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> merge(
+                _Graph<NodeType, EdgeType> graph1,
+                _Tree<NodeType, EdgeType> tree2,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(graph1, tree2, 0, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> merge(
+                _Tree<NodeType, EdgeType> tree1,
+                _Tree<NodeType, EdgeType> tree2,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(tree1, tree2, 0, merge_type);
+                return impl.get_result();
+            }
+            
+            // link 2 tree or graph to a graph, add extra edges
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> link(
+                _Graph<NodeType, EdgeType> setting_graph,
+                _Graph<NodeType, EdgeType> graph1,
+                _Graph<NodeType, EdgeType> graph2,
+                int extra_edges,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(setting_graph, graph1, graph2, extra_edges, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> link(
+                _Graph<NodeType, EdgeType> setting_graph,
+                _Tree<NodeType, EdgeType> tree1,
+                _Graph<NodeType, EdgeType> graph2,
+                int extra_edges,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(setting_graph, tree1, graph2, extra_edges, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> link(
+                _Graph<NodeType, EdgeType> setting_graph,
+                _Graph<NodeType, EdgeType> graph1,
+                _Tree<NodeType, EdgeType> tree2,
+                int extra_edges,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(setting_graph, graph1, tree2, extra_edges, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> link(
+                _Graph<NodeType, EdgeType> setting_graph,
+                _Tree<NodeType, EdgeType> tree1,
+                _Tree<NodeType, EdgeType> tree2,
+                int extra_edges,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(setting_graph, tree1, tree2, extra_edges, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> link(
+                _Graph<NodeType, EdgeType> graph1,
+                _Graph<NodeType, EdgeType> graph2,
+                int extra_edges,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(graph1, graph2, extra_edges, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> link(
+                _Tree<NodeType, EdgeType> tree1,
+                _Graph<NodeType, EdgeType> graph2,
+                int extra_edges,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(tree1, graph2, extra_edges, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> link(
+                _Graph<NodeType, EdgeType> graph1,
+                _Tree<NodeType, EdgeType> tree2,
+                int extra_edges,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(graph1, tree2, extra_edges, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Graph<NodeType, EdgeType> link(
+                _Tree<NodeType, EdgeType> tree1,
+                _Tree<NodeType, EdgeType> tree2,
+                int extra_edges,
+                MergeType merge_type = MergeType::Shuffle)
+            {
+                _LinkImpl<NodeType, EdgeType> impl(tree1, tree2, extra_edges, merge_type);
+                return impl.get_result();
+            }
+            
+            // special for 2 tree link to a tree
+            
+            template<typename NodeType, typename EdgeType> 
+            _Tree<NodeType, EdgeType> link(
+                _Tree<NodeType, EdgeType> setting_tree,
+                _Tree<NodeType, EdgeType> tree1,
+                _Tree<NodeType, EdgeType> tree2,
+                TreeLinkType merge_type = TreeLinkType::Shuffle)
+            {
+                _TreeLinkImpl<NodeType, EdgeType> impl(setting_tree, tree1, tree2, merge_type);
+                return impl.get_result();
+            }
+            
+            template<typename NodeType, typename EdgeType> 
+            _Tree<NodeType, EdgeType> link(
+                _Tree<NodeType, EdgeType> tree1,
+                _Tree<NodeType, EdgeType> tree2,
+                TreeLinkType merge_type = TreeLinkType::Shuffle)
+            {
+                _TreeLinkImpl<NodeType, EdgeType> impl(tree1, tree2, merge_type);
+                return impl.get_result();
+            }
 
             #undef _OTHER_OUTPUT_FUNCTION_SETTING
             #undef _OUTPUT_FUNCTION
