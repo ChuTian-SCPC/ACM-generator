@@ -2099,6 +2099,9 @@ namespace generator{
                 U _w;
                 _OUTPUT_FUNCTION(_Node<U>)
             public:
+                _Node() : _w(U()) {
+                    _output_function = default_function();
+                }
                 _Node(U w) : _w(w) {
                     _output_function = default_function();
                 }
@@ -2301,6 +2304,14 @@ namespace generator{
                 void set_edges_weight_function(EdgeGenFunction edges_weight_function) {
                     _edges_weight_function = edges_weight_function;
                 }
+                
+                NodeGenFunction nodes_weight_function() {
+                    return _nodes_weight_function;
+                }
+                
+                EdgeGenFunction edges_weight_function() {
+                    return _edges_weight_function;
+                }
             protected:
                                                            
                 template<typename T = NodeType, _HasT<T> = 0>
@@ -2326,6 +2337,9 @@ namespace generator{
 
             template<typename NodeType, typename EdgeType> 
             class _LinkImpl;
+            
+            template<typename NodeType, typename EdgeType>
+            class _TreeLinkImpl;
 
             enum TreeGenerator {
                 RandomFather,
@@ -2344,6 +2358,7 @@ namespace generator{
                 
             public:
                 friend class _LinkImpl<NodeType, EdgeType>;
+                friend class _TreeLinkImpl<NodeType, EdgeType>;
                 
             public:
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
@@ -2406,10 +2421,7 @@ namespace generator{
                 template<typename T = NodeType, _HasT<T> = 0>
                 std::vector<_Node<NodeType>>& nodes_weight_ref() { return _nodes_weight; }
             
-                void gen() {
-                    if (_node_count == 1) {
-                        return ;
-                    }
+                void gen() {           
                     __init();
                     __generator_tree();
                     __generator_nodes_weight();
@@ -3247,6 +3259,7 @@ namespace generator{
             
             public:
                 friend class _LinkImpl<NodeType, EdgeType>;
+                friend class _TreeLinkImpl<NodeType, EdgeType>;
             
             public:
 
@@ -3355,9 +3368,6 @@ namespace generator{
                 }
 
                 void gen() {
-                    if (_edge_count == 0) {
-                        return ;
-                    }
                     __init();
                     __generator_graph();
                     __generator_nodes_weight();
@@ -3384,7 +3394,7 @@ namespace generator{
                         if (_self_loop) {
                             limit += _node_count;
                         }
-                        if (_node_count > limit) {
+                        if (_edge_count > limit) {
                             io::__fail_msg(io::_err, "number of edges must less than or equal to %lld.", limit);
                         }
                     }
@@ -3502,11 +3512,11 @@ namespace generator{
                 }
 
                 virtual void __generator_connect() {
-                    _Tree<NodeType, EdgeType> tree(_node_count, 0);
+                    _Tree<void, void> tree(_node_count, 0);
                     tree.gen();
-                    std::vector <_Edge<EdgeType>> edge = tree.edges();
+                    std::vector <_Edge<void>> edge = tree.edges();
                     for (auto e: edge) {
-                        __add_edge(e);
+                        __add_edge(e.u(), e.v());
                     }
                 }
 
@@ -4860,18 +4870,18 @@ namespace generator{
             
             // TODO
             enum class LinkType {
-                Increase,
-                Shuffle,
                 Direct,
+                Increase,
+                Shuffle,           
                 Dedupe
             };
             
             using MergeType = LinkType;
             
             enum class TreeLinkType {
+                Direct,
                 Increase,
-                Shuffle,
-                Direct
+                Shuffle            
             };
             
             template<typename NodeType, typename EdgeType> 
@@ -4882,8 +4892,11 @@ namespace generator{
                 std::vector<_Node<NodeType>> _nodes_weight[2];
                 std::vector<int> _node_indices[2];
                 LinkType _link_type;
-                int _extra_edges;
+                int _extra_edge_count;
                 std::vector<int> _father;
+                std::map<int, std::vector<int>> _connect_parts;
+                std::map<std::pair<int, int>, int> _node_merge_map;
+                int _node_count[2];
             
             public:
                 template<template<typename, typename> class TG1, template<typename, typename> class TG2>
@@ -4891,11 +4904,11 @@ namespace generator{
                     _Graph<NodeType, EdgeType> result_graph,
                     TG1<NodeType, EdgeType> source1,
                     TG2<NodeType, EdgeType> source2,
-                    int extra_edges,
+                    int extra_edge_count,
                     LinkType link_type) :
                     _result(result_graph),
                     _link_type(link_type),
-                    _extra_edges(extra_edges)
+                    _extra_edge_count(extra_edge_count)
                 {
                     __init_result_graph();
                     __dump_source_data(0, source1);
@@ -4906,10 +4919,10 @@ namespace generator{
                 _LinkImpl(
                     TG1<NodeType, EdgeType> source1,
                     TG2<NodeType, EdgeType> source2,
-                    int extra_edges,
+                    int extra_edge_count,
                     LinkType link_type) :
                     _link_type(link_type),
-                    _extra_edges(extra_edges)
+                    _extra_edge_count(extra_edge_count)
                 {
                     __init_result_graph(source1);
                     __dump_source_data(0, source1);
@@ -4918,9 +4931,14 @@ namespace generator{
 
                 _Graph<NodeType, EdgeType> get_result() {
                     __merge_node_indices();
+                    __reset_node_count();
+                    __merge_nodes_weight();
                     __merge_edges();
+                    __reset_edge_count();
+                    __divide_connection_part();
                     __judge_limits();
-                    __gen_extra_edges();
+                    __generate_extra_edges();
+                    shuffle(_result._edges.begin(), _result._edges.end());
                     return _result;
                 }
             
@@ -4932,6 +4950,7 @@ namespace generator{
                     _result._edges.clear();
                     _result._nodes_weight.clear();
                     _result._e.clear();
+                    _result._node_indices.clear();
                 }
                 
                 void __init_result_graph(_Graph<NodeType, EdgeType> graph) {
@@ -4944,33 +4963,296 @@ namespace generator{
                     __init_result_graph();
                     _result._direction = tree._is_rooted;
                     _result._swap_node = tree._swap_node;
+                    _result._begin_node = tree._begin_node;
                 }
 
                 template<template<typename, typename> class TG>
                 void __dump_source_data(int index, TG<NodeType, EdgeType> source) {
                     _edges[index] = source._edges;
+                    int node_count = source._node_count;
+                    _node_count[index] = node_count;
+                    if ((int)source._nodes_weight.size() != node_count && source._nodes_weight_function != nullptr) {
+                        io::__warn_msg(io::_err, "Found node weights size is not equal to node count, re-generate it.");
+                        source.__check_nodes_weight_function();
+                        source.__generator_nodes_weight();
+                    }
                     _nodes_weight[index] = source._nodes_weight;
-                    _node_indices[index] = source._node_indices;
-                    println(_edges[index]);
-                    println(_nodes_weight[index]);
-                    println(_node_indices[index]);
+                    if ((int)source._node_indices.size() != node_count) {
+                        io::__warn_msg(io::_err, "Found node indices size is not equal to node count, re-init it.");
+                        source.__init_node_indices();
+                    }
+                    _node_indices[index] = source._node_indices;           
                 }
 
                 void __merge_node_indices() {
-
+                    _node_merge_map.clear();     
+                    if (_link_type == LinkType::Dedupe) {
+                        std::map<int, int> first_appear;
+                        int cnt = 0;
+                        for (int i = 0; i < 2; i++) {
+                            for (int j = 0; j < _node_count[i]; j++ ) {
+                                int x = _node_indices[i][j];
+                                if (first_appear.find(x) == first_appear.end()) {
+                                    _result._node_indices.emplace_back(x);
+                                    first_appear[x] = cnt;
+                                    cnt++;
+                                }
+                                _node_merge_map[std::make_pair(i, j)] = first_appear[x];
+                            }
+                        }
+                    }
+                    else {                       
+                        for (int i = 0; i < _node_count[0]; i++) {
+                            _node_merge_map[std::make_pair(0, i)] = i;
+                        }
+                        for (int i = 0; i < _node_count[1]; i++) {
+                            _node_merge_map[std::make_pair(1, i)] = i + _node_count[0];
+                        }
+                        if (_link_type == LinkType::Direct) {
+                            for (int i = 0; i < 2; i++) {
+                                for (auto x : _node_indices[i]) {
+                                    _result._node_indices.emplace_back(x);
+                                }
+                            }
+                        }
+                        else if (_link_type == LinkType::Increase) {
+                            for (int i = 0; i < _node_count[0] + _node_count[1]; i++) {
+                                _result._node_indices.emplace_back(i + _result._begin_node);
+                            }
+                        }
+                        else {
+                            _result._node_indices = rnd.perm(_node_count[0] + _node_count[1], _result._begin_node);
+                        }
+                    }                
                 }
-
+                
+                void __reset_node_count() {
+                    _result._node_count = (int)_result._node_indices.size();
+                }
+                
+                void __merge_nodes_weight() {
+                    if (_link_type == LinkType::Dedupe) {
+                        std::set<int> appear;
+                        _result._nodes_weight.resize(_result._node_count);
+                        for (auto it : _node_merge_map) {
+                            if (appear.find(it.second) == appear.end()) {
+                                appear.insert(it.second);
+                                _result._nodes_weight[it.second] = _nodes_weight[it.first.first][it.first.second];
+                            }
+                        }
+                    }
+                    else {
+                        for (int i = 0 ; i < 2; i++) {
+                            for (auto x : _nodes_weight[i]) {
+                                _result._nodes_weight.emplace_back(x);
+                            }
+                        }
+                    }
+                }
+                
+                void __reset_edge_count() {
+                    _result._edge_count = (int)_result._edges.size() + _extra_edge_count;
+                }
+                
                 void __merge_edges() {
-
+                    int ignore_edges = 0;
+                    for (int i = 0; i < 2; i++) {
+                        int sz = _edges[i].size();
+                        for (int j = 0; j < sz; j++) {
+                            _Edge<EdgeType> edge = _edges[i][j];
+                            int& u = edge.u_ref();
+                            int& v = edge.v_ref();
+                            u = _node_merge_map[std::make_pair(i, u)];
+                            v = _node_merge_map[std::make_pair(i, v)];
+                            if (_result.__judge_multiply_edge(u, v) || _result.__judge_self_loop(u, v)) {
+                                ignore_edges++;
+                            } 
+                            else {
+                                _result.__add_edge(edge);
+                            }
+                        }
+                    }
+                    if (ignore_edges) {
+                        io::__warn_msg(io::_err, "Ignore %d edge(s) due to the graph's attribute-based conditions.", ignore_edges);
+                    }
                 }
-
+                
+                int __find(int x) {
+                    if (_father[x] != x) {
+                        _father[x] = __find(_father[x]);
+                    }
+                    return _father[x];
+                }
+                
+                void __divide_connection_part() {
+                    if (!_result._connect) { return; }
+                    _father.clear();
+                    _connect_parts.clear();
+                    for (int i = 0; i < _result._node_count; i++) {
+                        _father.emplace_back(i);
+                    }
+                    for (auto edge : _result._edges) {
+                        int u = edge.u();
+                        int v = edge.v();
+                        int t1 = __find(u);
+                        int t2 = __find(v);
+                        if (t1 != t2) {
+                            _father[t1] = t2;
+                        }
+                    }
+                    for (int i = 0; i < _result._node_count; i++) {
+                        _connect_parts[__find(i)].emplace_back(i);
+                    }
+                }
+                
                 void __judge_limits() {
-
+                    if (_result._connect) {
+                        int need_edge_count = _connect_parts.size() - 1;
+                        if (_extra_edge_count < need_edge_count) {
+                            io::__fail_msg(
+                                io::_err, 
+                                "At least %d edges are needed to connect %d connected components, but found %d.",
+                                need_edge_count,
+                                _connect_parts.size(),
+                                _extra_edge_count);
+                        }
+                    }
+                    _result.__judge_limits();
                 }
-
-                void __gen_extra_edges() {
-
+                
+                void __generate_connect_part() {
+                    std::vector<int> mark_indices;
+                    for (auto it : _connect_parts) {
+                        mark_indices.emplace_back(it.first);
+                    }
+                    _Tree<void, void> tree(_connect_parts.size(), 0);
+                    tree.gen();
+                    std::vector<_Edge<void>> edges = tree.edges();
+                    for (_Edge<void> edge : edges) {
+                        int u = rnd.any(_connect_parts[mark_indices[edge.u()]]);
+                        int v = rnd.any(_connect_parts[mark_indices[edge.v()]]);
+                        _result.__add_edge(u, v);
+                    }
                 }
+                
+                void __generate_extra_edges() {
+                    int m = _extra_edge_count;
+                    if (_result._connect) {
+                        m -= _connect_parts.size() - 1;
+                        __generate_connect_part();
+                    }
+                    while (m--){
+                        _result.__add_edge(_result.__rand_edge());
+                    }         
+                }
+            };
+            
+            template<typename NodeType, typename EdgeType>
+            class _TreeLinkImpl {
+            private:
+                _Tree<NodeType, EdgeType> _result, _source1, _source2;
+                TreeLinkType _link_type;
+                
+            public:
+                _TreeLinkImpl(
+                    _Tree<NodeType, EdgeType> result,
+                    _Tree<NodeType, EdgeType> source1,
+                    _Tree<NodeType, EdgeType> source2,
+                    TreeLinkType link_type) :
+                    _result(result),
+                    _source1(source1),
+                    _source2(source2),
+                    _link_type(link_type)
+                {
+                    __init_result_tree();
+                }
+                
+                _TreeLinkImpl(
+                    _Tree<NodeType, EdgeType> source1,
+                    _Tree<NodeType, EdgeType> source2,
+                    TreeLinkType link_type) :
+                    _source1(source1),
+                    _source2(source2),
+                    _link_type(link_type)
+                {
+                    __init_result_tree(source1);
+                }
+                
+                _Tree<NodeType, EdgeType> get_result() {
+                    __link_tree();
+                    return _result;
+                }
+                
+            private:
+                void __init_result_tree() {
+                    _result._node_count = 0;
+                    _result._edges.clear();
+                    _result._nodes_weight.clear();
+                    _result._node_indices.clear();
+                }
+                
+                void __init_result_tree(_Tree<NodeType, EdgeType> tree) {
+                    _result = tree;
+                    __init_result_tree();
+                }   
+                
+                LinkType __convert_to_link_type() {
+                    if (_link_type == TreeLinkType::Direct) {
+                        return LinkType::Direct;
+                    }
+                    else if(_link_type == TreeLinkType::Increase) {
+                        return LinkType::Increase;
+                    }
+                    else {
+                        return LinkType::Shuffle;
+                    }
+                }
+                
+                template<typename T = NodeType, _HasT<T> = 0>
+                void __reset_nodes_weight_function(_Graph<NodeType, EdgeType>& graph) {
+                    _result.__check_nodes_weight_function();
+                    auto func = _result.nodes_weight_function();
+                    graph.set_nodes_weight_function(func);
+                }
+                
+                template<typename T = NodeType, _NotHasT<T> = 0>
+                void __reset_nodes_weight_function(_Graph<NodeType, EdgeType>& graph) {
+                    return;
+                }
+                
+                template<typename T = EdgeType, _HasT<T> = 0>
+                void __reset_edges_weight_function(_Graph<NodeType, EdgeType>& graph) {
+                    _result.__check_edges_weight_function();
+                    auto func = _result.edges_weight_function();
+                    graph.set_edges_weight_function(func);
+                }
+                
+                template<typename T = EdgeType, _NotHasT<T> = 0>
+                void __reset_edges_weight_function(_Graph<NodeType, EdgeType>& graph) {
+                    return;
+                }
+                
+                void __convert_graph_to_tree(_Graph<NodeType, EdgeType>& graph) {
+                    _result._node_count = graph._node_count;
+                    _result._edges = graph._edges;
+                    _result._nodes_weight = graph._nodes_weight;
+                    _result._node_indices = graph._node_indices;
+                    if (_result._is_rooted) {
+                        _result.reroot(_result._root + 1);
+                    }
+                }
+                
+                void __link_tree() {
+                    _Graph<NodeType, EdgeType> empty_graph;
+                    empty_graph.set_connect(true);
+                    empty_graph.set_swap_node(_result._swap_node);
+                    __reset_nodes_weight_function(empty_graph);
+                    __reset_edges_weight_function(empty_graph);
+                    _LinkImpl<NodeType, EdgeType> impl(empty_graph, _source1, _source2, 1, __convert_to_link_type());
+                    _Graph<NodeType, EdgeType> graph = impl.get_result();
+                    __convert_graph_to_tree(graph);
+                } 
+                  
             };
 
             #undef _OTHER_OUTPUT_FUNCTION_SETTING
