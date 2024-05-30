@@ -5257,84 +5257,84 @@ namespace generator{
             // merge 2 tree or graph to a graph
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> merge(
+            _Graph<NodeType, EdgeType> __merge(
                 _Graph<NodeType, EdgeType> setting_graph,
                 _Graph<NodeType, EdgeType> graph1,
                 _Graph<NodeType, EdgeType> graph2,
-                MergeType merge_type = MergeType::Shuffle)
+                MergeType merge_type)
             {
                 _LinkImpl<NodeType, EdgeType> impl(setting_graph, graph1, graph2, 0, merge_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> merge(
+            _Graph<NodeType, EdgeType> __merge(
                 _Graph<NodeType, EdgeType> setting_graph,
                 _Tree<NodeType, EdgeType> tree1,
                 _Graph<NodeType, EdgeType> graph2,
-                MergeType merge_type = MergeType::Shuffle)
+                MergeType merge_type)
             {
                 _LinkImpl<NodeType, EdgeType> impl(setting_graph, tree1, graph2, 0, merge_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> merge(
+            _Graph<NodeType, EdgeType> __merge(
                 _Graph<NodeType, EdgeType> setting_graph,
                 _Graph<NodeType, EdgeType> graph1,
                 _Tree<NodeType, EdgeType> tree2,
-                MergeType merge_type = MergeType::Shuffle)
+                MergeType merge_type)
             {
                 _LinkImpl<NodeType, EdgeType> impl(setting_graph, graph1, tree2, 0, merge_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> merge(
+            _Graph<NodeType, EdgeType> __merge(
                 _Graph<NodeType, EdgeType> setting_graph,
                 _Tree<NodeType, EdgeType> tree1,
                 _Tree<NodeType, EdgeType> tree2,
-                MergeType merge_type = MergeType::Shuffle)
+                MergeType merge_type)
             {
                 _LinkImpl<NodeType, EdgeType> impl(setting_graph, tree1, tree2, 0, merge_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> merge(
+            _Graph<NodeType, EdgeType> __merge(
                 _Graph<NodeType, EdgeType> graph1,
                 _Graph<NodeType, EdgeType> graph2,
-                MergeType merge_type = MergeType::Shuffle)
+                MergeType merge_type)
             {
                 _LinkImpl<NodeType, EdgeType> impl(graph1, graph2, 0, merge_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> merge(
+            _Graph<NodeType, EdgeType> __merge(
                 _Tree<NodeType, EdgeType> tree1,
                 _Graph<NodeType, EdgeType> graph2,
-                MergeType merge_type = MergeType::Shuffle)
+                MergeType merge_type)
             {
                 _LinkImpl<NodeType, EdgeType> impl(tree1, graph2, 0, merge_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> merge(
+            _Graph<NodeType, EdgeType> __merge(
                 _Graph<NodeType, EdgeType> graph1,
                 _Tree<NodeType, EdgeType> tree2,
-                MergeType merge_type = MergeType::Shuffle)
+                MergeType merge_type)
             {
                 _LinkImpl<NodeType, EdgeType> impl(graph1, tree2, 0, merge_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> merge(
+            _Graph<NodeType, EdgeType> __merge(
                 _Tree<NodeType, EdgeType> tree1,
                 _Tree<NodeType, EdgeType> tree2,
-                MergeType merge_type = MergeType::Shuffle)
+                MergeType merge_type)
             {
                 _LinkImpl<NodeType, EdgeType> impl(tree1, tree2, 0, merge_type);
                 return impl.get_result();
@@ -5343,117 +5343,117 @@ namespace generator{
             // link 2 tree or graph to a graph, add extra edges
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> link(
+            _Graph<NodeType, EdgeType> __link(
                 _Graph<NodeType, EdgeType> setting_graph,
                 _Graph<NodeType, EdgeType> graph1,
                 _Graph<NodeType, EdgeType> graph2,
                 int extra_edges,
-                MergeType merge_type = MergeType::Shuffle)
+                LinkType link_type)
             {
-                _LinkImpl<NodeType, EdgeType> impl(setting_graph, graph1, graph2, extra_edges, merge_type);
+                _LinkImpl<NodeType, EdgeType> impl(setting_graph, graph1, graph2, extra_edges, link_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> link(
+            _Graph<NodeType, EdgeType> __link(
                 _Graph<NodeType, EdgeType> setting_graph,
                 _Tree<NodeType, EdgeType> tree1,
                 _Graph<NodeType, EdgeType> graph2,
                 int extra_edges,
-                MergeType merge_type = MergeType::Shuffle)
+                LinkType link_type)
             {
-                _LinkImpl<NodeType, EdgeType> impl(setting_graph, tree1, graph2, extra_edges, merge_type);
+                _LinkImpl<NodeType, EdgeType> impl(setting_graph, tree1, graph2, extra_edges, link_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> link(
+            _Graph<NodeType, EdgeType> __link(
                 _Graph<NodeType, EdgeType> setting_graph,
                 _Graph<NodeType, EdgeType> graph1,
                 _Tree<NodeType, EdgeType> tree2,
                 int extra_edges,
-                MergeType merge_type = MergeType::Shuffle)
+                LinkType link_type)
             {
-                _LinkImpl<NodeType, EdgeType> impl(setting_graph, graph1, tree2, extra_edges, merge_type);
+                _LinkImpl<NodeType, EdgeType> impl(setting_graph, graph1, tree2, extra_edges, link_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> link(
+            _Graph<NodeType, EdgeType> __link(
                 _Graph<NodeType, EdgeType> setting_graph,
                 _Tree<NodeType, EdgeType> tree1,
                 _Tree<NodeType, EdgeType> tree2,
                 int extra_edges,
-                MergeType merge_type = MergeType::Shuffle)
+                LinkType link_type)
             {
-                _LinkImpl<NodeType, EdgeType> impl(setting_graph, tree1, tree2, extra_edges, merge_type);
+                _LinkImpl<NodeType, EdgeType> impl(setting_graph, tree1, tree2, extra_edges, link_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> link(
+            _Graph<NodeType, EdgeType> __link(
                 _Graph<NodeType, EdgeType> graph1,
                 _Graph<NodeType, EdgeType> graph2,
                 int extra_edges,
-                MergeType merge_type = MergeType::Shuffle)
+                LinkType link_type)
             {
-                _LinkImpl<NodeType, EdgeType> impl(graph1, graph2, extra_edges, merge_type);
+                _LinkImpl<NodeType, EdgeType> impl(graph1, graph2, extra_edges, link_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> link(
+            _Graph<NodeType, EdgeType> __link(
                 _Tree<NodeType, EdgeType> tree1,
                 _Graph<NodeType, EdgeType> graph2,
                 int extra_edges,
-                MergeType merge_type = MergeType::Shuffle)
+                LinkType link_type)
             {
-                _LinkImpl<NodeType, EdgeType> impl(tree1, graph2, extra_edges, merge_type);
+                _LinkImpl<NodeType, EdgeType> impl(tree1, graph2, extra_edges, link_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> link(
+            _Graph<NodeType, EdgeType> __link(
                 _Graph<NodeType, EdgeType> graph1,
                 _Tree<NodeType, EdgeType> tree2,
                 int extra_edges,
-                MergeType merge_type = MergeType::Shuffle)
+                LinkType link_type)
             {
-                _LinkImpl<NodeType, EdgeType> impl(graph1, tree2, extra_edges, merge_type);
+                _LinkImpl<NodeType, EdgeType> impl(graph1, tree2, extra_edges, link_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Graph<NodeType, EdgeType> link(
+            _Graph<NodeType, EdgeType> __link(
                 _Tree<NodeType, EdgeType> tree1,
                 _Tree<NodeType, EdgeType> tree2,
                 int extra_edges,
-                MergeType merge_type = MergeType::Shuffle)
+                LinkType link_type)
             {
-                _LinkImpl<NodeType, EdgeType> impl(tree1, tree2, extra_edges, merge_type);
+                _LinkImpl<NodeType, EdgeType> impl(tree1, tree2, extra_edges, link_type);
                 return impl.get_result();
             }
             
             // special for 2 tree link to a tree
             
             template<typename NodeType, typename EdgeType> 
-            _Tree<NodeType, EdgeType> link(
+            _Tree<NodeType, EdgeType> __link(
                 _Tree<NodeType, EdgeType> setting_tree,
                 _Tree<NodeType, EdgeType> tree1,
                 _Tree<NodeType, EdgeType> tree2,
-                TreeLinkType merge_type = TreeLinkType::Shuffle)
+                TreeLinkType link_type)
             {
-                _TreeLinkImpl<NodeType, EdgeType> impl(setting_tree, tree1, tree2, merge_type);
+                _TreeLinkImpl<NodeType, EdgeType> impl(setting_tree, tree1, tree2, link_type);
                 return impl.get_result();
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Tree<NodeType, EdgeType> link(
+            _Tree<NodeType, EdgeType> __link(
                 _Tree<NodeType, EdgeType> tree1,
                 _Tree<NodeType, EdgeType> tree2,
-                TreeLinkType merge_type = TreeLinkType::Shuffle)
+                TreeLinkType link_type)
             {
-                _TreeLinkImpl<NodeType, EdgeType> impl(tree1, tree2, merge_type);
+                _TreeLinkImpl<NodeType, EdgeType> impl(tree1, tree2, link_type);
                 return impl.get_result();
             }
 
@@ -5489,6 +5489,67 @@ namespace generator{
             using PseudoInTree = basic::_PseudoInTree<void, void>;
             using PseudoOutTree = basic::_PseudoOutTree<void, void>;
             using Cactus = basic::_Cactus<void, void>;
+
+            using LinkType = basic::LinkType;
+            using MergeType = basic::MergeType;
+            using TreeLinkType = basic::TreeLinkType;
+            
+            Graph merge(Graph setting_graph, Graph source1, Graph source2, MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+            Graph merge(Graph setting_graph, Tree source1, Graph source2, MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+            Graph merge(Graph setting_graph, Graph source1, Tree source2, MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+            Graph merge(Graph setting_graph, Tree source1, Tree source2, MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+            Graph merge(Graph source1, Graph source2, MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+            Graph merge(Tree source1, Graph source2, MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+            Graph merge(Graph source1, Tree source2, MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+            Graph merge(Tree source1, Tree source2, MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+            Graph link(Graph setting_graph, Graph source1, Graph source2, int extra_edges, LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+            Graph link(Graph setting_graph, Tree source1, Graph source2, int extra_edges, LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+            Graph link(Graph setting_graph, Graph source1, Tree source2, int extra_edges, LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+            Graph link(Graph setting_graph, Tree source1, Tree source2, int extra_edges, LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+            Graph link(Graph source1, Graph source2, int extra_edges, LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+            Graph link(Tree source1, Graph source2, int extra_edges, LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+            Graph link(Graph source1, Tree source2, int extra_edges, LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+            Graph link(Tree source1, Tree source2, int extra_edges, LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+            Tree link(Tree setting_tree, Tree source1, Tree source2, TreeLinkType link_type = TreeLinkType::Shuffle) {
+                return basic::__link(setting_tree, source1, source2, link_type);
+            }
+            Tree link(Tree source1, Tree source2, TreeLinkType link_type = TreeLinkType::Shuffle) {
+                return basic::__link(source1, source2, link_type);
+            }
         }
 
         namespace edge_weight{
@@ -5546,6 +5607,173 @@ namespace generator{
 
             template<typename EdgeType>
             using Cactus = basic::_Cactus<void, EdgeType>;
+
+            using LinkType = basic::LinkType;
+            using MergeType = basic::MergeType;
+            using TreeLinkType = basic::TreeLinkType;
+            
+            template<typename EdgeType>
+            Graph<EdgeType> merge(
+                Graph<EdgeType> setting_graph, 
+                Graph<EdgeType> source1, 
+                Graph<EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> merge(
+                Graph<EdgeType> setting_graph, 
+                Tree<EdgeType> source1, 
+                Graph<EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> merge(
+                Graph<EdgeType> setting_graph,
+                Graph<EdgeType> source1, 
+                Tree<EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> merge(
+                Graph<EdgeType> setting_graph, 
+                Tree<EdgeType> source1, 
+                Tree<EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> merge(
+                Graph<EdgeType> source1, 
+                Graph<EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> merge(
+                Tree<EdgeType> source1, 
+                Graph<EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> merge(
+                Graph<EdgeType> source1, 
+                Tree<EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> merge(
+                Tree<EdgeType> source1, 
+                Tree<EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+
+            template<typename EdgeType>
+            Graph<EdgeType> link(
+                Graph<EdgeType> setting_graph, 
+                Graph<EdgeType> source1, 
+                Graph<EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> link(
+                Graph<EdgeType> setting_graph, 
+                Tree<EdgeType> source1,
+                Graph<EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> link(
+                Graph<EdgeType> setting_graph, 
+                Graph<EdgeType> source1, 
+                Tree<EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> link(
+                Graph<EdgeType> setting_graph, 
+                Tree<EdgeType> source1, 
+                Tree<EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> link(
+                Graph<EdgeType> source1, 
+                Graph<EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> link(
+                Tree<EdgeType> source1, 
+                Graph<EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> link(
+                Graph<EdgeType> source1, 
+                Tree<EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename EdgeType>
+            Graph<EdgeType> link(
+                Tree<EdgeType> source1, 
+                Tree<EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+
+            template<typename EdgeType>
+            Tree<EdgeType> link(
+                Tree<EdgeType> setting_tree, 
+                Tree<EdgeType> source1, 
+                Tree<EdgeType> source2, 
+                TreeLinkType link_type = TreeLinkType::Shuffle) {
+                return basic::__link(setting_tree, source1, source2, link_type);
+            }
+
+            template<typename EdgeType>
+            Tree<EdgeType> link(
+                Tree<EdgeType> source1, 
+                Tree<EdgeType> source2, 
+                TreeLinkType link_type = TreeLinkType::Shuffle) {
+                return basic::__link(source1, source2, link_type);
+            }           
         }
 
         namespace node_weight{
@@ -5603,6 +5831,173 @@ namespace generator{
 
             template<typename NodeType>
             using Cactus = basic::_Cactus<NodeType, void>;
+       
+            using LinkType = basic::LinkType;
+            using MergeType = basic::MergeType;
+            using TreeLinkType = basic::TreeLinkType;
+            
+            template<typename NodeType>
+            Graph<NodeType> merge(
+                Graph<NodeType> setting_graph, 
+                Graph<NodeType> source1, 
+                Graph<NodeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> merge(
+                Graph<NodeType> setting_graph, 
+                Tree<NodeType> source1, 
+                Graph<NodeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> merge(
+                Graph<NodeType> setting_graph,
+                Graph<NodeType> source1, 
+                Tree<NodeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> merge(
+                Graph<NodeType> setting_graph, 
+                Tree<NodeType> source1, 
+                Tree<NodeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> merge(
+                Graph<NodeType> source1, 
+                Graph<NodeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> merge(
+                Tree<NodeType> source1, 
+                Graph<NodeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> merge(
+                Graph<NodeType> source1, 
+                Tree<NodeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> merge(
+                Tree<NodeType> source1, 
+                Tree<NodeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+
+            template<typename NodeType>
+            Graph<NodeType> link(
+                Graph<NodeType> setting_graph, 
+                Graph<NodeType> source1, 
+                Graph<NodeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> link(
+                Graph<NodeType> setting_graph, 
+                Tree<NodeType> source1,
+                Graph<NodeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> link(
+                Graph<NodeType> setting_graph, 
+                Graph<NodeType> source1, 
+                Tree<NodeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> link(
+                Graph<NodeType> setting_graph, 
+                Tree<NodeType> source1, 
+                Tree<NodeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> link(
+                Graph<NodeType> source1, 
+                Graph<NodeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> link(
+                Tree<NodeType> source1, 
+                Graph<NodeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> link(
+                Graph<NodeType> source1, 
+                Tree<NodeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType>
+            Graph<NodeType> link(
+                Tree<NodeType> source1, 
+                Tree<NodeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+
+            template<typename NodeType>
+            Tree<NodeType> link(
+                Tree<NodeType> setting_tree, 
+                Tree<NodeType> source1, 
+                Tree<NodeType> source2, 
+                TreeLinkType link_type = TreeLinkType::Shuffle) {
+                return basic::__link(setting_tree, source1, source2, link_type);
+            }
+
+            template<typename NodeType>
+            Tree<NodeType> link(
+                Tree<NodeType> source1, 
+                Tree<NodeType> source2, 
+                TreeLinkType link_type = TreeLinkType::Shuffle) {
+                return basic::__link(source1, source2, link_type);
+            }           
         }
         
         namespace both_weight{
@@ -5661,6 +6056,173 @@ namespace generator{
 
             template<typename NodeType, typename EdgeType>
             using Cactus = basic::_Cactus<NodeType, EdgeType>;
+
+            using LinkType = basic::LinkType;
+            using MergeType = basic::MergeType;
+            using TreeLinkType = basic::TreeLinkType;
+            
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> merge(
+                Graph<NodeType, EdgeType> setting_graph, 
+                Graph<NodeType, EdgeType> source1, 
+                Graph<NodeType, EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> merge(
+                Graph<NodeType, EdgeType> setting_graph, 
+                Tree<NodeType, EdgeType> source1, 
+                Graph<NodeType, EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> merge(
+                Graph<NodeType, EdgeType> setting_graph,
+                Graph<NodeType, EdgeType> source1, 
+                Tree<NodeType, EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> merge(
+                Graph<NodeType, EdgeType> setting_graph, 
+                Tree<NodeType, EdgeType> source1, 
+                Tree<NodeType, EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(setting_graph, source1, source2, merge_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> merge(
+                Graph<NodeType, EdgeType> source1, 
+                Graph<NodeType, EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> merge(
+                Tree<NodeType, EdgeType> source1, 
+                Graph<NodeType, EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> merge(
+                Graph<NodeType, EdgeType> source1, 
+                Tree<NodeType, EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> merge(
+                Tree<NodeType, EdgeType> source1, 
+                Tree<NodeType, EdgeType> source2, 
+                MergeType merge_type = MergeType::Shuffle) {
+                return basic::__merge(source1, source2, merge_type);
+            } 
+
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> link(
+                Graph<NodeType, EdgeType> setting_graph, 
+                Graph<NodeType, EdgeType> source1, 
+                Graph<NodeType, EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> link(
+                Graph<NodeType, EdgeType> setting_graph, 
+                Tree<NodeType, EdgeType> source1,
+                Graph<NodeType, EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> link(
+                Graph<NodeType, EdgeType> setting_graph, 
+                Graph<NodeType, EdgeType> source1, 
+                Tree<NodeType, EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> link(
+                Graph<NodeType, EdgeType> setting_graph, 
+                Tree<NodeType, EdgeType> source1, 
+                Tree<NodeType, EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(setting_graph, source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> link(
+                Graph<NodeType, EdgeType> source1, 
+                Graph<NodeType, EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> link(
+                Tree<NodeType, EdgeType> source1, 
+                Graph<NodeType, EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> link(
+                Graph<NodeType, EdgeType> source1, 
+                Tree<NodeType, EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+            template<typename NodeType, typename EdgeType>
+            Graph<NodeType, EdgeType> link(
+                Tree<NodeType, EdgeType> source1, 
+                Tree<NodeType, EdgeType> source2, 
+                int extra_edges, 
+                LinkType link_type = LinkType::Shuffle) {
+                return basic::__link(source1, source2, extra_edges, link_type);
+            } 
+
+
+            template<typename NodeType, typename EdgeType>
+            Tree<NodeType, EdgeType> link(
+                Tree<NodeType, EdgeType> setting_tree, 
+                Tree<NodeType, EdgeType> source1, 
+                Tree<NodeType, EdgeType> source2, 
+                TreeLinkType link_type = TreeLinkType::Shuffle) {
+                return basic::__link(setting_tree, source1, source2, link_type);
+            }
+
+            template<typename NodeType, typename EdgeType>
+            Tree<NodeType, EdgeType> link(
+                Tree<NodeType, EdgeType> source1, 
+                Tree<NodeType, EdgeType> source2, 
+                TreeLinkType link_type = TreeLinkType::Shuffle) {
+                return basic::__link(source1, source2, link_type);
+            }     
         }
     }
     
