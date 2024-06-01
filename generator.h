@@ -5377,6 +5377,11 @@ namespace generator{
                 return impl.get_result();
             }
 
+            template<typename NodeType, typename EdgeType>
+            class _FlowerChain : public _Tree<NodeType, EdgeType> {
+            
+            };
+
             #undef _OTHER_OUTPUT_FUNCTION_SETTING
             #undef _OUTPUT_FUNCTION
             #undef _DEF_GEN_FUNCTION
