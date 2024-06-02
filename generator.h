@@ -5379,7 +5379,12 @@ namespace generator{
 
             template<typename NodeType, typename EdgeType>
             class _FlowerChain : public _Tree<NodeType, EdgeType> {
-            
+            protected:
+                typedef _FlowerChain<NodeType,EdgeType> _Self;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+                int _flower_size, _chain_size;
+                
             };
 
             #undef _OTHER_OUTPUT_FUNCTION_SETTING
