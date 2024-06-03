@@ -3,9 +3,15 @@
 
 - 修复bugs：
   - 禁用二分图相关set函数。
+  - 修复有权图在设置`connect = true`的会出现生成错误。
+- 重构：
+  - 采用`node_indices`表示结点输出时的值。
+  - 变量名返回值更改为const常量，原数据引用采用`ref()`。
 - 新增功能：
   - 有根树添加重定根函数`reroot`。
   - 给make inputs添加一些函数，compare测试所有的样例。
+  - 树/图的合并：merge（不额外加边），link（额外加边）。
+  - FlowerChain：菊花带链
 
 ### version 0.7.0
 
