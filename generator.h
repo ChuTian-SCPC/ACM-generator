@@ -2456,7 +2456,10 @@ namespace generator{
                         q.pop();
                         visit[u] = 1;
                         for (auto& edge : node_edges[u]) {
-                            int v = (edge.u() == u ? edge.v() : edge.u());
+                            if (edge.u() != u) {
+                                std::swap(edge.u_ref(), edge.v_ref());
+                            }
+                            int v = edge.v();
                             if (visit[v]) {
                                 continue;
                             }
@@ -5008,13 +5011,26 @@ namespace generator{
                             }
                         }
                     }
-                    else {                       
-                        for (int i = 0; i < _node_count[0]; i++) {
-                            _node_merge_map[std::make_pair(0, i)] = i;
-                        }
-                        for (int i = 0; i < _node_count[1]; i++) {
-                            _node_merge_map[std::make_pair(1, i)] = i + _node_count[0];
-                        }
+                    else {   
+                        if (_link_type == LinkType::Shuffle) {
+                            std::vector<int> p = rnd.perm(_node_count[0] + _node_count[1], 0);
+                            int cnt = 0;
+                            for (int i = 0; i < 2; i++) {
+                                for (int j = 0; j < _node_count[i]; j++) {
+                                    _node_merge_map[std::make_pair(i, j)] = p[cnt];
+                                    cnt++;
+                                }
+                            }
+                        }   
+                        else {
+                            for (int i = 0; i < _node_count[0]; i++) {
+                                _node_merge_map[std::make_pair(0, i)] = i;
+                            }
+                            for (int i = 0; i < _node_count[1]; i++) {
+                                _node_merge_map[std::make_pair(1, i)] = i + _node_count[0];
+                            }                            
+                        }                 
+                        
                         if (_link_type == LinkType::Direct) {
                             for (int i = 0; i < 2; i++) {
                                 for (auto x : _node_indices[i]) {
@@ -5022,13 +5038,10 @@ namespace generator{
                                 }
                             }
                         }
-                        else if (_link_type == LinkType::Increase) {
+                        else {
                             for (int i = 0; i < _node_count[0] + _node_count[1]; i++) {
                                 _result._node_indices.emplace_back(i + _result._begin_node);
                             }
-                        }
-                        else {
-                            _result._node_indices = rnd.perm(_node_count[0] + _node_count[1], _result._begin_node);
                         }
                     }                
                 }
@@ -5261,6 +5274,172 @@ namespace generator{
                 } 
             };
             
+            template<typename NodeType, typename EdgeType>
+            class _FlowerChain : public _Tree<NodeType, EdgeType> {
+            protected:
+                typedef _FlowerChain<NodeType,EdgeType> _Self;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+                int _flower_size, _chain_size;
+            
+            public:
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                _FlowerChain(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int flower_size = -1,
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Tree<NodeType, EdgeType>(
+                        node, begin_node, is_rooted, root, 
+                        nodes_weight_function, edges_weight_function),
+                    _flower_size(flower_size)
+                {
+                    _output_function = this->default_function();
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                _FlowerChain(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int flower_size = -1,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Tree<void, EdgeType>(node, begin_node, is_rooted, root, edges_weight_function),
+                    _flower_size(flower_size)
+                {
+                    _output_function = this->default_function();
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                _FlowerChain(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int flower_size = -1,
+                    NodeGenFunction nodes_weight_function = nullptr) :
+                    _Tree<NodeType, void>(node, begin_node, is_rooted, root, nodes_weight_function),
+                    _flower_size(flower_size)
+                {
+                    _output_function = this->default_function();
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                _FlowerChain(
+                    int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int flower_size = -1) :
+                    _Tree<void, void>(node, begin_node, is_rooted, root),
+                    _flower_size(flower_size)
+                {
+                    _output_function = this->default_function();
+                }
+                
+                void set_flower_size(int flower_size) {
+                    _flower_size = flower_size;
+                    _chain_size = this->_node_count - flower_size;
+                }
+                
+                void set_chain_size(int chain_size) {
+                    _chain_size = chain_size;
+                    _flower_size = this->_node_count - _chain_size;
+                }
+                
+                void set_flower_chain_size(int flower_size, int chain_size) {
+                    _flower_size = flower_size;
+                    _chain_size = chain_size;
+                    this->_node_count = flower_size + chain_size;
+                    this->__init_node_indices();
+                } 
+                
+                int flower_size() const { return _flower_size; }
+                int& flower_size_ref() { return _flower_size; }
+                
+                int chain_size() const { return _chain_size; }
+                int& chain_size_ref() { return _chain_size; }
+                
+                _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+                _DISABLE_CHOOSE_GEN
+            protected:
+                template<typename T = NodeType, _HasT<T> = 0>
+                void __reset_nodes_weight_function(_Tree<NodeType, EdgeType>& tree) {
+                    auto func = this->nodes_weight_function();
+                    tree.set_nodes_weight_function(func);
+                }
+                
+                template<typename T = NodeType, _NotHasT<T> = 0>
+                void __reset_nodes_weight_function(_Tree<NodeType, EdgeType>&) {
+                    return;
+                }
+                
+                template<typename T = EdgeType, _HasT<T> = 0>
+                void __reset_edges_weight_function(_Tree<NodeType, EdgeType>& tree) {
+                    auto func = this->edges_weight_function();
+                    tree.set_edges_weight_function(func);
+                }
+                
+                template<typename T = EdgeType, _NotHasT<T> = 0>
+                void __reset_edges_weight_function(_Tree<NodeType, EdgeType>&) {
+                    return;
+                }
+                
+                virtual void __self_init() override {
+                    if (_flower_size == -1) {
+                        _flower_size = rnd.next(0, this->_node_count);
+                    }
+                    _chain_size = this->_node_count - _flower_size;
+                }
+                
+                virtual void __judge_self_limit() override {
+                    if (_flower_size < 0) {
+                        io::__fail_msg(io::_err, "Flower size must greater than or equal to 0, but found %d.", _flower_size);
+                    }
+                    if (_chain_size < 0) {
+                        io::__fail_msg(io::_err, "Chain size must greater than or equal to 0, but found %d.", _chain_size);
+                    }
+                }
+                
+                template<typename T = NodeType, _HasT<T> = 0>
+                void __dump_nodes_weight(_Tree<NodeType, EdgeType>& tree) {
+                    this->_nodes_weight = tree.nodes_weight_ref();
+                }
+                
+                template<typename T = NodeType, _NotHasT<T> = 0>
+                void __dump_nodes_weight(_Tree<NodeType, EdgeType>&) {
+                    return;
+                }
+                
+                void __dump_result(_Tree<NodeType, EdgeType>& tree) {
+                    this->_edges = tree.edges_ref();
+                    this->_node_indices = tree.node_indices_ref();
+                    __dump_nodes_weight(tree);
+                }
+                
+                virtual void __generator_tree() override {                   
+                    _Flower<NodeType, EdgeType> _flower;
+                    _Chain<NodeType, EdgeType> _chain;
+                    _flower.set_node_count(_flower_size);
+                    __reset_edges_weight_function(_flower);
+                    __reset_nodes_weight_function(_flower);
+                    _chain.set_node_count(_chain_size);
+                    __reset_edges_weight_function(_chain);
+                    __reset_nodes_weight_function(_chain);                  
+                    if (_flower_size != 0) {
+                        _flower.gen();
+                    }
+                    if (_chain_size != 0) {
+                        _chain.gen();
+                    }
+
+                    if (_flower_size == 0) {
+                        __dump_result(_chain);
+                    }
+                    else if (_chain_size == 0) {
+                        __dump_result(_flower);
+                    }
+                    else {
+                        _TreeLinkImpl<NodeType, EdgeType> impl(_flower, _chain, TreeLinkType::Shuffle);
+                        auto res = impl.get_result();     
+                        __dump_result(res);                        
+                    }
+
+                    if (this->_is_rooted) {
+                        this->reroot(this->_root + 1);
+                    }       
+                }
+                  
+            };
+            
             template <typename U>
             struct IsTreeOrGraph {
                 template <typename V>
@@ -5409,6 +5588,7 @@ namespace generator{
             using PseudoInTree = basic::_PseudoInTree<void, void>;
             using PseudoOutTree = basic::_PseudoOutTree<void, void>;
             using Cactus = basic::_Cactus<void, void>;
+            using FlowerChain = basic::_FlowerChain<void, void>;
 
             using LinkType = basic::LinkType;
             using MergeType = basic::MergeType;
@@ -5497,6 +5677,9 @@ namespace generator{
 
             template<typename EdgeType>
             using Cactus = basic::_Cactus<void, EdgeType>;
+
+            template<typename EdgeType>
+            using FlowerChain = basic::_FlowerChain<void, EdgeType>;
 
             using LinkType = basic::LinkType;
             using MergeType = basic::MergeType;
@@ -5623,6 +5806,9 @@ namespace generator{
 
             template<typename NodeType>
             using Cactus = basic::_Cactus<NodeType, void>;
+
+            template<typename NodeType>
+            using FlowerChain = basic::_FlowerChain<NodeType, void>;
        
             using LinkType = basic::LinkType;
             using MergeType = basic::MergeType;
@@ -5750,6 +5936,9 @@ namespace generator{
 
             template<typename NodeType, typename EdgeType>
             using Cactus = basic::_Cactus<NodeType, EdgeType>;
+
+            template<typename NodeType, typename EdgeType>
+            using FlowerChain = basic::_FlowerChain<NodeType, EdgeType>;
 
             using LinkType = basic::LinkType;
             using MergeType = basic::MergeType;
