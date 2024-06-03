@@ -5413,16 +5413,26 @@ namespace generator{
                     __reset_nodes_weight_function(_flower);
                     _chain.set_node_count(_chain_size);
                     __reset_edges_weight_function(_chain);
-                    __reset_nodes_weight_function(_flower);                  
+                    __reset_nodes_weight_function(_chain);                  
                     if (_flower_size != 0) {
                         _flower.gen();
                     }
                     if (_chain_size != 0) {
                         _chain.gen();
                     }
-                    _TreeLinkImpl<NodeType, EdgeType> impl(_flower, _chain, TreeLinkType::Shuffle);
-                    auto res = impl.get_result();     
-                    __dump_result(res);
+
+                    if (_flower_size == 0) {
+                        __dump_result(_chain);
+                    }
+                    else if (_chain_size == 0) {
+                        __dump_result(_flower);
+                    }
+                    else {
+                        _TreeLinkImpl<NodeType, EdgeType> impl(_flower, _chain, TreeLinkType::Shuffle);
+                        auto res = impl.get_result();     
+                        __dump_result(res);                        
+                    }
+
                     if (this->_is_rooted) {
                         this->reroot(this->_root + 1);
                     }       
@@ -5578,6 +5588,7 @@ namespace generator{
             using PseudoInTree = basic::_PseudoInTree<void, void>;
             using PseudoOutTree = basic::_PseudoOutTree<void, void>;
             using Cactus = basic::_Cactus<void, void>;
+            using FlowerChain = basic::_FlowerChain<void, void>;
 
             using LinkType = basic::LinkType;
             using MergeType = basic::MergeType;
@@ -5666,6 +5677,9 @@ namespace generator{
 
             template<typename EdgeType>
             using Cactus = basic::_Cactus<void, EdgeType>;
+
+            template<typename EdgeType>
+            using FlowerChain = basic::_FlowerChain<void, EdgeType>;
 
             using LinkType = basic::LinkType;
             using MergeType = basic::MergeType;
@@ -5792,6 +5806,9 @@ namespace generator{
 
             template<typename NodeType>
             using Cactus = basic::_Cactus<NodeType, void>;
+
+            template<typename NodeType>
+            using FlowerChain = basic::_FlowerChain<NodeType, void>;
        
             using LinkType = basic::LinkType;
             using MergeType = basic::MergeType;
@@ -5919,6 +5936,9 @@ namespace generator{
 
             template<typename NodeType, typename EdgeType>
             using Cactus = basic::_Cactus<NodeType, EdgeType>;
+
+            template<typename NodeType, typename EdgeType>
+            using FlowerChain = basic::_FlowerChain<NodeType, EdgeType>;
 
             using LinkType = basic::LinkType;
             using MergeType = basic::MergeType;
