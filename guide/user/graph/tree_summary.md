@@ -38,11 +38,11 @@ bool swap_node;               //边的两个结点输出时是否可能交换前
 TreeGenerator tree_generator; //树的生成方式
 ```
 
-结点的起始编号是指第一个结点的编号。比如一棵大小为 $node\textunderscore count$ 的树， 结点编号是从 $ begin\textunderscore node $   到 $ begin\textunderscore node+node\textunderscore count-1 $   。默认值都是 $1$ 。
+结点的起始编号是指第一个结点的编号。比如一棵大小为 `node_count` 的树， 结点编号是从 `begin_node` 到 ` begin_node + node_count-1`   。默认值都是 $1$ 。
 
 
 
-根在**设置**的时候要注意它的范围是 $[1, node\textunderscore count]$ ，表示根是第几个结点。
+根在**设置**的时候要注意它的范围是 `[1, node_count]` ，表示根是第几个结点。
 
 比如原本有一棵树的 $node\textunderscore count$  是 $5$ ，设置它的根是 $1$ ，可以正确的生成。现在将他的根改成 $6$ ，那么根就超出结点的个数了，会造成生成失败。可以看[相关示例](../../../examples/tree_root.cpp)。
 
@@ -58,26 +58,41 @@ TreeGenerator tree_generator; //树的生成方式
 
 `output_node_count`和`output_root`都是输出相关概念，详细见输出板块。
 
+
+`node_indices`表示的含义是每个结点对应输出和返回边中点的编号。
+
+默认的情况都是从 `begin_node` 到 ` begin_node + node_count-1`，由这两个属性决定的。
+
+**注意**：在一般情况下并不需要关注此变量。
+
+它也可以自定义，不过优先级较低，在`node_count`和`begin_node`改变的到时候都会重新初始化。
+
 ##### 获取
 
 变量获取分成可以修改（引用）和`const`的版本。
 
-根`root`的情况比较特殊，由于它在类中存储的范围是`[0,node\textunderscore count - 1]`，所以函数`int& root()`的返回值就是这个值。而`int croot() const`的返回值就是根的实际编号的值。
+根`root`的情况比较特殊，`int root()`返回的是根的编号，而`int& root_ref()`则是返回它实际存储的值。
 
-比如一棵树有 $5$ 个结点，起始结点的编号是 $2$ ，设置根是第 $4$ 个结点。那么`int& root()`的返回值就是`3`，而`int croot() const`的返回值就是`5`。
+根的实际存储的范围是`[0, node_count - 1]`，第 $i$ 个结点存储为 $i-1$ 。
 
 ```cpp
-int& node_count();
-int& root();
-int& beign_node();
-std::vector<Edge<EdgeType>>& edges();
-std::vector<NodeWeight<NodeType>>& nodes_weight();//如果有点权的话
+int node_count() const;
+bool is_rooted() const;
+bool swap_node() const;
+int root() const;
+int beign_node() const;
+std::vector<int> node_indices() const;
+std::vector<Edge<EdgeType>> edges() const;
+std::vector<NodeWeight<NodeType>> nodes_weight() const;//如果有点权的话
 
-int cnode_count() const;
-int croot() const;
-int cbeign_node() const;
-std::vector<Edge<EdgeType>> cedges() const;
-std::vector<NodeWeight<NodeType>> cnodes_weight() const;//如果有点权的话
+int& node_count_ref();
+bool& is_rooted_ref();
+bool& swap_node_ref();
+int& root_ref();
+int& beign_node_ref();
+std::vector<int>& node_indices_ref();
+std::vector<Edge<EdgeType>>& edges_ref();
+std::vector<NodeWeight<NodeType>>& nodes_weight_ref();//如果有点权的话
 ```
 
 
@@ -92,6 +107,8 @@ void set_begin_node(int begin_node);
 void set_output_node(bool output_node);
 void set_output_root(bool output_root);
 void set_swap_node(bool swap_node);
+void set_node_indices(std::vector<int> node_indices);
+void set_node_indices(int index, int number);
 ```
 
 
@@ -116,6 +133,12 @@ void set_nodes_weight_function(NodeGenFunction nodes_weight_function);
 void set_edges_weight_function(EdgeGenFunction edges_weight_function);
 ```
 
+可以通过以下函数获取：
+
+```cpp
+NodeGenFunction nodes_weight_function();
+EdgeGenFunction edges_weight_function();
+```
 
 
 #### 输出
@@ -137,7 +160,7 @@ void set_edges_weight_function(EdgeGenFunction edges_weight_function);
 
 `output_root`控制对于有根树是否输出根。
 
-也可以通过`void set_output(std::function<void(std::ostream&, const Tree&))`自行定义输出方式。
+也可以通过`void set_output(std::function<void(std::ostream&, const Tree<NodeType, EdgeType>&)>)`自行定义输出方式。
 
 树的输出可以通过重载的`std::ostream& <<`输出，也可以通过`println`输出。区别在于`std::ostream& <<`不会换行，而`println`会换行，即等价于`std::cout<<tree<<std::endl;`。
 

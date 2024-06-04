@@ -9,16 +9,16 @@
 可以通过函数获取边的结点以及修改，`const`的目的在于重载输出的时候可能需要用到：
 
 ```cpp
-int &u()                       //获取第一个结点u
-int &v()                       //获取第二个结点v
-T &w()                         //有权边获取权值w
+int u() const                      //获取第一个结点u
+int v() const                      //获取第二个结点v
+T w() const                        //有权边获取权值w
 
-int cu() const
-int cv() const
-T cw() const
+int& u_ref() 
+int& v_ref() 
+T& w_ref() 
 
-std::tuple<int, int> edge()    //无权边获取由tuple包裹的u,v
-std::tuple<int, int ,T> edge() //有权边获取由tuple包裹的u,v,w
+std::tuple<int, int> edge() const   //无权边获取由tuple包裹的u,v
+std::tuple<int, int ,T> edge() const //有权边获取由tuple包裹的u,v,w
 
 void set_u(int u)              //设置第一个结点u
 void set_v(int v)              //设置第二个结点v

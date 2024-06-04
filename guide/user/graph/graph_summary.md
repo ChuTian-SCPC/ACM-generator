@@ -53,22 +53,43 @@ bool output_edge_count;      //是否输出边数，默认是true
 
 `output_node_count`和`output_edge_count`都是输出相关概念，详细见输出板块。
 
+
+`node_indices`表示的含义是每个结点对应输出和返回边中点的编号。
+
+默认的情况都是从 `begin_node` 到 ` begin_node + node_count-1`，由这两个属性决定的。
+
+**注意**：在一般情况下并不需要关注此变量。
+
+它也可以自定义，不过优先级较低，在`node_count`和`begin_node`改变的到时候都会重新初始化。
+
 ##### 获取
 
 变量获取分成可以修改（引用）和`const`的版本。
 
 ```cpp
-int& node_count();
-int& edge_count();
-int& begin_node();
-std::vector<Edge<EdgeType>>& edges();
-std::vector<NodeWeight<NodeType>>& nodes_weight();//如果有点权的话
+int node_count() const;
+int edge_count() const;
+bool swap_node() const;
+int beign_node() const;
+bool direction() const;
+bool multiply_edge() const;
+bool self_loop() const;
+bool connect() const;
+std::vector<int> node_indices() const;
+std::vector<Edge<EdgeType>> edges() const;
+std::vector<NodeWeight<NodeType>> nodes_weight() const;//如果有点权的话
 
-int cnode_count() const;
-int cedge_count() const;
-int cbegin_node() const;
-std::vector<Edge<EdgeType>> cedges() const;
-std::vector<NodeWeight<NodeType>> cnodes_weight() const;//如果有点权的话
+int& node_count_ref();
+int& edge_count_ref();
+bool& swap_node_ref();
+int& beign_node_ref();
+bool& direction_ref();
+bool& multiply_edge_ref();
+bool& self_loop_ref();
+bool& connect_ref();
+std::vector<int>& node_indices_ref();
+std::vector<Edge<EdgeType>>& edges_ref();
+std::vector<NodeWeight<NodeType>>& nodes_weight_ref();//如果有点权的话
 ```
 
 ##### 修改
@@ -84,6 +105,8 @@ void set_connect(bool connect);
 void set_swap_node(bool swap_node) ;
 void set_output_node_count(bool output_node_count);
 void set_output_edge_count(bool output_side_count);
+void set_node_indices(std::vector<int> node_indices);
+void set_node_indices(int index, int number);
 ```
 
 
@@ -108,6 +131,12 @@ void set_nodes_weight_function(NodeGenFunction nodes_weight_function);
 void set_edges_weight_function(EdgeGenFunction edges_weight_function);
 ```
 
+可以通过以下函数获取：
+
+```cpp
+NodeGenFunction nodes_weight_function();
+EdgeGenFunction edges_weight_function();
+```
 
 
 #### 输出
@@ -129,7 +158,7 @@ void set_edges_weight_function(EdgeGenFunction edges_weight_function);
 
 `output_edge_count`控制是否输出边数。
 
-也可以通过`void set_output(std::function<void(std::ostream&, const Tree&))`自行定义输出方式。
+也可以通过`void set_output(std::function<void(std::ostream&, const Graph<NodeType, EdgeType>&)>)`自行定义输出方式。
 
 树的输出可以通过重载的`std::ostream& <<`输出，也可以通过`println`输出。区别在于`std::ostream& <<`不会换行，而`println`会换行，即等价于`std::cout<<graph<<std::endl;`。
 

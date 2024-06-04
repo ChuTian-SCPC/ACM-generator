@@ -2,7 +2,7 @@
 
 **注意**：类的含义是点权。
 
-由`NodeWeight<T>`进行存储，分成无权与有权两种类型。
+由`Node<T>`进行存储，分成无权与有权两种类型。
 
 权值的类型为`<T>`，无权不用显式地指定为`<void>`。
 
@@ -11,8 +11,8 @@
 可以通过函数获取点的权值和修改，`const`的目的在于重载输出的时候可能需要用到：
 
 ```cpp
-T &w()                         //获取权值w
-T cw() const
+T w() const                        //获取权值w
+T& w_ref() 
 void set_w(T w)                //设置边权w
 ```
 
@@ -22,7 +22,7 @@ void set_w(T w)                //设置边权w
 
 默认格式为`w`。
 
-也可以通过`void set_output(std::function<void(std::ostream&, const Edge<T>&))`自行定义输出方式。
+也可以通过`void set_output(std::function<void(std::ostream&, const Node<T>&))`自行定义输出方式。
 
 **注意**：点权的输出方式每一条都是独立的！对每个点权的设置仅对它自己生效。
 
