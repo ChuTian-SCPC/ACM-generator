@@ -2058,6 +2058,8 @@ namespace generator{
                 T& w_ref() { return _w; }
 
                 void set_w(T w) { _w = w; }
+
+                std::tuple<int, int, T> edge() const { return std::make_tuple(_u, _v, _w); }
                 
                 void default_output(std::ostream& os, bool swap_node = false) const {
                     if (swap_node) {
@@ -2080,6 +2082,8 @@ namespace generator{
                 _Edge(int u, int v) : _BasicEdge(u, v) {
                     _output_function = default_function();
                 }
+
+                std::tuple<int, int> edge() const { return std::make_tuple(_u, _v); }
 
                 void default_output(std::ostream& os, bool swap_node = false) const {
                     if (swap_node) {
