@@ -41,10 +41,15 @@ PseudoTree<NodeType, EdgeType>(
 基环树是无重边，无自环，一定连通，边数一定的无向图，所以以下函数被禁用：
 ```cpp
 void set_direction(bool direction);
+bool& direction_ref();
 void set_multiply_edge(bool multiply_edge);
+bool& multiply_edge_ref();
 void set_self_loop(bool self_loop);
+bool& self_loop_ref();
 void set_connect(bool connect);
+bool& connect_ref();
 void set_edge_count(int count);
+int& edge_count_ref();
 ```
 
 环的大小是`cycle`。
@@ -58,8 +63,8 @@ void set_cycle(int cycle)
 可以通过以下函数去获取：
 
 ```cpp
-int& cycle() ;
-int ccycle() const ;
+int cycle() const;
+int cycle_ref();
 ```
 
 如果不设置，`cycle`的默认值为 $-1$ ，环的大小采取随机一个值。

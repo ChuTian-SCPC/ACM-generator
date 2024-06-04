@@ -41,7 +41,9 @@ DAG<NodeType, EdgeType>(
 DAG是有向无环的图，所以以下函数被禁用：
 ```cpp
 void set_direction(bool direction);
+bool& direction_ref();
 void set_self_loop(bool self_loop);
+bool& self_loop_ref();
 ```
 
 [示例代码](../../../examples/dag.cpp)：

@@ -46,7 +46,9 @@ BipartiteGraph<NodeType, EdgeType>(
 
 ```cpp
 void set_direction(bool direction);
+bool& direction_ref();
 void set_self_loop(bool self_loop);
+bool& self_loop_ref();
 ```
 
 虽然是无向图，但是二分图的参数`swap_node`默认值为`false`，意味着他的边永远从左部指向右部。
@@ -64,11 +66,11 @@ void set_left_right(int left, int right); // node_count = left +
 可以通过以下函数去获取：
 
 ```cpp
-int& left();
-int& right();
+int left() const;
+int right() const;
 
-int cleft() const;
-int cright() const;
+int left_ref();
+int right_ref();
 ```
 
 如果不设置，左部大小是 $-1$ ，在生成的时候随机左右部大小。

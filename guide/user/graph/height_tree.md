@@ -46,6 +46,7 @@ HeightTree<NodeType, EdgeType>(
 
 ```cpp
 void set_is_rooted(bool is_rooted);
+bool& is_rooted_ref();
 ```
 
 树的高度是`height`。
@@ -59,8 +60,8 @@ void set_height(int height);
 可以通过以下函数去获取：
 
 ```cpp
-int& height();
-int cheight() const;
+int height() const;
+int& height_ref();
 ```
 
 如果不设置，`height`的默认值为 $-1$ ，树的高度采取随机一个树高。

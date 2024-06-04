@@ -41,9 +41,13 @@ Cactus<NodeType, EdgeType>(
 仙人掌是无重边，无自环，一定连通的无向图，所以以下函数被禁用：
 ```cpp
 void set_direction(bool direction);
+bool& direction_ref();
 void set_multiply_edge(bool multiply_edge);
+bool& multiply_edge_ref();
 void set_self_loop(bool self_loop);
+bool& self_loop_ref();
 void set_connect(bool connect);
+bool& connect_ref();
 ```
 
 [示例代码](../../../examples/cactus.cpp)：

@@ -36,10 +36,14 @@ WheelGraph<NodeType, EdgeType>(
 
 轮图是无重边，无自环，一定连通，边数一定的图，所以以下函数被禁用：
 ```cpp
-void set_multiply_edge();
-void set_connect();
-void set_self_loop();
+void set_multiply_edge(bool multiply_edge);
+bool& multiply_edge_ref();
+void set_connect(bool connect);
+bool& connect_ref();
+void set_self_loop(bool self_loop);
+bool& self_loop_ref();
 void set_edge_count(int count);
+int& edge_count_ref();
 ```
 
 [示例代码](../../../examples/wheel_graph.cpp)：

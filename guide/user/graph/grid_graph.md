@@ -45,6 +45,7 @@ GridGraph<NodeType, EdgeType>(
 网格图是无自环的图，所以以下函数被禁用：
 ```cpp
 void set_self_loop();
+bool& self_loop_ref();
 ```
 
 网格图的行数是`row`，列数是`column`。
@@ -59,11 +60,11 @@ void set_row_column(int row, int column, int ignore = 0);// nrow * column - igno
 可以通过以下函数去获取：
 
 ```cpp
-int& row();
-int& column();
+int row() const;
+int column() const;
 
-int crow() const;
-int ccolumn() const;
+int row_ref();
+int column_ref();
 ```
 
 

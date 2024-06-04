@@ -51,13 +51,14 @@ DegreeTree<NodeType, EdgeType>(
 
 ```cpp
 void set_max_degree(int max_degree);
+bool& is_rooted_ref();
 ```
 
 可以通过以下函数去获取：
 
 ```cpp
-int& max_degree();
-int cmax_degree() const;
+int max_degree() const;
+int& max_degree_ref();
 ```
 
 如果不设置，`max_degree`的默认值为 $-1$ ，树的最大度数采取随机值。

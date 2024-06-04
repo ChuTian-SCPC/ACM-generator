@@ -51,6 +51,7 @@ SonTree<NodeType, EdgeType>(
 
 ```cpp
 void set_is_rooted(bool is_rooted);
+bool& is_rooted_ref();
 ```
 
 树的最大儿子数是`max_son`。
@@ -64,8 +65,8 @@ void set_max_son(int max_son);
 可以通过以下函数去获取：
 
 ```cpp
-int& max_son();
-int cmax_son() const;
+int max_son() const;
+int& max_son_ref();
 ```
 
 如果不设置，`max_son`的默认值为 $-1$ ，树的最大儿子数采取随机值。
