@@ -14,7 +14,7 @@
 
 3. `long long rand_int(T from, U to)` 
 
-   传入两个类型分别为`T,U`的参数 $from, to$ ，`T,U`均需要为整型。
+   传入两个类型分别为`T,U`的参数 $from, to$ ，`T,U`均需要可以转化为整型。
 
    返回一个整数类型为`long long`，范围为 $[from, to]$ 。
 
@@ -34,6 +34,7 @@
    rand_int("[3, 5]");
    rand_int("(%d, %lld)", 3, 5LL);
    rand_int("[%s, 6)", "3");
+   rand_int(1, 1e9);
    ```
 
 [示例代码](../../../examples/rand_int.cpp)
