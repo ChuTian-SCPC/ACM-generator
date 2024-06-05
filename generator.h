@@ -1277,7 +1277,9 @@ namespace generator{
 
         // equal to rnd.next(from,to),a int in [from,to]
         template <typename T = long long, typename U = long long>
-        typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value, long long>::type
+        typename std::enable_if<
+            std::is_convertible<T, long long>::value && 
+            std::is_convertible<U, long long>::value, long long>::type
         rand_int(T from, U to){
             long long x = rnd.next((long long)from, (long long)to);
             return x;

@@ -3,7 +3,6 @@
 - 简介
   - [快速入门](./user/introduction/quick_start.md)
   - [版本更迭](./user/introduction/version.md)
-  - [开发记录](./developer/introduction.md)
 - 随机函数
   - [随机整数(rand_int)](./user/rand/rand_int.md)
   - [随机奇数(rand_odd)](./user/rand/rand_odd.md)
