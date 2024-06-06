@@ -48,3 +48,5 @@
         - [基环内向树(PseudoInTree)](./user/graph/pseudo_in_tree.md)
         - [基环外向树(PseudoOutTree)](./user/graph/pseudo_out_tree.md)
         - [仙人掌(Cactus)](./user/graph/cactus.md)
+  
+      - [合并(merge/link)](./user/graph/merge_link.md)

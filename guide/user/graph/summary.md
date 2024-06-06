@@ -39,5 +39,7 @@
     - [基环外向树(PseudoOutTree)](./pseudo_out_tree.md)
     - [仙人掌(Cactus)](./cactus.md)
 
+- [合并(merge/link)](./merge_link.md)
+
 [返回目录](../../home.md)
 
