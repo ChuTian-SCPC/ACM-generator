@@ -35,6 +35,7 @@
         - [指定高度的树(HeightTree)](./user/graph/height_tree.md)
         - [限制最大度数的树(DegreeTree)](./user/graph/degree_tree.md)
         - [限制最大儿子数的树(SonTree)](./user/graph/son_tree.md)
+        - [菊花带链(FlowerChain)](./user/graph/flower_chain.md)
     
       - [图简介](./user/graph/graph_summary.md)
         - [图(Graph)](./user/graph/graph.md)
