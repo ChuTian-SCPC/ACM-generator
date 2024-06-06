@@ -2488,17 +2488,7 @@ namespace generator{
                         }
                         first_line += std::to_string(root());
                     }
-                    int node_cnt = 0;
-                    for (_Node<NodeType> node : _nodes_weight) {
-                        node_cnt ++;
-                        if(node_cnt == 1) {
-                            if (first_line != "") {
-                                os << first_line << "\n";
-                            }
-                        }
-                        os << node << " ";
-                    }
-                    if (node_cnt >= 1) {
+                    if (__output_node_weights(os, first_line)) {
                         if (_node_count > 1) {
                             os << "\n";
                         }
@@ -2528,6 +2518,26 @@ namespace generator{
 
             protected:
                 
+                template<typename T = NodeType, _HasT<T> = 0>
+                bool __output_node_weights(std::ostream& os, std::string& first_line) const {
+                    int node_cnt = 0;
+                    for (_Node<NodeType> node : _nodes_weight) {
+                        node_cnt ++;
+                        if(node_cnt == 1) {
+                            if (first_line != "") {
+                                os << first_line << "\n";
+                            }
+                        }
+                        os << node << " ";
+                    }
+                    return node_count >= 1;
+                }
+
+                template<typename T = NodeType, _NotHasT<T> = 0>
+                bool __output_node_weights(std::ostream&, std::string&) const {
+                    return false;
+                }
+
                 template<typename T = EdgeType, _NotHasT<T> = 0>
                 std::vector<_Edge<EdgeType>> __get_output_edges() const {
                     std::vector<_Edge<EdgeType>> output_edges;
@@ -3340,17 +3350,8 @@ namespace generator{
                         }
                         first_line += std::to_string(_edge_count);
                     }
-                    int node_cnt = 0;
-                    for (_Node<NodeType> node : _nodes_weight) {
-                        node_cnt ++;
-                        if(node_cnt == 1) {
-                            if (first_line != "") {
-                                os << first_line << "\n";
-                            }
-                        }
-                        os << node << " ";
-                    }
-                    if (node_cnt >= 1) {
+                    
+                    if (__output_node_weights(os, first_line)) {
                         if (_edge_count >= 1) {
                             os << "\n";
                         }
@@ -3386,6 +3387,26 @@ namespace generator{
                 _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
             
             protected:
+
+                template<typename T = NodeType, _HasT<T> = 0>
+                bool __output_node_weights(std::ostream& os, std::string& first_line) const {
+                    int node_cnt = 0;
+                    for (_Node<NodeType> node : _nodes_weight) {
+                        node_cnt ++;
+                        if(node_cnt == 1) {
+                            if (first_line != "") {
+                                os << first_line << "\n";
+                            }
+                        }
+                        os << node << " ";
+                    }
+                    return node_count >= 1;
+                }
+
+                template<typename T = NodeType, _NotHasT<T> = 0>
+                bool __output_node_weights(std::ostream&, std::string&) const {
+                    return false;
+                }
 
                 virtual std::string __format_output_node() const {
                     if (_output_node_count) {
