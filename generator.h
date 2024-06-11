@@ -2435,46 +2435,8 @@ namespace generator{
                 }
                 
                 void reroot(int root) {
-                    if (!_is_rooted) {
-                        io::__warn_msg(io::_err, "unrooted tree can't re-root.");
-                        return;
-                    }
-                    if (root < 1 || root > _node_count) {
-                        io::__warn_msg(io::_err, "restriction of the root is [1, %d], but found %d.", _node_count, root);
-                        return;
-                    }
-                    if ((int)_edges.size() < _node_count - 1) {
-                        io::__warn_msg(io::_err, "Tree should generate first.");
-                        return;
-                    }
-                    _root = root - 1;
-                    std::vector<_Edge<EdgeType>> result;
-                    std::vector<std::vector<_Edge<EdgeType>>> node_edges(_node_count);
-                    for (auto edge : _edges) {
-                        node_edges[edge.u()].emplace_back(edge);
-                        node_edges[edge.v()].emplace_back(edge);
-                    }
-                    std::vector<int> visit(_node_count, 0);
-                    std::queue<int> q;
-                    q.push(_root);
-                    while(!q.empty()) {
-                        int u = q.front();
-                        q.pop();
-                        visit[u] = 1;
-                        for (auto& edge : node_edges[u]) {
-                            if (edge.u() != u) {
-                                std::swap(edge.u_ref(), edge.v_ref());
-                            }
-                            int v = edge.v();
-                            if (visit[v]) {
-                                continue;
-                            }
-                            result.emplace_back(edge);
-                            q.push(v);
-                        }
-                    }
-                    shuffle(result.begin(), result.end());
-                    _edges = result;                    
+                    __reroot_set_check(root);
+                    __reroot();
                 }
                 
                 void default_output(std::ostream& os) const {
@@ -2518,6 +2480,52 @@ namespace generator{
 
             protected:
                 
+                void __reroot_set_check(int root) {
+                    if (!_is_rooted) {
+                        io::__warn_msg(io::_err, "unrooted tree can't re-root.");
+                        return;
+                    }
+                    if (root < 1 || root > _node_count) {
+                        io::__warn_msg(io::_err, "restriction of the root is [1, %d], but found %d.", _node_count, root);
+                        return;
+                    }
+                    if ((int)_edges.size() < _node_count - 1) {
+                        io::__warn_msg(io::_err, "Tree should generate first.");
+                        return;
+                    }
+                    _root = root - 1;
+                }
+
+                void __reroot() {
+                    std::vector<_Edge<EdgeType>> result;
+                    std::vector<std::vector<_Edge<EdgeType>>> node_edges(_node_count);
+                    for (auto edge : _edges) {
+                        node_edges[edge.u()].emplace_back(edge);
+                        node_edges[edge.v()].emplace_back(edge);
+                    }
+                    std::vector<int> visit(_node_count, 0);
+                    std::queue<int> q;
+                    q.push(_root);
+                    while(!q.empty()) {
+                        int u = q.front();
+                        q.pop();
+                        visit[u] = 1;
+                        for (auto& edge : node_edges[u]) {
+                            if (edge.u() != u) {
+                                std::swap(edge.u_ref(), edge.v_ref());
+                            }
+                            int v = edge.v();
+                            if (visit[v]) {
+                                continue;
+                            }
+                            result.emplace_back(edge);
+                            q.push(v);
+                        }
+                    }
+                    shuffle(result.begin(), result.end());
+                    _edges = result;       
+                }
+
                 template<typename T = NodeType, _HasT<T> = 0>
                 bool __output_node_weights(std::ostream& os, std::string& first_line) const {
                     int node_cnt = 0;
@@ -5285,7 +5293,7 @@ namespace generator{
                     _result._nodes_weight = graph._nodes_weight;
                     _result._node_indices = graph._node_indices;
                     if (_result._is_rooted) {
-                        _result.reroot(_result._root + 1);
+                        _result.__reroot();
                     }
                 }
                 
@@ -5461,7 +5469,7 @@ namespace generator{
                     }
 
                     if (this->_is_rooted) {
-                        this->reroot(this->_root + 1);
+                        this->__reroot();
                     }       
                 }
                   
