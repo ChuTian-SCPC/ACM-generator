@@ -2429,8 +2429,8 @@ namespace generator{
             
                 void gen() {           
                     __init();
-                    __generator_tree();
-                    __generator_nodes_weight();
+                    __generate_tree();
+                    __generate_nodes_weight();
                     shuffle(_edges.begin(),_edges.end());
                 }
                 
@@ -2625,10 +2625,10 @@ namespace generator{
                 }
                 
                 template<typename T = NodeType, _NotHasT<T> = 0>
-                void __generator_nodes_weight() { return; }
+                void __generate_nodes_weight() { return; }
                 
                 template<typename T = NodeType, _HasT<T> = 0>
-                void __generator_nodes_weight() {
+                void __generate_nodes_weight() {
                     for (int i = 0; i < _node_count ; i++) {
                         NodeType w = this->_nodes_weight_function();
                         _nodes_weight.emplace_back(w);
@@ -2693,7 +2693,7 @@ namespace generator{
                     __add_edge(u, v);
                 }
                 
-                virtual void __generator_tree() {
+                virtual void __generate_tree() {
                     if (_tree_generator == Pruefer) {
                         std::vector<int> times = rand::rand_sum(_node_count, _node_count - 2, 0);
                         std::vector<int> pruefer = rand::shuffle_index(times);
@@ -2763,7 +2763,7 @@ namespace generator{
                 
             protected:
                                                         
-                virtual void __generator_tree() override {
+                virtual void __generate_tree() override {
                     for (int i = 1; i < this->_node_count; i++) {
                         this->__add_edge(this->_p[i - 1], this->_p[i]);
                     }
@@ -2821,7 +2821,7 @@ namespace generator{
                 
             protected:
                                                         
-                virtual void __generator_tree() override {
+                virtual void __generate_tree() override {
                     for (int i = 1; i < this->_node_count; i++) {
                         this->__add_edge(this->_p[0], this->_p[i]);
                     }
@@ -2904,7 +2904,7 @@ namespace generator{
                     }
                 }
 
-                virtual void __generator_tree() override {
+                virtual void __generate_tree() override {
                     std::vector<int> number(_height, 1);
                     int w = this->_node_count - _height;
                     for (int i = 1; i <= w; i++) {
@@ -3014,7 +3014,7 @@ namespace generator{
                     }
                 }
 
-                virtual void __generator_tree() override {
+                virtual void __generate_tree() override {
                     std::vector<int> times = rand::rand_sum(this->_node_count, this->_node_count - 2, 0, _max_degree - 1);
                     std::vector<int> pruefer = rand::shuffle_index(times);
                     this->__pruefer_decode(pruefer);
@@ -3116,7 +3116,7 @@ namespace generator{
                     }
                 }
 
-                virtual void __generator_tree() override {
+                virtual void __generate_tree() override {
                     int max_degree = _max_son + 1;
                     std::vector<int> times = rand::rand_sum(this->_node_count, this->_node_count - 2, 0, max_degree - 1);
                     if (times[this->_root] == max_degree - 1) {
@@ -3387,8 +3387,8 @@ namespace generator{
 
                 void gen() {
                     __init();
-                    __generator_graph();
-                    __generator_nodes_weight();
+                    __generate_graph();
+                    __generate_nodes_weight();
                     shuffle(_edges.begin(),_edges.end());
                 }
 
@@ -3519,10 +3519,10 @@ namespace generator{
                 }
 
                 template<typename T = NodeType, _NotHasT<T> = 0>
-                void __generator_nodes_weight() { return; }
+                void __generate_nodes_weight() { return; }
                 
                 template<typename T = NodeType, _HasT<T> = 0>
-                void __generator_nodes_weight() {
+                void __generate_nodes_weight() {
                     for (int i = 0; i < _node_count ; i++) {
                         NodeType w = this->_nodes_weight_function();
                         _nodes_weight.emplace_back(w);
@@ -3549,7 +3549,7 @@ namespace generator{
                     return this->__convert_edge(u, v);
                 }
 
-                virtual void __generator_connect() {
+                virtual void __generate_connect() {
                     _Tree<void, void> tree(_node_count, 0);
                     tree.gen();
                     std::vector <_Edge<void>> edge = tree.edges();
@@ -3558,11 +3558,11 @@ namespace generator{
                     }
                 }
 
-                virtual void __generator_graph() {
+                virtual void __generate_graph() {
                     int m = _edge_count;
                     if (_connect) {
                         m -= _node_count - 1;
-                        __generator_connect();
+                        __generate_connect();
                     }
                     while (m--) {
                         __add_edge(__rand_edge());
@@ -3949,7 +3949,7 @@ namespace generator{
                     _degree[f ^ 1][j]--;
                 }
 
-                virtual void __generator_connect() override {
+                virtual void __generate_connect() override {
                     int f = 0;
                     while (_d[0] + _d[1] > 0) {
                         for (int i = 0; i < (f == 0 ? _left : _right); i++) {
@@ -4040,7 +4040,7 @@ namespace generator{
                     _p = rnd.perm(this->_node_count, 0);
                 }
 
-                virtual void __generator_connect() override{
+                virtual void __generate_connect() override{
                     for (int i = 1; i < this->_node_count; i++) {
                         int f = rnd.next(i);
                         this->__add_edge(_p[f], _p[i]);
@@ -4135,7 +4135,7 @@ namespace generator{
                     }
                 }
 
-                virtual void __generator_graph() override {
+                virtual void __generate_graph() override {
                     int node = this->_node_count;
                     std::vector<int> p = rnd.perm(node, 0);
                     for (int i = 0; i < node; i++) {
@@ -4216,7 +4216,7 @@ namespace generator{
                     }
                 }
 
-                virtual void __generator_graph() override {
+                virtual void __generate_graph() override {
                     int node = this->_node_count;
                     std::vector<int> p = rnd.perm(node, 0);
                     for (int i = 0; i < node - 1; i++) {
@@ -4416,7 +4416,7 @@ namespace generator{
                     _column = (this->_node_count + _row - 1) / _row;
                 }
 
-                virtual void __generator_connect() override {
+                virtual void __generate_connect() override {
                     for (int i = 0; i < _row; i++) {
                         for (int j = 1; j < _column; j++) {
                             int x = i * _column + j, y = x - 1;
@@ -4563,7 +4563,7 @@ namespace generator{
                     return cycle;
                 }
 
-                void __generator_cycle() {
+                void __generate_cycle() {
                     _CycleGraph<NodeType, EdgeType> cycle = __get_cycle_graph();
                     cycle.set_swap_node(this->_swap_node);
                     cycle.gen(); 
@@ -4577,16 +4577,16 @@ namespace generator{
                     }
                 }
 
-                virtual void __generator_other_edges() {
+                virtual void __generate_other_edges() {
                     for (int i = _cycle; i < this->_node_count; i++) {
                         int f = rnd.next(i);
                         this->__add_edge(_p[i], _p[f]);
                     }
                 }
 
-                virtual void __generator_graph() override {
-                    __generator_cycle();
-                    __generator_other_edges();
+                virtual void __generate_graph() override {
+                    __generate_cycle();
+                    __generate_other_edges();
                 }       
             protected:
 
@@ -4745,7 +4745,7 @@ namespace generator{
                 _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
             protected:
 
-                virtual void __generator_other_edges() override {
+                virtual void __generate_other_edges() override {
                     for (int i = this->_cycle; i < this->_node_count; i++) {
                         int f = rnd.next(i);
                         this->__add_edge(this->_p[f], this->_p[i]);
@@ -4855,7 +4855,7 @@ namespace generator{
                     return cycle;
                 }
 
-                virtual void __generator_graph() override {
+                virtual void __generate_graph() override {
                     std::vector<std::vector<int>> cycles;
                     int m = this->_edge_count - (this->_node_count - 1);
                     for (int i = 2; i <= 2 * m; i += 2) {
@@ -5014,7 +5014,7 @@ namespace generator{
                     if ((int)source._nodes_weight.size() != node_count && source._nodes_weight_function != nullptr) {
                         io::__warn_msg(io::_err, "Found node weights size is not equal to node count, re-generate it.");
                         source.__check_nodes_weight_function();
-                        source.__generator_nodes_weight();
+                        source.__generate_nodes_weight();
                     }
                     _nodes_weight[index] = source._nodes_weight;
                     if ((int)source._node_indices.size() != node_count) {
@@ -5440,7 +5440,7 @@ namespace generator{
                     __dump_nodes_weight(tree);
                 }
                 
-                virtual void __generator_tree() override {                   
+                virtual void __generate_tree() override {                   
                     _Flower<NodeType, EdgeType> _flower;
                     _Chain<NodeType, EdgeType> _chain;
                     _flower.set_node_count(_flower_size);
