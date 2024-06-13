@@ -2538,7 +2538,7 @@ namespace generator{
                         }
                         os << node << " ";
                     }
-                    return node_count >= 1;
+                    return node_cnt >= 1;
                 }
 
                 template<typename T = NodeType, _NotHasT<T> = 0>
@@ -3408,7 +3408,7 @@ namespace generator{
                         }
                         os << node << " ";
                     }
-                    return node_count >= 1;
+                    return node_cnt >= 1;
                 }
 
                 template<typename T = NodeType, _NotHasT<T> = 0>
@@ -5386,25 +5386,15 @@ namespace generator{
                 _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
                 _DISABLE_CHOOSE_GEN
             protected:
-                template<typename T = NodeType, _HasT<T> = 0>
-                void __reset_nodes_weight_function(_Tree<NodeType, EdgeType>& tree) {
-                    auto func = this->nodes_weight_function();
-                    tree.set_nodes_weight_function(func);
-                }
-                
-                template<typename T = NodeType, _NotHasT<T> = 0>
-                void __reset_nodes_weight_function(_Tree<NodeType, EdgeType>&) {
-                    return;
-                }
                 
                 template<typename T = EdgeType, _HasT<T> = 0>
-                void __reset_edges_weight_function(_Tree<NodeType, EdgeType>& tree) {
+                void __reset_edges_weight_function(_Tree<void, EdgeType>& tree) {
                     auto func = this->edges_weight_function();
                     tree.set_edges_weight_function(func);
                 }
                 
                 template<typename T = EdgeType, _NotHasT<T> = 0>
-                void __reset_edges_weight_function(_Tree<NodeType, EdgeType>&) {
+                void __reset_edges_weight_function(_Tree<void, EdgeType>&) {
                     return;
                 }
                 
@@ -5424,31 +5414,18 @@ namespace generator{
                     }
                 }
                 
-                template<typename T = NodeType, _HasT<T> = 0>
-                void __dump_nodes_weight(_Tree<NodeType, EdgeType>& tree) {
-                    this->_nodes_weight = tree.nodes_weight_ref();
-                }
-                
-                template<typename T = NodeType, _NotHasT<T> = 0>
-                void __dump_nodes_weight(_Tree<NodeType, EdgeType>&) {
-                    return;
-                }
-                
-                void __dump_result(_Tree<NodeType, EdgeType>& tree) {
+                void __dump_result(_Tree<void, EdgeType>& tree) {
                     this->_edges = tree.edges_ref();
                     this->_node_indices = tree.node_indices_ref();
-                    __dump_nodes_weight(tree);
                 }
                 
                 virtual void __generate_tree() override {                   
-                    _Flower<NodeType, EdgeType> _flower;
-                    _Chain<NodeType, EdgeType> _chain;
+                    _Flower<void, EdgeType> _flower;
+                    _Chain<void, EdgeType> _chain;
                     _flower.set_node_count(_flower_size);
                     __reset_edges_weight_function(_flower);
-                    __reset_nodes_weight_function(_flower);
                     _chain.set_node_count(_chain_size);
-                    __reset_edges_weight_function(_chain);
-                    __reset_nodes_weight_function(_chain);                  
+                    __reset_edges_weight_function(_chain);               
                     if (_flower_size != 0) {
                         _flower.gen();
                     }
@@ -5463,7 +5440,7 @@ namespace generator{
                         __dump_result(_flower);
                     }
                     else {
-                        _TreeLinkImpl<NodeType, EdgeType> impl(_flower, _chain, TreeLinkType::Shuffle);
+                        _TreeLinkImpl<void, EdgeType> impl(_flower, _chain, TreeLinkType::Shuffle);
                         auto res = impl.get_result();     
                         __dump_result(res);                        
                     }
