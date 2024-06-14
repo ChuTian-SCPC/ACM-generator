@@ -5452,6 +5452,178 @@ namespace generator{
                   
             };
             
+            template<typename NodeType,typename EdgeType>
+            class _Forest : public _Graph<NodeType, EdgeType> {
+            protected:
+                typedef _Forest<NodeType,EdgeType> _Self;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+                std::vector<int> _trees_size;
+            
+            public:
+            
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                _Forest(
+                    int node_count = 1, int edge_count = 0, int begin_node = 1, 
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Graph<NodeType, EdgeType>(
+                        node_count, edge_count, begin_node,
+                        false, false, false, edge_count == node_count - 1, true,
+                        nodes_weight_function, edges_weight_function)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                _Forest(
+                    int node_count = 1, int edge_count = 0, int begin_node = 1, 
+                    NodeGenFunction nodes_weight_function = nullptr) :
+                    _Graph<NodeType, void>(
+                        node_count, edge_count, begin_node,
+                        false, false, false, edge_count == node_count - 1, true,
+                        nodes_weight_function)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                _Forest(
+                    int node_count = 1, int edge_count = 0, int begin_node = 1, 
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    _Graph<void, EdgeType>(
+                        node_count, edge_count, begin_node,
+                        false, false, false, edge_count == node_count - 1, true,
+                        edges_weight_function)
+                {
+                    _output_function = default_function();
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                _Forest(int node_count = 1, int edge_count = 0, int begin_node = 1) :
+                    _Graph<void, void>(
+                        node_count, edge_count, begin_node,
+                        false, false, false, edge_count == node_count - 1, true)
+                {
+                    _output_function = default_function();
+                }
+                
+                std::vector<int> trees_size() const { return _trees_size; }
+                std::vector<int>& tree_size_ref() { return _trees_size; }
+                
+                void add_tree_size(int tree_size) {
+                    if (tree_size > 0) {
+                        _trees_size.emplace_back(tree_size);
+                    }
+                    else {
+                        io::__warn_msg(io::_err, "Tree size must greater than 0, but found %d.", tree_size);
+                    }
+                }
+                void set_trees_size(std::vector<int> trees_size) {
+                    _trees_size.clear();
+                    for (int tree_size : trees_size) {
+                        add_tree_size(tree_size);
+                    }
+                    __reset_node_edge_count();
+                }
+            
+                _DISABLE_MULTIPLY_EDGE
+                _DISABLE_SELF_LOOP
+                _DISABLE_CONNECT
+                _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+            
+            protected:
+                
+                virtual void __judge_upper_limit() override {
+                    if (this->_edge_count > this->_node_count - 1) {
+                        io::__fail_msg(io::_err, "number of edges must less than %d.", this->_node_count - 1);
+                    }
+                }
+                
+                virtual void __self_init() override {
+                    this->_connect = (this->_edge_count == this->_node_count - 1);
+                }
+                
+                void __reset_node_edge_count() {
+                    int count = 0;
+                    for (int tree_size : _trees_size) {
+                        count += tree_size;
+                    }
+                    if (count != this->_node_count) {
+                        io::__info_msg(
+                            io::_err, 
+                            "Node count will be changed because the sum of Trees' size %d is not equal to node count %d.",
+                            count,
+                            this->_node_count);
+                        this->set_node_count(count);
+                    }
+                    if (count - (int)_trees_size.size() != this->_edge_count) {
+                        io::__info_msg(
+                            io::_err, 
+                            "Edge count will be changed because the sum of Trees' edges %d is not equal to edge count %d.",
+                            count - _trees_size.size(),
+                            this->_edge_count);
+                        this->set_edge_count(count - _trees_size.size());                       
+                    }
+                }
+                
+                void __generate_trees_size() {
+                    int tree_count = this->_node_count - this->_edge_count;
+                    _trees_size = rand::rand_sum(tree_count, this->_node_count, 1);
+                }
+                
+                void __dump_result(_Graph<void, EdgeType>& graph) {
+                    this->_edges = graph.edges_ref();
+                    this->_node_indices = graph.node_indices_ref();
+                }
+                
+                void __reset_connect() {
+                    this->_connect = this->_node_count == this->_edge_count - 1;
+                }
+                
+                virtual void __generate_graph() override {
+                    if (_trees_size.empty()) {
+                        __generate_trees_size();
+                    }
+                    else {
+                        __reset_node_edge_count();
+                    }
+                    __reset_connect();
+                    _Graph<void, EdgeType> result_graph;
+                    __reset_edges_weight_function(result_graph);
+                    for (int tree_size : _trees_size) {
+                        _Tree<void, EdgeType> tree(tree_size);
+                        __reset_edges_weight_function(tree);
+                        tree.gen();
+                        _LinkImpl<void, EdgeType> impl(result_graph, tree, 0, LinkType::Shuffle);
+                        result_graph = impl.get_result();
+                    }
+                    __dump_result(result_graph);
+                }
+                
+                template<typename T = EdgeType, _HasT<T> = 0>
+                void __reset_edges_weight_function(_Tree<void, EdgeType>& tree) {
+                    auto func = this->edges_weight_function();
+                    tree.set_edges_weight_function(func);
+                }
+                
+                template<typename T = EdgeType, _NotHasT<T> = 0>
+                void __reset_edges_weight_function(_Tree<void, EdgeType>&) {
+                    return;
+                }
+                
+                template<typename T = EdgeType, _HasT<T> = 0>
+                void __reset_edges_weight_function(_Graph<void, EdgeType>& graph) {
+                    auto func = this->edges_weight_function();
+                    graph.set_edges_weight_function(func);
+                }
+                
+                template<typename T = EdgeType, _NotHasT<T> = 0>
+                void __reset_edges_weight_function(_Graph<void, EdgeType>&) {
+                    return;
+                }
+            };
+            
             template <typename U>
             struct IsTreeOrGraph {
                 template <typename V>
