@@ -5773,6 +5773,7 @@ namespace generator{
             using PseudoOutTree = basic::_PseudoOutTree<void, void>;
             using Cactus = basic::_Cactus<void, void>;
             using FlowerChain = basic::_FlowerChain<void, void>;
+            using Forest = basic::_Forest<void, void>;
 
             using LinkType = basic::LinkType;
             using MergeType = basic::MergeType;
@@ -5864,6 +5865,9 @@ namespace generator{
 
             template<typename EdgeType>
             using FlowerChain = basic::_FlowerChain<void, EdgeType>;
+
+            template<typename EdgeType>
+            using Forest = basic::_Forest<void, EdgeType>;
 
             using LinkType = basic::LinkType;
             using MergeType = basic::MergeType;
@@ -5993,6 +5997,9 @@ namespace generator{
 
             template<typename NodeType>
             using FlowerChain = basic::_FlowerChain<NodeType, void>;
+
+            template<typename NodeType>
+            using Forest = basic::_Forest<NodeType, void>;
        
             using LinkType = basic::LinkType;
             using MergeType = basic::MergeType;
@@ -6123,6 +6130,9 @@ namespace generator{
 
             template<typename NodeType, typename EdgeType>
             using FlowerChain = basic::_FlowerChain<NodeType, EdgeType>;
+
+            template<typename NodeType, typename EdgeType>
+            using Forest = basic::_Forest<NodeType, EdgeType>;
 
             using LinkType = basic::LinkType;
             using MergeType = basic::MergeType;
