@@ -5589,7 +5589,7 @@ namespace generator{
                         __reset_node_edge_count();
                     }
                     __reset_connect();
-                    _Graph<void, EdgeType> result_graph;
+                    _Graph<void, EdgeType> result_graph(0);
                     __reset_edges_weight_function(result_graph);
                     for (int tree_size : _trees_size) {
                         _Tree<void, EdgeType> tree(tree_size);
