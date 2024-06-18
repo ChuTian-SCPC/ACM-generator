@@ -1,3 +1,6 @@
+#ifndef SCPC_GENERATOR_USED_TESTLIB
+#define SCPC_GENERATOR_USED_TESTLIB
+
 #include"testlib.h"
 #include <sstream>
 #include <unordered_map>
@@ -6217,4 +6220,5 @@ namespace generator{
 }
 #ifdef _WIN32
 #undef mkdir
+#endif
 #endif

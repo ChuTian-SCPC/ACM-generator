@@ -1,0 +1,61 @@
+# SConstruct
+
+from SCons.Script import *
+import subprocess
+import os
+
+test_files = {
+    "rand/rand_int" : {"expected" : 0}
+}
+
+header_dirs = set(os.path.dirname(file) for file in test_files.keys())
+header_dirs.add('tests') 
+
+env = Environment(CPPPATH=list(header_dirs))
+
+test_programs = []
+test_name_to_source = {}
+
+for test_name, config in test_files.items():
+
+    source_file = test_name + ".cpp"
+    if not os.path.isfile(source_file):
+        print(f"Source file {source_file} does not exist.")
+        continue
+    
+    test_program = env.Program(target=test_name, source=source_file)
+    test_programs.append(test_program)
+    test_name_to_source[test_name] = source_file
+
+def run_and_check_tests(target, source, env):
+
+    fail_case = []
+    for test_program in test_programs:
+        path_name = str(test_program[0])
+        short_test_name = os.path.relpath(path_name)
+        test_info = test_files.get(short_test_name, {})
+
+        expected_return_code = test_info.get('expected', 0)
+        test_name = test_info.get('test_name', short_test_name)
+        result = subprocess.run([f'./{test_name}'], capture_output=True, text=True)
+
+        if result.returncode != expected_return_code:
+            print(f'{test_name} FAIL')
+            fail_case.append(test_name)
+        else:
+            print(f'{test_name} PASS')
+
+    print("="*40)
+    if len(fail_case) == 0:
+        print("All Pass!")
+    else:
+        print(f"{len(fail_case)} Tests Fail!")
+        for case in fail_case:
+            print(case)
+    return fail_case
+
+# 添加测试目标到构建系统
+test = env.Command('run_tests', test_programs, run_and_check_tests)
+
+# 声明构建的默认目标
+Default(test_programs + [test])
