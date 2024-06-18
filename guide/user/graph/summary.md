@@ -38,6 +38,7 @@
     - [基环内向树(PseudoInTree)](./pseudo_in_tree.md)
     - [基环外向树(PseudoOutTree)](./pseudo_out_tree.md)
     - [仙人掌(Cactus)](./cactus.md)
+    - [森林(Forest)](./forest.md)
 
 - [合并(merge/link)](./merge_link.md)
 
