@@ -3,6 +3,8 @@
 debug/
 examples/*.exe
 examples/*/*.exe
-tests/*/*.exe
-tests/*/*.obj
+tests/**/*.exe
+tests/**/*.obj
 tests/.sconsign.dblite
+tests/**/*.o
+tests/build/

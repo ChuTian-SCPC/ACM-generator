@@ -204,6 +204,7 @@ const char *latestFeatures[] = {
 #else
 #   define WORD unsigned short
 #   include <unistd.h>
+#   include <cstdint>
 #endif
 
 #if defined(FOR_WINDOWS) && defined(FOR_LINUX)
