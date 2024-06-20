@@ -1237,7 +1237,15 @@ namespace generator{
             auto string_to_int = [&](size_t from, size_t to) -> long long{
                 std::string str = s.substr(from + 1, to - from - 1);
                 try {
-                    long long value = std::stoll(str);
+                    long long value;
+                    size_t is_real_format = str.find_first_of("eE.");
+                    if (is_real_format != std::string::npos) {
+                        double value_d = std::stod(str);
+                        value = (long long)value_d;
+                    }
+                    else {
+                        value = std::stoll(str); 
+                    } 
                     return value;
                 }
                 catch (const std::invalid_argument &e) {
