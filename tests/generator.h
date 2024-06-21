@@ -1347,7 +1347,7 @@ namespace generator{
         typename std::enable_if<std::is_integral<T>::value, long long>::type
         rand_even(T n){
             long long nl = (long long)n;
-            long long r = (nl - (nl % 2 == 1))/2;
+            long long r = (nl - std::abs(nl % 2))/2;
             if(r < 0) {
                 io::__fail_msg(io::_err,"There is no even number between [0,%lld].",nl);
             }
@@ -1362,8 +1362,8 @@ namespace generator{
         rand_even(T from, U to){
             long long froml = (long long)from;
             long long tol = (long long)to;
-            long long l = (froml + (froml % 2 == 1))/2;
-            long long r = (tol - (tol % 2 == 1))/2;
+            long long l = (froml + std::abs(froml % 2))/2;
+            long long r = (tol - std::abs(tol % 2))/2;
             if(l > r) {
                 io::__fail_msg(io::_err,"There is no even number between [%lld,%lld].",froml,tol);
             }

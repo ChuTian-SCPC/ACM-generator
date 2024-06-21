@@ -11,8 +11,7 @@ build_dir = 'build'
 VariantDir(build_dir, source_dir)
 
 test_files = {
-    "rand/rand_int" : {"expected" : 0},
-    "rand/rand_odd" : {"expected" : 0}
+    "rand/comman_rand_value" : {"expected" : 0},
 }
 
 header_dirs = set(os.path.dirname(file) for file in test_files.keys())
