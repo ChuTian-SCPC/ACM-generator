@@ -22,7 +22,7 @@ TEST_CASE("rand_int", "[rand]") {
     }
 }
 
-TEST_CASE("format_int_range", "[rand]") {
+TEST_CASE("format_int_range", "[format]") {
     auto range = __format_to_int_range("[1,10]");
     REQUIRE((range.first == 1 && range.second == 10));
     range = __format_to_int_range("  [1,  10  ]");
@@ -57,7 +57,7 @@ TEST_CASE("rand_odd", "[rand]") {
     }
 }
 
-TEST_CASE("rand_even", "[rand]") {
+TEST_CASE("rand_even", "[rand][format]") {
     int run_times = 100;
     for (int i = 1; i <= run_times; i++) {
       int x = rand_even(3);
@@ -75,4 +75,18 @@ TEST_CASE("rand_even", "[rand]") {
       x = rand_even(-2, -1);
       REQUIRE(x == -2);
     }
+}
+
+TEST_CASE("rand_int_from_format", "[rand]") {
+    int run_times = 100;
+    int x;
+    for (int i = 1; i <= run_times; i++) {
+        x = rand_int("[-1, %d]", 1);
+        REQUIRE((x >= -1 && x <= 1));
+        x = rand_odd("[-1 , %s]", "1");
+        REQUIRE((x >=-1 && x <= 1 && x%2));
+        x = rand_even("(-1, 1.0]");
+        REQUIRE(x == 0);
+    }
+
 }
