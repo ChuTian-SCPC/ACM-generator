@@ -8,7 +8,6 @@
   - [随机奇数(rand_odd)](./user/rand/rand_odd.md)
   - [随机偶数(rand_even)](./user/rand/rand_even.md)
   - [随机浮点数(rand_real)](./user/rand/rand_real.md)
-  - [随机数的范围为绝对值(rand_abs)](./user/rand/rand_abs.md)
   - [随机字符(rand_char)](./user/rand/rand_char.md)
   - [随机字符串(rand_string)](./user/rand/rand_string.md)
   - [随机排列(rand_p)](./user/rand/rand_p.md)

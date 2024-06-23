@@ -1395,7 +1395,7 @@ namespace generator{
             }
             else if(std::is_convertible<T, double>::value){
                 _n = static_cast<double>(n);
-                io::__warn_msg(io::_err,"Input is not a real number, change it to %lf.Please ensure it's correct.",_n);
+                // io::__warn_msg(io::_err,"Input is not a real number, change it to %lf.Please ensure it's correct.",_n);
             }
             else{
                 io::__fail_msg(io::_err,"Input is not a real number, and can't be changed to it.");
@@ -1517,63 +1517,6 @@ namespace generator{
             std::pair<double,double> range = __format_to_double_range(_format);
             double x = rnd.next(range.first,range.second);
             return x;
-        }
-
-        // return a real number in range (-1.0,1.0)
-        double rand_abs(){
-            double x = rnd.next();
-            int op = rnd.next(0,1);
-            return op?x:-x;
-        }
-
-        // return a real number in range (-n,n)
-        template <typename T>
-        typename std::enable_if<std::is_floating_point<T>::value, T>::type
-        rand_abs(T from) {
-            double x = rand_real(from);
-            int op = rnd.next(0,1);
-            return op?x:-x;
-        }
-
-        // return a integer number in range [-n,n]
-        template <typename T>
-        typename std::enable_if<std::is_integral<T>::value, T>::type
-        rand_abs(T from) {
-            T x = rand_int(from);
-            int op = rnd.next(0,1);
-            return op?x:-x;
-        }
-
-        // return a integer number in range [-to,-from]U[from,to]
-        template <typename T, typename U>
-        typename std::enable_if<std::is_integral<T>() && std::is_integral<U>(), long long>::type
-        rand_abs(T from, U to) {
-            long long x = rand_int(from, to);
-            int op = rnd.next(0,1);
-            return op?x:-x;
-        }
-
-        // return a real number in range (-to,-from]U[from,to)
-        template <typename T, typename U>
-        typename std::enable_if<
-            is_double_valid<T>() 
-            && is_double_valid<U>()
-            && !(std::is_integral<T>() 
-                && std::is_integral<U>())
-        , double>::type
-        rand_abs(T from, U to) {
-            double x = rand_real(from,to);
-            int op = rnd.next(0,1);
-            return op?x:-x;
-        }
-
-        // return a real number satisfied the given range and it's opposite
-        double rand_abs(const char* format,...) {
-            FMT_TO_RESULT(format, format, _format);
-            std::pair<double,double> range = __format_to_double_range(_format);
-            double x = rnd.next(range.first,range.second);
-            int op = rnd.next(0,1);
-            return op?x:-x;
         }
 
         enum CharType{

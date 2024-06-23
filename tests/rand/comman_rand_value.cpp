@@ -1,6 +1,7 @@
 #include "../generator.h"
 #include "../catch_main.hpp"
 
+using namespace std;
 using namespace generator::rand;
 
 TEST_CASE("rand_int", "[rand]") {
@@ -57,7 +58,7 @@ TEST_CASE("rand_odd", "[rand]") {
     }
 }
 
-TEST_CASE("rand_even", "[rand][format]") {
+TEST_CASE("rand_even", "[rand]") {
     int run_times = 100;
     for (int i = 1; i <= run_times; i++) {
       int x = rand_even(3);
@@ -77,7 +78,7 @@ TEST_CASE("rand_even", "[rand][format]") {
     }
 }
 
-TEST_CASE("rand_int_from_format", "[rand]") {
+TEST_CASE("rand_int_from_format", "[rand][format]") {
     int run_times = 100;
     int x;
     for (int i = 1; i <= run_times; i++) {
@@ -87,5 +88,45 @@ TEST_CASE("rand_int_from_format", "[rand]") {
         CHECK((x >=-1 && x <= 1 && x%2));
         x = rand_even("(-1, 1.0]");
         CHECK(x == 0);
+    }
+}
+
+TEST_CASE("format_double_range", "[format]") {
+    auto range = __format_to_double_range("[1, 2]");
+    CHECK((range.first ==  Approx(1.0) && range.second == Approx(2.1)));
+    range = __format_to_double_range("(0.01, 1.23e1]");
+    CHECK((range.first == Approx(0.011) && range.second == Approx(12.301)));
+    range = __format_to_double_range("[10, 20]");
+    CHECK((range.first == Approx(10.0) && range.second == Approx(20.1)));
+    range = __format_to_double_range("(-1e-6, 1E-6)");
+    CHECK((range.first == Approx(-0.0000009) && range.second == Approx(0.000001)));
+
+}
+
+TEST_CASE("rand_real", "[rand]") {
+    int run_times = 100;
+    double x;
+    for (int i = 1; i <= run_times; i++) {
+        x = rand_real();
+        CHECK((x >= 0 && x < 1));
+        x = rand_real(2);
+        CHECK((x >= 0 && x < 2));
+        x = rand_real(1, 2.0);
+        CHECK((x >= 1 && x < 2));
+    }    
+}
+
+TEST_CASE("rand_double_from_format", "[rand][format]") {
+    int run_times = 100;
+    double x;
+    for (int i = 1; i <= run_times; i++) {
+        x = rand_real("[1, 2)");
+        CHECK((x >= 1.0 && x < 2.0));
+        x = rand_real("[1, %s]", "2.00");
+        CHECK((x >= 1.000 && x < 2.001));
+        x = rand_real("(%d, 0.2e1)", 1);
+        CHECK((x >= 1.1 && x < 2.0));
+        x = rand_real("(-1e-6, 1E-2]");
+        CHECK((x >= 0.0000009 && x < 0.0100001));
     }
 }
