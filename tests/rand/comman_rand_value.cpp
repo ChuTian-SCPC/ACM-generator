@@ -130,3 +130,16 @@ TEST_CASE("rand_double_from_format", "[rand][format]") {
         CHECK((x >= 0.0000009 && x < 0.0100001));
     }
 }
+
+TEST_CASE("rand_char", "[rand]") {
+    int run_times = 100;
+    char c;
+    for (int i = 1; i <= run_times; i++) {
+        c = rand_char();
+        CHECK((c >= 'a' && c <= 'z'));
+        c = rand_char(CharType::Number);
+        CHECK((c >= '0' && c <= '9'));
+        c = rand_char("[oash]");
+        CHECK((c == 'o' || c == 'a' || c == 's' || c == 'h'));
+    }  
+}
