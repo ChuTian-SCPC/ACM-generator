@@ -143,3 +143,20 @@ TEST_CASE("rand_char", "[rand]") {
         CHECK((c == 'o' || c == 'a' || c == 's' || c == 'h'));
     }  
 }
+
+TEST_CASE("rand_string", "[rand]") {
+    int run_times = 100;
+    string s;
+    for (int i = 1; i <= run_times; i++) {
+        s = rand_string(5);
+        CHECK(s.length() == 5);
+        for (auto c : s) {
+            CHECK((c >= 'a' && c <= 'z'));
+        }
+        s = rand_string(3, 7, "[12%s]", "c");
+        CHECK((s.length() >= 3 && s.length() <= 7));
+        for (auto c : s) {
+            CHECK((c == '1' || c == '2' || c == 'c'));
+        }
+    }
+}
