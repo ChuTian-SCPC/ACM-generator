@@ -160,3 +160,21 @@ TEST_CASE("rand_string", "[rand]") {
         }
     }
 }
+
+bool check_permutation(std::vector<int>& p, int start) {
+    std::sort(p.begin(), p.end());
+    if (p[0] != start)  return false;
+    for (int i = 1; i < p.size(); i++) {
+        if (p[i] != p[i - 1] + 1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+TEST_CASE("rand_permutation", "[rand]") {
+    auto p = rand_p(10);
+    CHECK(check_permutation(p, 0));
+    p = rand_p(20, 3);
+    CHECK(check_permutation(p, 3));
+}
