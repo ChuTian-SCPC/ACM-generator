@@ -188,21 +188,25 @@ bool check_sum(std::vector<int>& p, int sum) {
 }
 
 TEST_CASE("rand_sum", "[rand]") {
-    auto p = rand_sum(10, 100);
-    CHECK(p.size() == 10);
-    CHECK(check_sum(p, 100));
+    int run_times = 100;
+    std::vector<int> p;
+    for (int i = 1; i <= run_times; i++) {
+        p = rand_sum(10, 100);
+        CHECK(p.size() == 10);
+        CHECK(check_sum(p, 100));
 
-    p = rand_sum(20, 100, 3);
-    CHECK(p.size() == 20);
-    CHECK(check_sum(p, 100));
-    for (auto x : p) {
-        CHECK(x >= 3);
-    }
+        p = rand_sum(20, 100, 3);
+        CHECK(p.size() == 20);
+        CHECK(check_sum(p, 100));
+        for (auto x : p) {
+            CHECK(x >= 3);
+        }
 
-    p = rand_sum(10, 100, 5, 12);
-    CHECK(p.size() == 10);
-    CHECK(check_sum(p, 100));
-    for (auto x : p) {
-        CHECK((x >= 5 && x <= 12));
+        p = rand_sum(10, 100, 5, 12);
+        CHECK(p.size() == 10);
+        CHECK(check_sum(p, 100));
+        for (auto x : p) {
+            CHECK((x >= 5 && x <= 12));
+        }        
     }
 }
