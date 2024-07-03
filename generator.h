@@ -1,3 +1,6 @@
+#ifndef SCPC_GENERATOR_USED_TESTLIB
+#define SCPC_GENERATOR_USED_TESTLIB
+
 #include"testlib.h"
 #include <sstream>
 #include <unordered_map>
@@ -1234,7 +1237,15 @@ namespace generator{
             auto string_to_int = [&](size_t from, size_t to) -> long long{
                 std::string str = s.substr(from + 1, to - from - 1);
                 try {
-                    long long value = std::stoll(str);
+                    long long value;
+                    size_t is_real_format = str.find_first_of("eE.");
+                    if (is_real_format != std::string::npos) {
+                        double value_d = std::stod(str);
+                        value = (long long)value_d;
+                    }
+                    else {
+                        value = std::stoll(str); 
+                    } 
                     return value;
                 }
                 catch (const std::invalid_argument &e) {
@@ -1336,7 +1347,7 @@ namespace generator{
         typename std::enable_if<std::is_integral<T>::value, long long>::type
         rand_even(T n){
             long long nl = (long long)n;
-            long long r = (nl - (nl % 2 == 1))/2;
+            long long r = (nl - std::abs(nl % 2))/2;
             if(r < 0) {
                 io::__fail_msg(io::_err,"There is no even number between [0,%lld].",nl);
             }
@@ -1351,8 +1362,8 @@ namespace generator{
         rand_even(T from, U to){
             long long froml = (long long)from;
             long long tol = (long long)to;
-            long long l = (froml + (froml % 2 == 1))/2;
-            long long r = (tol - (tol % 2 == 1))/2;
+            long long l = (froml + std::abs(froml % 2))/2;
+            long long r = (tol - std::abs(tol % 2))/2;
             if(l > r) {
                 io::__fail_msg(io::_err,"There is no even number between [%lld,%lld].",froml,tol);
             }
@@ -6216,5 +6227,4 @@ namespace generator{
     }
 }
 #ifdef _WIN32
-#undef mkdir
-#endif
+#u
