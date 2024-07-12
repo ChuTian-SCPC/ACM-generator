@@ -1395,7 +1395,7 @@ namespace generator{
             }
             else if(std::is_convertible<T, double>::value){
                 _n = static_cast<double>(n);
-                io::__warn_msg(io::_err,"Input is not a real number, change it to %lf.Please ensure it's correct.",_n);
+                // io::__warn_msg(io::_err,"Input is not a real number, change it to %lf.Please ensure it's correct.",_n);
             }
             else{
                 io::__fail_msg(io::_err,"Input is not a real number, and can't be changed to it.");
@@ -6227,4 +6227,6 @@ namespace generator{
     }
 }
 #ifdef _WIN32
-#u
+#undef mkdir
+#endif
+#endif
