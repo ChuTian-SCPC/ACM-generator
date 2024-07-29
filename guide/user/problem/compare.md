@@ -66,4 +66,6 @@ void compare(int time_limit,const char* checker,Args ... args);
 void compare(int time_limit,Path checker,Args ... args);
 ```
 
+如果不想设置时间限制，可以用`time_limit_inf`,也可以直接用它的值`-1`。
+
 [返回目录](../../home.md)

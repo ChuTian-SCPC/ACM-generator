@@ -18,6 +18,7 @@
   - 树/图的合并：merge（不额外加边），link（额外加边）。
   - FlowerChain：菊花带链。
   - Forest：森林。
+  - compare可以设置无限时间。
 
 ### version 0.7.0
 
