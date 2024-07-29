@@ -331,7 +331,7 @@ namespace generator{
                     io::__fail_msg(io::_err, "can't find full path :%s.", _path.c_str());
                 }
             #else
-                char buffer[1024];
+                char buffer[PATH_MAX];
                 if (realpath(_path.c_str(), buffer) == nullptr) {
                     io::__fail_msg(io::_err, "can't find full path :%s.", _path.c_str());
                 }
@@ -872,6 +872,8 @@ namespace generator{
         #endif
         }
         
+        const int time_limit_inf = -1;
+        
         void __run_program(
             Path& program,
             Path& input_file,
@@ -928,7 +930,10 @@ namespace generator{
                     &pi);
             if (ret) 
             {
-                if (WaitForSingleObject(pi.hProcess, time_limit) == WAIT_TIMEOUT) {
+                if (time_limit == time_limit_inf) {
+                    WaitForSingleObject(pi.hProcess, INFINITE);
+                } 
+                else if (WaitForSingleObject(pi.hProcess, time_limit) == WAIT_TIMEOUT) {
                     __terminate_process(pi.hProcess);
                 };
                 auto end_time = std::chrono::steady_clock::now();
@@ -943,15 +948,13 @@ namespace generator{
             if (pid == 0) {
                 int input = open(input_file.cname(), O_RDONLY);
                 if (input == -1) {
-                    __warn_msg(_err, "Fail to open input file %s.", input_file.cname());
-                    exit(EXIT_FAILURE);
+                    __error_msg(_err, "Fail to open input file %s.", input_file.cname());
                 }
 
                 int output = open(output_file.cname(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                 if (output == -1) {
                     close(input);
-                    __warn_msg(_err, "Fail to open output file %s.", output_file.cname());
-                    exit(EXIT_FAILURE);
+                    __error_msg(_err, "Fail to open output file %s.", output_file.cname());
                 }
 
                 dup2(input, STDIN_FILENO);
@@ -969,19 +972,23 @@ namespace generator{
                 auto limit = std::chrono::milliseconds(time_limit);
 
                 int status;
-                auto result = waitpid(pid, &status, WNOHANG);
-
-                while (result == 0 && std::chrono::steady_clock::now() - start_time < limit) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                    result = waitpid(pid, &status, WNOHANG);
-                }
-
-                if (result == 0) {
-                    __terminate_process(reinterpret_cast<void*>(pid));
-                } 
                 
-                auto end_time = std::chrono::steady_clock::now();
-                result = waitpid(pid, &status, WNOHANG);
+                if (time_limit == time_limit_inf) {
+                    waitpid(pid, &status, 0);
+                }
+                else {
+                    auto result = waitpid(pid, &status, WNOHANG);
+                    while (result == 0 && std::chrono::steady_clock::now() - start_time < limit) {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                        result = waitpid(pid, &status, WNOHANG);
+                    }     
+                    if (result == 0) {
+                        __terminate_process(reinterpret_cast<void*>(pid));
+                    }   
+                    result = waitpid(pid, &status, WNOHANG);              
+                }
+                
+                auto end_time = std::chrono::steady_clock::now();              
                 int exit_status = WEXITSTATUS(status);
                 if (WIFEXITED(status) && exit_status == EXIT_FAILURE) {
                     runtime = -1;
@@ -1001,6 +1008,9 @@ namespace generator{
             if (runtime == -1) {
                 result = R_ERROR;
                 return false;
+            }
+            if (time_limit == time_limit_inf) {
+                return true;
             }
             if (runtime > time_limit) {
                 result = R_TLE;
@@ -1056,7 +1066,7 @@ namespace generator{
         {
             Path input_file(__path_join(__current_path(), "testcases", __end_with(id, In)));
             Path output_file(__path_join(__current_path(), "testcases", __end_with(id, Out)));
-            __run_program(program, input_file, ans_file, 2 * time_limit, runtime);
+            __run_program(program, input_file, ans_file, time_limit == time_limit_inf ? time_limit_inf : 2 * time_limit, runtime);
             if(__enable_judge_ans(runtime, time_limit, result)) {
                 __check_result(
                     input_file, output_file, ans_file, testlib_out_file,
