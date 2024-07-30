@@ -12,6 +12,7 @@
   - 采用`node_indices`表示结点输出时的值。
   - 变量名返回值更改为const常量，原数据引用采用`ref()`。
   - `rand_int(T, U)`采用`is_convertible<T(U), long long>`。
+  - `rand_int`支持`testlib`不支持的`unsigned`整型。
 - 新增功能：
   - 有根树添加重定根函数`reroot`。
   - 给make inputs添加一些函数，compare测试所有的样例。
@@ -19,6 +20,7 @@
   - FlowerChain：菊花带链。
   - Forest：森林。
   - compare可以设置无限时间。
+  - rand_bracket_seq：随机合法括号序列。
 
 ### version 0.7.0
 
