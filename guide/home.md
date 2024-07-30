@@ -17,6 +17,7 @@
   - [不等概率随机(rand_prob)](./user/rand/rand_prob.md)
   - [随机数组其元素出现次数为给定值(shuffle_index)](./user/rand/shuffle_index.md)
   - [随机回文串(rand_palindrome)](./user/rand/rand_palindrome.md)
+  - [随机合法括号序列(rand_bracket_seq)](./user/rand/rand_bracket_seq.md)
 - 生成数据与测试
     - [生成标准输入](./user/problem/make_inputs.md)
     - [生成标准输出](./user/problem/make_outputs.md)

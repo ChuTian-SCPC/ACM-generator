@@ -2089,7 +2089,7 @@ namespace generator{
             return res;
         }
         
-        std::string rand_bracket_seq(int len, const char* format = "()", ...) {
+        std::string rand_bracket_seq(int len, const char* format, ...) {
             FMT_TO_RESULT(format, format, _format);
             return rand_bracket_seq(len, _format);
         }
@@ -2099,7 +2099,7 @@ namespace generator{
             return rand_bracket_seq(len, brackets);
         }
         
-        std::string rand_bracket_seq(int from, int to, const char* format = "()", ...) {
+        std::string rand_bracket_seq(int from, int to, const char* format, ...) {
             FMT_TO_RESULT(format, format, _format);
             return rand_bracket_seq(from, to, _format);
         }

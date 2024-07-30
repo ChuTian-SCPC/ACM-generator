@@ -37,6 +37,8 @@
    rand_int(1, 1e9);
    ```
 
+现在`rand_int`支持`unsigned int`, `unsigned long`, `unsigned long long`这些类型的生成。这在`testlib`中是不支持的，详见[示例代码](../../../examples/rand_int_unsigned.cpp)。
+
 [示例代码](../../../examples/rand_int.cpp)
 
 [返回目录](../../home.md)
