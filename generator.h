@@ -681,7 +681,7 @@ namespace generator{
             }
         }
         
-        void __make_inputs_exe(int start, int end, Path data_path, std::string seed) {
+        void __make_inputs_exe_impl(int start, int end, Path data_path, std::string seed) {
             data_path.full();
             if (!data_path.__file_exists()) {
                 io::__fail_msg(io::_err, "data file %s doesn't exist.", data_path.cname());
@@ -704,13 +704,13 @@ namespace generator{
         template<typename T>
         void make_inputs_exe(int start,int end,T path,const char* format = "",...){
             FMT_TO_RESULT(format,format,_format);
-            __make_inputs_exe(start, end, Path(path), _format);
+            __make_inputs_exe_impl(start, end, Path(path), _format);
         }
 
         template<typename T>
         void make_inputs_exe(int index, T path,const char* format = "",...){
             FMT_TO_RESULT(format,format,_format);
-            __make_inputs_exe(index, index, Path(path), _format);
+            __make_inputs_exe_impl(index, index, Path(path), _format);
         }
         
         template<typename T>
@@ -1397,81 +1397,117 @@ namespace generator{
             long long x = __rand_int_impl<long long>(range.first,range.second);
             return x;
         }
-
+        
+        template <typename T>
+        T __to_odd_need_limit(T n, bool lower) {
+            if (n % 2 == 0) lower ?  n++ : n--;
+            return (n - 1) / 2;
+        }
+        
+        template <typename T>
+        T __rand_odd_impl(T n) {
+            if (n <= 0) {
+                io::__fail_msg(io::_err,"There is no odd number between [1, %s].", std::to_string(n).c_str());
+            }
+            T r = __to_odd_need_limit(n, false) + 1;
+            T v = rand_int(r);
+            return v * 2 + 1;
+        }
+        
+        template <typename T>
+        T __rand_odd_impl(T from, T to) {
+            if (to < from || (to == from && to % 2 == 0)) {
+                io::__fail_msg(
+                    io::_err,"There is no odd number between [%s, %s].", 
+                    std::to_string(from).c_str(), std::to_string(to).c_str());
+            }
+            T l = __to_odd_need_limit(from, true);
+            T r = __to_odd_need_limit(to, false);
+            T v = rand_int(l, r);
+            return v * 2 + 1;
+        }
+        
         // rand a odd number between [1,n]
         template <typename T = long long>
-        typename std::enable_if<std::is_integral<T>::value, long long>::type
+        typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_odd(T n){
-            long long nl = (long long)n;
-            long long r = (nl - (nl % 2 == 0) - 1LL)/2;
-            if(r < 0) {
-                io::__fail_msg(io::_err,"There is no odd number between [1,%lld].",nl);
-            }
-            long long x = rnd.next(0LL, r);
-            x = x * 2 + 1;
-            return x;
+            return __rand_odd_impl<T>(n);
+        }
+        
+        template <typename T = long long>
+        typename std::enable_if<std::is_integral<T>::value, T>::type
+        rand_odd(T from, T to){
+            return __rand_odd_impl<T>(from, to);
         }
 
         // rand a odd number between [from,to]
         template <typename T = long long, typename U = long long>
         typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value, long long>::type
         rand_odd(T from, U to){
-            long long froml = (long long)from;
-            long long tol = (long long)to;
-            long long l = (froml + (froml % 2 == 0) - 1LL)/2;
-            long long r = (tol - (tol % 2 == 0) - 1LL)/2;
-            if(l > r) {
-                io::__fail_msg(io::_err,"There is no odd number between [%lld,%lld].",froml,tol);
-            }
-            long long x = rnd.next(l, r);
-            x = x * 2 + 1;       
-            return x;
+            return __rand_odd_impl<long long>((long long)from, (long long)to);
         }
 
         // rand a odd number satisfied the given range
         long long rand_odd(const char* format,...) {
             FMT_TO_RESULT(format, format, _format);
             std::pair<long long,long long> range = __format_to_int_range(_format);
-            long long x = rand_odd(range.first,range.second);
-            return x;
+            return __rand_odd_impl<long long>(range.first,range.second);
+        }
+
+        template <typename T>
+        T __to_even_need_limit(T n, bool lower) {
+            if (n % 2 != 0) lower ? n++ : n--;
+            return n / 2;
+        }
+
+        template <typename T>
+        T __rand_even_impl(T n) {
+            if (n < 0) {
+                io::__fail_msg(io::_err,"There is no even number between [0, %s].", std::to_string(n).c_str());
+            }
+            T r = __to_even_need_limit(n, false) + 1;
+            T v = rand_int(r);
+            return v * 2;
+        }
+        
+        template <typename T>
+        T __rand_even_impl(T from, T to) {
+            if (to < from || (to == from && to % 2 != 0)) {
+                io::__fail_msg(
+                    io::_err,"There is no even number between [%s, %s].", 
+                    std::to_string(from).c_str(), std::to_string(to).c_str()); 
+            }
+            T l = __to_even_need_limit(from, true);
+            T r = __to_even_need_limit(to, false);
+            T v = rand_int(l, r);
+            return v * 2;
         }
 
         // rand a even number between [0,n]
         template <typename T = long long>
-        typename std::enable_if<std::is_integral<T>::value, long long>::type
+        typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_even(T n){
-            long long nl = (long long)n;
-            long long r = (nl - std::abs(nl % 2))/2;
-            if(r < 0) {
-                io::__fail_msg(io::_err,"There is no even number between [0,%lld].",nl);
-            }
-            long long x = rnd.next(0LL,r);
-            x = x * 2;
-            return x;
+            return __rand_even_impl<T>(n);
+        }
+        
+        template <typename T = long long>
+        typename std::enable_if<std::is_integral<T>::value, T>::type
+        rand_even(T from, T to){
+            return __rand_even_impl<T>(from, to);
         }
 
         // rand a even number between [from,to]
         template <typename T = long long, typename U = long long>
         typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value, long long>::type
         rand_even(T from, U to){
-            long long froml = (long long)from;
-            long long tol = (long long)to;
-            long long l = (froml + std::abs(froml % 2))/2;
-            long long r = (tol - std::abs(tol % 2))/2;
-            if(l > r) {
-                io::__fail_msg(io::_err,"There is no even number between [%lld,%lld].",froml,tol);
-            }
-            long long x = rnd.next(l, r);
-            x = x * 2;       
-            return x;
+            return __rand_even_impl<long long>((long long)from, (long long)to);
         }
 
         // rand a even number satisfied the given range
         long long rand_even(const char* format,...) {
             FMT_TO_RESULT(format, format, _format);
             std::pair<long long,long long> range = __format_to_int_range(_format);
-            long long x = rand_even(range.first,range.second);
-            return x;
+            return __rand_even_impl<long long>(range.first,range.second);
         }
 
         // enable T is double or can be change to double
@@ -2089,7 +2125,7 @@ namespace generator{
             return res;
         }
         
-        std::string rand_bracket_seq(int len, const char* format, ...) {
+        std::string rand_bracket_seq(int len, const char* format = "()", ...) {
             FMT_TO_RESULT(format, format, _format);
             return rand_bracket_seq(len, _format);
         }
@@ -2099,7 +2135,7 @@ namespace generator{
             return rand_bracket_seq(len, brackets);
         }
         
-        std::string rand_bracket_seq(int from, int to, const char* format, ...) {
+        std::string rand_bracket_seq(int from, int to, const char* format = "()", ...) {
             FMT_TO_RESULT(format, format, _format);
             return rand_bracket_seq(from, to, _format);
         }
