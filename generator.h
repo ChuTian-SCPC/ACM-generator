@@ -639,6 +639,10 @@ namespace generator{
                 __close_output_file_to_console();
             }
         }
+
+        void make_outputs(int index, std::function<void()> func) {
+            make_outputs(index, index, func);
+        }
         
         void __fill_inputs_impl(int number, std::function<void()> func, std::string format, bool need_seed) {
             int sum = number;
@@ -714,7 +718,7 @@ namespace generator{
         }
         
         template<typename T>
-        void make_outputs_exe(int start,int end, T path){
+        void make_outputs_exe(int start, int end, T path){
             Path std_path(path);
             std_path.full();
             if (!std_path.__file_exists()) {
@@ -737,6 +741,11 @@ namespace generator{
                     io::__error_msg(io::_err,"Something error in creating output file %s",write_path.cname());
                 }
             }
+        }
+
+        template<typename T>
+        void make_outputs_exe(int index, T path) {
+            make_outputs_exe(index, index, path);
         }
         
         void __fill_inputs_exe_impl(int sum, Path path, std::string seed) {
