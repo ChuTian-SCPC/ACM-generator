@@ -15,7 +15,7 @@
   - `rand_int`支持`testlib`不支持的`unsigned`整型。`rand_odd`和`rand_even`也一并支持。
 - 新增功能：
   - 有根树添加重定根函数`reroot`。
-  - 给make inputs添加一些函数，compare测试所有的样例。
+  - 给make inputs, make outputs添加一些函数，compare测试所有的样例。
   - 树/图的合并：merge（不额外加边），link（额外加边）。
   - FlowerChain：菊花带链。
   - Forest：森林。

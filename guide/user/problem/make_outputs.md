@@ -12,9 +12,11 @@
 
    生成编号从`start`到`end`的标准输出文件，以`func`函数生成。
 
+2. `make_outputs(int index, std::function<void()> func)`
    
+   生成编号为`index`的标准输出文件，以`func`函数生成。
 
-2. `fill_outputs(std::function<void()> func, bool cover_exist = true)`
+3. `fill_outputs(std::function<void()> func, bool cover_exist = true)`
 
    与第一个函数不同的方式在于，该函数是将所有`.in`标准输入文件都生成对应的`.out`标准输出文件。
    
@@ -23,8 +25,8 @@
 如果想调用已经写好的标答的可执行文件，可以使用以下函数：
 
 1. `void make_outputs_exe(int start, int end, T path)`
-2. `void fill_outputs_exe(T path, bool cover_exist = true)`
-
+2. `void make_outputs_exe(int index, T path)`
+3. `void fill_outputs_exe(T path, bool cover_exist = true)`
 
 
 函数调用生成输出文件的标答可执行文件的路径为`path`, `path`的类型可以是`const char*`,`std::string`或者[路径(Path)](./path.md)类。
