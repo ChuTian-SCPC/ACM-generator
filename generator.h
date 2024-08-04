@@ -2108,7 +2108,7 @@ namespace generator{
             res += close[pos];
         }
         
-        std::string rand_bracket_seq(int len, std::string brackets = "()") {
+        std::string rand_bracket_seq(int len, std::string brackets) {
             if (len < 0 || len % 2) {
                 io::__fail_msg(io::_err, "Length must be positive even number, but found %d.", len);
             }
@@ -2138,8 +2138,12 @@ namespace generator{
             FMT_TO_RESULT(format, format, _format);
             return rand_bracket_seq(len, _format);
         }
+
+        std::string rand_bracket_seq(int len) {
+            return rand_bracket_seq(len, "()");
+        }
         
-        std::string rand_bracket_seq(int from, int to, std::string brackets = "()") {
+        std::string rand_bracket_seq(int from, int to, std::string brackets) {
             int len = rand_even(from, to);
             return rand_bracket_seq(len, brackets);
         }
@@ -2147,6 +2151,10 @@ namespace generator{
         std::string rand_bracket_seq(int from, int to, const char* format, ...) {
             FMT_TO_RESULT(format, format, _format);
             return rand_bracket_seq(from, to, _format);
+        }
+
+        std::string rand_bracket_seq(int from, int to) {
+            return rand_bracket_seq(from, to, "()");
         }
     }
 
