@@ -5952,8 +5952,6 @@ namespace generator{
                 return impl.get_result();
             }
 
-            #undef _OTHER_OUTPUT_FUNCTION_SETTING
-            #undef _OUTPUT_FUNCTION
             #undef _DEF_GEN_FUNCTION
             #undef _DISABLE_CHOOSE_GEN
             #undef _MUST_IS_ROOTED
@@ -6421,10 +6419,199 @@ namespace generator{
         }
     }
     
+    namespace polygon {
+        std::pair<std::string, std::string> __format_xy_range(std::string format) {          
+            auto find_range = [&](std::string s) -> std::string {
+                size_t pos_c = format.find_first_of(s);
+                if (pos_c == std::string::npos) {
+                    pos_c = s == "xX" ? 0 : format.find_first_of(")]");
+                }
+                size_t open = format.find_first_of("[(", pos_c);
+                size_t close = format.find_first_of(")]", pos_c);
+                if (open == std::string::npos || close == std::string::npos) {
+                    return std::string("");
+                }
+                return format.substr(open, close - open + 1);
+            };
+            std::string x_range = find_range("xX");
+            std::string y_range = find_range("yY");
+            if (x_range.empty() && y_range.empty()) {
+                io::__fail_msg(io::_err, "%s is not a vaild range.", format.c_str());
+            }
+            if (x_range.empty()) {
+                x_range = y_range;
+            }
+            if (y_range.empty()) {
+                y_range = x_range;
+            }
+            return std::make_pair(x_range, y_range);
+        }
+        
+        #if defined(__SIZEOF_INT128__) && __SIZEOF_INT128__ == 16
+            using MaxIntType = __int128;
+            std::ostream& operator<<(std::ostream& os, __int128 value) {
+                if (value < 0) {
+                    os << "-";
+                    value = -value;
+                }
+
+                std::string str;
+                while (value > 0) {
+                    str.insert(str.begin(), '0' + (value % 10));
+                    value /= 10;
+                }
+
+                if (str.empty()) {
+                    str = "0";
+                }
+
+                os << str;
+                return os;
+            }
+        #else
+            using MaxIntType = long long;
+        #endif
+        
+        template<typename T>
+        struct is_signed_integral {
+            static const bool value = std::is_integral<T>::value && !std::is_unsigned<T>::value;
+        };
+        
+        template<typename T>
+        struct is_point_type {
+            static const bool value = is_signed_integral<T>::value || std::is_floating_point<T>::value;
+        };
+        
+        template<typename T>
+        struct __ResultType {
+            using type = typename std::conditional<
+                is_signed_integral<T>::value,   
+                MaxIntType,
+                double 
+            >::type;
+        };
+        
+        template<typename T>
+        using __ResultTypeT = typename __ResultType<T>::type;
+        
+        template<typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
+        class Point {
+        protected:
+            typedef Point<T> _Self;
+            _OUTPUT_FUNCTION(_Self)
+        public:
+            Point():_x(T(0)),_y(T(0)) { _output_function = default_function(); };
+            Point(T x,T y):_x(x),_y(y) { _output_function = default_function();};
+            ~Point() = default;
+            Point operator+(Point b){return Point(_x + b._x, _y + b._y);}
+            Point operator-(Point b){return Point(_x - b._x, _y - b._y);}
+            T& operator[](int idx) { return idx == 0 ? _x : _y; }
+            T& operator[](char c) {return c=='x' || c=='X' ? _x : _y; }
+            T& operator[](std::string s) {
+                if(s.empty()) io::__fail_msg(io::_err,"Index s is an empty string.");
+                return this->operator[](s[0]);
+            }
+            bool operator==(const Point<T>& p) const{ return this->_x == p._x && this->_y == p._y; }
+            bool operator!=(const Point<T>& p) const{ return !(*this == p); }
+            bool operator<(const Point<T>& p) const{ return this->_x < p._x || (this->_x == p._x && this->_y < p._y); }
+            bool operator<=(const Point<T>& p) const{ return *this < p || *this == p; }
+            bool operator>(const Point<T>& p) const { return !(*this <= p); }
+            bool operator>=(const Point<T>& p) const { return !(*this < p); }
+            T x() const { return _x; }
+            T y() const { return _y; }
+            T& x_ref(){ return _x; }
+            T& y_ref(){ return _y; }
+            void default_output(std::ostream& os) const {
+                os << _x << " " << _y;
+            }
+            
+            template <typename E = T>
+            typename std::enable_if<std::is_floating_point<E>::value, void>::type
+            rand(E x_left, E x_right, E y_left, E y_right) {
+                _x = rand::rand_real(x_left, x_right);
+                _y = rand::rand_real(y_left, y_right);
+            }
+            
+            template <typename E = T>
+            typename std::enable_if<is_signed_integral<E>::value, void>::type
+            rand(E x_left, E x_right, E y_left, E y_right) {
+                _x = rand::rand_int(x_left, x_right);
+                _y = rand::rand_int(y_left, y_right);
+            }
+            
+            template <typename E = T>
+            typename std::enable_if<std::is_floating_point<E>::value, void>::type
+            rand(const char* format,...) {
+                FMT_TO_RESULT(format, format, _format);
+                auto xy_range = __format_xy_range(_format);
+                _x = static_cast<T>(rand::rand_real(xy_range.first.c_str()));
+                _y = static_cast<T>(rand::rand_real(xy_range.second.c_str()));
+            }
+            
+            template <typename E = T>
+            typename std::enable_if<is_signed_integral<E>::value, void>::type
+            rand(const char* format,...) {
+                FMT_TO_RESULT(format, format, _format);
+                auto xy_range = __format_xy_range(_format);
+                _x = static_cast<T>(rand::rand_int(xy_range.first.c_str()));
+                _y = static_cast<T>(rand::rand_int(xy_range.second.c_str()));
+            }
+            
+            __ResultTypeT<T> operator^(const Point& b) const{ 
+                __ResultTypeT<T> x1 = this->x();
+                __ResultTypeT<T> y1 = this->y();
+                __ResultTypeT<T> x2 = b.x();
+                __ResultTypeT<T> y2 = b.y();
+                return x1 * y2 - y1 * x2;
+            }
+            
+            __ResultTypeT<T> operator*(const Point& b) const{ 
+                __ResultTypeT<T> x1 = this->x();
+                __ResultTypeT<T> y1 = this->y();
+                __ResultTypeT<T> x2 = b.x();
+                __ResultTypeT<T> y2 = b.y();
+                return x1 * x2 + y1 * y2;
+            }
+            
+            _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+        protected:
+            T _x, _y;
+        };
+        
+        template <typename T>
+        typename std::enable_if<is_point_type<T>::value, Point<T>>::type
+        rand_point(T x_left, T x_right, T y_left, T y_right) {
+            Point<T> point;
+            point.rand(x_left, x_right, y_left, y_right);
+            return point;
+        }
+        
+        template <typename T>
+        typename std::enable_if<is_point_type<T>::value, Point<T>>::type
+        rand_point(T left, T right) {
+            return rand_point<T>(left, right, left, right);
+        }
+        
+        template <typename T>
+        typename std::enable_if<is_point_type<T>::value, Point<T>>::type
+        rand_point(const char* format, ...) {
+            FMT_TO_RESULT(format, format, _format);
+            Point<T> point;
+            point.rand(_format.c_str());
+            return point;
+        }
+        
+        #undef _OUTPUT_FUNCTION
+        #undef _COMMON_OUTPUT_FUNCTION_SETTING
+        #undef _OTHER_OUTPUT_FUNCTION_SETTING
+        #undef _EDGE_OUTPUT_FUNCTION_SETTING
+    }
+    
     namespace all{
         using namespace generator::io;
         using namespace generator::rand;
         using namespace generator::graph;
+        using namespace generator::polygon;
     }
 }
 #ifdef _WIN32
