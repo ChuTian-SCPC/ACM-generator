@@ -1550,7 +1550,8 @@ namespace generator{
 
         // equal to rnd.next(n),a real number in [0,n)
         template <typename T = double>
-        double rand_real(T n) {
+        typename std::enable_if<is_double_valid<T>(), double>::type
+        rand_real(T n) {
             double _n = __change_to_double(n);
             double x = rnd.next(_n);
             return x;
@@ -6601,6 +6602,25 @@ namespace generator{
             return point;
         }
         
+        template <typename T>
+        typename std::enable_if<is_point_type<T>::value, int>::type
+        __quadrant(Point<T> p) {
+            return ((p.y() < 0) << 1) | ((p.x() < 0) ^ (p.y() < 0));
+        }
+
+        template <typename T>
+        typename std::enable_if<is_point_type<T>::value, void>::type        
+        __polar_angle_sort(std::vector<Point<T>>& points, Point<T> c = Point<T>()) {
+            std::sort(points.begin(), points.end(), [&](Point<T> a, Point<T> b) {
+                Point<T> ac = a - c;
+                Point<T> bc = b - c;
+                int quadrant_a = __quadrant(ac);
+                int quadrant_b = __quadrant(bc);
+                if (quadrant_a == quadrant_b) return (ac ^ bc) > 0;
+                else return quadrant_a < quadrant_b;
+            });
+        }
+         
         #undef _OUTPUT_FUNCTION
         #undef _COMMON_OUTPUT_FUNCTION_SETTING
         #undef _OTHER_OUTPUT_FUNCTION_SETTING
