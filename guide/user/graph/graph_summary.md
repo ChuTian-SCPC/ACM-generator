@@ -23,7 +23,7 @@ both_weight::Graph<NodeType,EdgeType>;   //带点权和边权
 
 图的通用属性是：
 ```cpp
-int node_count;                   //图的结点数
+int node_count;              //图的结点数
 int edge_count;              //图的边数
 int begin_node;              //图结点的起始编号，默认是1
 //边

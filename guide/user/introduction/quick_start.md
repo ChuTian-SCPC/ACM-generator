@@ -20,6 +20,7 @@
 using namespace generator::rand;
 using namespace generator::io;
 using namespace generator::graph;
+using namespace generator::geometry;
 ```
 
 3、简单了解和掌握如何用testlib.h出题。

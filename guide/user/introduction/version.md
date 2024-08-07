@@ -21,6 +21,9 @@
   - Forest：森林。
   - compare可以设置无限时间。
   - rand_bracket_seq：随机合法括号序列。
+  - 计算几何：
+    - Point：点
+    - ConvexHull：凸包
 
 ### version 0.7.0
 

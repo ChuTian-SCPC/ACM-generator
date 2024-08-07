@@ -52,3 +52,6 @@
         - [森林(Forest)](./user/graph/forest.md)
   
       - [合并(merge/link)](./user/graph/merge_link.md)
+  - 计算几何
+    - [点(Point)](./user/geometry/point.md)
+    - [凸包(ConvexHull)](./user/geometry/convex_hull.md)
