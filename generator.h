@@ -6420,7 +6420,7 @@ namespace generator{
         }
     }
     
-    namespace polygon {
+    namespace geometry {
         std::pair<std::string, std::string> __format_xy_range(std::string format) {          
             auto find_range = [&](std::string s) -> std::string {
                 size_t pos_c = format.find_first_of(s);
@@ -6501,13 +6501,23 @@ namespace generator{
             typedef Point<T> _Self;
             _OUTPUT_FUNCTION(_Self)
         public:
-            Point():_x(T(0)),_y(T(0)) { _output_function = default_function(); };
-            Point(T x,T y):_x(x),_y(y) { _output_function = default_function();};
+            Point():_x(0),_y(0) { _output_function = default_function(); };
+            Point(T x,T y):_x(x),_y(y) { _output_function = default_function(); };
             ~Point() = default;
-            Point operator+(Point b){return Point(_x + b._x, _y + b._y);}
-            Point operator-(Point b){return Point(_x - b._x, _y - b._y);}
+            Point operator+(Point b){ return Point(_x + b._x, _y + b._y); }
+            Point& operator+=(const Point& b) {
+                _x += b._x;
+                _y += b._y;
+                return *this;
+            }
+            Point operator-(Point b){ return Point(_x - b._x, _y - b._y); }
+            Point& operator-=(const Point& b) {
+                _x -= b._x;
+                _y -= b._y;
+                return *this;
+            }
             T& operator[](int idx) { return idx == 0 ? _x : _y; }
-            T& operator[](char c) {return c=='x' || c=='X' ? _x : _y; }
+            T& operator[](char c) { return c=='x' || c=='X' ? _x : _y; }
             T& operator[](std::string s) {
                 if(s.empty()) io::__fail_msg(io::_err,"Index s is an empty string.");
                 return this->operator[](s[0]);
@@ -6607,7 +6617,7 @@ namespace generator{
         __quadrant(Point<T> p) {
             return ((p.y() < 0) << 1) | ((p.x() < 0) ^ (p.y() < 0));
         }
-
+        
         template <typename T>
         typename std::enable_if<is_point_type<T>::value, void>::type        
         __polar_angle_sort(std::vector<Point<T>>& points, Point<T> c = Point<T>()) {
@@ -6616,10 +6626,269 @@ namespace generator{
                 Point<T> bc = b - c;
                 int quadrant_a = __quadrant(ac);
                 int quadrant_b = __quadrant(bc);
-                if (quadrant_a == quadrant_b) return (ac ^ bc) > 0;
-                else return quadrant_a < quadrant_b;
+                if (quadrant_a == quadrant_b) {
+                    __ResultTypeT<T> cross = ac ^ bc;
+                    if (cross == 0) return a.x() < b.x();
+                    return cross > 0;
+                }
+                return quadrant_a < quadrant_b;
             });
         }
+        
+        // https://stackoverflow.com/questions/6758083/how-to-generate-a-random-convex-polygon/
+        template<typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
+        class ConvexHull {
+        protected:
+            typedef ConvexHull<T> _Self;
+            _OUTPUT_FUNCTION(_Self)
+        protected:
+            int _node_count;
+            std::vector<Point<T>> _points;
+            int _max_try;
+            T _x_left_limit;
+            T _x_right_limit;
+            T _y_left_limit;
+            T _y_right_limit;
+            bool _output_node_count;
+            
+            T _x_lower;
+            T _x_upper;
+            T _y_lower;
+            T _y_upper;
+        public:
+            ConvexHull(int node_count = 1, T x_left_limit = 0, T x_right_limit = 0, T y_left_limit = 0, T y_right_limit = 0) :
+                _node_count(node_count), _max_try(10), 
+                _x_left_limit(x_left_limit), _x_right_limit(x_right_limit),
+                _y_left_limit(y_left_limit), _y_right_limit(y_right_limit),
+                _output_node_count(true) 
+            {
+                _output_function = default_function();        
+            }
+            
+            int node_count() const { return _node_count; }
+            std::vector<Point<T>> points() const { return _points; }
+            int max_try() const { return _max_try; }
+            T x_left_limit() const { return _x_left_limit; }
+            T x_right_limit() const { return _x_right_limit; }
+            T y_left_limit() const { return _y_left_limit; }
+            T y_right_limit() const { return _y_right_limit; }
+            
+            int& node_count_ref() { return _node_count; }
+            std::vector<Point<T>>& points_ref() { return _points; }
+            int& max_try_ref() { return _max_try; }
+            T& x_left_limit_ref() { return _x_left_limit; }
+            T& x_right_limit_ref() { return _x_right_limit; }
+            T& y_left_limit_ref() { return _y_left_limit; }
+            T& y_right_limit_ref() { return _y_right_limit; }
+            
+            void set_node_count(int node_count) { _node_count = node_count; }
+            void set_max_try(int max_try)  { _max_try = max_try; }
+            void set_x_left_limit(T x_left_limit) { _x_left_limit = x_left_limit; }
+            void set_x_right_limit(T x_right_limit) { _x_right_limit = x_right_limit; }
+            void set_y_left_limit(T y_left_limit) { _y_left_limit = y_left_limit; }
+            void set_y_right_limit(T y_right_limit) { _y_right_limit = y_right_limit; }
+            void set_x_limit(T x_left_limit, T x_right_limit) { _x_left_limit = x_left_limit; _x_right_limit = x_right_limit; }
+            void set_y_limit(T y_left_limit, T y_right_limit) { _y_left_limit = y_left_limit; _y_right_limit = y_right_limit; }
+            void set_output_node_count(bool output_node_count) { _output_node_count = output_node_count; }
+            
+            template<typename E = T>
+            typename std::enable_if<is_signed_integral<E>::value, void>::type
+            set_x_limit(const char* format, ...) {
+                FMT_TO_RESULT(format, format, _format);
+                auto range = rand::__format_to_int_range(_format);
+                _x_left_limit = range.first;
+                _x_right_limit = range.second;
+            }
+            template<typename E = T>
+            typename std::enable_if<std::is_floating_point<E>::value, void>::type
+            set_x_limit(const char* format, ...) {
+                FMT_TO_RESULT(format, format, _format);
+                auto range = rand::__format_to_double_range(_format);
+                _x_left_limit = range.first;
+                _x_right_limit = range.second;
+            }
+            template<typename E = T>
+            typename std::enable_if<is_signed_integral<E>::value, void>::type
+            set_y_limit(const char* format, ...) {
+                FMT_TO_RESULT(format, format, _format);
+                auto range = rand::__format_to_int_range(_format);
+                _y_left_limit = range.first;
+                _y_right_limit = range.second;
+            }
+            template<typename E = T>
+            typename std::enable_if<std::is_floating_point<E>::value, void>::type
+            set_y_limit(const char* format, ...) {
+                FMT_TO_RESULT(format, format, _format);
+                auto range = rand::__format_to_double_range(_format);
+                _y_left_limit = range.first;
+                _y_right_limit = range.second;
+            }
+            
+            void set_xy_limit(const char* format, ...) {
+                FMT_TO_RESULT(format, format, _format);
+                auto range = __format_xy_range(_format);
+                set_x_limit(range.first.c_str());
+                set_y_limit(range.second.c_str());
+            }
+            
+            void default_output(std::ostream& os) const {
+                if (_output_node_count) {
+                    os << _node_count << "\n";
+                }
+                int points_count = 0;
+                for (auto p : _points) {
+                    os << p;
+                    if (++points_count < _node_count) {
+                        os << "\n";
+                    }
+                }
+            }
+            
+            void gen() {
+                __init();
+                __check_node_count();
+                __check_max_try();
+                __check_limit();
+                int try_time = 0;
+                bool success = false;
+                while(try_time < _max_try) {
+                    try_time++;
+                    success = __try_generate_once();
+                    if (success) break;
+                }
+                if (!success) {
+                    io::__fail_msg(io::_err, "Tried %d times, found no convex hull satisfied the condition.", _max_try);
+                }
+            }
+            _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+        protected:
+            
+            void __init() {
+                _points.clear();
+            }
+            
+            void __check_node_count() {
+                if (_node_count <= 0) {
+                    io::__fail_msg(io::_err, "At least one point.");
+                }
+            }
+            
+            void __check_max_try() {
+                if (_max_try <= 0) {
+                    io::__fail_msg(io::_err, "At least try once.");
+                }
+            }
+            
+            void __check_limit() {
+                if (_x_left_limit > _x_right_limit) {
+                    io::__fail_msg(io::_err, "range [%s, %s] for x-coordinate is vaild.", 
+                        std::to_string(_x_left_limit).c_str(), std::to_string(_x_right_limit).c_str());
+                }
+                if (_y_left_limit > _y_right_limit) {
+                    io::__fail_msg(io::_err, "range [%s, %s] for y-coordinate is vaild.", 
+                        std::to_string(_y_left_limit).c_str(), std::to_string(_y_right_limit).c_str());
+                }
+            }
+            
+            template<typename E = T>
+            typename std::enable_if<is_signed_integral<E>::value, E>::type
+            __rand_x() { return rand::rand_int(_x_left_limit, _x_right_limit); }
+            template<typename E = T>
+            typename std::enable_if<std::is_floating_point<E>::value, E>::type
+            __rand_x() { return rand::rand_real(_x_left_limit, _x_right_limit); }
+            
+            template<typename E = T>
+            typename std::enable_if<is_signed_integral<E>::value, E>::type
+            __rand_y() { return rand::rand_int(_y_left_limit, _y_right_limit); }
+            template<typename E = T>
+            typename std::enable_if<std::is_floating_point<E>::value, E>::type
+            __rand_y() { return rand::rand_real(_y_left_limit, _y_right_limit); }
+            
+            void __rand_pool_to_vector(std::vector<T>& pool, std::vector<T>& vec) {
+                std::sort(pool.begin(), pool.end());
+                T min = pool.front();
+                T max = pool.back();
+                T lower = min;
+                T upper = min;
+                for (int i = 1; i < _node_count - 1; i++) {
+                    T val = pool[i];
+                    if (rnd.next(2)) {
+                        vec.emplace_back(val - lower);
+                        lower = val;
+                    }
+                    else {
+                        vec.emplace_back(upper - val);
+                        upper = val;
+                    }
+                }
+                vec.emplace_back(max - lower);
+                vec.emplace_back(upper - max);
+            }
+            
+            int __find_next_none_zero(std::vector<T>& v, int begin) {
+                for (size_t i = begin + 1; i < v.size(); i++) {
+                    if (v[i] != 0) return i;
+                }
+                return -1;
+            }
+            
+            bool __zero_count_over(std::vector<T>& x, std::vector<T>& y) {
+                int count = 0;
+                for (auto p : x) count += (p == 0);
+                for (auto p : y) count += (p == 0);
+                return count > _node_count;
+            }
+            
+            bool __try_generate_once() {
+                std::vector<T> x_pool;
+                std::vector<T> y_pool;
+                for (int i = 0; i < _node_count; i++) {
+                    x_pool.emplace_back(__rand_x());
+                    y_pool.emplace_back(__rand_y());
+                }
+                std::vector<T> x_vec;
+                std::vector<T> y_vec;
+                __rand_pool_to_vector(x_pool, x_vec);
+                __rand_pool_to_vector(y_pool, y_vec);
+                if (__zero_count_over(x_vec, y_vec)) return false;
+                shuffle(x_vec.begin(), x_vec.end());
+                shuffle(y_vec.begin(), y_vec.end());
+                for (int i = 0; i < _node_count; i++) {
+                    if (x_vec[i] != 0 || y_vec[i] != 0) continue;
+                    int pos_x = __find_next_none_zero(x_vec, i);
+                    int pos_y = __find_next_none_zero(y_vec, i);
+                    if (pos_x == -1 && pos_y == -1) return false;
+                    else if (pos_x == -1) std::swap(y_vec[i], y_vec[pos_y]);
+                    else if (pos_y == -1) std::swap(x_vec[i], x_vec[pos_x]);
+                    else rnd.next(2) ? std::swap(x_vec[i], x_vec[pos_x]) : std::swap(y_vec[i], y_vec[pos_y]);
+                }
+                Point<T> o;
+                std::vector<Point<T>> vec;
+                for (int i = 0; i < _node_count; i++) vec.emplace_back(x_vec[i], y_vec[i]);
+                __polar_angle_sort(vec);
+                T min_x = std::numeric_limits<T>::max();
+                T min_y = std::numeric_limits<T>::max();
+                for (auto& v : vec) {
+                    o += v;
+                    _points.emplace_back(o);
+                    min_x = std::min(min_x, o.x());
+                    min_y = std::min(min_y, o.y());
+                }
+                Point<T> min(min_x, min_y);
+                Point<T> origin_min(_x_left_limit, _y_left_limit);
+                Point<T> shift = origin_min - min;
+                T x_max_move = _x_right_limit - _x_left_limit;
+                T y_max_move = _y_right_limit - _y_left_limit;
+                for (Point<T>& point : _points) {
+                    point += shift;
+                    x_max_move = std::min(x_max_move, _x_right_limit - point.x());
+                    y_max_move = std::min(y_max_move, _y_right_limit - point.y());
+                }
+                Point<T> move = rand_point((T)0, x_max_move, (T)0, y_max_move);
+                for (Point<T>& point : _points) point += move;
+                return true;
+            }
+        };
          
         #undef _OUTPUT_FUNCTION
         #undef _COMMON_OUTPUT_FUNCTION_SETTING
@@ -6631,7 +6900,7 @@ namespace generator{
         using namespace generator::io;
         using namespace generator::rand;
         using namespace generator::graph;
-        using namespace generator::polygon;
+        using namespace generator::geometry;
     }
 }
 #ifdef _WIN32
