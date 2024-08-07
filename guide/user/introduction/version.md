@@ -1,5 +1,7 @@
 [返回目录](../../home.md)
-### development
+### version 0.8.0
+
+2024-8-7
 
 - 修复bugs：
   - 禁用二分图相关set函数。
