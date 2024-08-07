@@ -6650,11 +6650,6 @@ namespace generator{
             T _y_left_limit;
             T _y_right_limit;
             bool _output_node_count;
-            
-            T _x_lower;
-            T _x_upper;
-            T _y_lower;
-            T _y_upper;
         public:
             ConvexHull(int node_count = 1, T x_left_limit = 0, T x_right_limit = 0, T y_left_limit = 0, T y_right_limit = 0) :
                 _node_count(node_count), _max_try(10), 
