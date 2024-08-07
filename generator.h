@@ -6684,6 +6684,7 @@ namespace generator{
             void set_y_right_limit(T y_right_limit) { _y_right_limit = y_right_limit; }
             void set_x_limit(T x_left_limit, T x_right_limit) { _x_left_limit = x_left_limit; _x_right_limit = x_right_limit; }
             void set_y_limit(T y_left_limit, T y_right_limit) { _y_left_limit = y_left_limit; _y_right_limit = y_right_limit; }
+            void set_xy_limit(T left, T right) { set_x_limit(left, right); set_y_limit(left, right); }
             void set_output_node_count(bool output_node_count) { _output_node_count = output_node_count; }
             
             template<typename E = T>
