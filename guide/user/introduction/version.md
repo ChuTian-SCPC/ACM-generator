@@ -1,4 +1,10 @@
 [返回目录](../../home.md)
+
+### development
+
+- 新增功能：
+  - 用`rand_bool`取代`rnd.next(2)`和`rnd.next(0,1)`。
+
 ### version 0.8.0
 
 2024-8-7

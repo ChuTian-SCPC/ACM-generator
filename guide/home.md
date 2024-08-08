@@ -4,6 +4,7 @@
   - [快速入门](./user/introduction/quick_start.md)
   - [版本更迭](./user/introduction/version.md)
 - 随机函数
+  - [随机布尔值(rand_bool)](./user/rand/rand_bool.md)
   - [随机整数(rand_int)](./user/rand/rand_int.md)
   - [随机奇数(rand_odd)](./user/rand/rand_odd.md)
   - [随机偶数(rand_even)](./user/rand/rand_even.md)
