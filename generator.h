@@ -1250,6 +1250,10 @@ namespace generator{
 
     namespace rand{
         
+        bool rand_bool() {
+            return rnd.next(2);
+        }
+
         const long long __LONG_LONG_MIN = std::numeric_limits<long long>::min();
         const unsigned long long __UNSIGNED_LONG_LONG_MAX = std::numeric_limits<unsigned long long>::max();
         const unsigned long long __UNSIGNED_LONG_LONG_MIN = std::numeric_limits<unsigned long long>::min();
@@ -1303,7 +1307,7 @@ namespace generator{
             }
             if (from == __UNSIGNED_LONG_LONG_MIN && to == __UNSIGNED_LONG_LONG_MAX) {
                 unsigned long long result = __rand_int_impl<unsigned long long>(from, to / 2);
-                int x = rnd.next(0, 1);
+                int x = rand_bool();
                 return x ? result * 2ULL + 1 : result * 2ULL;
             }
             return __rand_int_impl<unsigned long long>(to - from + 1ULL) + from;
@@ -1662,8 +1666,7 @@ namespace generator{
         // return a real number in range (-1.0,1.0)
         double rand_abs(){
             double x = rnd.next();
-            int op = rnd.next(0,1);
-            return op?x:-x;
+            return rand_bool() ? x : -x;
         }
 
         // return a real number in range (-n,n)
@@ -1671,8 +1674,7 @@ namespace generator{
         typename std::enable_if<std::is_floating_point<T>::value, T>::type
         rand_abs(T from) {
             double x = rand_real(from);
-            int op = rnd.next(0,1);
-            return op?x:-x;
+            return rand_bool() ? x : -x;
         }
 
         // return a integer number in range [-n,n]
@@ -1680,8 +1682,7 @@ namespace generator{
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_abs(T from) {
             T x = rand_int(from);
-            int op = rnd.next(0,1);
-            return op?x:-x;
+            return rand_bool() ? x : -x;
         }
 
         // return a integer number in range [-to,-from]U[from,to]
@@ -1689,8 +1690,7 @@ namespace generator{
         typename std::enable_if<std::is_integral<T>() && std::is_integral<U>(), long long>::type
         rand_abs(T from, U to) {
             long long x = rand_int(from, to);
-            int op = rnd.next(0,1);
-            return op?x:-x;
+            return rand_bool() ? x : -x;
         }
 
         // return a real number in range (-to,-from]U[from,to)
@@ -1703,8 +1703,7 @@ namespace generator{
         , double>::type
         rand_abs(T from, U to) {
             double x = rand_real(from,to);
-            int op = rnd.next(0,1);
-            return op?x:-x;
+            return rand_bool() ? x : -x;
         }
 
         // return a real number satisfied the given range and it's opposite
@@ -1712,8 +1711,7 @@ namespace generator{
             FMT_TO_RESULT(format, format, _format);
             std::pair<double,double> range = __format_to_double_range(_format);
             double x = rnd.next(range.first,range.second);
-            int op = rnd.next(0,1);
-            return op?x:-x;
+            return rand_bool() ? x : -x;
         }
 
         enum CharType{
@@ -2128,7 +2126,7 @@ namespace generator{
             int limit = len / 2;
             while(limit) {
                 if (st.empty()) __rand_bracket_open(res, open, st, limit);
-                else if(rnd.next(0, 1)) __rand_bracket_open(res, open, st, limit);
+                else if(rand_bool()) __rand_bracket_open(res, open, st, limit);
                 else __rand_bracket_close(res, close, st);
             };
             while(!st.empty())  __rand_bracket_close(res, close, st);
@@ -2679,7 +2677,7 @@ namespace generator{
                     int edge_cnt = 0;
                     std::vector<_Edge<EdgeType>> output_edges = __get_output_edges();
                     for (_Edge<EdgeType> e: output_edges) {
-                        if (_swap_node && rnd.next(2)) {
+                        if (_swap_node && rand::rand_bool()) {
                             e.set_output_default(true);
                         }
                         os << e;
@@ -3587,7 +3585,7 @@ namespace generator{
                     }
                     int edge_cnt = 0;
                     for (_Edge<EdgeType> e: __get_output_edges()) {
-                        if (_swap_node && rnd.next(2)) {
+                        if (_swap_node && rand::rand_bool()) {
                             e.set_output_default(true);
                         }
                         os << e;
@@ -6808,7 +6806,7 @@ namespace generator{
                 T upper = min;
                 for (int i = 1; i < _node_count - 1; i++) {
                     T val = pool[i];
-                    if (rnd.next(2)) {
+                    if (rand::rand_bool()) {
                         vec.emplace_back(val - lower);
                         lower = val;
                     }
@@ -6856,7 +6854,7 @@ namespace generator{
                     if (pos_x == -1 && pos_y == -1) return false;
                     else if (pos_x == -1) std::swap(y_vec[i], y_vec[pos_y]);
                     else if (pos_y == -1) std::swap(x_vec[i], x_vec[pos_x]);
-                    else rnd.next(2) ? std::swap(x_vec[i], x_vec[pos_x]) : std::swap(y_vec[i], y_vec[pos_y]);
+                    else rand::rand_bool() ? std::swap(x_vec[i], x_vec[pos_x]) : std::swap(y_vec[i], y_vec[pos_y]);
                 }
                 Point<T> o;
                 std::vector<Point<T>> vec;
