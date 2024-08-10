@@ -39,7 +39,7 @@ bool output_node_count;      //是否输出结点数，默认是true
 bool output_edge_count;      //是否输出边数，默认是true
 ```
 
-结点的起始编号是指第一个结点的编号。比如一棵大小为 $node\textunderscore count$ 的树， 结点编号是从   $begin\textunderscore node$   到     $begin\textunderscore node + node\textunderscore count - 1$   。默认值都是 $1$ 。
+结点的起始编号是指第一个结点的编号。比如一个大小为 `node_count` 的图， 结点编号是从 `begin_node` 到 ` begin_node + node_count-1`   。默认值都是 $1$ 。
 
 注意对于有向图，`connect`指的是弱连通。
 
