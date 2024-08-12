@@ -1262,6 +1262,65 @@ namespace generator{
         const unsigned long long __CHECK_UNSIGNED_LONG_MAX = (unsigned long long)std::numeric_limits<unsigned long>::max();
         
         template<typename T>
+        T __string_to_value(const std::string& s) {
+            io::__fail_msg(io::_err, "Unsupported type.");
+        }
+        
+        template<>
+        float __string_to_value(const std::string& s) {
+            return std::stof(s);
+        }
+        
+        template<>
+        double __string_to_value(const std::string& s) {
+            return std::stod(s);
+        }
+        
+        bool __is_real_format(const std::string& s) {
+            return s.find_first_of("eE.");
+        }
+        
+        template<>
+        int __string_to_value(const std::string& s) {
+            if (__is_real_format(s)) 
+                return (int)__string_to_value<double>(s);
+            return std::stoi(s);
+        }
+        
+        template<>
+        long __string_to_value(const std::string& s) {
+            if (__is_real_format(s)) 
+                return (long)__string_to_value<double>(s);
+            return std::stol(s);
+        }
+        
+        template<>
+        unsigned long __string_to_value(const std::string& s) {
+            if (__is_real_format(s)) 
+                return (unsigned long)__string_to_value<double>(s);
+            return std::stoul(s);
+        }
+        
+        template<>
+        long long __string_to_value(const std::string& s) {
+            if (__is_real_format(s)) 
+                return (long long)__string_to_value<double>(s);
+            return std::stoll(s);
+        }
+        
+        template<>
+        unsigned long long __string_to_value(const std::string& s) {
+            if (__is_real_format(s)) 
+                return (unsigned long long)__string_to_value<double>(s);
+            return std::stoll(s);
+        }
+        
+        template<>
+        unsigned int __string_to_value(const std::string& s) {
+            return (unsigned int)__string_to_value<long long>(s);
+        }
+        
+        template<typename T>
         T __rand_int_impl(T x) {
             return rnd.next(x);
         }
@@ -1336,45 +1395,24 @@ namespace generator{
             else return (unsigned long)__rand_int_impl<unsigned int>(from, to);
         }
         
+        std::string __sub_value_string(std::string&s, size_t from, size_t to) {
+            return s.substr(from + 1, to - from - 1);
+        }
         
-        std::pair<long long,long long> __format_to_int_range(std::string s){
+        template <typename T = long long>
+        typename std::enable_if<std::is_integral<T>::value, std::pair<T, T>>::type
+        __format_to_int_range(std::string& s) {
             size_t open = s.find_first_of("[(");
             size_t close = s.find_first_of(")]");
             size_t comma = s.find(',');
-            auto string_to_int = [&](size_t from, size_t to) -> long long{
-                std::string str = s.substr(from + 1, to - from - 1);
-                try {
-                    long long value;
-                    size_t is_real_format = str.find_first_of("eE.");
-                    if (is_real_format != std::string::npos) {
-                        double value_d = std::stod(str);
-                        value = (long long)value_d;
-                    }
-                    else {
-                        value = std::stoll(str); 
-                    } 
-                    return value;
-                }
-                catch (const std::invalid_argument &e) {
-                    io::__fail_msg(io::_err,"%s is an invalid argument.", str.c_str());
-                }
-                catch (const std::out_of_range &e) {
-                    io::__fail_msg(io::_err,"%s is out of range.", str.c_str());
-                }
-                return 0LL;
-            };
             if(open == std::string::npos || close == std::string::npos || comma == std::string::npos){
                 io::__fail_msg(io::_err,"%s is an invalid range.",s.c_str());
             }
-            long long left = string_to_int(open, comma);
-            long long right = string_to_int(comma, close);
-            if(s[open] == '('){
-                left ++;
-            }
-            if(s[close] == ')'){
-                right --;
-            }
-            return std::make_pair(left,right);
+            T left = __string_to_value<T>(__sub_value_string(s, open, comma));
+            T right = __string_to_value<T>(__sub_value_string(s, comma, close));
+            if (s[open] == '(') left++;
+            if (s[close] == ')') right--;
+            return std::make_pair(left, right);
         }
 
         // equal to rnd.next(n),a int in [0,n-1]
@@ -1404,10 +1442,12 @@ namespace generator{
         }
 
         // rand a integer number satisfied the given range
-        long long rand_int(const char* format,...) {
+        template <typename T = long long>
+        typename std::enable_if<std::is_integral<T>::value, T>::type
+        rand_int(const char* format,...) {
             FMT_TO_RESULT(format, format, _format);
-            std::pair<long long,long long> range = __format_to_int_range(_format);
-            long long x = __rand_int_impl<long long>(range.first,range.second);
+            std::pair<T, T> range = __format_to_int_range<T>(_format);
+            T x = __rand_int_impl<T>(range.first,range.second);
             return x;
         }
         
@@ -1564,7 +1604,7 @@ namespace generator{
         // equal to rnd.next(form,to),a real number in [from,to)
         template <typename T = double>
         typename std::enable_if<is_double_valid<T>(), double>::type
-        rand_real(T from,T to) {
+        rand_real(T from, T to) {
             double _from = __change_to_double(from);
             double _to = __change_to_double(to);
             double x = rnd.next(_from, _to);
@@ -1574,98 +1614,106 @@ namespace generator{
         // equal to rnd.next(form,to),a real number in [from,to)
         template <typename T = double,typename U = double>
         typename std::enable_if<is_double_valid<T>() && is_double_valid<U>(), double>::type
-        rand_real(T from,U to) {
+        rand_real(T from, U to) {
             double _from = __change_to_double(from);
             double _to = __change_to_double(to);
             double x = rnd.next(_from, _to);
             return x;
         }
-
-
-
-        std::pair<double,double> __format_to_double_range(std::string s){
+            
+        int __number_accuarcy(const std::string& s) {
+            int digit = 1;
+            bool is_decimal_part = false;
+            bool is_scientific_part = false;
+            std::string scientific_part = "";
+            for(auto c : s) {
+                if(is_decimal_part == true){
+                    if(c >= '0' && c <= '9') digit ++;
+                    else is_decimal_part = false;
+                }
+                if(is_scientific_part == true) scientific_part += c;
+                if(c == '.') is_decimal_part = true;
+                if(c == 'e' || c == 'E') is_scientific_part = true;
+            }
+            if(scientific_part != ""){
+                int scientific_length = std::stoi(scientific_part);
+                digit -= scientific_length;
+            }
+            return digit;
+        }
+        
+        template <typename T = double>
+        typename std::enable_if<std::is_floating_point<T>::value, std::pair<T, T>>::type
+        __format_to_double_range(std::string s) {
             int accuarcy = 1;
             size_t open = s.find_first_of("[(");
             size_t close = s.find_first_of(")]");
             size_t comma = s.find(',');
-            auto string_to_double = [&](size_t from, size_t to) -> double{
-                std::string str = s.substr(from + 1, to - from - 1);
-                try {
-                    double value = std::stod(str);
-                    if(std::isnan(value)){
-                        io::__fail_msg(io::_err,"Exist a nan number.");
-                    }
-                    if(std::isinf(value)){
-                        io::__fail_msg(io::_err,"Exist an inf number.");
-                    }
-                    int digit = 1;
-                    bool is_decimal_part = false;
-                    bool is_scientific_part = false;
-                    std::string scientific_part = "";
-                    for(auto c:str){
-                        if(is_decimal_part == true){
-                            if(c >= '0' && c <= '9'){
-                                digit ++;
-                            }
-                            else{
-                                is_decimal_part = false;
-                            }
-                        }
-                        if(is_scientific_part == true){
-                            scientific_part += c;
-                        }
-                        if(c == '.'){
-                            is_decimal_part = true;
-                        }
-                        if(c == 'e' || c == 'E'){
-                            is_scientific_part = true;
-                        }
-                    }
-                    if(scientific_part != ""){
-                        int scientific_length = std::stoi(scientific_part);
-                        digit -= scientific_length;
-                    }
-                    accuarcy = std::max(accuarcy, digit);
-                    return value;
-                }
-                catch (const std::invalid_argument &e) {
-                    io::__fail_msg(io::_err,"%s is an invalid argument.", str.c_str());
-                }
-                catch (const std::out_of_range &e) {
-                    io::__fail_msg(io::_err,"%s is out of range.", str.c_str());
-                }
-                return 0.0;
-            };
             if(open == std::string::npos || close == std::string::npos || comma == std::string::npos){
                 io::__fail_msg(io::_err,"%s is an invalid range.",s.c_str());
             }
-            double left = string_to_double(open, comma);
-            double right = string_to_double(comma, close);
-            double eps = 1.0;
-            for(int i = 1;i <= accuarcy;i++){
-                eps /= 10.0;
-            }
-            if(s[open] == '('){
-                left += eps;
-            }
-            if(s[close] == ']'){
-                right += eps;
-            }
+            std::string left_str = __sub_value_string(s, open, comma);
+            std::string right_str = __sub_value_string(s, comma, close);
+            T left = __string_to_value<T>(left_str);
+            T right = __string_to_value<T>(right_str);
+            accuarcy = std::max(accuarcy, std::max(__number_accuarcy(left_str), __number_accuarcy(right_str)));
+            double eps = std::pow(10.0, -accuarcy);
+            if(s[open] == '(') left += eps;
+            if(s[close] == ']') right += eps;
             return std::make_pair(left,right);
         }
+        
         // return a real number satisfied the given range
         // can use format like [from,to],(from,to),[from,to),(from,to]
         // the accuracy is equal to the max digits of from/to
-        double rand_real(const char* format,...) {
+        template <typename T = double>
+        typename std::enable_if<std::is_floating_point<T>::value, T>::type
+        rand_real(const char* format,...) {
             FMT_TO_RESULT(format, format, _format);
-            std::pair<double,double> range = __format_to_double_range(_format);
-            double x = rnd.next(range.first,range.second);
+            std::pair<T, T> range = __format_to_double_range(_format);
+            T x = rnd.next(range.first, range.second);
             return x;
+        }
+
+        template<typename T>
+        typename std::enable_if<std::is_integral<T>::value, std::pair<T, T>>::type
+        __format_to_range(std::string s) {
+            return __format_to_int_range<T>(s);
+        }
+        
+        template<typename T>
+        typename std::enable_if<std::is_floating_point<T>::value, std::pair<T, T>>::type
+        __format_to_range(std::string s) {
+            return __format_to_double_range<T>(s);
+        }
+
+        template<typename T>
+        typename std::enable_if<std::is_integral<T>::value, T>::type
+        __rand_range(std::string s) {
+            return rand_int<T>(s.c_str());
+        }
+        
+        template<typename T>
+        typename std::enable_if<std::is_floating_point<T>::value, T>::type
+        __rand_range(std::string s) {
+            return rand_real<T>(s.c_str());
+        }
+        
+        template<typename T>
+        typename std::enable_if<std::is_integral<T>::value, T>::type
+        __rand_range(T from, T to) {
+            return rand_int<T>(from, to);
+        }
+        
+        template<typename T>
+        typename std::enable_if<std::is_floating_point<T>::value, T>::type
+        __rand_range(T from, T to) {
+            return rand_real<T>(from, to);
         }
 
         // return a real number in range (-1.0,1.0)
         double rand_abs(){
-            double x = rnd.next();
+            double x = rand_real();
             return rand_bool() ? x : -x;
         }
 
@@ -1677,11 +1725,20 @@ namespace generator{
             return rand_bool() ? x : -x;
         }
 
-        // return a integer number in range [-n,n]
+        // return a integer number in range (-n,n)
         template <typename T>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_abs(T from) {
             T x = rand_int(from);
+            return rand_bool() ? x : -x;
+        }
+        
+        // return a integer number in range [-to,-from]U[from,to]
+        // return a real number in range (-to,-from]U[from,to)
+        template <typename T>
+        typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
+        rand_abs(T from, T to) {
+            long long x = __rand_range<T>(from, to);
             return rand_bool() ? x : -x;
         }
 
@@ -1705,14 +1762,15 @@ namespace generator{
             double x = rand_real(from,to);
             return rand_bool() ? x : -x;
         }
-
+        
         // return a real number satisfied the given range and it's opposite
-        double rand_abs(const char* format,...) {
+        template <typename T = double>
+        typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
+        rand_abs(const char* format,...) {
             FMT_TO_RESULT(format, format, _format);
-            std::pair<double,double> range = __format_to_double_range(_format);
-            double x = rnd.next(range.first,range.second);
+            T x = __rand_range<T>(_format);
             return rand_bool() ? x : -x;
-        }
+        } 
 
         enum CharType{
             LowerLetter,
@@ -6437,12 +6495,8 @@ namespace generator{
             if (x_range.empty() && y_range.empty()) {
                 io::__fail_msg(io::_err, "%s is not a vaild range.", format.c_str());
             }
-            if (x_range.empty()) {
-                x_range = y_range;
-            }
-            if (y_range.empty()) {
-                y_range = x_range;
-            }
+            if (x_range.empty()) x_range = y_range;
+            if (y_range.empty()) y_range = x_range;
             return std::make_pair(x_range, y_range);
         }
         
@@ -6493,6 +6547,8 @@ namespace generator{
         template<typename T>
         using __ResultTypeT = typename __ResultType<T>::type;
         
+        template <typename T> class __2Points;
+        
         template<typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
         class Point {
         protected:
@@ -6501,14 +6557,15 @@ namespace generator{
         public:
             Point():_x(0),_y(0) { _output_function = default_function(); };
             Point(T x,T y):_x(x),_y(y) { _output_function = default_function(); };
+            Point(const __2Points<T>& p) { *this = p.end() - p.start(); };
             ~Point() = default;
-            Point operator+(Point b){ return Point(_x + b._x, _y + b._y); }
+            Point operator+(const Point& b){ return Point(_x + b._x, _y + b._y); }
             Point& operator+=(const Point& b) {
                 _x += b._x;
                 _y += b._y;
                 return *this;
             }
-            Point operator-(Point b){ return Point(_x - b._x, _y - b._y); }
+            Point operator-(const Point& b){ return Point(_x - b._x, _y - b._y); }
             Point& operator-=(const Point& b) {
                 _x -= b._x;
                 _y -= b._y;
@@ -6534,36 +6591,21 @@ namespace generator{
                 os << _x << " " << _y;
             }
             
-            template <typename E = T>
-            typename std::enable_if<std::is_floating_point<E>::value, void>::type
-            rand(E x_left, E x_right, E y_left, E y_right) {
-                _x = rand::rand_real(x_left, x_right);
-                _y = rand::rand_real(y_left, y_right);
+            void rand(T x_left, T x_right, T y_left, T y_right) {
+                _x = rand::__rand_range<T>(x_left, x_right);
+                _y = rand::__rand_range<T>(y_left, y_right);
             }
             
-            template <typename E = T>
-            typename std::enable_if<is_signed_integral<E>::value, void>::type
-            rand(E x_left, E x_right, E y_left, E y_right) {
-                _x = rand::rand_int(x_left, x_right);
-                _y = rand::rand_int(y_left, y_right);
+            void rand(T left, T right) {
+                _x = rand::__rand_range<T>(left, right);
+                _y = rand::__rand_range<T>(left, right);
             }
             
-            template <typename E = T>
-            typename std::enable_if<std::is_floating_point<E>::value, void>::type
-            rand(const char* format,...) {
+            void rand(const char* format,...) {
                 FMT_TO_RESULT(format, format, _format);
                 auto xy_range = __format_xy_range(_format);
-                _x = static_cast<T>(rand::rand_real(xy_range.first.c_str()));
-                _y = static_cast<T>(rand::rand_real(xy_range.second.c_str()));
-            }
-            
-            template <typename E = T>
-            typename std::enable_if<is_signed_integral<E>::value, void>::type
-            rand(const char* format,...) {
-                FMT_TO_RESULT(format, format, _format);
-                auto xy_range = __format_xy_range(_format);
-                _x = static_cast<T>(rand::rand_int(xy_range.first.c_str()));
-                _y = static_cast<T>(rand::rand_int(xy_range.second.c_str()));
+                _x = rand::__rand_range<T>(xy_range.first);
+                _y = rand::__rand_range<T>(xy_range.second);
             }
             
             __ResultTypeT<T> operator^(const Point& b) const{ 
@@ -6588,6 +6630,22 @@ namespace generator{
         };
         
         template <typename T>
+        using Vec2 = Point<T>;
+        
+        template <typename T>
+        class __2Points {
+        public:
+            __2Points(const Point<T>& start, const Point<T>& end) : _start(start), _end(end) {}
+            
+            Point<T> start() const { return _start; }
+            Point<T> end() const { return _end; }
+            Point<T>& start_ref() { return _start; }
+            Point<T>& end_ref() { return _end; }
+        protected:
+            Point<T> _start, _end;  
+        };
+        
+        template <typename T>
         typename std::enable_if<is_point_type<T>::value, Point<T>>::type
         rand_point(T x_left, T x_right, T y_left, T y_right) {
             Point<T> point;
@@ -6598,7 +6656,9 @@ namespace generator{
         template <typename T>
         typename std::enable_if<is_point_type<T>::value, Point<T>>::type
         rand_point(T left, T right) {
-            return rand_point<T>(left, right, left, right);
+            Point<T> point;
+            point.rand(left, right);
+            return point;
         }
         
         template <typename T>
@@ -6617,15 +6677,18 @@ namespace generator{
         }
         
         template <typename T>
+        using _Points = std::vector<Point<T>>;
+        
+        template <typename T>
         typename std::enable_if<is_point_type<T>::value, void>::type        
-        __polar_angle_sort(std::vector<Point<T>>& points, Point<T> c = Point<T>()) {
+        __polar_angle_sort(_Points<T>& points, Point<T> o = Point<T>()) {
             std::sort(points.begin(), points.end(), [&](Point<T> a, Point<T> b) {
-                Point<T> ac = a - c;
-                Point<T> bc = b - c;
-                int quadrant_a = __quadrant(ac);
-                int quadrant_b = __quadrant(bc);
+                Point<T> oa = a - o;
+                Point<T> ob = b - o;
+                int quadrant_a = __quadrant(oa);
+                int quadrant_b = __quadrant(ob);
                 if (quadrant_a == quadrant_b) {
-                    __ResultTypeT<T> cross = ac ^ bc;
+                    __ResultTypeT<T> cross = oa ^ ob;
                     if (cross == 0) return a.x() < b.x();
                     return cross > 0;
                 }
@@ -6641,7 +6704,7 @@ namespace generator{
             _OUTPUT_FUNCTION(_Self)
         protected:
             int _node_count;
-            std::vector<Point<T>> _points;
+            _Points<T> _points;
             int _max_try;
             T _x_left_limit;
             T _x_right_limit;
@@ -6659,7 +6722,7 @@ namespace generator{
             }
             
             int node_count() const { return _node_count; }
-            std::vector<Point<T>> points() const { return _points; }
+            _Points<T> points() const { return _points; }
             int max_try() const { return _max_try; }
             T x_left_limit() const { return _x_left_limit; }
             T x_right_limit() const { return _x_right_limit; }
@@ -6667,7 +6730,7 @@ namespace generator{
             T y_right_limit() const { return _y_right_limit; }
             
             int& node_count_ref() { return _node_count; }
-            std::vector<Point<T>>& points_ref() { return _points; }
+            _Points<T>& points_ref() { return _points; }
             int& max_try_ref() { return _max_try; }
             T& x_left_limit_ref() { return _x_left_limit; }
             T& x_right_limit_ref() { return _x_right_limit; }
@@ -6684,36 +6747,17 @@ namespace generator{
             void set_y_limit(T y_left_limit, T y_right_limit) { _y_left_limit = y_left_limit; _y_right_limit = y_right_limit; }
             void set_xy_limit(T left, T right) { set_x_limit(left, right); set_y_limit(left, right); }
             void set_output_node_count(bool output_node_count) { _output_node_count = output_node_count; }
+
+            void set_x_limit(const char* format, ...) {
+                FMT_TO_RESULT(format, format, _format);
+                auto range = rand::__format_to_range<T>(_format);
+                _x_left_limit = range.first;
+                _x_right_limit = range.second;
+            }
             
-            template<typename E = T>
-            typename std::enable_if<is_signed_integral<E>::value, void>::type
-            set_x_limit(const char* format, ...) {
+            void set_y_limit(const char* format, ...) {
                 FMT_TO_RESULT(format, format, _format);
-                auto range = rand::__format_to_int_range(_format);
-                _x_left_limit = range.first;
-                _x_right_limit = range.second;
-            }
-            template<typename E = T>
-            typename std::enable_if<std::is_floating_point<E>::value, void>::type
-            set_x_limit(const char* format, ...) {
-                FMT_TO_RESULT(format, format, _format);
-                auto range = rand::__format_to_double_range(_format);
-                _x_left_limit = range.first;
-                _x_right_limit = range.second;
-            }
-            template<typename E = T>
-            typename std::enable_if<is_signed_integral<E>::value, void>::type
-            set_y_limit(const char* format, ...) {
-                FMT_TO_RESULT(format, format, _format);
-                auto range = rand::__format_to_int_range(_format);
-                _y_left_limit = range.first;
-                _y_right_limit = range.second;
-            }
-            template<typename E = T>
-            typename std::enable_if<std::is_floating_point<E>::value, void>::type
-            set_y_limit(const char* format, ...) {
-                FMT_TO_RESULT(format, format, _format);
-                auto range = rand::__format_to_double_range(_format);
+                auto range = rand::__format_to_range<T>(_format);
                 _y_left_limit = range.first;
                 _y_right_limit = range.second;
             }
@@ -6783,20 +6827,9 @@ namespace generator{
                         std::to_string(_y_left_limit).c_str(), std::to_string(_y_right_limit).c_str());
                 }
             }
-            
-            template<typename E = T>
-            typename std::enable_if<is_signed_integral<E>::value, E>::type
-            __rand_x() { return rand::rand_int(_x_left_limit, _x_right_limit); }
-            template<typename E = T>
-            typename std::enable_if<std::is_floating_point<E>::value, E>::type
-            __rand_x() { return rand::rand_real(_x_left_limit, _x_right_limit); }
-            
-            template<typename E = T>
-            typename std::enable_if<is_signed_integral<E>::value, E>::type
-            __rand_y() { return rand::rand_int(_y_left_limit, _y_right_limit); }
-            template<typename E = T>
-            typename std::enable_if<std::is_floating_point<E>::value, E>::type
-            __rand_y() { return rand::rand_real(_y_left_limit, _y_right_limit); }
+        
+            T __rand_x() { return rand::__rand_range<T>(_x_left_limit, _x_right_limit); }
+            T __rand_y() { return rand::__rand_range<T>(_y_left_limit, _y_right_limit); }
             
             void __rand_pool_to_vector(std::vector<T>& pool, std::vector<T>& vec) {
                 std::sort(pool.begin(), pool.end());
@@ -6857,7 +6890,7 @@ namespace generator{
                     else rand::rand_bool() ? std::swap(x_vec[i], x_vec[pos_x]) : std::swap(y_vec[i], y_vec[pos_y]);
                 }
                 Point<T> o;
-                std::vector<Point<T>> vec;
+                _Points<T> vec;
                 for (int i = 0; i < _node_count; i++) vec.emplace_back(x_vec[i], y_vec[i]);
                 __polar_angle_sort(vec);
                 T min_x = std::numeric_limits<T>::max();
