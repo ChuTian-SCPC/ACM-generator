@@ -2,6 +2,8 @@
 
 ### development
 
+- 重构：
+  - 让`rand_int`,`rand_real`和`rand_abs`用`format`的函数支持泛型。
 - 新增功能：
   - 用`rand_bool`取代`rnd.next(2)`和`rnd.next(0,1)`。
 
