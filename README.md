@@ -29,6 +29,12 @@ Generator可以方便的在本地进行对拍，内置testlib中常见的checker
 
 MIT协议
 
+## 提问&贡献
+
+如果您在使用中遇到bug，发现问题以及有需要加入的功能需求，可以提出Issue或者Discussion。
+
+您也可以对仓库fork后修正其中的问题或实现需求，提交Pull request。
+
 ## 功能实现
 
 - [x] 基础数据生成函数
