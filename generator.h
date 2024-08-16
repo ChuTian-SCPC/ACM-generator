@@ -6838,11 +6838,11 @@ namespace generator{
             
             void __check_limit() {
                 if (_x_left_limit > _x_right_limit) {
-                    io::__fail_msg(io::_err, "range [%s, %s] for x-coordinate is invaild.", 
+                    io::__fail_msg(io::_err, "range [%s, %s] for x-coordinate is invalid.", 
                         std::to_string(_x_left_limit).c_str(), std::to_string(_x_right_limit).c_str());
                 }
                 if (_y_left_limit > _y_right_limit) {
-                    io::__fail_msg(io::_err, "range [%s, %s] for y-coordinate is invaild.", 
+                    io::__fail_msg(io::_err, "range [%s, %s] for y-coordinate is invalid.", 
                         std::to_string(_y_left_limit).c_str(), std::to_string(_y_right_limit).c_str());
                 }
             }
