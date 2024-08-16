@@ -1263,7 +1263,7 @@ namespace generator{
         
         template<typename T>
         T __string_to_value(const std::string& s) {
-            io::__fail_msg(io::_err, "Unsupported type.");
+            io::__error_msg(io::_err, "Unsupported type.");
         }
         
         template<>
@@ -1312,7 +1312,7 @@ namespace generator{
         unsigned long long __string_to_value(const std::string& s) {
             if (__is_real_format(s)) 
                 return (unsigned long long)__string_to_value<double>(s);
-            return std::stoll(s);
+            return std::stoull(s);
         }
         
         template<>
@@ -6536,7 +6536,7 @@ namespace generator{
         };
         
         template<typename T>
-        struct __ResultType {
+        struct _ResultType {
             using type = typename std::conditional<
                 is_signed_integral<T>::value,   
                 MaxIntType,
@@ -6545,9 +6545,9 @@ namespace generator{
         };
         
         template<typename T>
-        using __ResultTypeT = typename __ResultType<T>::type;
+        using _ResultTypeT = typename _ResultType<T>::type;
         
-        template <typename T> class __2Points;
+        template <typename T> class _2Points;
         
         template<typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
         class Point {
@@ -6557,7 +6557,7 @@ namespace generator{
         public:
             Point():_x(0),_y(0) { _output_function = default_function(); };
             Point(T x,T y):_x(x),_y(y) { _output_function = default_function(); };
-            Point(const __2Points<T>& p) { *this = p.end() - p.start(); };
+            Point(const _2Points<T>& p) { *this = p.end() - p.start(); };
             ~Point() = default;
             Point operator+(const Point& b){ return Point(_x + b._x, _y + b._y); }
             Point& operator+=(const Point& b) {
@@ -6608,19 +6608,19 @@ namespace generator{
                 _y = rand::__rand_range<T>(xy_range.second);
             }
             
-            __ResultTypeT<T> operator^(const Point& b) const{ 
-                __ResultTypeT<T> x1 = this->x();
-                __ResultTypeT<T> y1 = this->y();
-                __ResultTypeT<T> x2 = b.x();
-                __ResultTypeT<T> y2 = b.y();
+            _ResultTypeT<T> operator^(const Point& b) const{ 
+                _ResultTypeT<T> x1 = this->x();
+                _ResultTypeT<T> y1 = this->y();
+                _ResultTypeT<T> x2 = b.x();
+                _ResultTypeT<T> y2 = b.y();
                 return x1 * y2 - y1 * x2;
             }
             
-            __ResultTypeT<T> operator*(const Point& b) const{ 
-                __ResultTypeT<T> x1 = this->x();
-                __ResultTypeT<T> y1 = this->y();
-                __ResultTypeT<T> x2 = b.x();
-                __ResultTypeT<T> y2 = b.y();
+            _ResultTypeT<T> operator*(const Point& b) const{ 
+                _ResultTypeT<T> x1 = this->x();
+                _ResultTypeT<T> y1 = this->y();
+                _ResultTypeT<T> x2 = b.x();
+                _ResultTypeT<T> y2 = b.y();
                 return x1 * x2 + y1 * y2;
             }
             
@@ -6633,16 +6633,35 @@ namespace generator{
         using Vec2 = Point<T>;
         
         template <typename T>
-        class __2Points {
+        class _2Points {
         public:
-            __2Points(const Point<T>& start, const Point<T>& end) : _start(start), _end(end) {}
+            _2Points() : _start(Point<T>()), _end(Point<T>()) {}
+            _2Points(Point<T> start, Point<T> end) : _start(start), _end(end) {}
             
             Point<T> start() const { return _start; }
             Point<T> end() const { return _end; }
             Point<T>& start_ref() { return _start; }
             Point<T>& end_ref() { return _end; }
+            
+            Point<T> to_vector() { return _end - _start; }
         protected:
             Point<T> _start, _end;  
+        };
+        
+        template <typename T>
+        class Line : public _2Points<T> {
+        public:
+            Line() : _2Points<T>() {}
+            Line(Point<T> start, Point<T> end) : _2Points<T>(start, end) {}
+              
+        };
+        
+        template <typename T>
+        class Segment : public _2Points<T> {
+        public:
+            Segment() : _2Points<T>() {}
+            Segment(Point<T> start, Point<T> end) : _2Points<T>(start, end) {}
+              
         };
         
         template <typename T>
@@ -6688,7 +6707,7 @@ namespace generator{
                 int quadrant_a = __quadrant(oa);
                 int quadrant_b = __quadrant(ob);
                 if (quadrant_a == quadrant_b) {
-                    __ResultTypeT<T> cross = oa ^ ob;
+                    _ResultTypeT<T> cross = oa ^ ob;
                     if (cross == 0) return a.x() < b.x();
                     return cross > 0;
                 }
@@ -6819,11 +6838,11 @@ namespace generator{
             
             void __check_limit() {
                 if (_x_left_limit > _x_right_limit) {
-                    io::__fail_msg(io::_err, "range [%s, %s] for x-coordinate is vaild.", 
+                    io::__fail_msg(io::_err, "range [%s, %s] for x-coordinate is invaild.", 
                         std::to_string(_x_left_limit).c_str(), std::to_string(_x_right_limit).c_str());
                 }
                 if (_y_left_limit > _y_right_limit) {
-                    io::__fail_msg(io::_err, "range [%s, %s] for y-coordinate is vaild.", 
+                    io::__fail_msg(io::_err, "range [%s, %s] for y-coordinate is invaild.", 
                         std::to_string(_y_left_limit).c_str(), std::to_string(_y_right_limit).c_str());
                 }
             }
@@ -6859,7 +6878,7 @@ namespace generator{
                 return -1;
             }
             
-            bool __zero_count_over(std::vector<T>& x, std::vector<T>& y) {
+            bool __zero_count_overflow(std::vector<T>& x, std::vector<T>& y) {
                 int count = 0;
                 for (auto p : x) count += (p == 0);
                 for (auto p : y) count += (p == 0);
@@ -6877,7 +6896,7 @@ namespace generator{
                 std::vector<T> y_vec;
                 __rand_pool_to_vector(x_pool, x_vec);
                 __rand_pool_to_vector(y_pool, y_vec);
-                if (__zero_count_over(x_vec, y_vec)) return false;
+                if (__zero_count_overflow(x_vec, y_vec)) return false;
                 shuffle(x_vec.begin(), x_vec.end());
                 shuffle(y_vec.begin(), y_vec.end());
                 for (int i = 0; i < _node_count; i++) {
