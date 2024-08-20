@@ -6547,17 +6547,118 @@ namespace generator{
         template<typename T>
         using _ResultTypeT = typename _ResultType<T>::type;
         
-        template <typename T> class _2Points;
+        template <typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
+        class _RandXYRangeUnset {
+        protected:
+            T _x_left_limit;
+            T _x_right_limit;
+            T _y_left_limit;
+            T _y_right_limit;
+        public:
+            _RandXYRangeUnset(T x_left_limit = 0, T x_right_limit = 0, T y_left_limit = 0, T y_right_limit = 0) :
+                _x_left_limit(x_left_limit), _x_right_limit(x_right_limit),
+                _y_left_limit(y_left_limit), _y_right_limit(y_right_limit) {}  
+                
+        protected:
+            T __rand_x() { return rand::__rand_range<T>(_x_left_limit, _x_right_limit); }
+            T __rand_y() { return rand::__rand_range<T>(_y_left_limit, _y_right_limit); }
+            
+            void __set_x_limit(T x_left_limit, T x_right_limit) { _x_left_limit = x_left_limit; _x_right_limit = x_right_limit; }
+            void __set_y_limit(T y_left_limit, T y_right_limit) { _y_left_limit = y_left_limit; _y_right_limit = y_right_limit; }
+            void __set_xy_limit(T left, T right) { __set_x_limit(left, right); __set_y_limit(left, right); }
+            void __set_xy_limit(T x_left, T x_right, T y_left, T y_right) { __set_x_limit(x_left, x_right); __set_y_limit(y_left, y_right); }
+            void __set_x_limit(std::string format) {
+                auto range = rand::__format_to_range<T>(format);
+                __set_x_limit(range.first, range.second);
+            } 
+            void __set_y_limit(std::string format) {
+                auto range = rand::__format_to_range<T>(format);
+                __set_y_limit(range.first, range.second);
+            }
+            void __set_xy_limit(std::string format) {
+                auto range = __format_xy_range(format);
+                __set_x_limit(range.first);
+                __set_y_limit(range.second);
+            }
+            
+            void __check_range_limit() {
+                if (this->_x_left_limit > this->_x_right_limit) {
+                    io::__fail_msg(io::_err, "range [%s, %s] for x-coordinate is invalid.", 
+                        std::to_string(this->_x_left_limit).c_str(), std::to_string(this->_x_right_limit).c_str());
+                }
+                if (this->_y_left_limit > this->_y_right_limit) {
+                    io::__fail_msg(io::_err, "range [%s, %s] for y-coordinate is invalid.", 
+                        std::to_string(this->_y_left_limit).c_str(), std::to_string(this->_y_right_limit).c_str());
+                }
+            }
+        };
+        
+        template <typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
+        class _RandXYRange : public _RandXYRangeUnset<T> {
+        public:
+            _RandXYRange(T x_left_limit = 0, T x_right_limit = 0, T y_left_limit = 0, T y_right_limit = 0) :
+                _RandXYRangeUnset<T>(x_left_limit, x_right_limit, y_left_limit, y_right_limit) {}  
+            
+            T x_left_limit() const { return this->_x_left_limit; }
+            T x_right_limit() const { return this->_x_right_limit; }
+            T y_left_limit() const { return this->_y_left_limit; }
+            T y_right_limit() const { return this->_y_right_limit; }
+            
+            T& x_left_limit_ref() { return this->_x_left_limit; }
+            T& x_right_limit_ref() { return this->_x_right_limit; }
+            T& y_left_limit_ref() { return this->_y_left_limit; }
+            T& y_right_limit_ref() { return this->_y_right_limit; }
+            
+            void set_x_left_limit(T x_left_limit) { this->_x_left_limit = x_left_limit; }
+            void set_x_right_limit(T x_right_limit) { this->_x_right_limit = x_right_limit; }
+            void set_y_left_limit(T y_left_limit) { this->_y_left_limit = y_left_limit; }
+            void set_y_right_limit(T y_right_limit) { this->_y_right_limit = y_right_limit; }
+            void set_x_limit(T x_left_limit, T x_right_limit) { this->__set_x_limit(x_left_limit, x_right_limit); }
+            void set_y_limit(T y_left_limit, T y_right_limit) { this->__set_y_limit(x_left_limit, x_right_limit); }
+            void set_xy_limit(T left, T right) { this->__set_xy_limit(left, right); }
+            void set_xy_limit(T x_left, T x_right, T y_left, T y_right) { this->__set_xy_limit(x_left, x_right, y_left, y_right); }      
+            void set_x_limit(const char* format, ...) { FMT_TO_RESULT(format, format, _format); this->__set_x_limit(_format); }
+            void set_y_limit(const char* format, ...) { FMT_TO_RESULT(format, format, _format); this->__set_y_limit(_format); }
+            void set_xy_limit(const char* format, ...) { FMT_TO_RESULT(format, format, _format); this->__set_xy_limit(_format); }
+
+        };
+        
+        #define _CLASS_RAND_FUNC \
+        void rand(T x_left, T x_right, T y_left, T y_right) { \
+            this->__set_xy_limit(x_left, x_right, y_left, y_right); \
+            __rand(); \
+        } \
+        void rand(T left, T right) { \
+            this->__set_xy_limit(left, right); \
+            __rand(); \
+        } \
+        void rand(const char* format,...) { \
+            FMT_TO_RESULT(format, format, _format); \
+            this->__set_xy_limit(_format); \
+            __rand(); \
+        }
+        
+        template <typename T, typename = typename std::enable_if<is_point_type<T>::value>::type> 
+        class _2Points;
         
         template<typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
-        class Point {
+        class Point : public _RandXYRangeUnset<T> {
         protected:
             typedef Point<T> _Self;
             _OUTPUT_FUNCTION(_Self)
         public:
-            Point():_x(0),_y(0) { _output_function = default_function(); };
-            Point(T x,T y):_x(x),_y(y) { _output_function = default_function(); };
-            Point(const _2Points<T>& p) { *this = p.end() - p.start(); };
+            Point(): _RandXYRangeUnset<T>(), _x(0), _y(0) { _output_function = default_function(); };
+            Point(T x,T y): _RandXYRangeUnset<T>(), _x(x), _y(y) { _output_function = default_function(); };
+            Point(const Point<T>& other) : _RandXYRangeUnset<T>() { *this = other; }
+            Point(const _2Points<T>& p) : _RandXYRangeUnset<T>() { *this = p.end() - p.start(); }
+            Point& operator=(const Point& other) {
+                if (this != &other) {
+                    _x = other._x;
+                    _y = other._y;
+                    _output_function = other._output_function;
+                }
+                return *this;
+            }
             ~Point() = default;
             Point operator+(const Point& b){ return Point(_x + b._x, _y + b._y); }
             Point& operator+=(const Point& b) {
@@ -6591,22 +6692,7 @@ namespace generator{
                 os << _x << " " << _y;
             }
             
-            void rand(T x_left, T x_right, T y_left, T y_right) {
-                _x = rand::__rand_range<T>(x_left, x_right);
-                _y = rand::__rand_range<T>(y_left, y_right);
-            }
-            
-            void rand(T left, T right) {
-                _x = rand::__rand_range<T>(left, right);
-                _y = rand::__rand_range<T>(left, right);
-            }
-            
-            void rand(const char* format,...) {
-                FMT_TO_RESULT(format, format, _format);
-                auto xy_range = __format_xy_range(_format);
-                _x = rand::__rand_range<T>(xy_range.first);
-                _y = rand::__rand_range<T>(xy_range.second);
-            }
+            _CLASS_RAND_FUNC
             
             _ResultTypeT<T> operator^(const Point& b) const{ 
                 _ResultTypeT<T> x1 = this->x();
@@ -6627,67 +6713,46 @@ namespace generator{
             _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
         protected:
             T _x, _y;
+            
+            void __check_limit() {
+                this->__check_range_limit();
+            }
+            
+            void __rand() {
+                __check_limit();
+                _x = this->__rand_x();
+                _y = this->__rand_y();
+            }
         };
         
         template <typename T>
         using Vec2 = Point<T>;
         
-        template <typename T>
-        class _2Points {
-        public:
-            _2Points() : _start(Point<T>()), _end(Point<T>()) {}
-            _2Points(Point<T> start, Point<T> end) : _start(start), _end(end) {}
-            
-            Point<T> start() const { return _start; }
-            Point<T> end() const { return _end; }
-            Point<T>& start_ref() { return _start; }
-            Point<T>& end_ref() { return _end; }
-            
-            Point<T> to_vector() { return _end - _start; }
-        protected:
-            Point<T> _start, _end;  
-        };
-        
-        template <typename T>
-        class Line : public _2Points<T> {
-        public:
-            Line() : _2Points<T>() {}
-            Line(Point<T> start, Point<T> end) : _2Points<T>(start, end) {}
-              
-        };
-        
-        template <typename T>
-        class Segment : public _2Points<T> {
-        public:
-            Segment() : _2Points<T>() {}
-            Segment(Point<T> start, Point<T> end) : _2Points<T>(start, end) {}
-              
-        };
-        
-        template <typename T>
-        typename std::enable_if<is_point_type<T>::value, Point<T>>::type
-        rand_point(T x_left, T x_right, T y_left, T y_right) {
-            Point<T> point;
-            point.rand(x_left, x_right, y_left, y_right);
-            return point;
-        }
-        
-        template <typename T>
-        typename std::enable_if<is_point_type<T>::value, Point<T>>::type
-        rand_point(T left, T right) {
-            Point<T> point;
-            point.rand(left, right);
-            return point;
-        }
-        
-        template <typename T>
-        typename std::enable_if<is_point_type<T>::value, Point<T>>::type
-        rand_point(const char* format, ...) {
-            FMT_TO_RESULT(format, format, _format);
-            Point<T> point;
-            point.rand(_format.c_str());
-            return point;
-        }
+        #define _OUT_RAND_FUNC(FUNC, TYPE) \
+        template <typename T> \
+        typename std::enable_if<is_point_type<T>::value, TYPE<T>>::type \
+        FUNC(T x_left, T x_right, T y_left, T y_right) { \
+            TYPE<T> result; \
+            result.rand(x_left, x_right, y_left, y_right); \
+            return result; \
+        } \
+        template <typename T> \
+        typename std::enable_if<is_point_type<T>::value, TYPE<T>>::type \
+        FUNC(T left, T right) { \
+            TYPE<T> result; \
+            result.rand(left, right); \
+            return result; \
+        } \
+        template <typename T> \
+        typename std::enable_if<is_point_type<T>::value, TYPE<T>>::type \
+        FUNC(const char* format, ...) { \
+            FMT_TO_RESULT(format, format, _format); \
+            TYPE<T> result; \
+            result.rand(_format.c_str()); \
+            return result; \
+        } 
+           
+        _OUT_RAND_FUNC(rand_point, Point)
         
         template <typename T>
         typename std::enable_if<is_point_type<T>::value, int>::type
@@ -6698,6 +6763,83 @@ namespace generator{
         template <typename T>
         using _Points = std::vector<Point<T>>;
         
+        template <typename T, typename>
+        class _2Points : public _RandXYRangeUnset<T> {
+        protected:
+            typedef _2Points<T> _Self;
+            _OUTPUT_FUNCTION(_Self)
+        public:
+            _2Points() : _RandXYRangeUnset<T>(), _start(Point<T>()), _end(Point<T>()) { _output_function = default_function(); }
+            _2Points(Point<T> start, Point<T> end) : _RandXYRangeUnset<T>(), _start(start), _end(end) { _output_function = default_function(); }
+            
+            Point<T> start() const { return _start; }
+            Point<T> end() const { return _end; }
+            Point<T>& start_ref() { return _start; }
+            Point<T>& end_ref() { return _end; }
+            
+            Point<T> to_vector() { return _end - _start; }
+            
+            _ResultTypeT<T> operator^(const Point<T>& b) { return (_end - _start) ^ b; }
+            _ResultTypeT<T> operator^(const _2Points<T>& l) { return (_end - _start) ^ (l._end - l._start); }
+            _ResultTypeT<T> operator*(const Point<T>& b) { return (_end - _start) * b; }
+            _ResultTypeT<T> operator*(const _2Points<T>& l) { return (_end - _start) * (l._end - l._start); }
+            
+            void default_output(std::ostream& os) const {
+                os << _start << " " << _end;
+            }
+            
+            _CLASS_RAND_FUNC
+            
+            _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+        protected:
+            Point<T> _start, _end;
+            _RandXYRange<T> _rand;
+                   
+            void __check_limit() {
+                this->__check_range_limit();
+                __check_count_limit();
+            }  
+            
+            void __check_count_limit() {
+                if (this->_x_left_limit == this->_x_right_limit && 
+                    this->_y_left_limit == this->_y_right_limit) {
+                        io::__fail_msg(io::_err, "Number of points in space must greater than one.");
+                    }
+            }          
+            
+            Point<T> __rand_point() {
+                return rand_point<T>(this->_x_left_limit, this->_x_right_limit, this->_y_left_limit, this->_y_right_limit);
+            }
+            
+            void __rand() {
+                __check_limit();
+                _start = __rand_point();
+                do {
+                    _end = __rand_point();
+                } while (_start == _end);
+            }
+        };
+        
+        template <typename T>
+        class Line : public _2Points<T> {
+        public:
+            Line() : _2Points<T>() {}
+            Line(Point<T> start, Point<T> end) : _2Points<T>(start, end) {}
+              
+        };
+        
+        _OUT_RAND_FUNC(rand_line, Line)
+        
+        template <typename T>
+        class Segment : public _2Points<T> {
+        public:
+            Segment() : _2Points<T>() {}
+            Segment(Point<T> start, Point<T> end) : _2Points<T>(start, end) {}
+              
+        };
+        
+        _OUT_RAND_FUNC(rand_segment, Segment)
+          
         template <typename T>
         typename std::enable_if<is_point_type<T>::value, void>::type        
         __polar_angle_sort(_Points<T>& points, Point<T> o = Point<T>()) {
@@ -6717,7 +6859,7 @@ namespace generator{
         
         // https://stackoverflow.com/questions/6758083/how-to-generate-a-random-convex-polygon/
         template<typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
-        class ConvexHull {
+        class ConvexHull : public _RandXYRange<T> {
         protected:
             typedef ConvexHull<T> _Self;
             _OUTPUT_FUNCTION(_Self)
@@ -6725,16 +6867,11 @@ namespace generator{
             int _node_count;
             _Points<T> _points;
             int _max_try;
-            T _x_left_limit;
-            T _x_right_limit;
-            T _y_left_limit;
-            T _y_right_limit;
             bool _output_node_count;
         public:
             ConvexHull(int node_count = 1, T x_left_limit = 0, T x_right_limit = 0, T y_left_limit = 0, T y_right_limit = 0) :
-                _node_count(node_count), _max_try(10), 
-                _x_left_limit(x_left_limit), _x_right_limit(x_right_limit),
-                _y_left_limit(y_left_limit), _y_right_limit(y_right_limit),
+                _RandXYRange<T>(x_left_limit, x_right_limit, y_left_limit, y_right_limit),
+                _node_count(node_count), _max_try(10),
                 _output_node_count(true) 
             {
                 _output_function = default_function();        
@@ -6743,50 +6880,14 @@ namespace generator{
             int node_count() const { return _node_count; }
             _Points<T> points() const { return _points; }
             int max_try() const { return _max_try; }
-            T x_left_limit() const { return _x_left_limit; }
-            T x_right_limit() const { return _x_right_limit; }
-            T y_left_limit() const { return _y_left_limit; }
-            T y_right_limit() const { return _y_right_limit; }
             
             int& node_count_ref() { return _node_count; }
             _Points<T>& points_ref() { return _points; }
             int& max_try_ref() { return _max_try; }
-            T& x_left_limit_ref() { return _x_left_limit; }
-            T& x_right_limit_ref() { return _x_right_limit; }
-            T& y_left_limit_ref() { return _y_left_limit; }
-            T& y_right_limit_ref() { return _y_right_limit; }
             
             void set_node_count(int node_count) { _node_count = node_count; }
             void set_max_try(int max_try)  { _max_try = max_try; }
-            void set_x_left_limit(T x_left_limit) { _x_left_limit = x_left_limit; }
-            void set_x_right_limit(T x_right_limit) { _x_right_limit = x_right_limit; }
-            void set_y_left_limit(T y_left_limit) { _y_left_limit = y_left_limit; }
-            void set_y_right_limit(T y_right_limit) { _y_right_limit = y_right_limit; }
-            void set_x_limit(T x_left_limit, T x_right_limit) { _x_left_limit = x_left_limit; _x_right_limit = x_right_limit; }
-            void set_y_limit(T y_left_limit, T y_right_limit) { _y_left_limit = y_left_limit; _y_right_limit = y_right_limit; }
-            void set_xy_limit(T left, T right) { set_x_limit(left, right); set_y_limit(left, right); }
             void set_output_node_count(bool output_node_count) { _output_node_count = output_node_count; }
-
-            void set_x_limit(const char* format, ...) {
-                FMT_TO_RESULT(format, format, _format);
-                auto range = rand::__format_to_range<T>(_format);
-                _x_left_limit = range.first;
-                _x_right_limit = range.second;
-            }
-            
-            void set_y_limit(const char* format, ...) {
-                FMT_TO_RESULT(format, format, _format);
-                auto range = rand::__format_to_range<T>(_format);
-                _y_left_limit = range.first;
-                _y_right_limit = range.second;
-            }
-            
-            void set_xy_limit(const char* format, ...) {
-                FMT_TO_RESULT(format, format, _format);
-                auto range = __format_xy_range(_format);
-                set_x_limit(range.first.c_str());
-                set_y_limit(range.second.c_str());
-            }
             
             void default_output(std::ostream& os) const {
                 if (_output_node_count) {
@@ -6837,18 +6938,8 @@ namespace generator{
             }
             
             void __check_limit() {
-                if (_x_left_limit > _x_right_limit) {
-                    io::__fail_msg(io::_err, "range [%s, %s] for x-coordinate is invalid.", 
-                        std::to_string(_x_left_limit).c_str(), std::to_string(_x_right_limit).c_str());
-                }
-                if (_y_left_limit > _y_right_limit) {
-                    io::__fail_msg(io::_err, "range [%s, %s] for y-coordinate is invalid.", 
-                        std::to_string(_y_left_limit).c_str(), std::to_string(_y_right_limit).c_str());
-                }
+                this->__check_range_limit();
             }
-        
-            T __rand_x() { return rand::__rand_range<T>(_x_left_limit, _x_right_limit); }
-            T __rand_y() { return rand::__rand_range<T>(_y_left_limit, _y_right_limit); }
             
             void __rand_pool_to_vector(std::vector<T>& pool, std::vector<T>& vec) {
                 std::sort(pool.begin(), pool.end());
@@ -6889,8 +6980,8 @@ namespace generator{
                 std::vector<T> x_pool;
                 std::vector<T> y_pool;
                 for (int i = 0; i < _node_count; i++) {
-                    x_pool.emplace_back(__rand_x());
-                    y_pool.emplace_back(__rand_y());
+                    x_pool.emplace_back(this->__rand_x());
+                    y_pool.emplace_back(this->__rand_y());
                 }
                 std::vector<T> x_vec;
                 std::vector<T> y_vec;
@@ -6921,25 +7012,53 @@ namespace generator{
                     min_y = std::min(min_y, o.y());
                 }
                 Point<T> min(min_x, min_y);
-                Point<T> origin_min(_x_left_limit, _y_left_limit);
+                Point<T> origin_min(this->_x_left_limit, this->_y_left_limit);
                 Point<T> shift = origin_min - min;
-                T x_max_move = _x_right_limit - _x_left_limit;
-                T y_max_move = _y_right_limit - _y_left_limit;
+                T x_max_move = this->_x_right_limit - this->_x_left_limit;
+                T y_max_move = this->_y_right_limit - this->_y_left_limit;
                 for (Point<T>& point : _points) {
                     point += shift;
-                    x_max_move = std::min(x_max_move, _x_right_limit - point.x());
-                    y_max_move = std::min(y_max_move, _y_right_limit - point.y());
+                    x_max_move = std::min(x_max_move, this->_x_right_limit - point.x());
+                    y_max_move = std::min(y_max_move, this->_y_right_limit - point.y());
                 }
                 Point<T> move = rand_point((T)0, x_max_move, (T)0, y_max_move);
                 for (Point<T>& point : _points) point += move;
                 return true;
             }
         };
+        
+        template<typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
+        class Triangle : public ConvexHull<T> {
+        protected:
+            typedef Triangle<T> _Self;
+            _OUTPUT_FUNCTION(_Self)
+        public:
+            Triangle(T x_left_limit = 0, T x_right_limit = 0, T y_left_limit = 0, T y_right_limit = 0) :
+                ConvexHull<T>(3, x_left_limit, x_right_limit, y_left_limit, y_right_limit)       
+            {
+                this->_output_node_count = false;
+                this->_output_function = default_function(); 
+            }
+            
+            int& node_count_ref() = delete;            
+            void set_node_count(int node_count) = delete;
+        
+            void default_output(std::ostream& os) const {
+                if (this->_output_node_count) {
+                    os << this->_node_count << "\n";
+                }
+                os << this->_points[0] << " " << this->_points[1] << " " << this->_points[2];
+            }
+            
+            _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
+        };
          
         #undef _OUTPUT_FUNCTION
         #undef _COMMON_OUTPUT_FUNCTION_SETTING
         #undef _OTHER_OUTPUT_FUNCTION_SETTING
         #undef _EDGE_OUTPUT_FUNCTION_SETTING
+        #undef _CLASS_RAND_FUNC
+        #undef _OUT_RAND_FUNC
     }
     
     namespace all{
