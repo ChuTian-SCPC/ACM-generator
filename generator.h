@@ -1621,7 +1621,7 @@ namespace generator{
             return x;
         }
             
-        int __number_accuarcy(const std::string& s) {
+        int __number_accuracy(const std::string& s) {
             int digit = 1;
             bool is_decimal_part = false;
             bool is_scientific_part = false;
@@ -1645,7 +1645,7 @@ namespace generator{
         template <typename T = double>
         typename std::enable_if<std::is_floating_point<T>::value, std::pair<T, T>>::type
         __format_to_double_range(std::string s) {
-            int accuarcy = 1;
+            int accuracy = 1;
             size_t open = s.find_first_of("[(");
             size_t close = s.find_first_of(")]");
             size_t comma = s.find(',');
@@ -1656,8 +1656,8 @@ namespace generator{
             std::string right_str = __sub_value_string(s, comma, close);
             T left = __string_to_value<T>(left_str);
             T right = __string_to_value<T>(right_str);
-            accuarcy = std::max(accuarcy, std::max(__number_accuarcy(left_str), __number_accuarcy(right_str)));
-            double eps = std::pow(10.0, -accuarcy);
+            accuracy = std::max(accuracy, std::max(__number_accuracy(left_str), __number_accuracy(right_str)));
+            double eps = std::pow(10.0, -accuracy);
             if(s[open] == '(') left += eps;
             if(s[close] == ']') right += eps;
             return std::make_pair(left,right);
@@ -6855,6 +6855,31 @@ namespace generator{
                 }
                 return quadrant_a < quadrant_b;
             });
+        }
+        
+        enum PointDirection {
+            COUNTER_CLOCKWISE,
+            CLOCKWISE,
+            ONLINE_BACK,
+            ONLINE_FRONT,
+            ON_SEGMENT
+        };
+        
+        template <typename T>
+        PointDirection point_direction(Point<T> a, Point<T> b, Point<T> c) {
+            b = b - a;
+            c = c - a;
+            _ResultTypeT<T> cross = b ^ c;
+            if (cross > 0) return COUNTER_CLOCKWISE;
+            if (cross < 0) return CLOCKWISE;
+            if (b * c < 0) return ONLINE_BACK;
+            if (b * b < c * c) return ONLINE_FRONT;
+            return ON_SEGMENT;
+        }
+        
+        template <typename T>
+        PointDirection point_direction(Point<T> a, Segment<T> s) {
+            return point_direction(a, s.start, s.end);
         }
         
         // https://stackoverflow.com/questions/6758083/how-to-generate-a-random-convex-polygon/
