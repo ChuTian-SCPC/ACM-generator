@@ -20,11 +20,11 @@
 
    注意，如果$from,to$的大小如果超过`long long`的范围话，那么会出现问题。
 
-4. `long long rand_int(const char* format,...)` 
+4. `T rand_int(const char* format,...)` 
 
    传入一个类似`printf`中的格式控制字符串。
 
-   返回一个整数类型为`long long`，范围为格式控制字符串所描述。
+   返回一个整数类型为`T`，`T`必须为整型，默认为`long long`，范围为格式控制字符串所描述。
 
    格式控制字符串中应该包含一个左括号'['或'('，一个右括号']'或')'表示开闭区间，以及一个逗号分隔左右端点。
 
@@ -32,8 +32,8 @@
 
    ```cpp
    rand_int("[3, 5]");
-   rand_int("(%d, %lld)", 3, 5LL);
-   rand_int("[%s, 6)", "3");
+   rand_int<int>("(%d, %lld)", 3, 5LL);
+   rand_int<unsigned int>("[%s, 6)", "3");
    rand_int(1, 1e9);
    ```
 

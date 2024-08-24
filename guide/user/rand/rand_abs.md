@@ -26,13 +26,13 @@
 
    返回一个浮点数类型为`double`，范围为 $[-to, -from]\cup[from, to)$ 。
 
-5. `double rand_abs(const char* format,...)`
+5. `T rand_abs(const char* format,...)`
 
    传入一个类似`printf`中的格式控制字符串。
 
-   返回一个浮点数类型为`double`，值绝对值的范围为格式控制字符串所描述。
+   返回一个数类型为`T`，`T`需要为整型或者浮点型，默认为`double`，值绝对值的范围为格式控制字符串所描述。
 
-   格式控制字符串示例可见[rand_real](./rand_real.md)
+   格式控制字符串示例可见[rand_int](./rand_int.md)和[rand_real](./rand_real.md)
 
 [示例代码](../../../examples/rand_abs.cpp)
 
