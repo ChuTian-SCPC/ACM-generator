@@ -1447,7 +1447,7 @@ namespace generator{
         rand_int(const char* format,...) {
             FMT_TO_RESULT(format, format, _format);
             std::pair<T, T> range = __format_to_int_range<T>(_format);
-            T x = __rand_int_impl<T>(range.first,range.second);
+            T x = __rand_int_impl<T>(range.first, range.second);
             return x;
         }
         
@@ -1501,10 +1501,12 @@ namespace generator{
         }
 
         // rand a odd number satisfied the given range
-        long long rand_odd(const char* format,...) {
+        template <typename T = long long>
+        typename std::enable_if<std::is_integral<T>::value, T>::type
+        rand_odd(const char* format,...) {
             FMT_TO_RESULT(format, format, _format);
-            std::pair<long long,long long> range = __format_to_int_range(_format);
-            return __rand_odd_impl<long long>(range.first,range.second);
+            std::pair<T, T> range = __format_to_int_range(_format);
+            return __rand_odd_impl<T>(range.first,range.second);
         }
 
         template <typename T>
@@ -1557,10 +1559,12 @@ namespace generator{
         }
 
         // rand a even number satisfied the given range
-        long long rand_even(const char* format,...) {
+        template <typename T = long long>
+        typename std::enable_if<std::is_integral<T>::value, T>::type
+        rand_even(const char* format,...) {
             FMT_TO_RESULT(format, format, _format);
-            std::pair<long long,long long> range = __format_to_int_range(_format);
-            return __rand_even_impl<long long>(range.first,range.second);
+            std::pair<T, T> range = __format_to_int_range(_format);
+            return __rand_even_impl<T>(range.first,range.second);
         }
 
         // enable T is double or can be change to double
