@@ -453,20 +453,30 @@ namespace generator{
             }
         }
 
-        void __close_output_file_to_console(){
-            #ifdef _WIN32
-                freopen("CON", "w", stdout);
-            #else
-                freopen("/dev/tty", "w", stdout);
-            #endif
+		void __close_output_file_to_console(){
+           	fflush(stdout);
+        	#ifdef _WIN32
+            if (freopen("CON", "r", stdout) == NULL) {
+                io::__fail_msg(io::_err, "Fail close file.");
+            }
+        	#else
+            if (freopen("/dev/tty", "r", stdout) == NULL) {
+                io::__fail_msg(io::_err, "Fail close file.");
+            }
+        	#endif
         }
         
         void __close_input_file_to_console(){
-            #ifdef _WIN32
-                freopen("CON", "r", stdin);
-            #else
-                freopen("/dev/tty", "r", stdin);
-            #endif
+            if (std::cin.eof()) std::cin.clear();
+        	#ifdef _WIN32
+            if (freopen("CON", "r", stdin) == NULL) {
+                io::__fail_msg(io::_err, "Fail close file.");
+            }
+        	#else
+            if (freopen("/dev/tty", "r", stdin) == NULL) {
+                io::__fail_msg(io::_err, "Fail close file.");
+            }
+        	#endif
         }
 
         char** __split_string_to_char_array(const char* input) {
