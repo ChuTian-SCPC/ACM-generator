@@ -454,6 +454,7 @@ namespace generator{
         }
 
         void __close_output_file_to_console(){
+            fflush(stdout);
             #ifdef _WIN32
                 freopen("CON", "w", stdout);
             #else
@@ -462,6 +463,7 @@ namespace generator{
         }
         
         void __close_input_file_to_console(){
+            if (std::cin.eof())  std::cin.clear();
             #ifdef _WIN32
                 freopen("CON", "r", stdin);
             #else
