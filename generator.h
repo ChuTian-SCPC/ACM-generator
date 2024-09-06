@@ -256,8 +256,15 @@ namespace generator{
             std::string _path;
         public:
             Path() : _path("") {}
-            Path(std::string s) : _path(s) {}
+            Path(const std::string& s) : _path(s) {}
             Path(const char *s) : _path(std::string(s)) {}
+            Path(const Path& other) : _path(other._path) {}
+            Path(Path&& other) noexcept : _path(std::move(other._path)) {}
+            Path(std::string&& s) noexcept : _path(std::move(s)) {}
+            Path& operator=(Path&& other) noexcept {
+                if (this != &other) _path = std::move(other._path);
+                return *this;
+            }
 
             std::string path() const { return _path; }
             const char* cname() const { return _path.c_str(); }
@@ -378,7 +385,7 @@ namespace generator{
             }
         };
 
-        template <typename U>
+        template<typename U>
         struct IsPath {
             template <typename V>
             static constexpr auto check(V *)
@@ -387,8 +394,17 @@ namespace generator{
             template <typename V>
             static constexpr std::false_type check(...);
 
-            static constexpr bool value =
-                    decltype(check<U>(nullptr))::value;
+            static constexpr bool value = decltype(check<U>(nullptr))::value;
+        };
+        
+        template<typename T>
+        struct IsPathConstructible {
+            static constexpr bool value = std::is_convertible<T, std::string>::value || IsPath<T>::value;
+        };
+        
+        template<typename T>
+        struct IsProgram {
+            static constexpr bool value = IsPathConstructible<T>::value || std::is_same<T, std::function<void()>>::value;
         };
 
         OutStream::OutStream(Path& path) {
@@ -396,7 +412,8 @@ namespace generator{
         }
 
         template <typename T, typename... Args>
-        Path __path_join(const T path, const Args &... args) {
+        typename std::enable_if<IsPathConstructible<T>::value, Path>::type
+        __path_join(const T path, const Args &... args) {
             return Path(path).join(args...);
         }
 
@@ -409,7 +426,7 @@ namespace generator{
             char buffer[MAX_PATH];
             GetModuleFileName(NULL, buffer, MAX_PATH);
         #else
-            char buffer[1024];
+            char buffer[PATH_MAX];
             ssize_t length = readlink("/proc/self/exe", buffer, sizeof(buffer));
             if (length != -1) {
                 buffer[length] = '\0';
@@ -420,7 +437,8 @@ namespace generator{
         }
 
         template <typename T>
-        Path __full_path(T p) {
+        typename std::enable_if<IsPathConstructible<T>::value, Path>::type
+        __full_path(T p) {
             Path path(p);
             path.full();
             return path;
@@ -886,7 +904,7 @@ namespace generator{
         
         const int time_limit_inf = -1;
         
-        void __run_program(
+        void __run_program_with_limit(
             Path& program,
             Path& input_file,
             Path& output_file,
@@ -1078,7 +1096,7 @@ namespace generator{
         {
             Path input_file(__path_join(__current_path(), "testcases", __end_with(id, In)));
             Path output_file(__path_join(__current_path(), "testcases", __end_with(id, Out)));
-            __run_program(program, input_file, ans_file, time_limit == time_limit_inf ? time_limit_inf : 2 * time_limit, runtime);
+            __run_program_with_limit(program, input_file, ans_file, time_limit == time_limit_inf ? time_limit_inf : 2 * time_limit, runtime);
             if(__enable_judge_ans(runtime, time_limit, result)) {
                 __check_result(
                     input_file, output_file, ans_file, testlib_out_file,
@@ -5847,33 +5865,8 @@ namespace generator{
                     _trees_size = rand::rand_sum(tree_count, this->_node_count, 1);
                 }
                 
-                void __dump_result(_Graph<void, EdgeType>& graph) {
-                    this->_edges = graph.edges_ref();
-                    this->_node_indices = graph.node_indices_ref();
-                }
-                
                 void __reset_connect() {
                     this->_connect = this->_node_count == this->_edge_count - 1;
-                }
-                
-                virtual void __generate_graph() override {
-                    if (_trees_size.empty()) {
-                        __generate_trees_size();
-                    }
-                    else {
-                        __reset_node_edge_count();
-                    }
-                    __reset_connect();
-                    _Graph<void, EdgeType> result_graph(0);
-                    __reset_edges_weight_function(result_graph);
-                    for (int tree_size : _trees_size) {
-                        _Tree<void, EdgeType> tree(tree_size);
-                        __reset_edges_weight_function(tree);
-                        tree.gen();
-                        _LinkImpl<void, EdgeType> impl(result_graph, tree, 0, LinkType::Shuffle);
-                        result_graph = impl.get_result();
-                    }
-                    __dump_result(result_graph);
                 }
                 
                 template<typename T = EdgeType, _HasT<T> = 0>
@@ -5887,16 +5880,30 @@ namespace generator{
                     return;
                 }
                 
-                template<typename T = EdgeType, _HasT<T> = 0>
-                void __reset_edges_weight_function(_Graph<void, EdgeType>& graph) {
-                    auto func = this->edges_weight_function();
-                    graph.set_edges_weight_function(func);
+                virtual void __generate_graph() override {
+                    if (_trees_size.empty()) __generate_trees_size();
+                    else __reset_node_edge_count();
+                    __reset_connect();
+                    std::vector<int> p(this->_node_count);
+                    for (int i = 0; i < this->_node_count; i++) p[i] = i;
+                    shuffle(p.begin(), p.end());
+                    int l = 0;
+                    _Tree<void, EdgeType> tree;
+                    __reset_edges_weight_function(tree);
+                    for (int tree_size : _trees_size) {
+                        tree.set_node_count(tree_size);
+                        tree.gen();
+                        for (auto edge : tree.edges_ref()) {
+                            int& u = edge.u_ref();
+                            int& v = edge.v_ref();
+                            u = p[u + l];
+                            v = p[v + l];
+                            this->__add_edge(edge);
+                        }
+                        l += tree_size;
+                    }
                 }
                 
-                template<typename T = EdgeType, _NotHasT<T> = 0>
-                void __reset_edges_weight_function(_Graph<void, EdgeType>&) {
-                    return;
-                }
             };
             
             template <typename U>
