@@ -13,7 +13,7 @@ Generator是基于testlib.h库封装的一个出题辅助工具库。
 
 [testlib.h](https://github.com/MikeMirzayanov/testlib)是Codeforces出题辅助工具。
 
-Generator可以方便的生成测试数据。
+Generator可以方便的生成测试数据。简化了使用testlib时使用命令行生成数据的困难。
 
 Generator可以方便的在本地进行对拍，内置testlib中常见的checker。
 
@@ -35,16 +35,6 @@ MIT协议
 
 您也可以对仓库fork后修正其中的问题或实现需求，提交Pull request。
 
-## 功能实现
-
-- [x] 基础数据生成函数
-
-- [x] 多组输入输出数据生成
-
-- [x] 对拍
-
-- [x] 树和图生成函数
-  
-- [x] 计算几何
+您也可以查看[未来计划](https://github.com/ChuTian-SCPC/ACM-generator/discussions/13)留下您的想法和建议。
 
 
