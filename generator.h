@@ -2733,29 +2733,25 @@ namespace generator{
                 }
                 
                 void default_output(std::ostream& os) const {
-                    std::string first_line = "";
+                    std::vector<int> first_line_vec;
                     if (_output_node_count) {
-                        first_line += std::to_string(_node_count);
+                        first_line_vec.push_back(_node_count);
                     }
                     if (_is_rooted && _output_root) {
-                        if (first_line != "") {
-                            first_line += " ";
-                        }
-                        first_line += std::to_string(root());
+                        first_line_vec.push_back(root());
                     }
-                    if (__output_node_weights(os, first_line)) {
-                        if (_node_count > 1) {
-                            os << "\n";
-                        }
+                    std::string first_line = join(first_line_vec);
+                    std::string second_line;
+                    if (!std::is_void<NodeType>::value) {
+                        second_line = join(_nodes_weight);
                     }
-                    else {
-                        if (first_line != "") {
-                            os << first_line;
-                            if (_node_count > 1) {
-                                os << "\n";
-                            }
-                        }
+                    std::vector<std::string> output_lines{first_line, second_line};
+                    output_lines.erase(std::remove(output_lines.begin(), output_lines.end(), ""), output_lines.end());
+                    os << join(output_lines, "\n");
+                    if (_node_count > 1) {
+                        os << "\n";
                     }
+
                     int edge_cnt = 0;
                     std::vector<_Edge<EdgeType>> output_edges = __get_output_edges();
                     for (_Edge<EdgeType> e: output_edges) {
@@ -2817,26 +2813,6 @@ namespace generator{
                     }
                     shuffle(result.begin(), result.end());
                     _edges = result;       
-                }
-
-                template<typename T = NodeType, _HasT<T> = 0>
-                bool __output_node_weights(std::ostream& os, std::string& first_line) const {
-                    int node_cnt = 0;
-                    for (_Node<NodeType> node : _nodes_weight) {
-                        node_cnt ++;
-                        if(node_cnt == 1) {
-                            if (first_line != "") {
-                                os << first_line << "\n";
-                            }
-                        }
-                        os << node << " ";
-                    }
-                    return node_cnt >= 1;
-                }
-
-                template<typename T = NodeType, _NotHasT<T> = 0>
-                bool __output_node_weights(std::ostream&, std::string&) const {
-                    return false;
                 }
 
                 template<typename T = EdgeType, _NotHasT<T> = 0>
@@ -3643,28 +3619,25 @@ namespace generator{
                 std::vector<_Node<NodeType>> nodes_weight_ref() const { return _nodes_weight; }
 
                 void default_output(std::ostream& os) const {
-                    std::string first_line = "";
-                    first_line += __format_output_node();
+                    std::vector<int> first_line_vec;
+                    if (_output_node_count) {
+                        first_line_vec.push_back(_node_count);
+                    }
                     if (_output_edge_count) {
-                        if (first_line != "") {
-                            first_line += " ";
-                        }
-                        first_line += std::to_string(_edge_count);
+                        first_line_vec.push_back(_edge_count);
+                    }
+                    std::string first_line = join(first_line_vec);
+                    std::string second_line;
+                    if (!std::is_void<NodeType>::value) {
+                        second_line = join(_nodes_weight);
+                    }
+                    std::vector<std::string> output_lines{first_line, second_line};
+                    output_lines.erase(std::remove(output_lines.begin(), output_lines.end(), ""), output_lines.end());
+                    os << join(output_lines, "\n");
+                    if (_edge_count >= 1) {
+                        os << "\n";
                     }
                     
-                    if (__output_node_weights(os, first_line)) {
-                        if (_edge_count >= 1) {
-                            os << "\n";
-                        }
-                    }
-                    else {
-                        if (first_line != "") {
-                            os << first_line;
-                            if (_edge_count >= 1) {
-                                os << "\n";
-                            }
-                        }
-                    }
                     int edge_cnt = 0;
                     for (_Edge<EdgeType> e: __get_output_edges()) {
                         if (_swap_node && rand::rand_bool()) {
@@ -3688,26 +3661,6 @@ namespace generator{
                 _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
             
             protected:
-
-                template<typename T = NodeType, _HasT<T> = 0>
-                bool __output_node_weights(std::ostream& os, std::string& first_line) const {
-                    int node_cnt = 0;
-                    for (_Node<NodeType> node : _nodes_weight) {
-                        node_cnt ++;
-                        if(node_cnt == 1) {
-                            if (first_line != "") {
-                                os << first_line << "\n";
-                            }
-                        }
-                        os << node << " ";
-                    }
-                    return node_cnt >= 1;
-                }
-
-                template<typename T = NodeType, _NotHasT<T> = 0>
-                bool __output_node_weights(std::ostream&, std::string&) const {
-                    return false;
-                }
 
                 virtual std::string __format_output_node() const {
                     if (_output_node_count) {
