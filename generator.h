@@ -2740,30 +2740,20 @@ namespace generator{
                     if (_is_rooted && _output_root) {
                         first_line_vec.push_back(root());
                     }
-                    std::string first_line = join(first_line_vec);
-                    std::string second_line;
+                    std::vector<std::string> output_lines{join(first_line_vec)};
                     if (!std::is_void<NodeType>::value) {
-                        second_line = join(_nodes_weight);
+                        output_lines.push_back(join(_nodes_weight));
                     }
-                    std::vector<std::string> output_lines{first_line, second_line};
+                    std::vector<_Edge<EdgeType>> output_edges = __get_output_edges();
+                    for (auto &edge : output_edges) {
+                        if (_swap_node && rand::rand_bool()) {
+                            edge.set_output_default(true);
+                        }
+                    }
+                    output_lines.push_back(join(output_edges, "\n"));
+
                     output_lines.erase(std::remove(output_lines.begin(), output_lines.end(), ""), output_lines.end());
                     os << join(output_lines, "\n");
-                    if (_node_count > 1) {
-                        os << "\n";
-                    }
-
-                    int edge_cnt = 0;
-                    std::vector<_Edge<EdgeType>> output_edges = __get_output_edges();
-                    for (_Edge<EdgeType> e: output_edges) {
-                        if (_swap_node && rand::rand_bool()) {
-                            e.set_output_default(true);
-                        }
-                        os << e;
-                        e.set_output_default();
-                        if (++edge_cnt < _node_count - 1) {
-                            os << "\n";
-                        }
-                    }
                 }
                 _OTHER_OUTPUT_FUNCTION_SETTING(_Self)
 
@@ -3626,29 +3616,20 @@ namespace generator{
                     if (_output_edge_count) {
                         first_line_vec.push_back(_edge_count);
                     }
-                    std::string first_line = join(first_line_vec);
-                    std::string second_line;
+                    std::vector<std::string> output_lines{join(first_line_vec)};
                     if (!std::is_void<NodeType>::value) {
-                        second_line = join(_nodes_weight);
+                        output_lines.push_back(join(_nodes_weight));
                     }
-                    std::vector<std::string> output_lines{first_line, second_line};
+                    std::vector<_Edge<EdgeType>> output_edges = __get_output_edges();
+                    for (auto &edge : output_edges) {
+                        if (_swap_node && rand::rand_bool()) {
+                            edge.set_output_default(true);
+                        }
+                    }
+                    output_lines.push_back(join(output_edges, "\n"));
+
                     output_lines.erase(std::remove(output_lines.begin(), output_lines.end(), ""), output_lines.end());
                     os << join(output_lines, "\n");
-                    if (_edge_count >= 1) {
-                        os << "\n";
-                    }
-                    
-                    int edge_cnt = 0;
-                    for (_Edge<EdgeType> e: __get_output_edges()) {
-                        if (_swap_node && rand::rand_bool()) {
-                            e.set_output_default(true);
-                        }
-                        os << e;
-                        e.set_output_default();
-                        if (++edge_cnt < _edge_count) {
-                            os << "\n";
-                        }
-                    }
                 }
 
                 void gen() {
