@@ -1082,8 +1082,8 @@ namespace generator{
                 pi = (uintptr_t)process_info.ClientId.UniqueProcess;
                 ti = (uintptr_t)process_info.ClientId.UniqueThread;
 
-                assert(hp = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pi));
-                assert(ht = OpenThread(THREAD_ALL_ACCESS, FALSE, ti));
+                hp = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pi);
+                ht = OpenThread(THREAD_ALL_ACCESS, FALSE, ti);
 
                 ResumeThread(ht);
                 CloseHandle(ht);
