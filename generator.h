@@ -1297,7 +1297,7 @@ namespace generator{
         }
         
         bool __is_real_format(const std::string& s) {
-            return s.find_first_of("eE.");
+            return s.find_first_of("eE.") != std::string::npos;
         }
         
         template<>
