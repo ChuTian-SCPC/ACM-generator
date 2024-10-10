@@ -7,11 +7,14 @@
   - 重构了`Forest`的生成函数，提高生成速度。
 - 新增功能：
   - 用`rand_bool`取代`rnd.next(2)`和`rnd.next(0,1)`。
-  - Line：直线，Segment：线段
-  - Triangle：三角形
+  - 给`rand_even`和`rand_odd`添加泛型支持。
+  - Line：直线，Segment：线段。
+  - Triangle：三角形。
 - 修复bugs：
   - 修复树、图输出时存在多余空格的问题。
+  - 修复了多次打开文件可能出现的问题。
   - 修复了判断字符串是否是小数形式的错误。
+  - 修正一些格式错误。
 
 ### version 0.8.0
 
@@ -38,8 +41,8 @@
   - compare可以设置无限时间。
   - rand_bracket_seq：随机合法括号序列。
   - 计算几何：
-    - Point：点
-    - ConvexHull：凸包
+    - Point：点。
+    - ConvexHull：凸包。
 
 ### version 0.7.0
 
