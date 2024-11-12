@@ -33,12 +33,12 @@
 #ifndef _SGPCET_COMMAND_FUNC_H_
 #include "io/command_func.h"
 #endif // !_SGPCET_COMMAND_FUNC_H_
-#ifndef _SGPCET_PROGRAM_H_
-#include "io/program.h"
-#endif // !_SGPCET_PROGRAM_H_
 #ifndef _SGPCET_IO_INIT_H_
 #include "io/io_init.h"
 #endif // !_SGPCET_IO_INIT_H_
+#ifndef _SGPCET_PROGRAM_H_
+#include "io/program.h"
+#endif // !_SGPCET_PROGRAM_H_
 #ifndef _SGPCET_IO_REPORTER_H_
 #include "io/io_reporter.h"
 #endif // !_SGPCET_IO_REPORTER_H_

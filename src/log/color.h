@@ -116,11 +116,6 @@ namespace generator {
       _ColorMsg _fail("FAIL", _enum::Color::Red);
       _ColorMsg _error("ERROR", _enum::Color::Red);
       
-      _ColorMsg _ac("AC", _enum::Color::Green);
-      _ColorMsg _wa("WA", _enum::Color::Red);
-      _ColorMsg _tle("TLE", _enum::Color::Yellow);
-      _ColorMsg _checker_return("checker return :", _enum::Color::Red);
-      
     } // namespace _msg
 }
 

@@ -43,7 +43,7 @@ namespace generator {
     std::string hack_folder = "hack";
     std::string validate_folder = "validate";
     
-    int _function_count = 1;
+    int _function_count = 0;
     
     bool same_log_for_class = false;
     

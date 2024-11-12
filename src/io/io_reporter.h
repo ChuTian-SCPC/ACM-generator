@@ -1,18 +1,39 @@
 #ifndef _SGPCET_IO_REPORTER_H_
 #define _SGPCET_IO_REPORTER_H_
 
-#ifndef _SGPCET_ENUM_H_
-#include "common/enum.h"
-#endif // !_SGPCET_ENUM_H_
-#ifndef _SGPCET_LOGGER_H_
-#include "log/logger.h"
-#endif // !_SGPCET_LOGGER_H_
 #ifndef _SGPCET_IO_INIT_H_
 #include "io/io_init.h"
 #endif // !_SGPCET_IO_INIT_H_
 
 namespace generator {
     namespace io {
+        _msg::_ColorMsg _ac("AC", _enum::Color::Green);
+        _msg::_ColorMsg _wa("WA", _enum::Color::Red);
+        _msg::_ColorMsg _tle("TLE", _enum::Color::Yellow);
+        _msg::_ColorMsg _checker_return("checker return :", _enum::Color::Red);
+
+        void __judge_msg(_msg::OutStream &out, _enum::_JudgeState state, int case_id, int runtime, const std::string &result) {
+            out.print(tools::string_format("Testcase %d : ", case_id));
+            if (_enum::__is_run_error(state)) {
+                out.print(_msg::_error);
+                out.println(" ,meet some error,pleace check it or report.");
+                return;
+            }
+            out.print(__state_msg(state, true));
+            if (_enum::__is_combine_state(state)) {
+                out.print("(");
+                out.print(__state_msg(state, false));
+                out.print(")");
+            }
+            out.print(tools::string_format(" ,Runtime = %dms", runtime));
+            if (_enum::__is_tle(state)) out.print(" (killed)");
+            out.print(".");
+            if (_enum::__has_wa(state)) {
+                out.println(" ", _checker_return);
+                out.println("  ", result);
+            }
+            out.println();
+        }
 
         const char* __stage_name(_enum::_Stage stage) {
             if (stage == _enum::_INPUT) return "Make input";

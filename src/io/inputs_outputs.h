@@ -8,10 +8,6 @@
 namespace generator {
     namespace io {
         
-        void __ensure_file_folder(Path file) {
-            __create_directories(file.__folder_path());
-        }
-        
         bool __input_file_exists(int x) {
             return __input_file_path(x).__file_exist();
         }

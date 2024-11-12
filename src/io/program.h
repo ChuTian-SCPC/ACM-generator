@@ -1,21 +1,9 @@
 #ifndef _SGPCET_PROGRAM_H_
 #define _SGPCET_PROGRAM_H_
 
-#ifndef _SGPCET_COMMON_H_
-#include "common/common.h"
-#endif // !_SGPCET_COMMON_H_
-#ifndef _SGPCET_ENUM_H_
-#include "common/enum.h"
-#endif // !_SGPCET_ENUM_H_
-#ifndef _SGPCET_LOGGER_H_
-#include "log/logger.h"
-#endif // !_SGPCET_LOGGER_H_
-#ifndef _SGPCET_COMMAND_PATH_H_
-#include "command_path.h"
-#endif // !_SGPCET_COMMAND_PATH_H_
-#ifndef _SGPCET_COMMAND_FUNC_H_
-#include "command_func.h"
-#endif // !_SGPCET_COMMAND_FUNC_H_
+#ifndef _SGPCET_IO_INIT_H_
+#include "io_init.h"
+#endif // !_SGPCET_IO_INIT_H_
 
 namespace generator {
     namespace io {
@@ -105,15 +93,6 @@ namespace generator {
             pid_t pid = static_cast<pid_t>(reinterpret_cast<long long>(process));
             kill(pid, SIGTERM);
         #endif
-        }
-
-        bool __is_time_limit_inf(int time_limit) {
-            return time_limit == _setting::time_limit_inf;
-        }
-
-        int __time_limit_extend(int time_Limit) {
-            if (__is_time_limit_inf(time_Limit)) return time_Limit;
-            return time_Limit * _setting::time_limit_over_ratio;
         }
 
         char** __split_string_to_char_array(const char* input) {
@@ -216,37 +195,6 @@ namespace generator {
             else if (type == _enum::_VALIDATOR) __set_validator_args(args);
             else __set_default_args();
         }
-
-        template<typename T>
-        struct IsCommandPathConstructible {
-            static constexpr bool value = std::is_constructible<T, CommandPath>::value;
-        };
-        
-        template<typename T>
-        struct IsCommandFuncConstructible {
-            static constexpr bool value = std::is_constructible<T, CommandFunc>::value;
-        };
-        
-        template<typename T>
-        struct IsProgram {
-            static constexpr bool value = IsCommandPathConstructible<T>::value || IsCommandFuncConstructible<T>::value;
-        };
-        
-        template<typename T>
-        struct IsProgramConstructible {
-            static constexpr bool value = IsProgram<T>::value || IsPathConstructible<T>::value || IsFunctionConvertible<T>::value;
-        };
-        
-        template<typename T>
-        struct _ProgramType {
-            using type = typename std::conditional<
-                IsCommandPathConstructible<T>::value || IsPathConstructible<T>::value,   
-                CommandPath,
-                CommandFunc >::type;
-        };
-
-        template<typename T>
-        using _ProgramTypeT = typename _ProgramType<T>::type;
 
         template<typename T>
         typename std::enable_if<IsCommandFuncConstructible<T>::value, int>::type

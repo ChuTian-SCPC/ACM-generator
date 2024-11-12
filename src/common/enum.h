@@ -87,6 +87,16 @@ namespace generator {
       _OUTPUT,
       _VALID 
     };
+
+    enum Checker{
+      lcmp,
+      yesno,
+      rcmp4,
+      rcmp6,
+      rcmp9,
+      wcmp,
+      MaxChecker
+    };
   } // namespace _enum
 } // namespace generator
 

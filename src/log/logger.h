@@ -195,29 +195,6 @@ namespace generator {
         else return _wa;
       }
       
-      void __judge_msg(OutStream& out, _enum::_JudgeState state, int case_id, int runtime, const std::string& result) {
-        out.print(tools::string_format("Testcase %d : ", case_id));
-        if (_enum::__is_run_error(state)) {
-            out.print(_error);
-            out.println(" ,meet some error,pleace check it or report.");
-            return;
-        }
-        out.print(__state_msg(state, true));
-        if (_enum::__is_combine_state(state)) {
-            out.print("(");
-            out.print(__state_msg(state, false));
-            out.print(")");
-        }
-        out.print(tools::string_format(" ,Runtime = %dms", runtime));
-        if (_enum::__is_tle(state)) out.print(" (killed)");
-        out.print(".");
-        if (_enum::__has_wa(state)) {
-            out.println(" ", _checker_return);
-            out.println("  ", result);
-        }
-        else out.println();
-      }
-      
       OutStream _defl; // default_log
     } // namespace _msg
 } // namespace generator
