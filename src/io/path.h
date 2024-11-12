@@ -67,7 +67,7 @@ namespace generator {
       
       std::string __file_name() {
         if (!__file_exist()) 
-          _msg::__fail_msg(_msg::_default_log, 
+          _msg::__fail_msg(_msg::_defl, 
             tools::string_format("%s is not a file or the file doesn't exist.", _path.c_str()));
         __unify_split();
         size_t pos = _path.find_last_of(_setting::_path_split);
@@ -81,11 +81,11 @@ namespace generator {
         #ifdef ON_WINDOWS
           char buffer[MAX_PATH];
           if (GetFullPathNameA(_path.c_str(), MAX_PATH, buffer, nullptr) == 0) 
-            _msg::__fail_msg(_msg::_default_log, tools::string_format("Can't find full path :%s.", _path.c_str()));
+            _msg::__fail_msg(_msg::_defl, tools::string_format("Can't find full path :%s.", _path.c_str()));
         #else
           char buffer[PATH_MAX];
           if (realpath(_path.c_str(), buffer) == nullptr) 
-            _msg::__fail_msg(_msg::_default_log, tools::string_format("Can't find full path :%s.", _path.c_str()));
+            _msg::__fail_msg(_msg::_defl, tools::string_format("Can't find full path :%s.", _path.c_str()));
         #endif
           _path = std::string(buffer);
       }
@@ -108,6 +108,7 @@ namespace generator {
       
       template <typename... Args>
       Path join(const Args&... args) {
+        if (this->__empty()) return tools::string_join(_setting::_path_split, args...);
         std::string path_join = tools::string_join(_setting::_path_split, _path, args...);
         return Path(path_join);
       }
@@ -169,7 +170,7 @@ namespace generator {
             if(current_path.path().size() == 1 && current_path.path()[0] ==  _setting::_path_split) continue;
         #endif
             if (!__create_directory(current_path)) 
-              _msg::__fail_msg(_msg::_default_log, tools::string_format("Error in creating folder : %s.",current_path.cname()));
+              _msg::__fail_msg(_msg::_defl, tools::string_format("Error in creating folder : %s.",current_path.cname()));
         }
     }
 

@@ -13,12 +13,12 @@ namespace generator {
   }; // namespace io
   
   namespace _setting {
-    int _vector_limit = 10000000; // 1e7
-    int _node_limit = 10000000;
-    int _edge_limit = 10000000;
+    int vector_limit = 10000000; // 1e7
+    int node_limit = 10000000;
+    int edge_limit = 10000000;
     
     int time_limit_inf = -1; 
-    int _test_case_limit = 1000;
+    int test_case_limit = 1000;
 
   #ifdef ON_WINDOWS
     char _path_split = '\\';
@@ -38,10 +38,10 @@ namespace generator {
   #endif // ON_WINDOWS
     
     std::string _lib_folder = io::__lib_path();
-    std::string _testcase_folder = "testcases";
-    std::string _compare_folder = "cmp";
-    std::string _hack_folder = "hack";
-    std::string _validate_folder = "validate";
+    std::string testcase_folder = "testcases";
+    std::string compare_folder = "cmp";
+    std::string hack_folder = "hack";
+    std::string validate_folder = "validate";
     
     int _function_count = 1;
     
@@ -55,6 +55,9 @@ namespace generator {
     double time_limit_check_ratio = 2;
 
     const int _error_return = -1;
+
+    bool default_seed = true;
+    std::string default_stable_seed = "";
   };// namespace _setting
   
 };// namespace generator

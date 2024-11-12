@@ -184,6 +184,10 @@ namespace generator {
         out.println(_error, " ", args...);
         exit(EXIT_FAILURE);
       }
+
+      void __endl(OutStream& out, int count = 1) {
+        for (int i = 1; i <= count; i++) out.println();
+      }
       
       _ColorMsg __state_msg(_enum::_JudgeState state, bool consider_tle) {
         if (consider_tle && _enum::__has_tle(state)) return _tle;
@@ -214,7 +218,7 @@ namespace generator {
         else out.println();
       }
       
-      OutStream _default_log;
+      OutStream _defl; // default_log
     } // namespace _msg
 } // namespace generator
 

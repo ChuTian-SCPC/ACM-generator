@@ -44,21 +44,21 @@ namespace generator {
         void __open_input_file(const char* file) {
             if (std::cin.eof())  std::cin.clear();
             if (freopen(file, "r", stdin) == NULL) {
-                _msg::__error_msg(_msg::_default_log, tools::string_format("Fail to open file %s.", file));
+                _msg::__error_msg(_msg::_defl, tools::string_format("Fail to open file %s.", file));
             }
         }
         
         void __open_output_file(const char* file) {
             fflush(stdout);
             if (freopen(file, "w", stdout) == NULL) {
-                _msg::__error_msg(_msg::_default_log, tools::string_format("Fail to open file %s.", file));
+                _msg::__error_msg(_msg::_defl, tools::string_format("Fail to open file %s.", file));
             }
         }
         
         void __open_error_file(const char* file) {
             fflush(stderr);
             if (freopen(file, "w", stderr) == NULL) {
-                _msg::__error_msg(_msg::_default_log, tools::string_format("Fail to open file %s.", file));
+                _msg::__error_msg(_msg::_defl, tools::string_format("Fail to open file %s.", file));
             }
         }
         
@@ -97,64 +97,6 @@ namespace generator {
             __open_error_file("/dev/tty");
         #endif 
         }
-
-        Path __testcases_folder() {
-            return __path_join(__current_path(), _setting::_testcase_folder);
-        }
-        
-        void __ensure_file_folder(Path file) {
-            __create_directories(file.__folder_path());
-        }
-        
-        Path __input_file_path(int x) {
-            return __path_join(__testcases_folder(), __end_with(x, _enum::_IN));
-        }
-        
-        Path __output_file_path(int x) {
-            return __path_join(__testcases_folder(), __end_with(x, _enum::_OUT));
-        }
-        
-        bool __input_file_exists(int x) {
-            return __input_file_path(x).__file_exist();
-        }
-        
-        bool __output_file_exists(int x) {
-            return __output_file_path(x).__file_exist();
-        }
-
-        std::vector<int> __get_all_inputs() {
-            std::vector<int> inputs;
-            Path folder_path = __testcases_folder();
-        #ifdef ON_WINDOWS
-            WIN32_FIND_DATA findFileData;
-            HANDLE hFind = FindFirstFile(folder_path.join("*.in").cname(), &findFileData);
-
-            if (hFind != INVALID_HANDLE_VALUE) {
-                do {
-                    Path file_path(__path_join(folder_path,findFileData.cFileName));
-                    int num = std::stoi(file_path.__file_name());  
-                    inputs.emplace_back(num);  
-                } while (FindNextFile(hFind, &findFileData) != 0);
-
-                FindClose(hFind);
-            }
-        #else
-            DIR* dir = opendir(folder_path.cname());
-            if (dir != nullptr) {
-                struct dirent* entry;
-                while ((entry = readdir(dir)) != nullptr) {
-                    std::string file_name = entry->d_name;
-                    if (file_name.size() >= 3 && file_name.substr(file_name.size() - 3) == ".in") {
-                        int num = std::stoi(file_name.substr(0, file_name.size() - 3));
-                        inputs.emplace_back(num);
-                    }
-                }
-                closedir(dir);
-            }
-        #endif
-
-            return inputs;
-        } 
 
         void __terminate_process(void* process) {
         #ifdef ON_WINDOWS
@@ -218,7 +160,7 @@ namespace generator {
             registerGen(argc, argv, 1);
         }
 
-        void __set_generator_args(std::string args) {
+        void __set_generator_args(std::string args = "") {
             char** fake_argv = __fake_argv(_setting::_first_generator_argv, args);
             int fake_argc = __fake_argc(fake_argv);
             registerGen(fake_argc, fake_argv , 1);
@@ -226,16 +168,32 @@ namespace generator {
         }
 
         void init_gen() {
-            __set_generator_args("");
+            __set_generator_args();
         }
         
-        void __set_checker_args(std::string args) {
+        void init_checker(int argc,char* argv[]) {
+            registerTestlibCmd(argc, argv);
+        }
+
+        void __set_checker_args(std::string args = "") {
             char** fake_argv = __fake_argv(_setting::_first_checker_argv, args);
             int fake_argc = __fake_argc(fake_argv);
             registerTestlibCmd(fake_argc, fake_argv);
             __free_char_array(fake_argv);
         }
+
+        void init_checker() {
+            __set_checker_args();
+        }
         
+        void init_validator(int argc,char* argv[]) {
+            registerValidation(argc, argv);
+        }
+
+        void init_validator() {
+            registerValidation();
+        }
+
         void __set_validator_args(std::string args) {
             if (args.empty()) {
                 registerValidation();
@@ -253,20 +211,10 @@ namespace generator {
         }
         
         void __set_args(std::string args, _enum::_FuncProgramType type) {
-            switch(type) {
-            case _enum::_GENERATOR:
-                __set_generator_args(args);
-                break;
-            case _enum::_CHECKER:
-                __set_checker_args(args);
-                break;
-            case _enum::_VALIDATOR:
-                __set_validator_args(args);
-                break;
-            default:
-                __set_default_args();
-                break;
-            }
+            if (type == _enum::_GENERATOR) __set_generator_args(args);
+            else if (type == _enum::_CHECKER) __set_checker_args(args);
+            else if (type == _enum::_VALIDATOR) __set_validator_args(args);
+            else __set_default_args();
         }
 
         template<typename T>
@@ -299,6 +247,288 @@ namespace generator {
 
         template<typename T>
         using _ProgramTypeT = typename _ProgramType<T>::type;
+
+        template<typename T>
+        typename std::enable_if<IsCommandFuncConstructible<T>::value, int>::type
+        __run_child_program(T program, Path input, Path output, Path error, _enum::_FuncProgramType type) {
+            if (!input.__empty()) __open_input_file(input);
+            if (!output.__empty()) __open_output_file(output);
+            if (!error.__empty()) __open_error_file(error);
+            __set_args(program.args(), type);
+            program.func()();
+            return EXIT_SUCCESS;
+        }
+        
+        template<typename T>
+        typename std::enable_if<IsCommandPathConstructible<T>::value, int>::type
+        __run_child_program(T program, Path input, Path output, Path error, _enum::_FuncProgramType) {
+            if (!input.__empty() && program.enable_default_args()) program.add_args("<", input);
+            if (!output.__empty() && program.enable_default_args()) program.add_args(">", output);
+            if (!error.__empty() && program.enable_default_args()) program.add_args("2>", error);
+            int return_code = program.run();
+            if (program.enable_default_args()) program.clear_args();
+            return return_code;
+        } 
+
+        template<typename T>
+        typename std::enable_if<IsCommandFuncConstructible<T>::value, void>::type
+        __close_files(Path input, Path output, Path error) {
+            if (!input.__empty()) __close_input_file_to_console();
+            if (!output.__empty()) __close_output_file_to_console();
+            if (!error.__empty()) __close_error_file_to_console();
+        }   
+
+        template<typename T>
+        typename std::enable_if<IsCommandPathConstructible<T>::value, void>::type
+        __close_files(Path, Path, Path) {
+            return;
+        }
+
+        struct ReturnState {
+            int exit_code;
+            int time;
+        };
+
+        #ifdef ON_WINDOWS
+
+        template<typename T1, typename T2, typename T3, typename T4>
+        typename std::enable_if<
+            IsCommandPathConstructible<T1>::value &&
+            IsPathConstructible<T2>::value &&
+            IsPathConstructible<T3>::value &&
+            IsPathConstructible<T4>::value, ReturnState>::type
+        __run_child_process_program(T1 program, T2 input_file, T3 output_file, T4 error_file, int time_limit, _enum::_FuncProgramType func_type) {
+            auto start_time = std::chrono::steady_clock::now();
+            SECURITY_ATTRIBUTES sa;
+            sa.nLength = sizeof(sa);
+            sa.lpSecurityDescriptor = NULL;
+            sa.bInheritHandle = TRUE;       
+            
+            HANDLE hInFile = INVALID_HANDLE_VALUE;
+            HANDLE hOutFile = INVALID_HANDLE_VALUE;
+            HANDLE hErrorFile = INVALID_HANDLE_VALUE;
+
+            Path input_file_path(input_file);
+            Path output_file_path(output_file);
+            Path error_file_path(error_file);
+
+            if (!input_file_path.__empty()) {
+                if (!input_file_path.__file_exist())  return {_setting::_error_return, -1};
+                hInFile = CreateFileA(Path(input_file).cname(),
+                    GENERIC_READ | GENERIC_WRITE,
+                    FILE_SHARE_READ | FILE_SHARE_WRITE,
+                    &sa,
+                    OPEN_EXISTING ,
+                    FILE_ATTRIBUTE_NORMAL,
+                    NULL );
+            }
+            
+            if (!output_file_path.__empty()) {
+                hOutFile = CreateFileA(Path(output_file).cname(),
+                    GENERIC_READ | GENERIC_WRITE,
+                    FILE_SHARE_WRITE | FILE_SHARE_READ,
+                    &sa,
+                    CREATE_ALWAYS ,
+                    FILE_ATTRIBUTE_NORMAL,
+                    NULL );                
+            }
+
+            if (!error_file_path.__empty()) {
+                hErrorFile = CreateFileA(Path(error_file).cname(),
+                    GENERIC_READ | GENERIC_WRITE,
+                    FILE_SHARE_WRITE | FILE_SHARE_READ,
+                    &sa,
+                    CREATE_ALWAYS ,
+                    FILE_ATTRIBUTE_NORMAL,
+                    NULL );                
+            }
+
+            PROCESS_INFORMATION pi; 
+            STARTUPINFOA si;
+            BOOL ret = FALSE; 
+            DWORD flags = CREATE_NO_WINDOW;
+
+            ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
+            ZeroMemory(&si, sizeof(STARTUPINFOA));
+            si.cb = sizeof(STARTUPINFOA); 
+            si.dwFlags |= STARTF_USESTDHANDLES;
+            si.hStdInput = hInFile != INVALID_HANDLE_VALUE ? hInFile : NULL;
+            si.hStdError = hErrorFile != INVALID_HANDLE_VALUE ? hErrorFile : NULL;
+            si.hStdOutput = hOutFile != INVALID_HANDLE_VALUE ? hOutFile : NULL;
+            ret = CreateProcessA(NULL, const_cast<char *>(program.command().c_str()), NULL, NULL, TRUE, flags, NULL, NULL, &si, &pi);
+            if (ret) 
+            {
+                if (__is_time_limit_inf(time_limit))  WaitForSingleObject(pi.hProcess, INFINITE);
+                else if (WaitForSingleObject(pi.hProcess, time_limit) == WAIT_TIMEOUT) __terminate_process(pi.hProcess);
+                auto end_time = std::chrono::steady_clock::now();
+                DWORD exitCode;
+                GetExitCodeProcess(pi.hProcess, &exitCode);
+                CloseHandle(pi.hProcess);
+                CloseHandle(pi.hThread);
+                if (hInFile != INVALID_HANDLE_VALUE) CloseHandle(hInFile);
+                if (hOutFile != INVALID_HANDLE_VALUE) CloseHandle(hOutFile);
+                if (hErrorFile != INVALID_HANDLE_VALUE) CloseHandle(hErrorFile);
+                return {(int)exitCode, (int)std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count()};
+            }
+            else {
+                if (hInFile != INVALID_HANDLE_VALUE) CloseHandle(hInFile);
+                if (hOutFile != INVALID_HANDLE_VALUE) CloseHandle(hOutFile);
+                if (hErrorFile != INVALID_HANDLE_VALUE) CloseHandle(hErrorFile);
+                return {_setting::_error_return, -1};
+            }   
+        }
+        
+        template<typename T1, typename T2, typename T3, typename T4>
+        typename std::enable_if<
+            IsCommandFuncConstructible<T1>::value &&   
+            IsPathConstructible<T2>::value &&
+            IsPathConstructible<T3>::value &&
+            IsPathConstructible<T4>::value, ReturnState>::type
+        __run_child_process_program(T1 program, T2 input_file, T3 output_file, T4 error_file, int time_limit, _enum::_FuncProgramType func_type) {
+            if (__is_time_limit_inf(time_limit)) {
+                auto start_time = std::chrono::steady_clock::now();
+                Path input_file_path(input_file);
+                Path output_file_path(output_file);
+                Path error_file_path(error_file);
+                int exit_code = __run_child_program(program, input_file_path, output_file_path, error_file_path, func_type);
+                __close_files<T1>(input_file_path, output_file_path, error_file_path);
+                auto end_time = std::chrono::steady_clock::now();
+                return {exit_code, (int)std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count()};
+            } else {
+                _msg::__error_msg(_msg::_defl, "Unsupport running time limit function in Windows");
+                return {_setting::_error_return, -1};
+            }
+        }
+        
+        #else
+        
+        template<typename T1, typename T2, typename T3, typename T4>
+        typename std::enable_if<
+            IsProgram<T1>::value &&   
+            IsPathConstructible<T2>::value &&
+            IsPathConstructible<T3>::value &&
+            IsPathConstructible<T4>::value, ReturnState>::type
+        __run_child_process_program(T1 program, T2 input_file, T3 output_file, T4 error_file, int time_limit, _enum::_FuncProgramType func_type) {
+            auto start_time = std::chrono::steady_clock::now();
+            pid_t pid = fork();
+            Path input_file_path(input_file);
+            Path output_file_path(output_file);
+            Path error_file_path(error_file);            
+            if (pid == 0) {
+                __set_default_args();
+                int exit_code = __run_child_program(program, input_file_path, output_file_path, error_file_path, func_type);
+                __close_files<T1>(input_file_path, output_file_path, error_file_path);
+                exit(exit_code);           
+            } 
+            else if (pid > 0) {
+
+                __set_default_args();
+                auto limit = std::chrono::milliseconds(time_limit);
+
+                int status;
+                
+                if (__is_time_limit_inf(time_limit)) {
+                    waitpid(pid, &status, 0);
+                }
+                else {
+                    auto result = waitpid(pid, &status, WNOHANG);
+                    while (result == 0 && std::chrono::steady_clock::now() - start_time < limit) {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                        result = waitpid(pid, &status, WNOHANG);
+                    }     
+                    if (result == 0) {
+                        __terminate_process(reinterpret_cast<void*>(pid));
+                    }   
+                    result = waitpid(pid, &status, WNOHANG);              
+                }
+                
+                auto end_time = std::chrono::steady_clock::now();              
+                int exit_status = WEXITSTATUS(status);
+                if (WIFEXITED(status) && exit_status == -1) {     
+                    _msg::__warn_msg(_msg::_defl, "Fail to run program or something error.");
+                    return {_setting::_error_return, -1};
+                } else {
+                    return {exit_status, (int)std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count()};   
+                }    
+                     
+            } 
+            else {
+                _msg::__warn_msg(_msg::_defl, "Fail to fork.");
+                return {_setting::_error_return, -1};
+            }            
+        }    
+        #endif
+
+        template<typename T>
+        typename std::enable_if<IsCommandPathConstructible<T>::value, void>::type
+        __check_program_valid(T program) {
+            program.path().full();
+            if (!program.path().__file_exist()) {
+                _msg::__error_msg(_msg::_defl, tools::string_format("File %s not exist.", program.path().cname()));
+            }
+        }
+        
+        template<typename T>
+        typename std::enable_if<IsCommandFuncConstructible<T>::value, void>::type
+        __check_program_valid(T) {
+            return;
+        }
+
+        template<typename T>
+        typename std::enable_if<IsPathConstructible<T>::value, void>::type
+        __check_program_valid(T program) {
+            Path program_path(program);
+            program_path.full();
+            if (!program_path.__file_exist()) {
+                _msg::__error_msg(_msg::_defl, tools::string_format("File %s not exist.", program_path.cname()));
+            }
+        }
+        
+        template<typename T>
+        typename std::enable_if<IsFunctionConvertible<T>::value, void>::type
+        __check_program_valid(T) {
+            return;
+        }
+
+        template<typename T1, typename T2, typename T3, typename T4>
+        typename std::enable_if<
+            IsProgram<T1>::value &&
+            IsPathConstructible<T2>::value &&
+            IsPathConstructible<T3>::value &&
+            IsPathConstructible<T4>::value, ReturnState>::type
+        __run_program(T1 program, T2 input_file, T3 output_file, T4 error_file, int time_limit, _enum::_FuncProgramType func_type) {
+            __check_program_valid(program);
+            return __run_child_process_program(program, input_file, output_file, error_file, time_limit, func_type);
+        }
+
+        bool __is_error(int return_code) {
+            return return_code == _setting::_error_return;
+        }
+        
+        bool __is_success(int return_code) {
+            return return_code == EXIT_SUCCESS;
+        }
+
+        template<typename T>
+        typename std::enable_if<IsProgram<T>::value, T>::type
+        __generator_program(T program, int x) {
+            if (program.enable_default_args()) program.add_args(_setting::default_stable_seed + std::to_string(x));
+            return program;
+        }
+        
+        template<typename T>
+        typename std::enable_if<IsFunctionConvertible<T>::value, CommandFunc>::type
+        __generator_program(T program, int x) {
+            std::string args = _setting::default_seed ? _setting::default_stable_seed + std::to_string(x) : "";
+            return CommandFunc(program, args);
+        }
+        
+        template<typename T>
+        typename std::enable_if<IsPathConstructible<T>::value, CommandPath>::type
+        __generator_program(T program, int x) {
+            std::string args = _setting::default_seed ? _setting::default_stable_seed + std::to_string(x) : "";
+            return CommandPath(program, args);
+        }     
     } // namespace io
 } // namespace generator
 

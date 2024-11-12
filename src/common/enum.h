@@ -81,6 +81,12 @@ namespace generator {
       _RESULT,
       _OTHER  
     };
+
+    enum _Stage {
+      _INPUT,
+      _OUTPUT,
+      _VALID 
+    };
   } // namespace _enum
 } // namespace generator
 
