@@ -6,8 +6,8 @@ examples/*/*.exe
 # Xmake cache
 .xmake/
 build/
-./src/test.*
-./src/testlib.h
+src/test.*
+src/testlib.h
 
 # MacOS Cache
 .DS_Store
