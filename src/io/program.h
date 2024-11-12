@@ -509,26 +509,6 @@ namespace generator {
             return return_code == EXIT_SUCCESS;
         }
 
-        template<typename T>
-        typename std::enable_if<IsProgram<T>::value, T>::type
-        __generator_program(T program, int x) {
-            if (program.enable_default_args()) program.add_args(_setting::default_stable_seed + std::to_string(x));
-            return program;
-        }
-        
-        template<typename T>
-        typename std::enable_if<IsFunctionConvertible<T>::value, CommandFunc>::type
-        __generator_program(T program, int x) {
-            std::string args = _setting::default_seed ? _setting::default_stable_seed + std::to_string(x) : "";
-            return CommandFunc(program, args);
-        }
-        
-        template<typename T>
-        typename std::enable_if<IsPathConstructible<T>::value, CommandPath>::type
-        __generator_program(T program, int x) {
-            std::string args = _setting::default_seed ? _setting::default_stable_seed + std::to_string(x) : "";
-            return CommandPath(program, args);
-        }     
     } // namespace io
 } // namespace generator
 

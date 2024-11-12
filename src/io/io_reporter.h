@@ -7,24 +7,12 @@
 #ifndef _SGPCET_LOGGER_H_
 #include "log/logger.h"
 #endif // !_SGPCET_LOGGER_H_
-#ifndef _SGPCET_PATH_H_
-#include "path.h"
-#endif // !_SGPCET_PATH_H_
+#ifndef _SGPCET_IO_INIT_H_
+#include "io/init.h"
+#endif // !_SGPCET_IO_INIT_H_
 
 namespace generator {
     namespace io {
-
-        Path __testcases_folder() {
-            return __path_join(__current_path(), _setting::testcase_folder);
-        }
-
-        Path __input_file_path(int x) {
-            return __path_join(__testcases_folder(), __end_with(x, _enum::_IN));
-        }
-        
-        Path __output_file_path(int x) {
-            return __path_join(__testcases_folder(), __end_with(x, _enum::_OUT));
-        }
 
         const char* __stage_name(_enum::_Stage stage) {
             if (stage == _enum::_INPUT) return "Make input";
