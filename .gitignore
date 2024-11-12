@@ -3,8 +3,9 @@
 debug/
 examples/*.exe
 examples/*/*.exe
-tests/**/*.exe
-tests/**/*.obj
-tests/.sconsign.dblite
-tests/**/*.o
-tests/build/
+# Xmake cache
+.xmake/
+build/
+
+# MacOS Cache
+.DS_Store
