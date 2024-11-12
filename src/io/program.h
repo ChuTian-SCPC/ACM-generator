@@ -29,15 +29,15 @@ namespace generator {
             ".val"
         };
 
-        std::string __end_with(int x, _End end) {
+        std::string __end_with(int x, _enum::_End end) {
             return std::to_string(x) + _file_end[end];
         }
         
-        std::string __end_with(const char* text, _End end) {
+        std::string __end_with(const char* text, _enum::_End end) {
             return std::string(text) + _file_end[end];
         }
         
-        std::string __end_with(std::string text, _End end) {
+        std::string __end_with(std::string text, _enum::_End end) {
             return text + _file_end[end];
         }
         
@@ -115,11 +115,11 @@ namespace generator {
         }
         
         bool __input_file_exists(int x) {
-            return __input_file_path(x).__file_exists();
+            return __input_file_path(x).__file_exist();
         }
         
         bool __output_file_exists(int x) {
-            return __output_file_path(x).__file_exists();
+            return __output_file_path(x).__file_exist();
         }
 
         std::vector<int> __get_all_inputs() {
