@@ -8,7 +8,7 @@
 #include "log/logger.h"
 #endif // !_SGPCET_LOGGER_H_
 #ifndef _SGPCET_IO_INIT_H_
-#include "io/init.h"
+#include "io/io_init.h"
 #endif // !_SGPCET_IO_INIT_H_
 
 namespace generator {
