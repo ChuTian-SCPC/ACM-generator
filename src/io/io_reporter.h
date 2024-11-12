@@ -12,6 +12,21 @@ namespace generator {
         _msg::_ColorMsg _tle("TLE", _enum::Color::Yellow);
         _msg::_ColorMsg _checker_return("checker return :", _enum::Color::Red);
 
+        _msg::_ColorMsg __state_msg(_enum::_JudgeState state, bool consider_tle) {
+            if (consider_tle && _enum::__has_tle(state)) return _tle;
+            else if (_enum::__has_ac(state)) return _ac;
+            else return _wa;
+        }
+
+        void __state_msg(_msg::OutStream &out, _enum::_JudgeState state) {
+            out.print(__state_msg(state, true));
+            if (_enum::__is_combine_state(state)) {
+                out.print("(");
+                out.print(__state_msg(state, false));
+                out.print(")");
+            }
+        }
+
         void __judge_msg(_msg::OutStream &out, _enum::_JudgeState state, int case_id, int runtime, const std::string &result) {
             out.print(tools::string_format("Testcase %d : ", case_id));
             if (_enum::__is_run_error(state)) {
@@ -19,12 +34,7 @@ namespace generator {
                 out.println(" ,meet some error,pleace check it or report.");
                 return;
             }
-            out.print(__state_msg(state, true));
-            if (_enum::__is_combine_state(state)) {
-                out.print("(");
-                out.print(__state_msg(state, false));
-                out.print(")");
-            }
+            __state_msg(out, state);
             out.print(tools::string_format(" ,Runtime = %dms", runtime));
             if (_enum::__is_tle(state)) out.print(" (killed)");
             out.print(".");

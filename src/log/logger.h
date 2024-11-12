@@ -189,12 +189,6 @@ namespace generator {
         for (int i = 1; i <= count; i++) out.println();
       }
       
-      _ColorMsg __state_msg(_enum::_JudgeState state, bool consider_tle) {
-        if (consider_tle && _enum::__has_tle(state)) return _tle;
-        else if (_enum::__has_ac(state)) return _ac;
-        else return _wa;
-      }
-      
       OutStream _defl; // default_log
     } // namespace _msg
 } // namespace generator
