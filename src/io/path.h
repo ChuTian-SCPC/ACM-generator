@@ -108,7 +108,9 @@ namespace generator {
       
       template <typename... Args>
       Path join(const Args&... args) {
+      #ifdef ON_WINDOWS
         if (this->__empty()) return tools::string_join(_setting::_path_split, args...);
+      #endif // ON_WINDOWS
         std::string path_join = tools::string_join(_setting::_path_split, _path, args...);
         return Path(path_join);
       }

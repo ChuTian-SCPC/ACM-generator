@@ -22,6 +22,7 @@ namespace generator {
         "\033[1;31m",
         "\033[32m",
         "\033[1;33m",
+        "\033[0m",
         "\033[0m"
       };
     #endif // ON_WINDOWS
