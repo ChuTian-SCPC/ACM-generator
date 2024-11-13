@@ -28,6 +28,16 @@ namespace generator {
       _JUDGE_STATE_MAX
     };
 
+    constexpr int __state_index(_JudgeState state) {
+      return static_cast<int>(state);
+    }
+
+    inline _JudgeState& operator++(_JudgeState& s) {
+      if (s != _JudgeState::_JUDGE_STATE_MAX) 
+        s = static_cast<_JudgeState>(static_cast<int>(s) + 1);
+      return s;
+    }
+
     inline _JudgeState operator|(_JudgeState lhs, _JudgeState rhs) {
         return static_cast<_JudgeState>(
             static_cast<int>(lhs) | static_cast<int>(rhs)

@@ -6,29 +6,7 @@
 #endif // !_SGPCET_IO_INIT_H_
 
 namespace generator {
-    namespace io {
-        std::string _file_end[_enum::_MAX_END] = {
-            ".in",
-            ".out",
-            ".ans",
-            ".log",
-            ".logc",
-            ".exe",
-            ".val"
-        };
-
-        std::string __end_with(int x, _enum::_End end) {
-            return std::to_string(x) + _file_end[end];
-        }
-        
-        std::string __end_with(const char* text, _enum::_End end) {
-            return std::string(text) + _file_end[end];
-        }
-        
-        std::string __end_with(std::string text, _enum::_End end) {
-            return text + _file_end[end];
-        }
-        
+    namespace io {       
         void __open_input_file(const char* file) {
             if (std::cin.eof())  std::cin.clear();
             if (freopen(file, "r", stdin) == NULL) {

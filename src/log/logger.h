@@ -21,19 +21,16 @@ namespace generator {
         class OutStream {
         protected:
           std::ostream* _stream;
-          bool _control;
+          std::ofstream _file;
           std::string _path;
           std::unordered_set<std::string> _logs;
           bool _log_same;
         public:
           OutStream(bool log_same = true) : _log_same(log_same) { __default_output(); }
           OutStream(std::ostream& stream, bool log_same = true) : 
-            _stream(&stream), _control(false), _path(""), _log_same(log_same)
-          {
-            _stream->iword(_colorize_index) = true;
-          }
+            _stream(&stream), _path(""), _log_same(log_same) {}
           OutStream(const io::Path& path, bool log_same = true);
-          OutStream(const std::string& path, bool log_same = false) : _log_same(log_same) {
+          OutStream(const std::string& path, bool log_same = true) : _log_same(log_same), _stream(nullptr) {
             open(path);
           }
           ~OutStream() { close(); }
@@ -42,24 +39,21 @@ namespace generator {
           OutStream& operator=(const OutStream&) = delete;
           
           OutStream(OutStream&& other) noexcept
-            : _stream(std::move(other._stream)), _control(other._control), _path(std::move(other._path)) {
-            _control = false;
+            : _stream(std::move(other._stream)), _file(std::move(other._file)), _path(std::move(other._path)) {
           }
           
           OutStream& operator=(OutStream&& other) noexcept {
             if (this != &other) {
-              close(); 
               _stream = std::move(other._stream);
-              _control = other._control;
+              _file = std::move(other._file);
               _path = std::move(other._path);
-              other._control = false; 
             }
             return *this;
           }
           
           void swap(OutStream& other) noexcept {
             std::swap(_stream, other._stream);
-            std::swap(_control, other._control);
+            std::swap(_file, other._file);
             std::swap(_path, other._path);
             std::swap(_logs, other._logs);
             std::swap(_log_same, other._log_same);
@@ -106,15 +100,17 @@ namespace generator {
             }
             return false;
           }
+
+          _GET_VALUE_CONST(std::string, path)
+          _SET_GET_VALUE(bool, log_same)
             
         protected:
           void open(std::string path) {
             close(); 
             if (!path.empty()) {
-              auto file = std::ofstream(path);
-              if (file.is_open()) {
-                _stream = &file;
-                _control = true; 
+              _file = std::ofstream(path);
+              if (_file.is_open()) {
+                _stream = &_file;
                 _path = path;
                 return; 
               }
@@ -125,12 +121,11 @@ namespace generator {
           }
           
           void close() {
-            if (_control && _stream) dynamic_cast<std::ofstream*>(_stream)->close();
+            if (_file.is_open()) _file.close();
           }
           
           void __default_output() {
             _stream = &std::cerr;
-            _control = false;
             _path = "";
             _stream->iword(_colorize_index) = true;
           }

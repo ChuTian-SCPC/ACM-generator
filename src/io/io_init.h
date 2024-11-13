@@ -59,6 +59,28 @@ namespace generator {
             return __path_join(__current_path(), _setting::testcase_folder);
         }
 
+        std::string _file_end[_enum::_MAX_END] = {
+            ".in",
+            ".out",
+            ".ans",
+            ".log",
+            ".logc",
+            ".exe",
+            ".val"
+        };
+
+        std::string __end_with(int x, _enum::_End end) {
+            return std::to_string(x) + _file_end[end];
+        }
+        
+        std::string __end_with(const char* text, _enum::_End end) {
+            return std::string(text) + _file_end[end];
+        }
+        
+        std::string __end_with(std::string text, _enum::_End end) {
+            return text + _file_end[end];
+        }
+
         Path __input_file_path(int x) {
             return __path_join(__testcases_folder(), __end_with(x, _enum::_IN));
         }
@@ -161,7 +183,7 @@ namespace generator {
         bool __is_time_limit_inf(int time_limit) {
             return time_limit == _setting::time_limit_inf;
         }
-        
+
         bool __time_limit_exceed(int time, int time_limit) {
             return !__is_time_limit_inf(time) && time > time_limit;
         }

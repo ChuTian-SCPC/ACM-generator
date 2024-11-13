@@ -10,9 +10,11 @@ namespace generator {
         _msg::_ColorMsg _ac("AC", _enum::Color::Green);
         _msg::_ColorMsg _wa("WA", _enum::Color::Red);
         _msg::_ColorMsg _tle("TLE", _enum::Color::Yellow);
+        _msg::_ColorMsg _run_error("RE/UNK", _enum::Color::Red);
         _msg::_ColorMsg _checker_return("checker return :", _enum::Color::Red);
 
         _msg::_ColorMsg __state_msg(_enum::_JudgeState state, bool consider_tle) {
+            if (_enum::__is_run_error(state)) return _run_error;
             if (consider_tle && _enum::__has_tle(state)) return _tle;
             else if (_enum::__has_ac(state)) return _ac;
             else return _wa;
@@ -74,6 +76,29 @@ namespace generator {
             } else {
                 _msg::__info_msg(_msg::_defl, _msg::_ColorMsg("All Success.", _enum::Color::Green));
             }
+            _msg::__endl(_msg::_defl);
+        }
+
+        void __report_comapre_stream_logs(int case_count, _msg::OutStream& stream, std::vector<int>& results_count) {
+            _msg::__info_msg(stream, "Total results :");
+            int error_count = 0;
+            for (_enum::_JudgeState state = _enum::_JudgeState::_UNKNOWN; state < _enum::_JudgeState::_JUDGE_STATE_MAX; ++state) {
+                if (_enum::__is_run_error(state)) {
+                    error_count += results_count[_enum::__state_index(state)];
+                    continue;
+                }
+                __state_msg(stream, state);
+                _msg::__info_msg(stream, tools::string_format(" : %d / %d", results_count[_enum::__state_index(state)], case_count));
+            }
+            __state_msg(stream, _enum::_JudgeState::_ERROR);
+            _msg::__info_msg(stream, tools::string_format(" : %d / %d", error_count, case_count));
+            
+        }
+
+        void __report_compare_logs(int case_count, _msg::OutStream& log, std::vector<int>& results_count) {
+            __report_comapre_stream_logs(case_count, log, results_count);
+            __report_comapre_stream_logs(case_count, _msg::_defl, results_count);
+            _msg::__info_msg(_msg::_defl, tools::string_format("The report is in %s file.", log.path().c_str()));
             _msg::__endl(_msg::_defl);
         }
     } // namespace io
