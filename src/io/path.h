@@ -7,6 +7,9 @@
 #ifndef _SGPCET_MACRO_H_
 #include "basic/macro.h"
 #endif // !_SGPCET_MACRO_H_
+#ifndef _SGPCET_TOOLS_H_
+#include "basic/tools.h"
+#endif // !_SGPCET_TOOLS_H_
 #ifndef _SGPCET_LOGGER_H_
 #include "log/logger.h"
 #endif // !_SGPCET_LOGGER_H_
@@ -174,6 +177,17 @@ namespace generator {
             if (!__create_directory(current_path)) 
               _msg::__fail_msg(_msg::_defl, tools::string_format("Error in creating folder : %s.",current_path.cname()));
         }
+    }
+    
+    template<typename T1, typename T2>
+    typename std::enable_if<IsPathConstructible<T1>::value && IsPathConstructible<T2>::value, void>::type
+    __copy_file(T1 source, T2 destination) {
+    #ifdef ON_WINDOWS
+        std::string command = tools::string_join(" ", "copy", source, destination);
+    #else
+        std::string command = tools::string_join(" ", "cp", source, destination);
+    #endif
+        std::system(command.c_str());
     }
 
   } // namespace io
