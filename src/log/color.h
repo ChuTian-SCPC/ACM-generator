@@ -2,7 +2,7 @@
 #define _SGPCET_COLOR_H_
 
 #ifndef _SGPCET_SETTING_H_
-#include "common/setting.h"
+#include "basic/setting.h"
 #endif // !_SGPCET_SETTING_H_
 
 namespace generator {

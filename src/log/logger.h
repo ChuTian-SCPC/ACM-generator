@@ -5,10 +5,10 @@
 #include "color.h"
 #endif // !_SGPCET_COLOR_H_
 #ifndef _SGPCET_TOOLS_H_
-#include "common/tools.h"
+#include "basic/tools.h"
 #endif // !_SGPCET_TOOLS_H_
 #ifndef _SGPCET_ENUM_H_
-#include "common/enum.h"
+#include "basic/enum.h"
 #endif // !_SGPCET_ENUM_H_
 
 namespace generator {

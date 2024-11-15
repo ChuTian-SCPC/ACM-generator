@@ -2,10 +2,10 @@
 #define _SGPCET_COMMAND_FUNC_H_
 
 #ifndef _SGPCET_COMMON_H_
-#include "common/common.h"
+#include "basic/common.h"
 #endif // !_SGPCET_COMMON_H_
 #ifndef _SGPCET_MACRO_H_
-#include "common/macro.h"
+#include "basic/macro.h"
 #endif // !_SGPCET_MACRO_H_
 
 namespace generator {

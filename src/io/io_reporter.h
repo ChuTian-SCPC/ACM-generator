@@ -7,17 +7,17 @@
 
 namespace generator {
     namespace io {
-        _msg::_ColorMsg _ac("AC", _enum::Color::Green);
-        _msg::_ColorMsg _wa("WA", _enum::Color::Red);
-        _msg::_ColorMsg _tle("TLE", _enum::Color::Yellow);
-        _msg::_ColorMsg _run_error("RE/UNK", _enum::Color::Red);
-        _msg::_ColorMsg _checker_return("checker return :", _enum::Color::Red);
+        _msg::_ColorMsg _ac_color("AC", _enum::Color::Green);
+        _msg::_ColorMsg _wa_color("WA", _enum::Color::Red);
+        _msg::_ColorMsg _tle_color("TLE", _enum::Color::Yellow);
+        _msg::_ColorMsg _run_error_color("RE/UNK", _enum::Color::Red);
+        _msg::_ColorMsg _checker_return_color("checker return :", _enum::Color::Red);
 
         _msg::_ColorMsg __state_msg(_enum::_JudgeState state, bool consider_tle) {
-            if (_enum::__is_run_error(state)) return _run_error;
-            if (consider_tle && _enum::__has_tle(state)) return _tle;
-            else if (_enum::__has_ac(state)) return _ac;
-            else return _wa;
+            if (_enum::__is_run_error(state)) return _run_error_color;
+            if (consider_tle && _enum::__has_tle(state)) return _tle_color;
+            else if (_enum::__has_ac(state)) return _ac_color;
+            else return _wa_color;
         }
 
         void __state_msg(_msg::OutStream &out, _enum::_JudgeState state) {
@@ -41,8 +41,8 @@ namespace generator {
             if (_enum::__is_tle(state)) out.print(" (killed)");
             out.print(".");
             if (_enum::__has_wa(state)) {
-                out.println(" ", _checker_return);
-                out.println("  ", result);
+                out.println(" ", _checker_return_color);
+                out.print("  ", result);
             }
             out.println();
         }

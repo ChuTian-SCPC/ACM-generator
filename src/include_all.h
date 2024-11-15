@@ -2,19 +2,20 @@
 #define _SGPCET_INCLUDE_ALL_H_
 
 #ifndef _SGPCET_COMMON_H_
-#include "common/common.h"
+#include "basic/common.h"
 #endif // !_SGPCET_COMMON_H_
+
 #ifndef _SGPCET_SETTING_H_
-#include "common/setting.h"
+#include "basic/setting.h"
 #endif // !_SGPCET_SETTING_H_
 #ifndef _SGPCET_TOOLS_H_
-#include "common/tools.h"
+#include "basic/tools.h"
 #endif // !_SGPCET_TOOLS_H_
 #ifndef _SGPCET_ENUM_H_
-#include "common/enum.h"
+#include "basic/enum.h"
 #endif // !_SGPCET_ENUM_H_
 #ifndef _SGPCET_MACRO_H_
-#include "common/macro.h"
+#include "basic/macro.h"
 #endif // !_SGPCET_MACRO_H_
 
 #ifndef _SGPCET_COLOR_H_
@@ -45,7 +46,9 @@
 #ifndef _SGPCET_INPUTS_OUTPUTS_H_
 #include "io/inputs_outputs.h"
 #endif // !_SGPCET_INPUTS_OUTPUTS_H_
-
+#ifndef _SGPCET_COMPARE_H_
+#include "io/compare.h"
+#endif // !_SGPCET_COMPARE_H_
 
 namespace generator {
   namespace all {

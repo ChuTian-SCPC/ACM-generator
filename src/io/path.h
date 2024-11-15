@@ -2,10 +2,10 @@
 #define _SGPCET_PATH_H_
 
 #ifndef _SGPCET_SETTING_H_
-#include "common/setting.h"
+#include "basic/setting.h"
 #endif // !_SGPCET_SETTING_H_
 #ifndef _SGPCET_MACRO_H_
-#include "common/macro.h"
+#include "basic/macro.h"
 #endif // !_SGPCET_MACRO_H_
 #ifndef _SGPCET_LOGGER_H_
 #include "log/logger.h"

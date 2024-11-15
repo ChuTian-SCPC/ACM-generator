@@ -7,25 +7,6 @@
 
 namespace generator {
     namespace io {
-        std::string checker_name[_enum::MaxChecker] = {
-          "lcmp",
-          "yesno",
-          "rcmp4",
-          "rcmp6",
-          "rcmp9",
-          "wcmp"  
-        };
-
-        Path __get_default_checker_file(Checker checker) {
-            Path folder_path(__full_path(__path_join(__lib_path().__folder_path(), _setting::_checker_folder)));
-        #ifdef ON_WINDOWS
-            Path checker_path(__path_join(folder_path, _setting::_sub_checker_folder, __end_with(checker_name[checker], _enum::_EXE)));
-        #else
-            Path checker_path(__path_join(folder_path, _setting::_sub_checker_folder, checker_name[checker]));
-        #endif
-            return checker_path;
-        }
-
         template<typename T>
         typename std::enable_if<IsCommandPathConstructible<T>::value, std::string>::type
         __compare_program_name(T program) {
@@ -76,7 +57,97 @@ namespace generator {
             else result |= _enum::_JudgeState::_WA;
         } 
 
+        template<typename T, typename F>
+        typename std::enable_if<IsProgram<T>::value && IsProgramConstructible<F>::value, void>::type
+        __check_once(int id, F program, int time_limit, T checker, Path& ans_file, Path& testlib_out_file, 
+            int& runtime, _enum::_JudgeState& result, std::string& testlib_result) {
+            Path input_file = __input_file_path(id);
+            Path output_file = __output_file_path(id);
+            ReturnState state = __run_program(program, input_file, ans_file, 
+                _setting::_default_path, __time_limit_extend(time_limit), _enum::_RESULT);
+            if (!__is_success(state.exit_code)) {
+                result = _enum::_JudgeState::_ERROR;
+                return;
+            }
+            runtime = state.time;
+            if(__enable_judge_ans(runtime, time_limit, result)) {
+                __check_result(
+                    input_file, output_file, ans_file, testlib_out_file,
+                    checker, result, testlib_result);
+            }   
+        }
 
+        template<typename T>
+        typename std::enable_if<IsProgram<T>::value, void>::type
+        __compare_impl(std::map<int, int>& , int , T ) {
+            return;
+        } 
+
+        template<typename T, typename F, typename... Args>
+        typename std::enable_if<IsProgram<T>::value && IsProgramConstructible<F>::value, void>::type
+        __compare_impl(std::map<int, int>& case_indices, int time_limit, T checker, F first, Args... args) {
+            _ProgramTypeT<F> program = __result_program(first);
+            __check_program_valid(program);
+            __increase_function_count<_ProgramTypeT<F>>();
+            Path ans_folder = __compare_program_folder(program);
+            std::string program_name = __compare_program_name(program);
+            __create_directories(ans_folder);
+            Path testlib_out_file = __path_join(ans_folder, __end_with("__checker", _enum::_LOGC));
+            int case_count = case_indices.size();
+            std::vector<int> runtimes(case_count, -1);
+            std::vector<_enum::_JudgeState> results(case_count, _enum::_JudgeState::_UNKNOWN);
+            std::vector<std::string> testlib_results(case_count);
+            std::vector<int> results_count(_enum::__state_index(_enum::_JudgeState::_JUDGE_STATE_MAX), 0);
+            _msg::__info_msg(_msg::_defl, "Test results for program ", _msg::_ColorMsg(program_name, _enum::Color::Green), " :");
+            Path log_path = __path_join(__compare_folder(), __end_with(program_name, _enum::_LOG));
+            _msg::OutStream log(log_path); 
+            for (auto cas : case_indices) {
+                int real_index = cas.first;
+                int vec_index = cas.second;
+                Path ans_file = __path_join(ans_folder, __end_with(real_index, _enum::_ANS));
+                __check_once(
+                    real_index, program, time_limit, checker, ans_file, testlib_out_file,
+                    runtimes[vec_index], results[vec_index], testlib_results[vec_index]);
+                results_count[_enum::__state_index(results[vec_index])]++;
+                __judge_msg(_msg::_defl, results[vec_index], real_index, runtimes[vec_index], testlib_results[vec_index]);
+                __judge_msg(log, results[vec_index], real_index, runtimes[vec_index], testlib_results[vec_index]);
+            }
+            testlib_out_file.__delete_file();
+            __report_compare_logs(case_count, log, results_count);
+            __compare_impl(case_indices, time_limit, checker, args...);
+        }
+
+        template<typename T, typename... Args>
+        typename std::enable_if<IsCheckerConstructible<T>::value, void>::type
+        compare(int start, int end, int time_limit, T checker, Args... args) {
+            _msg::__info_msg(_msg::_defl, _msg::_ColorMsg("Compare", _enum::Color::Green));
+            std::map<int, int> case_indices;
+            int count = 0;
+            _CheckerTypeT<T> checker_program = __checker_porgram(checker);
+            for (int i = start; i <= end; i++) {
+                if (__input_file_exists(i) && __output_file_exists(i)) {
+                    case_indices[i] = count;
+                    count ++;
+                }
+            }
+            __compare_impl(case_indices, time_limit, checker_program, args...);
+        }
+        
+        template<typename T, typename... Args>
+        typename std::enable_if<IsCheckerConstructible<T>::value, void>::type
+        compare(int time_limit, T checker, Args... args) {
+            _msg::__info_msg(_msg::_defl, _msg::_ColorMsg("Compare", _enum::Color::Green));
+            std::map<int, int> case_indices;
+            int count = 0;
+            _CheckerTypeT<T> checker_program = __checker_porgram(checker);
+            for (int i : __get_all_inputs()) {
+                if (__output_file_exists(i)) {
+                    case_indices[i] = count;
+                    count++;
+                }
+            }
+            __compare_impl(case_indices, time_limit, checker_program, args...);
+        }
     } // namespace io
 } // namespace generator
 

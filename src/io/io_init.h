@@ -2,10 +2,10 @@
 #define _SGPCET_IO_INIT_H_
 
 #ifndef _SGPCET_COMMON_H_
-#include "common/common.h"
+#include "basic/common.h"
 #endif // !_SGPCET_COMMON_H_
 #ifndef _SGPCET_ENUM_H_
-#include "common/enum.h"
+#include "basic/enum.h"
 #endif // !_SGPCET_ENUM_H_
 #ifndef _SGPCET_LOGGER_H_
 #include "log/logger.h"
@@ -130,7 +130,7 @@ namespace generator {
 
         template<typename T>
         struct IsDefaultChecker {
-            static constexpr bool value = std::is_same<T, Checker>::value;
+            static constexpr bool value = std::is_same<T, _enum::Checker>::value;
         };
         
         template<typename T>
@@ -148,6 +148,25 @@ namespace generator {
 
         template<typename T>
         using _CheckerTypeT = typename _CheckerType<T>::type;
+
+        std::string checker_name[_enum::MaxChecker] = {
+          "lcmp",
+          "yesno",
+          "rcmp4",
+          "rcmp6",
+          "rcmp9",
+          "wcmp"  
+        };
+
+        Path __get_default_checker_file(_enum::Checker checker) {
+            Path folder_path(__full_path(__path_join(Path(__lib_path()).__folder_path(), _setting::_checker_folder)));
+        #ifdef ON_WINDOWS
+            Path checker_path(__path_join(folder_path, _setting::_sub_checker_folder, __end_with(checker_name[checker], _enum::_EXE)));
+        #else
+            Path checker_path(__path_join(folder_path, _setting::_sub_checker_folder, checker_name[checker]));
+        #endif
+            return checker_path;
+        }
 
         template<typename T>
         typename std::enable_if<IsProgram<T>::value, T>::type
