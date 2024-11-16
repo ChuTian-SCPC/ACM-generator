@@ -54,9 +54,8 @@ namespace generator {
             return "UNKNOWN";
         }
 
-        const char* __stage_file(_enum::_Stage stage, int x) {
-            Path path = stage == _enum::_OUTPUT ? __output_file_path(x) : __input_file_path(x);
-            return path.cname();
+        Path __stage_file(_enum::_Stage stage, int x) {
+            return stage == _enum::_OUTPUT ? __output_file_path(x) : __input_file_path(x);
         }
 
         void __report_iov_summary_logs(std::unordered_map<int, bool>& results, _enum::_Stage stage) {
@@ -71,7 +70,7 @@ namespace generator {
             if (errors.size()) {
                 _msg::__info_msg(_msg::_defl, "Program meets errors in files :");
                 for (int i : errors) 
-                    _msg::__info_msg(_msg::_defl, tools::string_format("  %s", __stage_file(stage, i)));
+                    _msg::__info_msg(_msg::_defl, tools::string_format("  %s", __stage_file(stage, i).cname()));
                 _msg::__info_msg(_msg::_defl, _msg::_ColorMsg("Please Check.", _enum::Color::Red));
             } else {
                 _msg::__info_msg(_msg::_defl, _msg::_ColorMsg("All Success.", _enum::Color::Green));

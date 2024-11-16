@@ -184,7 +184,7 @@ namespace generator {
                 if (!__is_success(standard_state.exit_code)) _msg::__fail_msg(_msg::_defl, "std meet error.");
                 if (__time_limit_exceed(standard_state.time, std_time_limit)) 
                     _msg::__fail_msg(_msg::_defl, tools::string_format(
-                        "std using time(%dms) is greater than the time limit(%dms).", 
+                        "std running time(%dms) is greater than the time limit(%dms).", 
                         standard_state.time, std_time_limit));
                 
                 bool uncorrect = false;
