@@ -81,13 +81,71 @@ namespace generator {
             return text + _file_end[end];
         }
 
-        Path __input_file_path(int x) {
-            return __path_join(__testcases_folder(), __end_with(x, _enum::_IN));
+        Path __input_file_path(Path folder, int x) {
+            return __path_join(folder, __end_with(x, _enum::_IN));
         }
         
-        Path __output_file_path(int x) {
-            return __path_join(__testcases_folder(), __end_with(x, _enum::_OUT));
+        Path __output_file_path(Path folder, int x) {
+            return __path_join(folder, __end_with(x, _enum::_OUT));
         }
+
+        Path __testcase_input_file_path(int x) {
+            return __input_file_path(__testcases_folder(), x);
+        }
+        
+        Path __testcase_output_file_path(int x) {
+            return __output_file_path(__testcases_folder(), x);
+        }
+
+        bool __input_file_exists(Path folder, int x) {
+            return __input_file_path(folder, x).__file_exist();
+        }
+        
+        bool __output_file_exists(Path folder, int x) {
+            return __output_file_path(folder, x).__file_exist();
+        }
+
+        bool __testcase_input_file_exists(int x) {
+            return __testcase_input_file_path(x).__file_exist();
+        }
+        
+        bool __testcase_output_file_exists(int x) {
+            return __testcase_output_file_path(x).__file_exist();
+        }
+
+        std::vector<int> __get_all_inputs(std::string case_name = _setting::testcase_folder) {
+            std::vector<int> inputs;
+            Path folder_path = __path_join(__current_path(), case_name);
+        #ifdef ON_WINDOWS
+            WIN32_FIND_DATA findFileData;
+            HANDLE hFind = FindFirstFile(folder_path.join("*.in").cname(), &findFileData);
+
+            if (hFind != INVALID_HANDLE_VALUE) {
+                do {
+                    Path file_path(__path_join(folder_path,findFileData.cFileName));
+                    int num = std::stoi(file_path.__file_name());  
+                    inputs.emplace_back(num);  
+                } while (FindNextFile(hFind, &findFileData) != 0);
+
+                FindClose(hFind);
+            }
+        #else
+            DIR* dir = opendir(folder_path.cname());
+            if (dir != nullptr) {
+                struct dirent* entry;
+                while ((entry = readdir(dir)) != nullptr) {
+                    std::string file_name = entry->d_name;
+                    if (file_name.size() >= 3 && file_name.substr(file_name.size() - 3) == ".in") {
+                        int num = std::stoi(file_name.substr(0, file_name.size() - 3));
+                        inputs.emplace_back(num);
+                    }
+                }
+                closedir(dir);
+            }
+        #endif
+
+            return inputs;
+        } 
 
         template<typename T>
         typename std::enable_if<IsProgram<T>::value, T>::type
@@ -180,9 +238,9 @@ namespace generator {
         }
 
         template<typename T>
-        typename std::enable_if<IsProgram<T>::value, T>::type
+        typename std::enable_if<IsProgramConstructible<T>::value, T>::type
         __checker_porgram(T program) {
-            return program;
+            return __result_program(program);
         }
 
         template<typename T>
@@ -192,20 +250,6 @@ namespace generator {
             return func;
         }
         
-        template<typename T>
-        typename std::enable_if<IsFunctionConvertible<T>::value, CommandFunc>::type
-        __checker_porgram(T program) {
-            CommandFunc func(program);
-            return func;
-        }
-        
-        template<typename T>
-        typename std::enable_if<IsPathConstructible<T>::value, CommandPath>::type
-        __checker_porgram(T program) {
-            CommandPath func(program);
-            return func;
-        }
-
         Path __compare_folder() {
             return __path_join(__current_path(), _setting::compare_folder);
         }
@@ -225,6 +269,16 @@ namespace generator {
 
         Path __hack_folder() {
             return __path_join(__current_path(), _setting::hack_folder);
+        }
+
+        template<typename T>
+        typename std::enable_if<IsProgramConstructible<T>::value, _ProgramTypeT<T>>::type
+        __validator_program(T program) {
+            return __result_program(program);
+        }
+        
+        Path __validate_folder(std::string case_name) {
+            return __path_join(__current_path(), _setting::validate_folder, case_name);
         }
 
     } // namespace generator

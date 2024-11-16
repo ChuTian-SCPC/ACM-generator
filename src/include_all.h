@@ -49,14 +49,17 @@
 #ifndef _SGPCET_COMPARE_HACK_H_
 #include "io/compare_hack.h"
 #endif // !_SGPCET_COMPARE_HACK_H_
+#ifndef _SGPCET_VALIDATE_H_
+#include "io/validate.h"
+#endif // !_SGPCET_VALIDATE_H_
 
 namespace generator {
   namespace all {
     using namespace generator::tools;
     using namespace generator::_msg;
-    using namespace generator::io;
     using namespace generator::_setting;
     using namespace generator::_enum;
+    using namespace generator::io;
   }
 } // namespace generator
 

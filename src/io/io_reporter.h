@@ -55,7 +55,7 @@ namespace generator {
         }
 
         Path __stage_file(_enum::_Stage stage, int x) {
-            return stage == _enum::_OUTPUT ? __output_file_path(x) : __input_file_path(x);
+            return stage == _enum::_OUTPUT ? __testcase_output_file_path(x) : __testcase_input_file_path(x);
         }
 
         void __report_iov_summary_logs(std::unordered_map<int, bool>& results, _enum::_Stage stage) {

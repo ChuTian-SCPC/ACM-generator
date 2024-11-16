@@ -61,8 +61,8 @@ namespace generator {
         typename std::enable_if<IsProgram<T>::value && IsProgramConstructible<F>::value, void>::type
         __check_once(int id, F program, int time_limit, T checker, Path& ans_file, Path& testlib_out_file, 
             int& runtime, _enum::_JudgeState& result, std::string& testlib_result) {
-            Path input_file = __input_file_path(id);
-            Path output_file = __output_file_path(id);
+            Path input_file = __testcase_input_file_path(id);
+            Path output_file = __testcase_output_file_path(id);
             ReturnState state = __run_program(program, input_file, ans_file, 
                 _setting::_default_path, __time_limit_extend(time_limit), _enum::_RESULT);
             if (!__is_success(state.exit_code)) {
@@ -125,7 +125,7 @@ namespace generator {
             int count = 0;
             _CheckerTypeT<T> checker_program = __checker_porgram(checker);
             for (int i = start; i <= end; i++) {
-                if (__input_file_exists(i) && __output_file_exists(i)) {
+                if (__testcase_input_file_exists(i) && __testcase_output_file_exists(i)) {
                     case_indices[i] = count;
                     count ++;
                 }
@@ -141,7 +141,7 @@ namespace generator {
             int count = 0;
             _CheckerTypeT<T> checker_program = __checker_porgram(checker);
             for (int i : __get_all_inputs()) {
-                if (__output_file_exists(i)) {
+                if (__testcase_output_file_exists(i)) {
                     case_indices[i] = count;
                     count++;
                 }
@@ -211,8 +211,8 @@ namespace generator {
                     if (copy_wrong_to_testcase) {
                         std::vector<int> next_input = __find_not_exist_inputs(1);
                         if (next_input.size() == 1) {
-                            Path testcase_input = __input_file_path(next_input[0]);
-                            Path testcase_output = __output_file_path(next_input[0]);
+                            Path testcase_input = __testcase_input_file_path(next_input[0]);
+                            Path testcase_output = __testcase_output_file_path(next_input[0]);
                             __copy_file(input, testcase_input);
                             __copy_file(output, testcase_output);
                             _msg::__info_msg(_msg::_defl, "Standard input and output is moved to testcase folder:");

@@ -583,12 +583,12 @@ namespace generator{
             io::__success_msg(io::_err,"Successfully create output file %s", output_path.cname());
         }
         
-        bool __input_file_exists(int x) {
+        bool __testcase_input_file_exists(int x) {
             Path file_path = __path_join(__current_path(), "testcases", __end_with(x, In));
             return file_path.__file_exists();
         }
         
-        bool __output_file_exists(int x) {
+        bool __testcase_output_file_exists(int x) {
             Path file_path = __path_join(__current_path(), "testcases", __end_with(x, Out));
             return file_path.__file_exists();
         }
@@ -667,7 +667,7 @@ namespace generator{
         void __fill_inputs_impl(int number, std::function<void()> func, std::string format, bool need_seed) {
             int sum = number;
             for (int i = 1; sum; i++) {
-                if (!__input_file_exists(i)) {
+                if (!__testcase_input_file_exists(i)) {
                     sum--;
                     __write_input_file(i);
                     __fake_arg(format, need_seed);
@@ -695,7 +695,7 @@ namespace generator{
         void fill_outputs(std::function<void()> func, bool cover_exist = true) {
             std::vector<int> inputs = __get_inputs();
             for (int i : inputs) {
-                if (!cover_exist && __output_file_exists(i)) {
+                if (!cover_exist && __testcase_output_file_exists(i)) {
                     continue;
                 }
                 __write_output_file(i);
@@ -816,7 +816,7 @@ namespace generator{
             __create_directories(testcases_folder);
             std::vector<int> inputs =  __get_inputs();
             for(auto i:inputs){
-                if (!cover_exist && __output_file_exists(i)) {
+                if (!cover_exist && __testcase_output_file_exists(i)) {
                     continue;
                 }
                 Path read_path = __path_join(testcases_folder, __end_with(i, In));
@@ -1202,7 +1202,7 @@ namespace generator{
             std::map<int, int> case_indices;
             int count = 0;
             for (int i = start; i <= end; i++) {
-                if (__input_file_exists(i) && __output_file_exists(i)) {
+                if (__testcase_input_file_exists(i) && __testcase_output_file_exists(i)) {
                     case_indices[i] = count;
                     count ++;
                 }
@@ -1240,7 +1240,7 @@ namespace generator{
             int count = 0;
             std::vector<int> inputs = __get_inputs();
             for(int idx : inputs) {
-                if (__output_file_exists(idx)) {
+                if (__testcase_output_file_exists(idx)) {
                     case_indices[idx] = count;
                     count++;
                 }

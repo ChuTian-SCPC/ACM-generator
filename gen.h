@@ -725,20 +725,20 @@ namespace generator{
             __create_directories(file.__folder_path());
         }
         
-        Path __input_file_path(int x) {
+        Path __testcase_input_file_path(int x) {
             return __path_join(__testcases_folder(), __end_with(x, _IN));
         }
         
-        Path __output_file_path(int x) {
+        Path __testcase_output_file_path(int x) {
             return __path_join(__testcases_folder(), __end_with(x, _OUT));
         }
         
-        bool __input_file_exists(int x) {
-            return __input_file_path(x).__file_exists();
+        bool __testcase_input_file_exists(int x) {
+            return __testcase_input_file_path(x).__file_exists();
         }
         
-        bool __output_file_exists(int x) {
-            return __output_file_path(x).__file_exists();
+        bool __testcase_output_file_exists(int x) {
+            return __testcase_output_file_path(x).__file_exists();
         }
 
         std::vector<int> __get_all_inputs() {
@@ -1275,7 +1275,7 @@ namespace generator{
         }
         
         Path __stage_file(_Stage stage, int x) {
-            return stage == _OUTPUT ? __output_file_path(x) : __input_file_path(x);
+            return stage == _OUTPUT ? __testcase_output_file_path(x) : __testcase_input_file_path(x);
         }
         
         void __report_summary_logs(std::unordered_map<int, bool>& results, _Stage stage) {
@@ -1327,7 +1327,7 @@ namespace generator{
             std::unordered_map<int, bool> results;
             __info_msg(_err, "%s", color("Generator(Inputs)", Green).c_str());
             for (int i : inputs) {
-                Path input = __input_file_path(i);
+                Path input = __testcase_input_file_path(i);
                 __info_msg(_err, "Generating input : %s", input.cname());
                 ReturnState state = __run_program(
                     __generator_program(program, i), _default_path, input, _default_path, 
@@ -1356,7 +1356,7 @@ namespace generator{
             std::vector<int> inputs;
             __create_directories(__testcases_folder());
             for (int i = 1; sum; i++) {
-                if (!__input_file_exists(i)) {
+                if (!__testcase_input_file_exists(i)) {
                     sum--;
                     inputs.emplace_back(i);
                 }
@@ -1401,8 +1401,8 @@ namespace generator{
             std::unordered_map<int, bool> results;
             __info_msg(_err, "%s", color("Generator(Outputs)", Green).c_str());
             for (int i : outputs) {
-                Path input = __input_file_path(i);
-                Path output = __output_file_path(i);
+                Path input = __testcase_input_file_path(i);
+                Path output = __testcase_output_file_path(i);
                 __info_msg(_err, "Generating output : %s", output.cname());
                 ReturnState state = __run_program(
                     __result_program(program), input, output, _default_path, 
@@ -1417,7 +1417,7 @@ namespace generator{
         make_outputs(int start, int end, T program) {     
             std::vector<int> outputs;
             for (int i = start; i <= end; i++) 
-                if (__input_file_exists(i)) outputs.emplace_back(i);
+                if (__testcase_input_file_exists(i)) outputs.emplace_back(i);
             __make_outputs_impl(outputs, program);
         }
         
@@ -1433,7 +1433,7 @@ namespace generator{
             std::vector<int> outputs;
             std::vector<int> inputs = __get_all_inputs();
             for (int i : inputs) {
-                if (!cover_exist && __output_file_exists(i)) continue;
+                if (!cover_exist && __testcase_output_file_exists(i)) continue;
                 outputs.emplace_back(i);
             }
             __make_outputs_impl(outputs, program);
@@ -1602,8 +1602,8 @@ namespace generator{
         typename std::enable_if<IsProgram<T>::value && IsProgramConstructible<F>::value, void>::type
         __check_once(int id, F program, int time_limit, T checker, Path& ans_file, Path& testlib_out_file, 
             int& runtime, ResultState& result, std::string& testlib_result) {
-            Path input_file = __input_file_path(id);
-            Path output_file = __output_file_path(id);
+            Path input_file = __testcase_input_file_path(id);
+            Path output_file = __testcase_output_file_path(id);
             ReturnState state = __run_program(program, input_file, ans_file, _default_path, __is_time_limit_inf(time_limit) ? time_limit_inf : 2 * time_limit, _RESULT);
             if (!__is_success(state.exit_code)) {
                 result = _ERROR;
@@ -1713,7 +1713,7 @@ namespace generator{
             int count = 0;
             _CheckerTypeT<T> checker_program = __checker_porgram(checker);
             for (int i = start; i <= end; i++) {
-                if (__input_file_exists(i) && __output_file_exists(i)) {
+                if (__testcase_input_file_exists(i) && __testcase_output_file_exists(i)) {
                     case_indices[i] = count;
                     count ++;
                 }
@@ -1729,7 +1729,7 @@ namespace generator{
             int count = 0;
             _CheckerTypeT<T> checker_program = __checker_porgram(checker);
             for (int i : __get_all_inputs()) {
-                if (__output_file_exists(i)) {
+                if (__testcase_output_file_exists(i)) {
                     case_indices[i] = count;
                     count++;
                 }
@@ -1813,8 +1813,8 @@ namespace generator{
                     all_correct = false;
                     if (copy_wrong_to_testcase) {
                         std::vector<int> next_input = __find_not_exist_inputs(1);
-                        Path testcase_input = __input_file_path(next_input[0]);
-                        Path testcase_output = __output_file_path(next_input[0]);
+                        Path testcase_input = __testcase_input_file_path(next_input[0]);
+                        Path testcase_output = __testcase_output_file_path(next_input[0]);
                         __copy_file(input, testcase_input);
                         __copy_file(output, testcase_output);
                         __info_msg(_err, "Standard input and output is moved to testcase folder:");
@@ -1860,7 +1860,7 @@ namespace generator{
             __create_directories(folder);
             for (int i : indices) {
                 Path log = __path_join(__validator_folder(), __end_with(i, _VAL));
-                Path input = __input_file_path(i);
+                Path input = __testcase_input_file_path(i);
                 __info_msg(_err, "Checking input validity : %s", input.cname());
                 ReturnState state = __run_program(validator, input, _default_path, log, time_limit_inf, _VALIDATOR);
                 __info_msg(_err, "Result : %s", __is_success(state.exit_code) ? color("SUCCESS", Green).c_str() : color("FAIL", Red).c_str());
@@ -1874,7 +1874,7 @@ namespace generator{
         validate(int start, int end, T program) {
             std::vector<int> indices;
             for(int i = start; i <= end; i++)
-                if (__input_file_exists(i)) indices.emplace_back(i);
+                if (__testcase_input_file_exists(i)) indices.emplace_back(i);
             __validate_impl(indices, program);
         }
         
@@ -1883,7 +1883,7 @@ namespace generator{
         validate(T program) {
             std::vector<int> indices;
             for(int i : __get_all_inputs())
-                if (__input_file_exists(i)) indices.emplace_back(i);
+                if (__testcase_input_file_exists(i)) indices.emplace_back(i);
             __validate_impl(indices, program);
         }
     }

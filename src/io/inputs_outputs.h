@@ -7,48 +7,6 @@
 
 namespace generator {
     namespace io {
-        
-        bool __input_file_exists(int x) {
-            return __input_file_path(x).__file_exist();
-        }
-        
-        bool __output_file_exists(int x) {
-            return __output_file_path(x).__file_exist();
-        }
-
-        std::vector<int> __get_all_inputs() {
-            std::vector<int> inputs;
-            Path folder_path = __testcases_folder();
-        #ifdef ON_WINDOWS
-            WIN32_FIND_DATA findFileData;
-            HANDLE hFind = FindFirstFile(folder_path.join("*.in").cname(), &findFileData);
-
-            if (hFind != INVALID_HANDLE_VALUE) {
-                do {
-                    Path file_path(__path_join(folder_path,findFileData.cFileName));
-                    int num = std::stoi(file_path.__file_name());  
-                    inputs.emplace_back(num);  
-                } while (FindNextFile(hFind, &findFileData) != 0);
-
-                FindClose(hFind);
-            }
-        #else
-            DIR* dir = opendir(folder_path.cname());
-            if (dir != nullptr) {
-                struct dirent* entry;
-                while ((entry = readdir(dir)) != nullptr) {
-                    std::string file_name = entry->d_name;
-                    if (file_name.size() >= 3 && file_name.substr(file_name.size() - 3) == ".in") {
-                        int num = std::stoi(file_name.substr(0, file_name.size() - 3));
-                        inputs.emplace_back(num);
-                    }
-                }
-                closedir(dir);
-            }
-        #endif
-
-            return inputs;
-        } 
 
         template<typename T>
         typename std::enable_if<IsProgramConstructible<T>::value, void>::type
@@ -58,7 +16,7 @@ namespace generator {
             std::unordered_map<int, bool> results;
             _msg::__info_msg(_msg::_defl, _msg::_ColorMsg("Generator(Inputs)", _enum::Color::Green));
             for (int i : inputs) {
-                Path input = __input_file_path(i);
+                Path input = __testcase_input_file_path(i);
                 _msg::__info_msg(_msg::_defl, tools::string_format("Generating input : %s", input.cname()));
                 ReturnState state = __run_program(
                     __generator_program(program, i), _setting::_default_path, input, _setting::_default_path, 
@@ -91,7 +49,7 @@ namespace generator {
                     _msg::__warn_msg(_msg::_defl, tools::string_format("Testcases are over the test_case_limit(%d).", _setting::test_case_limit));
                     return inputs;
                 }
-                if (!__input_file_exists(i)) {
+                if (!__testcase_input_file_exists(i)) {
                     sum--;
                     inputs.emplace_back(i);
                 }
@@ -118,8 +76,8 @@ namespace generator {
             std::unordered_map<int, bool> results;
             _msg::__info_msg(_msg::_defl, _msg::_ColorMsg("Generator(Outputs)", _enum::Color::Green));
             for (int i : outputs) {
-                Path input = __input_file_path(i);
-                Path output = __output_file_path(i);
+                Path input = __testcase_input_file_path(i);
+                Path output = __testcase_output_file_path(i);
                 _msg::__info_msg(_msg::_defl, tools::string_format("Generating output : %s", input.cname()));
                 ReturnState state = __run_program(
                     __result_program(program), input, output, _setting::_default_path, time_limit, _enum::_RESULT);
@@ -136,7 +94,7 @@ namespace generator {
         make_outputs(int start, int end, T program, int time_limit = _setting::time_limit_inf) {     
             std::vector<int> outputs;
             for (int i = start; i <= end; i++) 
-                if (__input_file_exists(i)) outputs.emplace_back(i);
+                if (__testcase_input_file_exists(i)) outputs.emplace_back(i);
             __make_outputs_impl(outputs, program, time_limit);
         }
         
@@ -152,7 +110,7 @@ namespace generator {
             std::vector<int> outputs;
             std::vector<int> inputs = __get_all_inputs();
             for (int i : inputs) {
-                if (!cover_exist && __output_file_exists(i)) continue;
+                if (!cover_exist && __testcase_output_file_exists(i)) continue;
                 outputs.emplace_back(i);
             }
             __make_outputs_impl(outputs, program, time_limit);

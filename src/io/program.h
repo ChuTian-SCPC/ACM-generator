@@ -224,6 +224,7 @@ namespace generator {
             IsPathConstructible<T3>::value &&
             IsPathConstructible<T4>::value, ReturnState>::type
         __run_child_process_program(T1 program, T2 input_file, T3 output_file, T4 error_file, int time_limit, _enum::_FuncProgramType func_type) {
+            __set_default_args();
             auto start_time = std::chrono::steady_clock::now();
             SECURITY_ATTRIBUTES sa;
             sa.nLength = sizeof(sa);
@@ -311,6 +312,7 @@ namespace generator {
             IsPathConstructible<T3>::value &&
             IsPathConstructible<T4>::value, ReturnState>::type
         __run_child_process_program(T1 program, T2 input_file, T3 output_file, T4 error_file, int time_limit, _enum::_FuncProgramType func_type) {
+            __set_default_args();
             if (__is_time_limit_inf(time_limit)) {
                 auto start_time = std::chrono::steady_clock::now();
                 Path input_file_path(input_file);
