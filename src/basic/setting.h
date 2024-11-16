@@ -58,6 +58,7 @@ namespace generator {
 
     bool default_seed = true;
     std::string default_stable_seed = "";
+    std::string default_hack_stable_seed = "hack";
   };// namespace _setting
   
 };// namespace generator

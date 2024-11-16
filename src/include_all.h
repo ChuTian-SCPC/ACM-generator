@@ -46,9 +46,9 @@
 #ifndef _SGPCET_INPUTS_OUTPUTS_H_
 #include "io/inputs_outputs.h"
 #endif // !_SGPCET_INPUTS_OUTPUTS_H_
-#ifndef _SGPCET_COMPARE_H_
-#include "io/compare.h"
-#endif // !_SGPCET_COMPARE_H_
+#ifndef _SGPCET_COMPARE_HACK_H_
+#include "io/compare_hack.h"
+#endif // !_SGPCET_COMPARE_HACK_H_
 
 namespace generator {
   namespace all {

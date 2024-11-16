@@ -91,22 +91,33 @@ namespace generator {
 
         template<typename T>
         typename std::enable_if<IsProgram<T>::value, T>::type
-        __generator_program(T program, int x) {
-            if (program.enable_default_args()) program.add_args(_setting::default_stable_seed + std::to_string(x));
+        __generator_program(T program, int x, bool hack = false) {
+            if (program.enable_default_args()) {
+                if (hack) program.add_args(_setting::default_hack_stable_seed + std::to_string(x));
+                else program.add_args(_setting::default_stable_seed + std::to_string(x));
+            }
             return program;
         }
         
         template<typename T>
         typename std::enable_if<IsFunctionConvertible<T>::value, CommandFunc>::type
-        __generator_program(T program, int x) {
-            std::string args = _setting::default_seed ? _setting::default_stable_seed + std::to_string(x) : "";
+        __generator_program(T program, int x, bool hack = false) {
+            std::string args = "";
+            if (_setting::default_seed) {
+                if (hack) args = _setting::default_hack_stable_seed + std::to_string(x);
+                else args =  _setting::default_stable_seed + std::to_string(x);
+            }
             return CommandFunc(program, args);
         }
         
         template<typename T>
         typename std::enable_if<IsPathConstructible<T>::value, CommandPath>::type
-        __generator_program(T program, int x) {
-            std::string args = _setting::default_seed ? _setting::default_stable_seed + std::to_string(x) : "";
+        __generator_program(T program, int x, bool hack = false) {
+            std::string args = "";
+            if (_setting::default_seed) {
+                if (hack) args = _setting::default_hack_stable_seed + std::to_string(x);
+                else args =  _setting::default_stable_seed + std::to_string(x);
+            }
             return CommandPath(program, args);
         }
 
@@ -204,13 +215,18 @@ namespace generator {
         }
 
         bool __time_limit_exceed(int time, int time_limit) {
-            return !__is_time_limit_inf(time) && time > time_limit;
+            return !__is_time_limit_inf(time_limit) && time > time_limit;
         }
 
         int __time_limit_extend(int time_Limit) {
             if (__is_time_limit_inf(time_Limit)) return time_Limit;
             return time_Limit * _setting::time_limit_over_ratio;
         }
+
+        Path __hack_folder() {
+            return __path_join(__current_path(), _setting::hack_folder);
+        }
+
     } // namespace generator
 } // namespace io
 
