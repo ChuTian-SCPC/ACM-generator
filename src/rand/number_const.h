@@ -4,6 +4,9 @@
 #ifndef _SGPCET_COMMON_H_
 #include "basic/common.h"
 #endif // !_SGPCET_COMMON_H_
+#ifndef _SGPCET_ENUM_H_
+#include "basic/enum.h"
+#endif // !_SGPCET_ENUM_H_
 
 namespace generator {
     namespace rand_numeric {
@@ -17,6 +20,15 @@ namespace generator {
         template <typename T>
         struct IsNumeric {
             static constexpr bool value = std::is_integral<T>::value || std::is_floating_point<T>::value;
+        };
+
+        const std::string _PATTERN[_enum::MaxCharType]={
+            "[a-z]",
+            "[A-Z]",
+            "[a-zA-Z]",
+            "[0-9]",
+            "[a-zA-Z0-9]",
+            "[01]"
         };
     } // namespace rand_numeric
 } // namespace generator

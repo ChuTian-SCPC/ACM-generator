@@ -107,6 +107,16 @@ namespace generator {
       wcmp,
       MaxChecker
     };
+
+    enum CharType{
+      LowerLetter,
+      UpperLetter,
+      Letter,
+      Number,
+      LetterNumber,
+      ZeroOne,
+      MaxCharType
+    };
   } // namespace _enum
 } // namespace generator
 
