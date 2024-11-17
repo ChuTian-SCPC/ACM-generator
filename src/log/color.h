@@ -4,6 +4,9 @@
 #ifndef _SGPCET_SETTING_H_
 #include "basic/setting.h"
 #endif // !_SGPCET_SETTING_H_
+#ifndef _SGPCET_ENUM_H_
+#include "basic/enum.h"
+#endif // !_SGPCET_ENUM_H_
 
 namespace generator {
     

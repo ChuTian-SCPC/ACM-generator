@@ -10,6 +10,9 @@
 #ifndef _SGPCET_ENUM_H_
 #include "basic/enum.h"
 #endif // !_SGPCET_ENUM_H_
+#ifndef _SGPCET_MACRO_H_
+#include "basic/macro.h"
+#endif // !_SGPCET_MACRO_H_
 
 namespace generator {
     namespace io {

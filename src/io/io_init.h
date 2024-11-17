@@ -238,7 +238,7 @@ namespace generator {
         }
 
         template<typename T>
-        typename std::enable_if<IsProgramConstructible<T>::value, T>::type
+        typename std::enable_if<IsProgramConstructible<T>::value, _ProgramTypeT<T>>::type
         __checker_porgram(T program) {
             return __result_program(program);
         }
