@@ -1268,7 +1268,7 @@ namespace generator{
         }
     }
 
-    namespace rand{
+    namespace rand_numeric{
         
         bool rand_bool() {
             return rnd.next(2);
@@ -1713,7 +1713,7 @@ namespace generator{
 
         template<typename T>
         typename std::enable_if<std::is_integral<T>::value, T>::type
-        __rand_range(std::string s) {
+        __rand_value(std::string s) {
             return rand_int<T>(s.c_str());
         }
         
@@ -1762,7 +1762,7 @@ namespace generator{
         template <typename T>
         typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
         rand_abs(T from, T to) {
-            long long x = __rand_range<T>(from, to);
+            long long x = __rand_value<T>(from, to);
             return rand_bool() ? x : -x;
         }
 
@@ -1792,7 +1792,7 @@ namespace generator{
         typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
         rand_abs(const char* format,...) {
             FMT_TO_RESULT(format, format, _format);
-            T x = __rand_range<T>(_format);
+            T x = __rand_value<T>(_format);
             return rand_bool() ? x : -x;
         } 
 
@@ -2746,7 +2746,7 @@ namespace generator{
                     }
                     std::vector<_Edge<EdgeType>> output_edges = __get_output_edges();
                     for (auto &edge : output_edges) {
-                        if (_swap_node && rand::rand_bool()) {
+                        if (_swap_node && rand_numeric::rand_bool()) {
                             edge.set_output_default(true);
                         }
                     }
@@ -2954,8 +2954,8 @@ namespace generator{
                 
                 virtual void __generate_tree() {
                     if (_tree_generator == Pruefer) {
-                        std::vector<int> times = rand::rand_sum(_node_count, _node_count - 2, 0);
-                        std::vector<int> pruefer = rand::shuffle_index(times);
+                        std::vector<int> times = rand_numeric::rand_sum(_node_count, _node_count - 2, 0);
+                        std::vector<int> pruefer = rand_numeric::shuffle_index(times);
                         __pruefer_decode(pruefer);
                     } else {
                         __random_father();
@@ -3274,8 +3274,8 @@ namespace generator{
                 }
 
                 virtual void __generate_tree() override {
-                    std::vector<int> times = rand::rand_sum(this->_node_count, this->_node_count - 2, 0, _max_degree - 1);
-                    std::vector<int> pruefer = rand::shuffle_index(times);
+                    std::vector<int> times = rand_numeric::rand_sum(this->_node_count, this->_node_count - 2, 0, _max_degree - 1);
+                    std::vector<int> pruefer = rand_numeric::shuffle_index(times);
                     this->__pruefer_decode(pruefer);
                 }
             };
@@ -3377,7 +3377,7 @@ namespace generator{
 
                 virtual void __generate_tree() override {
                     int max_degree = _max_son + 1;
-                    std::vector<int> times = rand::rand_sum(this->_node_count, this->_node_count - 2, 0, max_degree - 1);
+                    std::vector<int> times = rand_numeric::rand_sum(this->_node_count, this->_node_count - 2, 0, max_degree - 1);
                     if (times[this->_root] == max_degree - 1) {
                         int p;
                         do {
@@ -3385,7 +3385,7 @@ namespace generator{
                         } while (p == this->_root || times[p] == max_degree - 1);
                         std::swap(times[this->_root], times[p]);
                     }
-                    std::vector<int> pruefer = rand::shuffle_index(times);
+                    std::vector<int> pruefer = rand_numeric::shuffle_index(times);
                     this->__pruefer_decode(pruefer);
                 }
             }; 
@@ -3622,7 +3622,7 @@ namespace generator{
                     }
                     std::vector<_Edge<EdgeType>> output_edges = __get_output_edges();
                     for (auto &edge : output_edges) {
-                        if (_swap_node && rand::rand_bool()) {
+                        if (_swap_node && rand_numeric::rand_bool()) {
                             edge.set_output_default(true);
                         }
                     }
@@ -5796,7 +5796,7 @@ namespace generator{
                 
                 void __generate_trees_size() {
                     int tree_count = this->_node_count - this->_edge_count;
-                    _trees_size = rand::rand_sum(tree_count, this->_node_count, 1);
+                    _trees_size = rand_numeric::rand_sum(tree_count, this->_node_count, 1);
                 }
                 
                 void __reset_connect() {
@@ -6507,19 +6507,19 @@ namespace generator{
                 _y_left_limit(y_left_limit), _y_right_limit(y_right_limit) {}  
                 
         protected:
-            T __rand_x() { return rand::__rand_range<T>(_x_left_limit, _x_right_limit); }
-            T __rand_y() { return rand::__rand_range<T>(_y_left_limit, _y_right_limit); }
+            T __rand_x() { return rand_numeric::__rand_value<T>(_x_left_limit, _x_right_limit); }
+            T __rand_y() { return rand_numeric::__rand_value<T>(_y_left_limit, _y_right_limit); }
             
             void __set_x_limit(T x_left_limit, T x_right_limit) { _x_left_limit = x_left_limit; _x_right_limit = x_right_limit; }
             void __set_y_limit(T y_left_limit, T y_right_limit) { _y_left_limit = y_left_limit; _y_right_limit = y_right_limit; }
             void __set_xy_limit(T left, T right) { __set_x_limit(left, right); __set_y_limit(left, right); }
             void __set_xy_limit(T x_left, T x_right, T y_left, T y_right) { __set_x_limit(x_left, x_right); __set_y_limit(y_left, y_right); }
             void __set_x_limit(std::string format) {
-                auto range = rand::__format_to_range<T>(format);
+                auto range = rand_numeric::__format_to_range<T>(format);
                 __set_x_limit(range.first, range.second);
             } 
             void __set_y_limit(std::string format) {
-                auto range = rand::__format_to_range<T>(format);
+                auto range = rand_numeric::__format_to_range<T>(format);
                 __set_y_limit(range.first, range.second);
             }
             void __set_xy_limit(std::string format) {
@@ -6571,15 +6571,15 @@ namespace generator{
         };
         
         #define _CLASS_RAND_FUNC \
-        void rand(T x_left, T x_right, T y_left, T y_right) { \
+        void rand_numeric(T x_left, T x_right, T y_left, T y_right) { \
             this->__set_xy_limit(x_left, x_right, y_left, y_right); \
             __rand(); \
         } \
-        void rand(T left, T right) { \
+        void rand_numeric(T left, T right) { \
             this->__set_xy_limit(left, right); \
             __rand(); \
         } \
-        void rand(const char* format,...) { \
+        void rand_numeric(const char* format,...) { \
             FMT_TO_RESULT(format, format, _format); \
             this->__set_xy_limit(_format); \
             __rand(); \
@@ -6921,7 +6921,7 @@ namespace generator{
                 T upper = min;
                 for (int i = 1; i < _node_count - 1; i++) {
                     T val = pool[i];
-                    if (rand::rand_bool()) {
+                    if (rand_numeric::rand_bool()) {
                         vec.emplace_back(val - lower);
                         lower = val;
                     }
@@ -6969,7 +6969,7 @@ namespace generator{
                     if (pos_x == -1 && pos_y == -1) return false;
                     else if (pos_x == -1) std::swap(y_vec[i], y_vec[pos_y]);
                     else if (pos_y == -1) std::swap(x_vec[i], x_vec[pos_x]);
-                    else rand::rand_bool() ? std::swap(x_vec[i], x_vec[pos_x]) : std::swap(y_vec[i], y_vec[pos_y]);
+                    else rand_numeric::rand_bool() ? std::swap(x_vec[i], x_vec[pos_x]) : std::swap(y_vec[i], y_vec[pos_y]);
                 }
                 Point<T> o;
                 _Points<T> vec;
@@ -7035,7 +7035,7 @@ namespace generator{
     
     namespace all{
         using namespace generator::io;
-        using namespace generator::rand;
+        using namespace generator::rand_numeric;
         using namespace generator::graph;
         using namespace generator::geometry;
     }

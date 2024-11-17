@@ -53,6 +53,16 @@
 #include "io/validate.h"
 #endif // !_SGPCET_VALIDATE_H_
 
+#ifndef _SGPCET_NUMBER_CONST_H_
+#include "rand/number_const.h"
+#endif // !_SGPCET_NUMBER_CONST_H_
+#ifndef _SGPCET_NUMBER_FORMAT_H_
+#include "rand/number_format.h"
+#endif // !_SGPCET_NUMBER_FORMAT_H_
+#ifndef _SGPCET_NUMERIC_H_
+#include "rand/numeric.h"
+#endif // !_SGPCET_NUMERIC_H_
+
 namespace generator {
   namespace all {
     using namespace generator::tools;
@@ -60,6 +70,7 @@ namespace generator {
     using namespace generator::_setting;
     using namespace generator::_enum;
     using namespace generator::io;
+    using namespace generator::rand_numeric;
   }
 } // namespace generator
 
