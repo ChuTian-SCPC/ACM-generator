@@ -203,11 +203,16 @@ namespace generator {
 
         template <typename T>
         std::vector<T> rand_vector(int size, std::function<T()> func) {
+            __judge_vector_lower_bound(size, "vector");
+            __judge_vector_upper_bound(size, "vector");
+            _msg::OutStream vector_stream(false);
+            _msg::_defl.swap(vector_stream);    
             std::vector<T> v;
             for(int i = 0; i < size; i++){
                 T x = func();
                 v.emplace_back(x);
             }
+            _msg::_defl.swap(vector_stream);
             return v;
         }
 
@@ -216,13 +221,8 @@ namespace generator {
             __judge_range(from, to);
             __judge_vector_lower_bound(to, "vector");
             __judge_vector_upper_bound(from, "vector");
-            std::vector<T> v;
             int size = rnd.next(from, to);
-            for(int i = 0; i < size; i++){
-                T x = func();
-                v.emplace_back(x);
-            }
-            return v;
+            return rand_vector(size, func);
         }
 
         template<typename Iter>
