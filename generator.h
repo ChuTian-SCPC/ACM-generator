@@ -2239,7 +2239,7 @@ namespace generator{
         }
     }
 
-    namespace graph {
+    namespace rand_graph {
         namespace basic {
             class _BasicEdge {
             protected:
@@ -7036,7 +7036,7 @@ namespace generator{
     namespace all{
         using namespace generator::io;
         using namespace generator::rand_numeric;
-        using namespace generator::graph;
+        using namespace generator::rand_graph;
         using namespace generator::geometry;
     }
 }

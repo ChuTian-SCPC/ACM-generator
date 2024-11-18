@@ -9,7 +9,7 @@ void e3_output_format(ostream&os, const edge_weight::Edge<double>& edge)
 }
 // these namspace for some(mostly?) compiler is unnecessary
 namespace generator {
-	namespace graph {
+	namespace rand_graph {
 		namespace basic {
 			template<typename T1, typename T2>
 			ostream& operator<<(ostream& os, const pair<T1, T2>& p) {

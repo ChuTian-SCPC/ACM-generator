@@ -66,6 +66,25 @@
 #include "rand/array.h"
 #endif // !_SGPCET_ARRAY_H_
 
+#ifndef _SGPCET_EDGE_H_
+#include "graph/edge.h"
+#endif // !_SGPCET_EDGE_H_
+#ifndef _SGPCET_NODE_H_
+#include "graph/node.h"
+#endif // !_SGPCET_NODE_H_
+#ifndef _SGPCET_UNWEIGHT_H_
+#include "graph/unweight.h"
+#endif // !_SGPCET_UNWEIGHT_H_
+#ifndef _SGPCET_NODE_WEIGHT_H_
+#include "graph/node_weight.h"
+#endif // !_SGPCET_NODE_WEIGHT_H_
+#ifndef _SGPCET_EDGE_WEIGHT_H_
+#include "graph/edge_weight.h"
+#endif // !_SGPCET_EDGE_WEIGHT_H_
+#ifndef _SGPCET_BOTH_WEIGHT_H_
+#include "graph/both_weight.h"
+#endif // !_SGPCET_BOTH_WEIGHT_H_
+
 namespace generator {
   namespace all {
     using namespace generator::tools;
@@ -75,6 +94,7 @@ namespace generator {
     using namespace generator::io;
     using namespace generator::rand_numeric;
     using namespace generator::rand_array;
+    using namespace generator::rand_graph;
   }
 } // namespace generator
 
@@ -84,6 +104,8 @@ namespace generator {
 #undef _GET_VALUE
 #undef _SET_VALUE
 #undef _SET_GET_VALUE
+#undef _OUTPUT_FUNCTION
+#undef _OUTPUT_FUNCTION_SETTING
 #endif
 
 #endif // !_SGPCET_INCLUDE_ALL_H_

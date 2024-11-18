@@ -29,5 +29,34 @@
   _SET_VALUE(type, name)
 #endif // !_SET_GET_VALUE
 
+#ifndef _OUTPUT_FUNCTION
+#define _OUTPUT_FUNCTION(_TYPE) \
+    typedef std::function<void(std::ostream&, const _TYPE&)> OutputFunction; \
+    OutputFunction _output_function;
+#endif // !_OUTPUT_FUNCTION
+
+#ifndef _OUTPUT_FUNCTION_SETTING
+#define _OUTPUT_FUNCTION_SETTING(_TYPE) \
+    void set_output(OutputFunction func) { \
+        _output_function = func; \
+    } \
+    friend std::ostream& operator<<(std::ostream& os, const _TYPE& type) { \
+        type._output_function(os, type); \
+        return os; \
+    } \
+    void println() { \
+        std::cout << *this << std::endl; \
+    } \
+    void set_output_default() { \
+        _output_function = default_function(); \
+    } \
+    OutputFunction default_function() { \
+        OutputFunction func = \
+            [](std::ostream& os, const _TYPE& type) { \
+                type.default_output(os); \
+            }; \
+        return func; \
+    }
+#endif // !_OUTPUT_FUNCTION_SETTING
 
 #endif // !_SGPCET_MACRO_H_
