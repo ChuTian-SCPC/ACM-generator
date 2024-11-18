@@ -62,6 +62,9 @@
 #ifndef _SGPCET_NUMERIC_H_
 #include "rand/numeric.h"
 #endif // !_SGPCET_NUMERIC_H_
+#ifndef _SGPCET_ARRAY_H_
+#include "rand/array.h"
+#endif // !_SGPCET_ARRAY_H_
 
 namespace generator {
   namespace all {
@@ -71,6 +74,7 @@ namespace generator {
     using namespace generator::_enum;
     using namespace generator::io;
     using namespace generator::rand_numeric;
+    using namespace generator::rand_array;
   }
 } // namespace generator
 
