@@ -87,6 +87,9 @@
 #ifndef _SGPCET_GEN_STRATEGY_H_
 #include "graph/gen_strategy.h"
 #endif // !_SGPCET_GEN_STRATEGY_H_
+#ifndef _SGPCET_GEN_TREE_H_
+#include "graph/gen_tree.h"
+#endif // !_SGPCET_GEN_TREE_H_
 #ifndef _SGPCET_TREE_H_
 #include "graph/tree.h"
 #endif // !_SGPCET_TREE_H_

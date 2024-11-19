@@ -21,15 +21,20 @@ namespace generator {
     namespace rand_graph {
         namespace basic {
             
+            class Gen {
+            public:
+                Gen(){}
+                virtual void generate() {
+                    _msg::__fail_msg(_msg::_defl, "unsupport generator.");
+                };
+            };
+
             template <typename T>
-            class BasicGen {
+            class BasicGen : public Gen {
             protected:
                 T& _context;
             public:
                 BasicGen(T& context) : _context(context) {}
-                virtual void generate() {
-                    _msg::__fail_msg(_msg::_defl, "unsupport generator.");
-                };
             };
 
             template <template <typename, typename> class Tree, typename NodeType, typename EdgeType>
@@ -132,6 +137,36 @@ namespace generator {
                 template <typename T = NodeType, _HasT<T> = 0>
                 void __clear_nodes_weight() {
                     this->_context.nodes_weight_ref().clear(); 
+                }
+            };
+
+            class _GenSwitch {
+            protected:
+                Gen* _generator;
+            public:
+                _GenSwitch() : _generator(nullptr) {}
+                virtual ~_GenSwitch() { __delete_generator(); }
+
+                void gen() { _generator->generate(); }
+            protected:
+                void __delete_generator() {
+                    if (_generator) delete _generator;
+                }
+            };
+
+            class _TreeGenSwitch : public _GenSwitch {
+            public:
+                void set_tree_generator(Gen* gen) {
+                    __delete_generator();
+                    _generator = gen;
+                }
+            };
+
+            class _GraphGenSwitch : public _GenSwitch {
+            public:
+                void set_graph_generator(Gen* gen) {
+                    __delete_generator();
+                    _generator = gen;
                 }
             };
         } // namespace basic
