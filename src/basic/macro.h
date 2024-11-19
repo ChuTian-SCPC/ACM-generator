@@ -59,4 +59,27 @@
     }
 #endif // !_OUTPUT_FUNCTION_SETTING
 
+#ifndef _DEF_GEN_FUNCTION
+#define _DEF_GEN_FUNCTION \
+    typedef std::function<NodeType()> NodeGenFunction; \
+    typedef std::function<EdgeType()> EdgeGenFunction;
+#endif // !_DEF_GEN_FUNCTION
+
+#ifndef _CONTEXT_V
+#define _CONTEXT_V(name) \
+  this->_context.name()
+#endif // !_CONTEXT_V
+#ifndef _CONTEXT_V_REF
+#define _CONTEXT_V_REF(name) \
+  this->_context.name##_ref()
+#endif // !_CONTEXT_V_REF
+#ifndef _CONTEXT_GET
+#define _CONTEXT_GET(type, name) \
+    type name = _CONTEXT_V(name);
+#endif // !_CONTEXT_GET
+#ifndef _CONTEXT_GET_REF
+#define _CONTEXT_GET_REF(type, name) \
+    type& name = _CONTEXT_V_REF(name);
+#endif // !_CONTEXT_GET
+
 #endif // !_SGPCET_MACRO_H_

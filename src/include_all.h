@@ -72,6 +72,24 @@
 #ifndef _SGPCET_NODE_H_
 #include "graph/node.h"
 #endif // !_SGPCET_NODE_H_
+#ifndef _SGPCET_BASIC_TREE_H_
+#include "graph/basic_tree.h"
+#endif // !_SGPCET_BASIC_TREE_H_
+#ifndef _SGPCET_WEIGHT_TYPE_H_
+#include "graph/weight_type.h"
+#endif // !_SGPCET_WEIGHT_TYPE_H_
+#ifndef _SGPCET_GEN_FUNCTION_H_
+#include "graph/gen_function.h"
+#endif // !_SGPCET_GEN_FUNCTION_H_
+#ifndef _SGPCET_LINK_FORWARD_H_
+#include "graph/link_forward.h"
+#endif // !_SGPCET_LINK_FORWARD_H_
+#ifndef _SGPCET_GEN_STRATEGY_H_
+#include "graph/gen_strategy.h"
+#endif // !_SGPCET_GEN_STRATEGY_H_
+#ifndef _SGPCET_TREE_H_
+#include "graph/tree.h"
+#endif // !_SGPCET_TREE_H_
 #ifndef _SGPCET_UNWEIGHT_H_
 #include "graph/unweight.h"
 #endif // !_SGPCET_UNWEIGHT_H_
@@ -106,6 +124,11 @@ namespace generator {
 #undef _SET_GET_VALUE
 #undef _OUTPUT_FUNCTION
 #undef _OUTPUT_FUNCTION_SETTING
+#undef _DEF_GEN_FUNCTION
+#undef _CONTEXT_V
+#undef _CONTEXT_V_REF
+#undef _CONTEXT_GET
+#undef _CONTEXT_GET_REF
 #endif
 
 #endif // !_SGPCET_INCLUDE_ALL_H_

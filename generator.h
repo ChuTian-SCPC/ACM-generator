@@ -2646,9 +2646,9 @@ namespace generator{
             };
 
             template<typename NodeType, typename EdgeType>
-            class _Tree : public _BasicTree, public _RandomFunction<NodeType, EdgeType> {
+            class Tree : public _BasicTree, public _RandomFunction<NodeType, EdgeType> {
             protected:
-                typedef _Tree<NodeType,EdgeType> _Self;
+                typedef Tree<NodeType,EdgeType> _Self;
                 _OUTPUT_FUNCTION(_Self)
                 _DEF_GEN_FUNCTION
                 std::vector<_Edge<EdgeType>> _edges;
@@ -2661,7 +2661,7 @@ namespace generator{
                 
             public:
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
-                _Tree(
+                Tree(
                     int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr,
@@ -2674,7 +2674,7 @@ namespace generator{
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
-                _Tree(
+                Tree(
                     int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     EdgeGenFunction edges_weight_function = nullptr,
                     TreeGenerator tree_generator = RandomFather) :
@@ -2686,7 +2686,7 @@ namespace generator{
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
-                _Tree(
+                Tree(
                     int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     TreeGenerator tree_generator = RandomFather) :
@@ -2698,7 +2698,7 @@ namespace generator{
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
-                _Tree(
+                Tree(
                     int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     TreeGenerator tree_generator = RandomFather) :
                     _BasicTree(node_count, begin_node, is_rooted, root, true, true),
@@ -2973,7 +2973,7 @@ namespace generator{
                 bool& is_rooted_ref() = delete;
 
             template<typename NodeType, typename EdgeType>
-            class _Chain : public _Tree<NodeType, EdgeType> {
+            class _Chain : public Tree<NodeType, EdgeType> {
             protected:
                 typedef _Chain<NodeType,EdgeType> _Self;
                 _OUTPUT_FUNCTION(_Self)
@@ -2984,7 +2984,7 @@ namespace generator{
                     int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<NodeType, EdgeType>(
+                    Tree<NodeType, EdgeType>(
                         node, begin_node, is_rooted, root, 
                         nodes_weight_function, edges_weight_function)
                 {
@@ -2995,7 +2995,7 @@ namespace generator{
                 _Chain(
                     int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<void, EdgeType>(node, begin_node, is_rooted, root, edges_weight_function)
+                    Tree<void, EdgeType>(node, begin_node, is_rooted, root, edges_weight_function)
                 {
                     _output_function = this->default_function();
                 }
@@ -3004,7 +3004,7 @@ namespace generator{
                 _Chain(
                     int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     NodeGenFunction nodes_weight_function = nullptr) :
-                    _Tree<NodeType, void>(node, begin_node, is_rooted, root, nodes_weight_function)
+                    Tree<NodeType, void>(node, begin_node, is_rooted, root, nodes_weight_function)
                 {
                     _output_function = this->default_function();
                 }
@@ -3012,7 +3012,7 @@ namespace generator{
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
                 _Chain(
                     int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
-                    _Tree<void, void>(node, begin_node, is_rooted, root)
+                    Tree<void, void>(node, begin_node, is_rooted, root)
                 {
                     _output_function = this->default_function();
                 }
@@ -3031,7 +3031,7 @@ namespace generator{
             };
 
             template<typename NodeType, typename EdgeType>
-            class _Flower : public _Tree<NodeType, EdgeType> {
+            class _Flower : public Tree<NodeType, EdgeType> {
             protected:
                 typedef _Flower<NodeType,EdgeType> _Self;
                 _OUTPUT_FUNCTION(_Self)
@@ -3042,7 +3042,7 @@ namespace generator{
                     int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<NodeType, EdgeType>(
+                    Tree<NodeType, EdgeType>(
                         node_count, begin_node, is_rooted, root, 
                         nodes_weight_function, edges_weight_function)
                 {
@@ -3053,7 +3053,7 @@ namespace generator{
                 _Flower(
                     int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<void, EdgeType>(node_count, begin_node, is_rooted, root, edges_weight_function)
+                    Tree<void, EdgeType>(node_count, begin_node, is_rooted, root, edges_weight_function)
                 {
                     _output_function = this->default_function();
                 }
@@ -3062,7 +3062,7 @@ namespace generator{
                 _Flower(
                     int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1,
                     NodeGenFunction nodes_weight_function = nullptr) :
-                    _Tree<NodeType, void>(node_count, begin_node, is_rooted, root, nodes_weight_function)
+                    Tree<NodeType, void>(node_count, begin_node, is_rooted, root, nodes_weight_function)
                 {
                     _output_function = this->default_function();
                 }
@@ -3070,7 +3070,7 @@ namespace generator{
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
                 _Flower(
                     int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
-                    _Tree<void, void>(node_count, begin_node, is_rooted, root)
+                    Tree<void, void>(node_count, begin_node, is_rooted, root)
                 {
                     _output_function = this->default_function();
                 }
@@ -3089,7 +3089,7 @@ namespace generator{
             };
 
             template<typename NodeType, typename EdgeType> 
-            class _HeightTree : public _Tree<NodeType, EdgeType> {
+            class _HeightTree : public Tree<NodeType, EdgeType> {
             protected:
                 typedef _HeightTree<NodeType,EdgeType> _Self;
                 _OUTPUT_FUNCTION(_Self)
@@ -3102,7 +3102,7 @@ namespace generator{
                     int node_count = 1, int begin_node = 1, int root = 1, int height = -1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<NodeType, EdgeType>(
+                    Tree<NodeType, EdgeType>(
                         node_count, begin_node, true, root, 
                         nodes_weight_function, edges_weight_function),
                     _height(height)
@@ -3114,7 +3114,7 @@ namespace generator{
                 _HeightTree(
                     int node_count = 1, int begin_node = 1, int root = 1, int height = -1,
                     NodeGenFunction nodes_weight_function = nullptr) :
-                    _Tree<NodeType, void>(node_count, begin_node, true, root, nodes_weight_function),
+                    Tree<NodeType, void>(node_count, begin_node, true, root, nodes_weight_function),
                     _height(height)
                 {
                     _output_function = this->default_function();
@@ -3124,7 +3124,7 @@ namespace generator{
                 _HeightTree(
                     int node_count = 1, int begin_node = 1, int root = 1, int height = -1,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<void, EdgeType>(node_count, begin_node, true, root, edges_weight_function),
+                    Tree<void, EdgeType>(node_count, begin_node, true, root, edges_weight_function),
                     _height(height)
                 {
                     _output_function = this->default_function();
@@ -3132,7 +3132,7 @@ namespace generator{
 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
                 _HeightTree(int node_count = 1, int begin_node = 1, int root = 1, int height = -1) :
-                    _Tree<void, void>(node_count, begin_node, true, root),
+                    Tree<void, void>(node_count, begin_node, true, root),
                     _height(height)
                 {
                     _output_function = this->default_function();
@@ -3183,7 +3183,7 @@ namespace generator{
             };
             
             template<typename NodeType, typename EdgeType>
-            class _DegreeTree : public _Tree<NodeType, EdgeType> {
+            class _DegreeTree : public Tree<NodeType, EdgeType> {
             protected:
                 typedef _DegreeTree<NodeType,EdgeType> _Self;
                 _OUTPUT_FUNCTION(_Self)
@@ -3196,7 +3196,7 @@ namespace generator{
                     int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<NodeType, EdgeType>(
+                    Tree<NodeType, EdgeType>(
                         node_count, begin_node, is_rooted, root, 
                         nodes_weight_function, edges_weight_function),
                     _max_degree(max_degree)
@@ -3208,7 +3208,7 @@ namespace generator{
                 _DegreeTree(
                     int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
                     NodeGenFunction nodes_weight_function = nullptr) :
-                    _Tree<NodeType, void>(node_count, begin_node, is_rooted, root, nodes_weight_function),
+                    Tree<NodeType, void>(node_count, begin_node, is_rooted, root, nodes_weight_function),
                     _max_degree(max_degree)
                 {
                     _output_function = this->default_function();
@@ -3218,7 +3218,7 @@ namespace generator{
                 _DegreeTree(
                     int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<void, EdgeType>(node_count, begin_node, is_rooted, root,edges_weight_function),
+                    Tree<void, EdgeType>(node_count, begin_node, is_rooted, root,edges_weight_function),
                     _max_degree(max_degree)
                 {
                     _output_function = this->default_function();
@@ -3227,7 +3227,7 @@ namespace generator{
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
                 _DegreeTree(
                     int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1) :
-                    _Tree<void, EdgeType>(node_count, begin_node, is_rooted, root),
+                    Tree<void, EdgeType>(node_count, begin_node, is_rooted, root),
                     _max_degree(max_degree)
                 {
                     _output_function = this->default_function();
@@ -3281,7 +3281,7 @@ namespace generator{
             };
 
             template<typename NodeType, typename EdgeType>
-            class _SonTree : public _Tree<NodeType, EdgeType> {
+            class _SonTree : public Tree<NodeType, EdgeType> {
             protected:
                 typedef _SonTree<NodeType,EdgeType> _Self;
                 _OUTPUT_FUNCTION(_Self)
@@ -3294,7 +3294,7 @@ namespace generator{
                     int node_count = 1, int begin_node = 1,  int root = 1, int max_son = -1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<NodeType, EdgeType>(
+                    Tree<NodeType, EdgeType>(
                         node_count, begin_node, true, root, 
                         nodes_weight_function, edges_weight_function),
                     _max_son(max_son)
@@ -3306,7 +3306,7 @@ namespace generator{
                 _SonTree(
                     int node_count = 1, int begin_node = 1,  int root = 1, int max_son = -1,
                     NodeGenFunction nodes_weight_function = nullptr) :
-                    _Tree<NodeType, void>(node_count, begin_node, true, root, nodes_weight_function),
+                    Tree<NodeType, void>(node_count, begin_node, true, root, nodes_weight_function),
                     _max_son(max_son)
                 {
                     _output_function = this->default_function();
@@ -3316,7 +3316,7 @@ namespace generator{
                 _SonTree(
                     int node_count = 1, int begin_node = 1,  int root = 1, int max_son = -1,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<void, EdgeType>(node_count, begin_node, true, root, edges_weight_function),
+                    Tree<void, EdgeType>(node_count, begin_node, true, root, edges_weight_function),
                     _max_son(max_son)
                 {
                     _output_function = this->default_function();
@@ -3324,7 +3324,7 @@ namespace generator{
 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
                 _SonTree(int node_count = 1, int begin_node = 1,  int root = 1, int max_son = -1) :
-                    _Tree<void, void>(node_count, begin_node, true, root),
+                    Tree<void, void>(node_count, begin_node, true, root),
                     _max_son(max_son)
                 {
                     _output_function = this->default_function();
@@ -3777,7 +3777,7 @@ namespace generator{
                 }
 
                 virtual void __generate_connect() {
-                    _Tree<void, void> tree(_node_count, 0);
+                    Tree<void, void> tree(_node_count, 0);
                     tree.gen();
                     std::vector <_Edge<void>> edge = tree.edges();
                     for (auto e: edge) {
@@ -5223,7 +5223,7 @@ namespace generator{
                     __init_result_graph();
                 }
                 
-                void __init_result_graph(_Tree<NodeType, EdgeType> tree) {
+                void __init_result_graph(Tree<NodeType, EdgeType> tree) {
                     _result = _Graph<NodeType, EdgeType>();
                     __init_result_graph();
                     _result._direction = tree._is_rooted;
@@ -5407,7 +5407,7 @@ namespace generator{
                     for (auto it : _connect_parts) {
                         mark_indices.emplace_back(it.first);
                     }
-                    _Tree<void, void> tree(_connect_parts.size(), 0);
+                    Tree<void, void> tree(_connect_parts.size(), 0);
                     tree.gen();
                     std::vector<_Edge<void>> edges = tree.edges();
                     for (_Edge<void> edge : edges) {
@@ -5432,14 +5432,14 @@ namespace generator{
             template<typename NodeType, typename EdgeType>
             class _TreeLinkImpl {
             private:
-                _Tree<NodeType, EdgeType> _result, _source1, _source2;
+                Tree<NodeType, EdgeType> _result, _source1, _source2;
                 TreeLinkType _link_type;
                 
             public:
                 _TreeLinkImpl(
-                    _Tree<NodeType, EdgeType> result,
-                    _Tree<NodeType, EdgeType> source1,
-                    _Tree<NodeType, EdgeType> source2,
+                    Tree<NodeType, EdgeType> result,
+                    Tree<NodeType, EdgeType> source1,
+                    Tree<NodeType, EdgeType> source2,
                     TreeLinkType link_type) :
                     _result(result),
                     _source1(source1),
@@ -5450,8 +5450,8 @@ namespace generator{
                 }
                 
                 _TreeLinkImpl(
-                    _Tree<NodeType, EdgeType> source1,
-                    _Tree<NodeType, EdgeType> source2,
+                    Tree<NodeType, EdgeType> source1,
+                    Tree<NodeType, EdgeType> source2,
                     TreeLinkType link_type) :
                     _source1(source1),
                     _source2(source2),
@@ -5460,7 +5460,7 @@ namespace generator{
                     __init_result_tree(source1);
                 }
                 
-                _Tree<NodeType, EdgeType> get_result() {
+                Tree<NodeType, EdgeType> get_result() {
                     __link_tree();
                     return _result;
                 }
@@ -5473,7 +5473,7 @@ namespace generator{
                     _result._node_indices.clear();
                 }
                 
-                void __init_result_tree(_Tree<NodeType, EdgeType> tree) {
+                void __init_result_tree(Tree<NodeType, EdgeType> tree) {
                     _result = tree;
                     __init_result_tree();
                 }   
@@ -5537,7 +5537,7 @@ namespace generator{
             };
             
             template<typename NodeType, typename EdgeType>
-            class _FlowerChain : public _Tree<NodeType, EdgeType> {
+            class _FlowerChain : public Tree<NodeType, EdgeType> {
             protected:
                 typedef _FlowerChain<NodeType,EdgeType> _Self;
                 _OUTPUT_FUNCTION(_Self)
@@ -5550,7 +5550,7 @@ namespace generator{
                     int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int flower_size = -1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<NodeType, EdgeType>(
+                    Tree<NodeType, EdgeType>(
                         node, begin_node, is_rooted, root, 
                         nodes_weight_function, edges_weight_function),
                     _flower_size(flower_size)
@@ -5562,7 +5562,7 @@ namespace generator{
                 _FlowerChain(
                     int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int flower_size = -1,
                     EdgeGenFunction edges_weight_function = nullptr) :
-                    _Tree<void, EdgeType>(node, begin_node, is_rooted, root, edges_weight_function),
+                    Tree<void, EdgeType>(node, begin_node, is_rooted, root, edges_weight_function),
                     _flower_size(flower_size)
                 {
                     _output_function = this->default_function();
@@ -5572,7 +5572,7 @@ namespace generator{
                 _FlowerChain(
                     int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int flower_size = -1,
                     NodeGenFunction nodes_weight_function = nullptr) :
-                    _Tree<NodeType, void>(node, begin_node, is_rooted, root, nodes_weight_function),
+                    Tree<NodeType, void>(node, begin_node, is_rooted, root, nodes_weight_function),
                     _flower_size(flower_size)
                 {
                     _output_function = this->default_function();
@@ -5581,7 +5581,7 @@ namespace generator{
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
                 _FlowerChain(
                     int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int flower_size = -1) :
-                    _Tree<void, void>(node, begin_node, is_rooted, root),
+                    Tree<void, void>(node, begin_node, is_rooted, root),
                     _flower_size(flower_size)
                 {
                     _output_function = this->default_function();
@@ -5615,13 +5615,13 @@ namespace generator{
             protected:
                 
                 template<typename T = EdgeType, _HasT<T> = 0>
-                void __reset_edges_weight_function(_Tree<void, EdgeType>& tree) {
+                void __reset_edges_weight_function(Tree<void, EdgeType>& tree) {
                     auto func = this->edges_weight_function();
                     tree.set_edges_weight_function(func);
                 }
                 
                 template<typename T = EdgeType, _NotHasT<T> = 0>
-                void __reset_edges_weight_function(_Tree<void, EdgeType>&) {
+                void __reset_edges_weight_function(Tree<void, EdgeType>&) {
                     return;
                 }
                 
@@ -5641,7 +5641,7 @@ namespace generator{
                     }
                 }
                 
-                void __dump_result(_Tree<void, EdgeType>& tree) {
+                void __dump_result(Tree<void, EdgeType>& tree) {
                     this->_edges = tree.edges_ref();
                     this->_node_indices = tree.node_indices_ref();
                 }
@@ -5804,13 +5804,13 @@ namespace generator{
                 }
                 
                 template<typename T = EdgeType, _HasT<T> = 0>
-                void __reset_edges_weight_function(_Tree<void, EdgeType>& tree) {
+                void __reset_edges_weight_function(Tree<void, EdgeType>& tree) {
                     auto func = this->edges_weight_function();
                     tree.set_edges_weight_function(func);
                 }
                 
                 template<typename T = EdgeType, _NotHasT<T> = 0>
-                void __reset_edges_weight_function(_Tree<void, EdgeType>&) {
+                void __reset_edges_weight_function(Tree<void, EdgeType>&) {
                     return;
                 }
                 
@@ -5822,7 +5822,7 @@ namespace generator{
                     for (int i = 0; i < this->_node_count; i++) p[i] = i;
                     shuffle(p.begin(), p.end());
                     int l = 0;
-                    _Tree<void, EdgeType> tree;
+                    Tree<void, EdgeType> tree;
                     __reset_edges_weight_function(tree);
                     for (int tree_size : _trees_size) {
                         tree.set_node_count(tree_size);
@@ -5936,10 +5936,10 @@ namespace generator{
             // special for 2 tree link to a tree
             
             template<typename NodeType, typename EdgeType> 
-            _Tree<NodeType, EdgeType> __link(
-                _Tree<NodeType, EdgeType> setting_tree,
-                _Tree<NodeType, EdgeType> tree1,
-                _Tree<NodeType, EdgeType> tree2,
+            Tree<NodeType, EdgeType> __link(
+                Tree<NodeType, EdgeType> setting_tree,
+                Tree<NodeType, EdgeType> tree1,
+                Tree<NodeType, EdgeType> tree2,
                 TreeLinkType link_type)
             {
                 _TreeLinkImpl<NodeType, EdgeType> impl(setting_tree, tree1, tree2, link_type);
@@ -5947,9 +5947,9 @@ namespace generator{
             }
             
             template<typename NodeType, typename EdgeType> 
-            _Tree<NodeType, EdgeType> __link(
-                _Tree<NodeType, EdgeType> tree1,
-                _Tree<NodeType, EdgeType> tree2,
+            Tree<NodeType, EdgeType> __link(
+                Tree<NodeType, EdgeType> tree1,
+                Tree<NodeType, EdgeType> tree2,
                 TreeLinkType link_type)
             {
                 _TreeLinkImpl<NodeType, EdgeType> impl(tree1, tree2, link_type);
@@ -5970,7 +5970,7 @@ namespace generator{
             using Edge = basic::_Edge<void>;
             using NodeWeight = basic::_Node<void>;
             using TreeGenerator = basic::TreeGenerator;
-            using Tree = basic::_Tree<void, void>;
+            using Tree = basic::Tree<void, void>;
             using Chain = basic::_Chain<void, void>;
             using Flower = basic::_Flower<void, void>;
             using HeightTree = basic::_HeightTree<void, void>;
@@ -6030,7 +6030,7 @@ namespace generator{
             using TreeGenerator = basic::TreeGenerator;
 
             template<typename EdgeType>
-            using Tree = basic::_Tree<void, EdgeType>;
+            using Tree = basic::Tree<void, EdgeType>;
 
             template<typename EdgeType>
             using Chain = basic::_Chain<void, EdgeType>;
@@ -6162,7 +6162,7 @@ namespace generator{
             using TreeGenerator = basic::TreeGenerator;
             
             template<typename NodeType>
-            using Tree = basic::_Tree<NodeType, void>;
+            using Tree = basic::Tree<NodeType, void>;
 
             template<typename NodeType>
             using Chain = basic::_Chain<NodeType, void>;
@@ -6295,7 +6295,7 @@ namespace generator{
             using TreeGenerator = basic::TreeGenerator;
             
             template<typename NodeType, typename EdgeType>
-            using Tree = basic::_Tree<NodeType, EdgeType>;
+            using Tree = basic::Tree<NodeType, EdgeType>;
 
             template<typename NodeType, typename EdgeType>
             using Chain = basic::_Chain<NodeType, EdgeType>;

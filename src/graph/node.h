@@ -7,7 +7,7 @@
 
 namespace generator {
     namespace rand_graph {
-        namespace _basic {
+        namespace basic {
             template<typename U>
             class _Node {
             protected:
@@ -45,7 +45,7 @@ namespace generator {
 
                 _OUTPUT_FUNCTION_SETTING(_Self)
             };
-        } // namespace _basic
+        } // namespace basic
     } // namespace rand_graph
 } // namespace generator
 

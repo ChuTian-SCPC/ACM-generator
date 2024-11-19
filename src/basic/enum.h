@@ -117,6 +117,11 @@ namespace generator {
       ZeroOne,
       MaxCharType
     };
+
+    enum TreeGenerator {
+      RandomFather,
+      Pruefer
+    };
   } // namespace _enum
 } // namespace generator
 

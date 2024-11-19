@@ -7,7 +7,7 @@
 
 namespace generator {
     namespace rand_graph {
-        namespace _basic {
+        namespace basic {
             class _BasicEdge {
             protected:
                 int _u, _v;
@@ -85,7 +85,7 @@ namespace generator {
 
                 _OUTPUT_FUNCTION_SETTING(_Self)
             };
-        } // namespace _basic
+        } // namespace basic
     } // namespace rand_graph
 } // namespace generator
 
