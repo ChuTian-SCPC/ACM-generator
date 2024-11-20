@@ -69,17 +69,49 @@
 #define _CONTEXT_V(name) \
   this->_context.name()
 #endif // !_CONTEXT_V
+
 #ifndef _CONTEXT_V_REF
 #define _CONTEXT_V_REF(name) \
   this->_context.name##_ref()
 #endif // !_CONTEXT_V_REF
+
 #ifndef _CONTEXT_GET
 #define _CONTEXT_GET(type, name) \
     type name = _CONTEXT_V(name);
 #endif // !_CONTEXT_GET
+
 #ifndef _CONTEXT_GET_REF
 #define _CONTEXT_GET_REF(type, name) \
     type& name = _CONTEXT_V_REF(name);
 #endif // !_CONTEXT_GET
+
+#ifndef _MUST_IS_ROOTED
+#define _MUST_IS_ROOTED \
+    void set_is_rooted(int is_rooted) = delete; \
+    bool& is_rooted_ref() = delete;
+#endif // !_MUST_IS_ROOTED
+
+#ifndef _DEFAULT_GEN_FUNC
+#define _DEFAULT_GEN_FUNC(name) \
+  void __default_generator() { \
+    this->_generator = new name##Gen<NodeType, EdgeType>(*this); \
+  }
+#endif // !_DEFAULT_GEN_FUNC
+
+#ifndef _DEFAULT_OUTPUT
+#define _DEFAULT_OUTPUT \
+  _output_function = this->default_function();
+#endif // !_DEFAULT_OUTPUT
+
+#ifndef _DEFAULT_GEN
+#define _DEFAULT_GEN \
+  __default_generator();
+#endif // !_DEFAULT_GEN
+
+#ifndef _TREE_GRAPH_DEFAULT
+#define _TREE_GRAPH_DEFAULT \
+  _DEFAULT_OUTPUT \
+  _DEFAULT_GEN
+#endif // !_TREE_GRAPH_DEFAULT
 
 #endif // !_SGPCET_MACRO_H_

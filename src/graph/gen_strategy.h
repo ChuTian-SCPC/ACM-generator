@@ -37,10 +37,10 @@ namespace generator {
                 BasicGen(T& context) : _context(context) {}
             };
 
-            template <template <typename, typename> class Tree, typename NodeType, typename EdgeType>
-            class BasicTreeGen : public BasicGen<Tree<NodeType, EdgeType>> {
+            template <template <typename, typename> class TreeType, typename NodeType, typename EdgeType>
+            class BasicTreeGen : public BasicGen<TreeType<NodeType, EdgeType>> {
             public:
-                BasicTreeGen(Tree<NodeType, EdgeType>& context) : BasicGen<Tree<NodeType, EdgeType>>(context) {}
+                BasicTreeGen(TreeType<NodeType, EdgeType>& context) : BasicGen<TreeType<NodeType, EdgeType>>(context) {}
                 virtual void generate() override {
                     _msg::OutStream tree_log(false);
                     _msg::_defl.swap(tree_log);
@@ -137,6 +137,109 @@ namespace generator {
                 template <typename T = NodeType, _HasT<T> = 0>
                 void __clear_nodes_weight() {
                     this->_context.nodes_weight_ref().clear(); 
+                }
+            };
+
+            template <template <typename, typename> class TreeType, typename NodeType, typename EdgeType>
+            class BasicRandomFatherGen : public BasicTreeGen<TreeType, NodeType, EdgeType> {
+            protected:
+                using Context = TreeType<NodeType, EdgeType>;
+                std::vector<int> _rank;
+                
+            public:
+                BasicRandomFatherGen(Context& tree) : BasicTreeGen<TreeType, NodeType, EdgeType>(tree) {}
+            protected:
+                virtual void __generate_tree() override {
+                    __init_rank();
+                    __random_father();
+                }
+
+                virtual void __init_rank() {
+                    int node_count = this->_context.node_count();
+                    _rank = rand_array::rand_p(node_count);
+                    if (this->_context.is_rooted()) {
+                        for (int i = 1; i < node_count; i++) {
+                            if (_rank[i] == this->_context.root_ref()) {
+                                std::swap(_rank[0], _rank[i]);
+                                break;
+                            }
+                        } 
+                    }
+                }
+                virtual void __random_father() {
+                    int node_count = this->_context.node_count();
+                    for (int i = 1; i < node_count; i++) {
+                        int f = rnd.next(i);
+                        this->__add_edge(_rank[f], _rank[i]);
+                    }
+                }
+            };
+
+             template <template <typename, typename> class TreeType, typename NodeType, typename EdgeType>
+            class BasicPrueferGen : public BasicTreeGen<TreeType, NodeType, EdgeType> {
+            protected:
+                using Context = TreeType<NodeType, EdgeType>;
+            public:
+                BasicPrueferGen(Context& tree) : BasicTreeGen<TreeType, NodeType, EdgeType>(tree) {}
+            protected:
+                virtual void __generate_tree() override {
+                    _CONTEXT_GET(int, node_count)
+                    std::vector<int> times = rand_array::rand_sum(node_count, node_count - 2, 0);
+                    std::vector<int> pruefer = rand_array::shuffle_index(times);
+                    __pruefer_decode(pruefer);
+                }
+                void __pruefer_decode(std::vector<int> pruefer) {
+                    _CONTEXT_GET(int, node_count)
+                    _CONTEXT_GET(bool, is_rooted)
+                    if (node_count == 2) {
+                        int u = is_rooted ? _CONTEXT_V_REF(root) : 0;
+                        this->__add_edge(u, 1 ^ u);
+                        return;
+                    }
+
+                    if (is_rooted) {
+                        _CONTEXT_GET_REF(int, root)
+                        int n = pruefer.size();
+                        bool exist = false;
+                        for (int i = 0; i < n; i++) {
+                            if (pruefer[i] == root) {
+                                std::swap(pruefer[i], pruefer[n - 1]);
+                                exist = true;
+                                break;
+                            }
+                        }
+                        if (!exist) {
+                            pruefer[n - 1] = root;
+                        }
+                    }
+
+                    std::vector<int> degree(node_count, 1);
+                    for (auto x: pruefer) {
+                        degree[x]++;
+                    }
+                    int ptr = 0;
+                    while (degree[ptr] != 1) {
+                        ptr++;
+                    }
+                    int leaf = ptr;
+                    for (auto u: pruefer) {
+                        this->__add_edge(u, leaf);
+                        degree[u]--;
+                        if (degree[u] == 1 && u < ptr) {
+                            leaf = u;
+                        } else {
+                            do {
+                                ptr++;
+                            } while (degree[ptr] != 1);
+                            leaf = ptr;
+                        }
+                    }
+                    int u = leaf;
+                    int v = node_count - 1;
+                    if (is_rooted && v == _CONTEXT_V_REF(root)) {
+                        std::swap(u, v);
+                    }
+                    this->__add_edge(u, v);
                 }
             };
 

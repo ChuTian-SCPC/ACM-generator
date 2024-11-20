@@ -93,6 +93,9 @@
 #ifndef _SGPCET_TREE_H_
 #include "graph/tree.h"
 #endif // !_SGPCET_TREE_H_
+#ifndef _SGPCET_CHAIN_H_
+#include "graph/chain.h"
+#endif // !_SGPCET_CHAIN_H_
 #ifndef _SGPCET_UNWEIGHT_H_
 #include "graph/unweight.h"
 #endif // !_SGPCET_UNWEIGHT_H_
@@ -132,6 +135,11 @@ namespace generator {
 #undef _CONTEXT_V_REF
 #undef _CONTEXT_GET
 #undef _CONTEXT_GET_REF
+#undef _MUST_IS_ROOTED
+#undef _DEFAULT_GEN_FUNC
+#undef _DEFAULT_OUTPUT
+#undef _DEFAULT_GEN
+#undef _TREE_GRAPH_DEFAULT
 #endif
 
 #endif // !_SGPCET_INCLUDE_ALL_H_
