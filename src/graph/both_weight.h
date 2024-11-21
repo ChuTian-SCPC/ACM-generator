@@ -7,6 +7,9 @@
 #ifndef _SGPCET_CHAIN_H_
 #include "chain.h"
 #endif // !_SGPCET_CHAIN_H_
+#ifndef _SGPCET_FLOWER_H_
+#include "flower.h"
+#endif // !_SGPCET_FLOWER_H_
 
 namespace generator {
     namespace rand_graph {
@@ -36,6 +39,12 @@ namespace generator {
 
             template <typename NodeType, typename EdgeType>
             using Chain = basic::Chain<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using FlowerGen = basic::FlowerGen<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using Flower = basic::Flower<NodeType, EdgeType>;
         } // namespace both_weight
     } // namespace rand_graph
 } // namespace generator

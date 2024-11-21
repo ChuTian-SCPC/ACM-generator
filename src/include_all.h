@@ -96,6 +96,9 @@
 #ifndef _SGPCET_CHAIN_H_
 #include "graph/chain.h"
 #endif // !_SGPCET_CHAIN_H_
+#ifndef _SGPCET_FLOWER_H_
+#include "graph/flower.h"
+#endif // !_SGPCET_FLOWER_H_
 #ifndef _SGPCET_UNWEIGHT_H_
 #include "graph/unweight.h"
 #endif // !_SGPCET_UNWEIGHT_H_
