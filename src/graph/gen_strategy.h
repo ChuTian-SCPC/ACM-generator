@@ -47,7 +47,7 @@ namespace generator {
                     __init();
                     __generate_tree(); 
                     __generate_nodes_weight();
-                    _CONTEXT_GET_REF(auto, edges)
+                    _CONTEXT_GET_REF(edges)
                     shuffle(edges.begin(), edges.end());
                     _msg::_defl.swap(tree_log);
                 };
@@ -78,7 +78,7 @@ namespace generator {
                 }
 
                 void __judge_comman_limit() {
-                    _CONTEXT_GET(int, node_count)
+                    _CONTEXT_GET(node_count)
                     if (node_count <= 0) {
                         _msg::__fail_msg(_msg::_defl, 
                             tools::string_format("number of nodes must be a positive integer, but found %d.", 
@@ -86,10 +86,10 @@ namespace generator {
                     }
 
                     if (_CONTEXT_V(is_rooted)) {
-                        _CONTEXT_GET_REF(int, root)
+                        _CONTEXT_GET_REF(root)
                         if (root < 0 || root >= node_count) {
                             _msg::__fail_msg(_msg::_defl,
-                                tools::string_format("restriction of the root is [1, %d], but found %d.", 
+                                tools::string_format("limit of the root is [1, %d], but found %d.", 
                                 node_count, root + 1));                           
                         }
                     }
@@ -110,8 +110,8 @@ namespace generator {
                     __judge_limits();
                     this->_context.edges_ref().clear();
                     __clear_nodes_weight();    
-                    _CONTEXT_GET(auto, node_indices)
-                    _CONTEXT_GET(int, node_count)
+                    _CONTEXT_GET(node_indices)
+                    _CONTEXT_GET(node_count)
                     if ((int)node_indices.size() != node_count) {
                         _msg::__warn_msg(_msg::_defl, 
                             tools::string_format("size of node_indices %d is not equal to node_count %d, use default node_indices.",
@@ -183,14 +183,14 @@ namespace generator {
                 BasicPrueferGen(Context& tree) : BasicTreeGen<TreeType, NodeType, EdgeType>(tree) {}
             protected:
                 virtual void __generate_tree() override {
-                    _CONTEXT_GET(int, node_count)
+                    _CONTEXT_GET(node_count)
                     std::vector<int> times = rand_array::rand_sum(node_count, node_count - 2, 0);
                     std::vector<int> pruefer = rand_array::shuffle_index(times);
                     __pruefer_decode(pruefer);
                 }
                 void __pruefer_decode(std::vector<int> pruefer) {
-                    _CONTEXT_GET(int, node_count)
-                    _CONTEXT_GET(bool, is_rooted)
+                    _CONTEXT_GET(node_count)
+                    _CONTEXT_GET(is_rooted)
                     if (node_count == 2) {
                         int u = is_rooted ? _CONTEXT_V_REF(root) : 0;
                         this->__add_edge(u, 1 ^ u);
@@ -198,7 +198,7 @@ namespace generator {
                     }
 
                     if (is_rooted) {
-                        _CONTEXT_GET_REF(int, root)
+                        _CONTEXT_GET_REF(root)
                         int n = pruefer.size();
                         bool exist = false;
                         for (int i = 0; i < n; i++) {

@@ -115,7 +115,7 @@ namespace generator {
                     }
                     if (root < 1 || root > _node_count) {
                         _msg::__warn_msg(_msg::_defl, 
-                            tools::string_format("restriction of the root is [1, %d], but found %d.", 
+                            tools::string_format("limit of the root is [1, %d], but found %d.", 
                             _node_count, root));
                         return;
                     }

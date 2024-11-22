@@ -19,26 +19,26 @@ namespace generator {
                 HeightTreeGen(Context& tree) : BasicRandomFatherGen<HeightTree, NodeType, EdgeType>(tree) {}
             protected:
                 virtual void __self_init() override {
-                    _CONTEXT_GET_REF(int, height)
-                    _CONTEXT_GET(int, node_count)
+                    _CONTEXT_GET_REF(height)
+                    _CONTEXT_GET(node_count)
                     if (height == -1) {
                         height = rnd.next(node_count == 1 ? 1 : 2, node_count);
                     }
                 }
 
                 virtual void __judge_self_limit() override{
-                    _CONTEXT_GET(int, node_count)
-                    _CONTEXT_GET(int, height)
+                    _CONTEXT_GET(node_count)
+                    _CONTEXT_GET(height)
                     if (height > node_count || (node_count > 1 && height <= 1) || height < 1) {
                         _msg::__fail_msg(_msg::_defl, 
-                            tools::string_format("restriction of the height is [%d,%d].", 
-                            node_count == 1 ? 1 : 2, node_count));
+                            tools::string_format("limit of the height is [%d, %d], but found %d.", 
+                            node_count == 1 ? 1 : 2, node_count, height));
                     }
                 }
 
                 virtual void __random_father() override {
-                    _CONTEXT_GET(int, height)
-                    _CONTEXT_GET(int, node_count)
+                    _CONTEXT_GET(height)
+                    _CONTEXT_GET(node_count)
                     std::vector<int> number(height, 1);
                     int w = node_count - height;
                     for (int i = 1; i <= w; i++) {

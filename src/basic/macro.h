@@ -76,13 +76,13 @@
 #endif // !_CONTEXT_V_REF
 
 #ifndef _CONTEXT_GET
-#define _CONTEXT_GET(type, name) \
-    type name = _CONTEXT_V(name);
+#define _CONTEXT_GET(name) \
+    auto name = _CONTEXT_V(name);
 #endif // !_CONTEXT_GET
 
 #ifndef _CONTEXT_GET_REF
-#define _CONTEXT_GET_REF(type, name) \
-    type& name = _CONTEXT_V_REF(name);
+#define _CONTEXT_GET_REF(name) \
+    auto& name = _CONTEXT_V_REF(name);
 #endif // !_CONTEXT_GET
 
 #ifndef _MUST_IS_ROOTED

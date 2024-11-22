@@ -99,6 +99,9 @@
 #ifndef _SGPCET_FLOWER_H_
 #include "graph/flower.h"
 #endif // !_SGPCET_FLOWER_H_
+#ifndef _SGPCET_DEGREE_TREE_H_
+#include "graph/degree_tree.h"
+#endif // !_SGPCET_DEGREE_TREE_H_
 #ifndef _SGPCET_HEIGHT_TREE_H_
 #include "graph/height_tree.h"
 #endif // !_SGPCET_HEIGHT_TREE_H_
