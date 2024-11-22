@@ -18,11 +18,10 @@ namespace generator {
             public:
                 FlowerGen(Context& tree) : BasicRandomFatherGen<Flower, NodeType, EdgeType>(tree) {}
             protected:
-                virtual void __generate_tree() override {
-                    this->__init_rank();
+                virtual void __random_father() override {
                     for (int i = 1; i < this->_context.node_count(); i++) {
                         this->__add_edge(this->_rank[0], this->_rank[i]);
-                    }             
+                    }                     
                 }
             };
 
