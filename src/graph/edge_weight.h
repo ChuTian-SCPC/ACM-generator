@@ -74,6 +74,12 @@ namespace generator {
 
             template <typename EdgeType>
             using SonTree = basic::SonTree<void, EdgeType>;
+
+            template <typename EdgeType>
+            using GraphGen = basic::GraphGen<void, EdgeType>;
+
+            template <typename EdgeType>
+            using Graph = basic::Graph<void, EdgeType>;
         } // namespace edge_weight
     } // namespace rand_graph
 } // namespace generator

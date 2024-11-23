@@ -74,6 +74,12 @@ namespace generator {
 
             template <typename NodeType>
             using SonTree = basic::SonTree<NodeType, void>;
+
+            template <typename NodeType>
+            using GraphGen = basic::GraphGen<NodeType, void>;
+
+            template <typename NodeType>
+            using Graph = basic::Graph<NodeType, void>;
         } // namespace node_weight
     } // namespace rand_graph
 } // namespace generator
