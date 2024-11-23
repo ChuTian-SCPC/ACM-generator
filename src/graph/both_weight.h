@@ -16,6 +16,9 @@
 #ifndef _SGPCET_DEGREE_TREE_H_
 #include "degree_tree.h"
 #endif // !_SGPCET_DEGREE_TREE_H_
+#ifndef _SGPCET_SON_TREE_H_
+#include "son_tree.h"
+#endif // !_SGPCET_SON_TREE_H_
 
 namespace generator {
     namespace rand_graph {
@@ -57,6 +60,18 @@ namespace generator {
 
             template <typename NodeType, typename EdgeType>
             using HeightTree = basic::HeightTree<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using DegreeTreeGen = basic::DegreeTreeGen<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using DegreeTree = basic::DegreeTree<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using SonTreeGen = basic::SonTreeGen<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using SonTree = basic::SonTree<NodeType, EdgeType>;
         } // namespace both_weight
     } // namespace rand_graph
 } // namespace generator

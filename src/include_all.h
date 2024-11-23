@@ -102,6 +102,9 @@
 #ifndef _SGPCET_DEGREE_TREE_H_
 #include "graph/degree_tree.h"
 #endif // !_SGPCET_DEGREE_TREE_H_
+#ifndef _SGPCET_SON_TREE_H_
+#include "graph/son_tree.h"
+#endif // !_SGPCET_SON_TREE_H_
 #ifndef _SGPCET_HEIGHT_TREE_H_
 #include "graph/height_tree.h"
 #endif // !_SGPCET_HEIGHT_TREE_H_

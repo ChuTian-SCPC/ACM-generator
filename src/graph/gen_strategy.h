@@ -197,22 +197,6 @@ namespace generator {
                         return;
                     }
 
-                    if (is_rooted) {
-                        _CONTEXT_GET_REF(root)
-                        int n = pruefer.size();
-                        bool exist = false;
-                        for (int i = 0; i < n; i++) {
-                            if (pruefer[i] == root) {
-                                std::swap(pruefer[i], pruefer[n - 1]);
-                                exist = true;
-                                break;
-                            }
-                        }
-                        if (!exist) {
-                            pruefer[n - 1] = root;
-                        }
-                    }
-
                     std::vector<int> degree(node_count, 1);
                     for (auto x: pruefer) {
                         degree[x]++;
@@ -250,7 +234,6 @@ namespace generator {
                 _GenSwitch() : _generator(nullptr) {}
                 virtual ~_GenSwitch() { __delete_generator(); }
 
-                void gen() { _generator->generate(); }
             protected:
                 void __delete_generator() {
                     if (_generator) delete _generator;

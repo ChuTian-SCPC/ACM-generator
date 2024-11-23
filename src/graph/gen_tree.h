@@ -220,6 +220,11 @@ namespace generator {
                 _GenTree(int node_count = 1, int begin_node = 1, bool is_rooted = false, int root = 1) :
                     _NoGenTree<void, void>(node_count, begin_node, is_rooted, root),
                     _TreeGenSwitch() {}
+
+                void gen() { 
+                    this->_generator->generate(); 
+                    if (this->_is_rooted) this->__reroot();
+                }
             };
 
         } // namespace basic
