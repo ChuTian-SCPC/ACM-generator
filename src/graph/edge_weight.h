@@ -22,6 +22,9 @@
 #ifndef _SGPCET_GRAPH_H_
 #include "graph.h"
 #endif // !_SGPCET_GRAPH_H_
+#ifndef _SGPCET_BIPARTITE_GRAPH_H_
+#include "bipartite_graph.h"
+#endif // !_SGPCET_BIPARTITE_GRAPH_H_
 
 namespace generator {
     namespace rand_graph {
@@ -80,6 +83,12 @@ namespace generator {
 
             template <typename EdgeType>
             using Graph = basic::Graph<void, EdgeType>;
+
+            template <typename EdgeType>
+            using BipartiteGraphGen = basic::BipartiteGraphGen<void, EdgeType>;
+
+            template <typename EdgeType>
+            using BipartiteGraph = basic::BipartiteGraph<void, EdgeType>;
         } // namespace edge_weight
     } // namespace rand_graph
 } // namespace generator

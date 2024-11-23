@@ -118,6 +118,9 @@
 #ifndef _SGPCET_GRAPH_H_
 #include "graph/graph.h"
 #endif // !_SGPCET_GRAPH_H_
+#ifndef _SGPCET_BIPARTITE_GRAPH_H_
+#include "graph/bipartite_graph.h"
+#endif // !_SGPCET_BIPARTITE_GRAPH_H_
 #ifndef _SGPCET_UNWEIGHT_H_
 #include "graph/unweight.h"
 #endif // !_SGPCET_UNWEIGHT_H_
@@ -162,6 +165,11 @@ namespace generator {
 #undef _DEFAULT_OUTPUT
 #undef _DEFAULT_GEN
 #undef _TREE_GRAPH_DEFAULT
+#undef _DISABLE_EDGE_COUNT
+#undef _DISABLE_DIRECTION
+#undef _DISABLE_MULTIPLY_EDGE
+#undef _DISABLE_SELF_LOOP
+#undef _DISABLE_CONNECT
 #endif
 
 #endif // !_SGPCET_INCLUDE_ALL_H_

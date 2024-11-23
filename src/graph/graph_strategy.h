@@ -28,14 +28,24 @@ namespace generator {
 
             protected :
 
-                virtual void __judge_upper_limit() {
+                void __judge_setting_limit() {
                     _CONTEXT_GET(node_count)
                     _CONTEXT_GET(edge_count)
+                    if (node_count > _setting::node_limit) {
+                        _msg::__fail_msg(_msg::_defl,
+                            tools::string_format("node_count can't greater than node_limit(%d), but found %d.",
+                            _setting::node_limit, node_count));
+                    }
                     if (edge_count > _setting::edge_limit) {
                         _msg::__fail_msg(_msg::_defl,
                             tools::string_format("edge_count can't greater than edge_limit(%d), but found %d.",
                             _setting::edge_limit, edge_count));
-                    }
+                    }                  
+                }
+
+                virtual void __judge_upper_limit() {
+                    _CONTEXT_GET(node_count)
+                    _CONTEXT_GET(edge_count)
                     if (!_CONTEXT_V(multiply_edge)) {  
                         long long limit = (long long) node_count * (long long) (node_count - 1) / 2;
                         if (_CONTEXT_V(direction)) limit *= 2;
@@ -72,6 +82,7 @@ namespace generator {
                 virtual void __judge_self_limit() {}
 
                 void __judge_limits() {
+                    __judge_setting_limit();
                     __judge_upper_limit();
                     __judge_lower_limit();
                     __judge_self_limit();

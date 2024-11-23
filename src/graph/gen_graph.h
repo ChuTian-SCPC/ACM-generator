@@ -88,9 +88,7 @@ namespace generator {
                 
                 void default_output(std::ostream& os) const {
                     std::vector<int> first_line_vec;
-                    if (_output_node_count) {
-                        first_line_vec.push_back(_node_count);
-                    }
+                    __format_output_node(first_line_vec);
                     if (_output_edge_count) {
                         first_line_vec.push_back(_edge_count);
                     }
@@ -137,6 +135,10 @@ namespace generator {
                 template<typename T = NodeType, _HasT<T> = 0>
                 std::string __nodes_weight_format() const {
                     return join(_nodes_weight);
+                }
+
+                virtual void __format_output_node(std::vector<int>& first_line) const {
+                    if (_output_node_count) first_line.push_back(_node_count);
                 }
             };
 
