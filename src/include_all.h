@@ -72,9 +72,9 @@
 #ifndef _SGPCET_NODE_H_
 #include "graph/node.h"
 #endif // !_SGPCET_NODE_H_
-#ifndef _SGPCET_BASIC_TREE_H_
-#include "graph/basic_tree.h"
-#endif // !_SGPCET_BASIC_TREE_H_
+#ifndef _SGPCET_BASIC_TREE_GRAPH_H_
+#include "graph/basic_tree_graph.h"
+#endif // !_SGPCET_BASIC_TREE_GRAPH_H_
 #ifndef _SGPCET_WEIGHT_TYPE_H_
 #include "graph/weight_type.h"
 #endif // !_SGPCET_WEIGHT_TYPE_H_

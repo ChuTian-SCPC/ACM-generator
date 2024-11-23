@@ -1,9 +1,9 @@
 #ifndef _SGPCET_GEN_TREE_H_
 #define _SGPCET_GEN_TREE_H_
 
-#ifndef _SGPCET_BASIC_TREE_H_
-#include "basic_tree.h"
-#endif // !_SGPCET_BASIC_TREE_H_
+#ifndef _SGPCET_BASIC_TREE_GRAPH_H_
+#include "basic_tree_graph.h"
+#endif // !_SGPCET_BASIC_TREE_GRAPH_H_
 #ifndef _SGPCET_GEN_FUNCTION_H_
 #include "gen_function.h"
 #endif // !_SGPCET_GEN_FUNCTION_H_
