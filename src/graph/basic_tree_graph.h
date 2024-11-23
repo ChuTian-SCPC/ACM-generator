@@ -85,7 +85,7 @@ namespace generator {
                 }
             };
             
-            class _BasicTree : _BasicTreeGraph {
+            class _BasicTree : public _BasicTreeGraph {
             protected:
                 
                 bool _is_rooted;
@@ -136,7 +136,7 @@ namespace generator {
                 
             }; 
 
-            class _BasicGraph : _BasicTreeGraph {
+            class _BasicGraph : public _BasicTreeGraph {
             protected:
                 int _edge_count;
                 bool _direction;
@@ -146,16 +146,6 @@ namespace generator {
                 bool _output_edge_count; 
             
             public:
-                _BasicGraph(int node_count, int edge_count, int begin_node,
-                    bool direction, bool multiply_edge, bool self_loop, bool connect,
-                    bool output_node_count, bool output_edge_count) :
-                    _BasicTreeGraph(node_count, begin_node, output_node_count, !direction),
-                    _edge_count(edge_count),
-                    _direction(direction),
-                    _multiply_edge(multiply_edge),
-                    _self_loop(self_loop),
-                    _connect(connect),
-                    _output_edge_count(output_edge_count) {}
 
                 _BasicGraph(int node_count, int edge_count, int begin_node,
                     bool direction, bool multiply_edge, bool self_loop, bool connect,

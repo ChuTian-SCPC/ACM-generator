@@ -19,6 +19,9 @@
 #ifndef _SGPCET_SON_TREE_H_
 #include "son_tree.h"
 #endif // !_SGPCET_SON_TREE_H_
+#ifndef _SGPCET_GRAPH_H_
+#include "graph.h"
+#endif // !_SGPCET_GRAPH_H_
 
 namespace generator {
     namespace rand_graph {

@@ -7,6 +7,7 @@ target("generator")
     add_headerfiles("src/io/*.h")
     add_headerfiles("src/log/*.h")
     add_headerfiles("src/rand/*.h")
+    add_headerfiles("src/graph/*.h")
     add_headerfiles("src/include_all.h")
     
 

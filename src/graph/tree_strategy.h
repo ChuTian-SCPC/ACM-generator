@@ -1,5 +1,5 @@
-#ifndef _SGPCET_GEN_STRATEGY_H_
-#define _SGPCET_GEN_STRATEGY_H_
+#ifndef _SGPCET_TREE_STRATEGY_H_
+#define _SGPCET_TREE_STRATEGY_H_
 
 #ifndef _SGPCET_COMMON_H_
 #include "basic/common.h"
@@ -7,9 +7,9 @@
 #ifndef _SGPCET_MACRO_H_
 #include "basic/macro.h"
 #endif // !_SGPCET_MACRO_H_
-#ifndef _SGPCET_LOGGER_H_
-#include "log/logger.h"
-#endif // !_SGPCET_LOGGER_H_
+#ifndef _SGPCET_GEN_STRATEGY_H_
+#include "basic/gen_strategy.h"
+#endif // !_SGPCET_GEN_STRATEGY_H_
 #ifndef _SGPCET_NODE_H_
 #include "node.h"
 #endif // !_SGPCET_NODE_H_
@@ -20,27 +20,11 @@
 namespace generator {
     namespace rand_graph {
         namespace basic {
-            
-            class Gen {
-            public:
-                Gen(){}
-                virtual void generate() {
-                    _msg::__fail_msg(_msg::_defl, "unsupport generator.");
-                };
-            };
-
-            template <typename T>
-            class BasicGen : public Gen {
-            protected:
-                T& _context;
-            public:
-                BasicGen(T& context) : _context(context) {}
-            };
 
             template <template <typename, typename> class TreeType, typename NodeType, typename EdgeType>
-            class BasicTreeGen : public BasicGen<TreeType<NodeType, EdgeType>> {
+            class BasicTreeGen : public tools::_BasicGen<TreeType<NodeType, EdgeType>> {
             public:
-                BasicTreeGen(TreeType<NodeType, EdgeType>& context) : BasicGen<TreeType<NodeType, EdgeType>>(context) {}
+                BasicTreeGen(TreeType<NodeType, EdgeType>& context) : tools::_BasicGen<TreeType<NodeType, EdgeType>>(context) {}
                 virtual void generate() override {
                     _msg::OutStream tree_log(false);
                     _msg::_defl.swap(tree_log);
@@ -57,7 +41,7 @@ namespace generator {
                 }
 
                 void __add_edge(_Edge<EdgeType> edge) {
-                    this->_context.edges_ref().emplace_back(edge);
+                    _CONTEXT_V_REF(edges).emplace_back(edge);
                 }
                 
                 template<typename T = EdgeType, _NotHasT<T> = 0>
@@ -81,8 +65,14 @@ namespace generator {
                     _CONTEXT_GET(node_count)
                     if (node_count <= 0) {
                         _msg::__fail_msg(_msg::_defl, 
-                            tools::string_format("number of nodes must be a positive integer, but found %d.", 
+                            tools::string_format("node_count must be a positive integer, but found %d.", 
                             node_count));
+                    }
+
+                    if (node_count > _setting::node_limit) {
+                        _msg::__fail_msg(_msg::_defl,
+                            tools::string_format("node_count can't greater than node_limit(%d), but found.",
+                            _setting::node_limit, node_count));
                     }
 
                     if (_CONTEXT_V(is_rooted)) {
@@ -108,7 +98,7 @@ namespace generator {
                     __self_init();
                     this->_context.check_gen_function();
                     __judge_limits();
-                    this->_context.edges_ref().clear();
+                    _CONTEXT_V_REF(edges).clear();
                     __clear_nodes_weight();    
                     _CONTEXT_GET(node_indices)
                     _CONTEXT_GET(node_count)
@@ -175,7 +165,7 @@ namespace generator {
                 }
             };
 
-             template <template <typename, typename> class TreeType, typename NodeType, typename EdgeType>
+            template <template <typename, typename> class TreeType, typename NodeType, typename EdgeType>
             class BasicPrueferGen : public BasicTreeGen<TreeType, NodeType, EdgeType> {
             protected:
                 using Context = TreeType<NodeType, EdgeType>;
@@ -227,36 +217,16 @@ namespace generator {
                 }
             };
 
-            class _GenSwitch {
-            protected:
-                Gen* _generator;
+            class _TreeGenSwitch : public tools::_GenSwitch {
             public:
-                _GenSwitch() : _generator(nullptr) {}
-                virtual ~_GenSwitch() { __delete_generator(); }
-
-            protected:
-                void __delete_generator() {
-                    if (_generator) delete _generator;
-                }
-            };
-
-            class _TreeGenSwitch : public _GenSwitch {
-            public:
-                void set_tree_generator(Gen* gen) {
+                void set_tree_generator(tools::_Gen* gen) {
                     __delete_generator();
                     _generator = gen;
                 }
             };
 
-            class _GraphGenSwitch : public _GenSwitch {
-            public:
-                void set_graph_generator(Gen* gen) {
-                    __delete_generator();
-                    _generator = gen;
-                }
-            };
         } // namespace basic
     } // namespace rand_graph
 } // namespace generator
 
-#endif // !_SGPCET_GEN_STRATEGY_H_
+#endif // !_SGPCET_TREE_STRATEGY_H_

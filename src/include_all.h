@@ -25,6 +25,10 @@
 #include "log/logger.h"
 #endif // !_SGPCET_LOGGER_H_
 
+#ifndef _SGPCET_GEN_STRATEGY_H_
+#include "basic/gen_strategy.h"
+#endif // !_SGPCET_GEN_STRATEGY_H_
+
 #ifndef _SGPCET_PATH_H_
 #include "io/path.h"
 #endif // !_SGPCET_PATH_H_
@@ -84,15 +88,18 @@
 #ifndef _SGPCET_LINK_FORWARD_H_
 #include "graph/link_forward.h"
 #endif // !_SGPCET_LINK_FORWARD_H_
-#ifndef _SGPCET_GEN_STRATEGY_H_
-#include "graph/gen_strategy.h"
-#endif // !_SGPCET_GEN_STRATEGY_H_
+#ifndef _SGPCET_TREE_STRATEGY_H_
+#include "graph/tree_strategy.h"
+#endif // !_SGPCET_TREE_STRATEGY_H_
 #ifndef _SGPCET_GEN_TREE_H_
 #include "graph/gen_tree.h"
 #endif // !_SGPCET_GEN_TREE_H_
 #ifndef _SGPCET_TREE_H_
 #include "graph/tree.h"
 #endif // !_SGPCET_TREE_H_
+#ifndef _SGPCET_GRAPH_STRATEGY_H_
+#include "graph/graph_strategy.h"
+#endif // !_SGPCET_GRAPH_STRATEGY_H_
 #ifndef _SGPCET_CHAIN_H_
 #include "graph/chain.h"
 #endif // !_SGPCET_CHAIN_H_
@@ -108,6 +115,9 @@
 #ifndef _SGPCET_HEIGHT_TREE_H_
 #include "graph/height_tree.h"
 #endif // !_SGPCET_HEIGHT_TREE_H_
+#ifndef _SGPCET_GRAPH_H_
+#include "graph/graph.h"
+#endif // !_SGPCET_GRAPH_H_
 #ifndef _SGPCET_UNWEIGHT_H_
 #include "graph/unweight.h"
 #endif // !_SGPCET_UNWEIGHT_H_

@@ -1,5 +1,5 @@
-#ifndef _SGPCET_GEN_TREE_H_
-#define _SGPCET_GEN_TREE_H_
+#ifndef _SGPCET_GEN_GRAPH_H_
+#define _SGPCET_GEN_GRAPH_H_
 
 #ifndef _SGPCET_BASIC_TREE_GRAPH_H_
 #include "basic_tree_graph.h"
@@ -7,9 +7,9 @@
 #ifndef _SGPCET_GEN_FUNCTION_H_
 #include "gen_function.h"
 #endif // !_SGPCET_GEN_FUNCTION_H_
-#ifndef _SGPCET_TREE_STRATEGY_H_
-#include "tree_strategy.h"
-#endif // !_SGPCET_TREE_STRATEGY_H_
+#ifndef _SGPCET_GRAPH_STRATEGY_H_
+#include "graph_strategy.h"
+#endif // !_SGPCET_GRAPH_STRATEGY_H_
 #ifndef _SGPCET_LINK_FORWARD_H_
 #include "link_forward.h"
 #endif // !_SGPCET_LINK_FORWARD_H_
@@ -21,9 +21,9 @@ namespace generator {
     namespace rand_graph {
         namespace basic {
             template<typename NodeType, typename EdgeType>
-            class _RandomFuncTree : public _BasicTree, public _RandomFunction<NodeType, EdgeType> {
+            class _RandomFuncGraph : public _BasicGraph, public _RandomFunction<NodeType, EdgeType> {
             protected:
-                using _Self =  _RandomFuncTree<NodeType,EdgeType>;
+                using _Self =  _RandomFuncGraph<NodeType,EdgeType>;
                 _OUTPUT_FUNCTION(_Self)
                 _DEF_GEN_FUNCTION
                 std::vector<_Edge<EdgeType>> _edges;
@@ -33,42 +33,50 @@ namespace generator {
                 friend class _TreeLinkImpl<NodeType, EdgeType>;
             public:
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
-                _RandomFuncTree(int node_count, int begin_node, bool is_rooted, int root,
+                _RandomFuncGraph(int node_count, int edge_count, int begin_node,
+                    bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node,
                     NodeGenFunction nodes_weight_function,
                     EdgeGenFunction edges_weight_function) :
-                    _BasicTree(node_count, begin_node, is_rooted, root, true, true),
+                    _BasicGraph(node_count, edge_count, begin_node,
+                        direction, multiply_edge, self_loop, connect, swap_node, true, true),
                     _RandomFunction<NodeType, EdgeType>(nodes_weight_function, edges_weight_function)
                 {
                     _output_function = default_function();
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
-                _RandomFuncTree(int node_count, int begin_node, bool is_rooted, int root,
+                _RandomFuncGraph(int node_count, int edge_count, int begin_node,
+                    bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node,
                     EdgeGenFunction edges_weight_function) :
-                    _BasicTree(node_count, begin_node, is_rooted, root, true, true),
+                    _BasicGraph(node_count, edge_count, begin_node,
+                        direction, multiply_edge, self_loop, connect, swap_node, true, true),
                     _RandomFunction<NodeType, EdgeType>(nullptr, edges_weight_function)
                 {
                     _output_function = default_function();
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
-                _RandomFuncTree(int node_count, int begin_node, bool is_rooted, int root,
+                _RandomFuncGraph(int node_count, int edge_count, int begin_node,
+                    bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node,
                     NodeGenFunction nodes_weight_function) :
-                    _BasicTree(node_count, begin_node, is_rooted, root, true, true),
+                    _BasicGraph(node_count, edge_count, begin_node,
+                        direction, multiply_edge, self_loop, connect, swap_node, true, true),
                     _RandomFunction<NodeType, EdgeType>(nodes_weight_function, nullptr)
                 {
                     _output_function = default_function();
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
-                _RandomFuncTree(int node_count, int begin_node, bool is_rooted, int root) :
-                    _BasicTree(node_count, begin_node, is_rooted, root, true, true),
+                _RandomFuncGraph(int node_count, int edge_count, int begin_node,
+                    bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node) :
+                    _BasicGraph(node_count, edge_count, begin_node,
+                        direction, multiply_edge, self_loop, connect, swap_node, true, true),
                     _RandomFunction<NodeType, EdgeType>(nullptr, nullptr)
                 {
                     _output_function = default_function();
                 }
 
-                virtual ~_RandomFuncTree() {}
+                virtual ~_RandomFuncGraph() {}
 
                 std::vector<_Edge<EdgeType>> edges() const { return __get_output_edges(); }
                 std::vector<_Edge<EdgeType>>& edges_ref() { return _edges; }
@@ -78,18 +86,13 @@ namespace generator {
                 template<typename T = NodeType, _HasT<T> = 0>
                 std::vector<_Node<NodeType>>& nodes_weight_ref() { return _nodes_weight; }
                 
-                void reroot(int root) {
-                    __reroot_set_check(root);
-                    __reroot();
-                }
-                
                 void default_output(std::ostream& os) const {
                     std::vector<int> first_line_vec;
                     if (_output_node_count) {
                         first_line_vec.push_back(_node_count);
                     }
-                    if (_is_rooted && _output_root) {
-                        first_line_vec.push_back(root());
+                    if (_output_edge_count) {
+                        first_line_vec.push_back(_edge_count);
                     }
                     std::vector<std::string> output_lines{join(first_line_vec)};
                     output_lines.push_back(__nodes_weight_format());
@@ -107,54 +110,6 @@ namespace generator {
 
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
-
-                void __reroot_set_check(int root) {
-                    if (!_is_rooted) {
-                        _msg::__warn_msg(_msg::_defl, "unrooted tree can't re-root.");
-                        return;
-                    }
-                    if (root < 1 || root > _node_count) {
-                        _msg::__warn_msg(_msg::_defl, 
-                            tools::string_format("limit of the root is [1, %d], but found %d.", 
-                            _node_count, root));
-                        return;
-                    }
-                    if ((int)_edges.size() < _node_count - 1) {
-                        _msg::__warn_msg(_msg::_defl, "should use gen() to generate tree first.");
-                        return;
-                    }
-                    _root = root - 1;
-                }
-
-                void __reroot() {
-                    std::vector<_Edge<EdgeType>> result;
-                    std::vector<std::vector<_Edge<EdgeType>>> node_edges(_node_count);
-                    for (auto edge : _edges) {
-                        node_edges[edge.u()].emplace_back(edge);
-                        node_edges[edge.v()].emplace_back(edge);
-                    }
-                    std::vector<int> visit(_node_count, 0);
-                    std::queue<int> q;
-                    q.push(_root);
-                    while(!q.empty()) {
-                        int u = q.front();
-                        q.pop();
-                        visit[u] = 1;
-                        for (auto& edge : node_edges[u]) {
-                            if (edge.u() != u) {
-                                std::swap(edge.u_ref(), edge.v_ref());
-                            }
-                            int v = edge.v();
-                            if (visit[v]) {
-                                continue;
-                            }
-                            result.emplace_back(edge);
-                            q.push(v);
-                        }
-                    }
-                    shuffle(result.begin(), result.end());
-                    _edges = result;       
-                }
 
                 template<typename T = EdgeType, _NotHasT<T> = 0>
                 std::vector<_Edge<EdgeType>> __get_output_edges() const {
@@ -186,49 +141,54 @@ namespace generator {
             };
 
             template<typename NodeType, typename EdgeType>
-            class _GenTree : public _RandomFuncTree<NodeType, EdgeType>, public _TreeGenSwitch {
+            class _GenGraph : public _RandomFuncGraph<NodeType, EdgeType>, public _TreeGenSwitch {
             protected:
-                using _Self = _GenTree<NodeType,EdgeType>;
+                using _Self = _GenGraph<NodeType,EdgeType>;
                 _OUTPUT_FUNCTION(_Self)
                 _DEF_GEN_FUNCTION
             public:
                 using _TreeGenSwitch::set_tree_generator;
             public:
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
-                _GenTree(int node_count, int begin_node, bool is_rooted, int root,
+                _GenGraph(int node_count, int edge_count, int begin_node,
+                    bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node,
                     NodeGenFunction nodes_weight_function,
                     EdgeGenFunction edges_weight_function) :
-                    _RandomFuncTree<NodeType, EdgeType>(node_count, begin_node, is_rooted, root,
+                    _RandomFuncGraph<NodeType, EdgeType>(node_count, edge_count, begin_node,
+                        direction, multiply_edge, self_loop, connect, swap_node,
                         nodes_weight_function, edges_weight_function),
                     _TreeGenSwitch() {}
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
-                _GenTree(int node_count, int begin_node, bool is_rooted, int root,
+                _GenGraph(int node_count, int edge_count, int begin_node,
+                    bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node,
                     EdgeGenFunction edges_weight_function) :
-                    _RandomFuncTree<void, EdgeType>(node_count, begin_node, is_rooted, root,
+                    _RandomFuncGraph<NodeType, EdgeType>(node_count, edge_count, begin_node,
+                        direction, multiply_edge, self_loop, connect, swap_node,
                         edges_weight_function),
                     _TreeGenSwitch() {}
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
-                _GenTree(int node_count, int begin_node, bool is_rooted, int root,
+                _GenGraph(int node_count, int edge_count, int begin_node,
+                    bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node,
                     NodeGenFunction nodes_weight_function) :
-                    _RandomFuncTree<NodeType, void>(node_count, begin_node, is_rooted, root,
+                    _RandomFuncGraph<NodeType, EdgeType>(node_count, edge_count, begin_node,
+                        direction, multiply_edge, self_loop, connect, swap_node,
                         nodes_weight_function),
                     _TreeGenSwitch() {}
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
-                _GenTree(int node_count, int begin_node, bool is_rooted, int root) :
-                    _RandomFuncTree<void, void>(node_count, begin_node, is_rooted, root),
+                _GenGraph(int node_count, int edge_count, int begin_node,
+                    bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node) :
+                    _RandomFuncGraph<NodeType, EdgeType>(node_count, edge_count, begin_node,
+                        direction, multiply_edge, self_loop, connect, swap_node),
                     _TreeGenSwitch() {}
 
-                void gen() { 
-                    this->_generator->generate(); 
-                    if (this->_is_rooted) this->__reroot();
-                }
+                void gen() { this->_generator->generate(); }
             };
 
         } // namespace basic
     } // namespace rand_graph
 } // namespace generator
 
-#endif // !_SGPCET_GEN_TREE_H_
+#endif // !_SGPCET_GEN_GRAPH_H_
