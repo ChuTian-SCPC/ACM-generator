@@ -52,14 +52,14 @@ namespace generator {
                         if (_CONTEXT_V(self_loop)) limit += node_count;
                         if (edge_count > limit) {
                             _msg::__fail_msg(_msg::_defl, 
-                            tools::string_format("edge_count must less than or equal to %lld, but found %d."
-                            , limit, edge_count));
+                                tools::string_format("edge_count must less than or equal to %lld, but found %d.",
+                                limit, edge_count));
                         }
                     }
                     else {               
                         if (node_count == 1 && !_CONTEXT_V(self_loop) && edge_count > 0) {
                             _msg::__fail_msg(_msg::_defl, 
-                                tools::string_format("number of edges must equal to 0, but found %d.",
+                                tools::string_format("edge_count must equal to 0, but found %d.",
                                 edge_count));
                         }
 
