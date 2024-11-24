@@ -31,7 +31,9 @@
 #ifndef _SGPCET_CYCLE_GRAPH_H_
 #include "cycle_graph.h"
 #endif // !_SGPCET_CYCLE_GRAPH_H_
-
+#ifndef _SGPCET_WHEEL_GRAPH_H_
+#include "wheel_graph.h"
+#endif // !_SGPCET_WHEEL_GRAPH_H_
 
 namespace generator {
     namespace rand_graph {
@@ -108,7 +110,13 @@ namespace generator {
             using CycleGraphGen = basic::CycleGraphGen<NodeType, EdgeType>;
 
             template <typename NodeType, typename EdgeType>
-            using CycleGraph = basic::CycleGraph<NodeType, EdgeType;
+            using CycleGraph = basic::CycleGraph<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using WheelGraphGen = basic::WheelGraphGen<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using WheelGraph = basic::WheelGraph<NodeType, EdgeType>;
         } // namespace both_weight
     } // namespace rand_graph
 } // namespace generator
