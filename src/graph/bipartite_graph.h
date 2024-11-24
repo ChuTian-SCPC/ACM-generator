@@ -267,10 +267,11 @@ namespace generator {
 
                 void set_left_right(int left, int right) {
                     if (left + right < 0) {
-                        _msg::__fail_msg(_msg::_defl,
+                        _msg::__set_fail_msg(_msg::_defl,
                             "number of left part nodes add right part nodes must greater than 0,",
                             tools::string_format("but found %d + %d = %d",
                             left, right, left + right));
+                        return;
                     }
                     _left = left;
                     _right = right;

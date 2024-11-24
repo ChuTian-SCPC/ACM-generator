@@ -183,6 +183,13 @@ namespace generator {
         exit(EXIT_FAILURE);
       }
 
+      template <typename... Args>
+      void __set_fail_msg(OutStream& out, Args... args) {
+        if (!out.same_log(_set_fail, " ", args...))
+          out.println(_set_fail, " ", args...);
+        return;
+      }
+
       void __endl(OutStream& out, int count = 1) {
         for (int i = 1; i <= count; i++) out.println();
       }

@@ -58,7 +58,7 @@ namespace generator {
 
                 void set_node_indices(std::vector<int> node_indices) {
                     if ((int)node_indices.size() != _node_count) {
-                        _msg::__warn_msg(_msg::_defl,
+                        _msg::__set_fail_msg(_msg::_defl,
                             tools::string_format("size of node_indices must equal to node_count %d, but found %d.", 
                             _node_count, node_indices.size()));
                         return;
@@ -67,7 +67,7 @@ namespace generator {
                 }         
                 void set_node_indices(int index, int number) {
                     if (index < 1 || index > _node_count) {
-                        _msg::__warn_msg(_msg::_defl,
+                        _msg::__set_fail_msg(_msg::_defl,
                             tools::string_format("node index must in range [1, %d], but found %d.",
                             _node_count, index));
                         return;

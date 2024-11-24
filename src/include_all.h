@@ -130,6 +130,9 @@
 #ifndef _SGPCET_WHEEL_GRAPH_H_
 #include "graph/wheel_graph.h"
 #endif // !_SGPCET_WHEEL_GRAPH_H_
+#ifndef _SGPCET_GRID_GRAPH_H_
+#include "graph/grid_graph.h"
+#endif // !_SGPCET_GRID_GRAPH_H_
 #ifndef _SGPCET_UNWEIGHT_H_
 #include "graph/unweight.h"
 #endif // !_SGPCET_UNWEIGHT_H_

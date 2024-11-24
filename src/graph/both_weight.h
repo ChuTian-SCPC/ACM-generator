@@ -34,6 +34,9 @@
 #ifndef _SGPCET_WHEEL_GRAPH_H_
 #include "wheel_graph.h"
 #endif // !_SGPCET_WHEEL_GRAPH_H_
+#ifndef _SGPCET_GRID_GRAPH_H_
+#include "grid_graph.h"
+#endif // !_SGPCET_GRID_GRAPH_H_
 
 namespace generator {
     namespace rand_graph {
