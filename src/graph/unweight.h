@@ -68,6 +68,8 @@ namespace generator {
             using CycleGraph = basic::CycleGraph<void, void>;
             using WheelGraphGen = basic::WheelGraphGen<void, void>;
             using WheelGraph = basic::WheelGraph<void, void>;
+            using GridGraphGen = basic::GridGraphGen<void, void>;
+            using GridGraph = basic::GridGraph<void, void>;
         } // namespace unweight
     } // namespace rand_graph
 } // namespace generator

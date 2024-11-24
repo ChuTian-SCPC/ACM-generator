@@ -120,6 +120,12 @@ namespace generator {
 
             template <typename NodeType, typename EdgeType>
             using WheelGraph = basic::WheelGraph<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using GridGraphGen = basic::GridGraphGen<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using GridGraph = basic::GridGraph<NodeType, EdgeType>;
         } // namespace both_weight
     } // namespace rand_graph
 } // namespace generator

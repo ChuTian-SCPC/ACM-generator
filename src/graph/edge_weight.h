@@ -119,6 +119,12 @@ namespace generator {
 
             template <typename EdgeType>
             using WheelGraph = basic::WheelGraph<void, EdgeType>;
+
+            template <typename EdgeType>
+            using GridGraphGen = basic::GridGraphGen<void, EdgeType>;
+
+            template <typename EdgeType>
+            using GridGraph = basic::GridGraph<void, EdgeType>;
         } // namespace edge_weight
     } // namespace rand_graph
 } // namespace generator
