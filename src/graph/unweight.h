@@ -28,6 +28,9 @@
 #ifndef _SGPCET_DAG_H_
 #include "dag.h"
 #endif // !_SGPCET_DAG_H_
+#ifndef _SGPCET_CYCLE_GRAPH_H_
+#include "cycle_graph.h"
+#endif // !_SGPCET_CYCLE_GRAPH_H_
 
 namespace generator {
     namespace rand_graph {
@@ -55,6 +58,8 @@ namespace generator {
             using BipartiteGraph = basic::BipartiteGraph<void, void>;
             using DAGGen = basic::DAGGen<void, void>;
             using DAG = basic::DAG<void, void>;
+            using CycleGraphGen = basic::CycleGraphGen<void, void>;
+            using CycleGraph = basic::CycleGraph<void, void>;
         } // namespace unweight
     } // namespace rand_graph
 } // namespace generator

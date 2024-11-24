@@ -28,6 +28,10 @@
 #ifndef _SGPCET_DAG_H_
 #include "dag.h"
 #endif // !_SGPCET_DAG_H_
+#ifndef _SGPCET_CYCLE_GRAPH_H_
+#include "cycle_graph.h"
+#endif // !_SGPCET_CYCLE_GRAPH_H_
+
 
 namespace generator {
     namespace rand_graph {
@@ -98,6 +102,12 @@ namespace generator {
 
             template <typename NodeType>
             using DAG = basic::DAG<NodeType, void>;
+
+            template <typename NodeType>
+            using CycleGraphGen = basic::CycleGraphGen<NodeType, void>;
+
+            template <typename NodeType>
+            using CycleGraph = basic::CycleGraph<NodeType, void>;
         } // namespace node_weight
     } // namespace rand_graph
 } // namespace generator
