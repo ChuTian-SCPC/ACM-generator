@@ -145,6 +145,9 @@
 #ifndef _SGPCET_BOTH_WEIGHT_H_
 #include "graph/both_weight.h"
 #endif // !_SGPCET_BOTH_WEIGHT_H_
+#ifndef _SGPCET_PSEUDO_TREE_H_
+#include "graph/pseudo_tree.h"
+#endif // !_SGPCET_PSEUDO_TREE_H_
 
 namespace generator {
   namespace all {

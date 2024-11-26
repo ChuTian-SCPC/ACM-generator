@@ -37,6 +37,9 @@
 #ifndef _SGPCET_GRID_GRAPH_H_
 #include "grid_graph.h"
 #endif // !_SGPCET_GRID_GRAPH_H_
+#ifndef _SGPCET_PSEUDO_TREE_H_
+#include "pseudo_tree.h"
+#endif // !_SGPCET_PSEUDO_TREE_H_
 
 namespace generator {
     namespace rand_graph {
@@ -125,6 +128,12 @@ namespace generator {
 
             template <typename NodeType>
             using GridGraph = basic::GridGraph<NodeType, void>;
+
+            template <typename NodeType>
+            using PseudoTreeGen = basic::PseudoTreeGen<NodeType, void>;
+
+            template <typename NodeType>
+            using PseudoTree = basic::PseudoTree<NodeType, void>;
         } // namespace node_weight
     } // namespace rand_graph
 } // namespace generator

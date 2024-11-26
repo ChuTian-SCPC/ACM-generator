@@ -103,7 +103,7 @@ namespace generator {
                     _CONTEXT_GET(row)
                     _CONTEXT_GET_REF(column)
                     _rank = rnd.perm(node_count, 0);
-                    if (row == -1) __rand_row();
+                    __rand_row();
                 }
 
                 virtual void __generate_connect() override {
