@@ -11,13 +11,13 @@ namespace generator {
             template<typename NodeType, typename EdgeType>
             class PseudoTree;
 
-            template <typename NodeType, typename EdgeType>
-            class PseudoTreeGen : public BasicGraphGen<PseudoTree, NodeType, EdgeType> {
+            template <template <typename, typename> class Type, typename NodeType, typename EdgeType>
+            class PseudoTreeBasicGen : public BasicGraphGen<Type, NodeType, EdgeType> {
             protected:
-                using Context = PseudoTree<NodeType, EdgeType>;
+                using Context = Type<NodeType, EdgeType>;
                 std::vector<int> _rank;
             public:
-                PseudoTreeGen(Context& graph) : BasicGraphGen<PseudoTree, NodeType, EdgeType>(graph) {}
+                PseudoTreeBasicGen(Context& graph) : BasicGraphGen<Type, NodeType, EdgeType>(graph) {}
             
             protected:
                 virtual void __self_init() override {
@@ -89,6 +89,14 @@ namespace generator {
             };
 
             template <typename NodeType, typename EdgeType>
+            class PseudoTreeGen : public PseudoTreeBasicGen<PseudoTree, NodeType, EdgeType> {
+            protected:
+                using Context = PseudoTree<NodeType, EdgeType>;
+            public:
+                PseudoTreeGen(Context& graph) : PseudoTreeBasicGen<PseudoTree, NodeType, EdgeType>(graph) {}
+            };
+
+            template <typename NodeType, typename EdgeType>
             class PseudoTree : public _GenGraph<NodeType, EdgeType> {
             protected:
                 using _Self =  PseudoTree<NodeType,EdgeType>;
@@ -153,7 +161,145 @@ namespace generator {
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
                 _DEFAULT_GEN_FUNC(PseudoTree)
-            };   
+            }; 
+
+            template <typename NodeType, typename EdgeType>
+            class PseudoInTree;
+
+            template <typename NodeType, typename EdgeType>
+            class PseudoInTreeGen : public PseudoTreeBasicGen<PseudoInTree, NodeType, EdgeType> {
+            protected:
+                using Context = PseudoInTree<NodeType, EdgeType>;
+            public:
+                PseudoInTreeGen(Context& graph) : PseudoTreeBasicGen<PseudoInTree, NodeType, EdgeType>(graph) {}
+            };
+
+            template <typename NodeType, typename EdgeType>
+            class PseudoInTree : public PseudoTree<NodeType, EdgeType> {
+            protected:
+                using _Self =  PseudoInTree<NodeType,EdgeType>;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+            public:
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                PseudoInTree(int node_count = 3, int begin_node = 1, int cycle = -1,
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    PseudoTree<NodeType, EdgeType>(node_count, begin_node, cycle,
+                        nodes_weight_function, edges_weight_function)
+                {
+                    _TREE_GRAPH_DEFAULT
+                    this->_direction = true;
+                    this->_swap_node = false;       
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                PseudoInTree(int node_count = 3, int begin_node = 1, int cycle = -1,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    PseudoTree<NodeType, EdgeType>(node_count, begin_node, cycle,
+                        edges_weight_function)
+                {
+                    _TREE_GRAPH_DEFAULT
+                    this->_direction = true;
+                    this->_swap_node = false;    
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                PseudoInTree(int node_count = 3, int begin_node = 1, int cycle = -1,
+                    NodeGenFunction nodes_weight_function = nullptr) :
+                    PseudoTree<NodeType, EdgeType>(node_count, begin_node, cycle,
+                        nodes_weight_function)
+                {
+                    _TREE_GRAPH_DEFAULT
+                    this->_direction = true;
+                    this->_swap_node = false;         
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                PseudoInTree(int node_count = 3, int begin_node = 1, int cycle = -1) :
+                    PseudoTree<NodeType, EdgeType>(node_count, begin_node, cycle)
+                {
+                    _TREE_GRAPH_DEFAULT
+                    this->_direction = true;
+                    this->_swap_node = false;        
+                }   
+                _OUTPUT_FUNCTION_SETTING(_Self)
+            protected:
+                _DEFAULT_GEN_FUNC(PseudoInTree) 
+            };
+
+            template <typename NodeType, typename EdgeType>
+            class PseudoOutTree;
+
+            template <typename NodeType, typename EdgeType>
+            class PseudoOutTreeGen : public PseudoTreeBasicGen<PseudoOutTree, NodeType, EdgeType> {
+            protected:
+                using Context = PseudoOutTree<NodeType, EdgeType>;
+            public:
+                PseudoOutTreeGen(Context& graph) : PseudoTreeBasicGen<PseudoOutTree, NodeType, EdgeType>(graph) {}
+            protected:
+
+                virtual void __generate_other_edges() override {
+                    for (int i = _CONTEXT_V(cycle); i < _CONTEXT_V(node_count); i++) {
+                        int f = rnd.next(i);
+                        this->__add_edge(this->_rank[f], this->_rank[i]);
+                    }
+                }
+            };
+
+            template <typename NodeType, typename EdgeType>
+            class PseudoOutTree : public PseudoTree<NodeType, EdgeType> {
+            protected:
+                using _Self =  PseudoOutTree<NodeType,EdgeType>;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+            public:
+                template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
+                PseudoOutTree(int node_count = 3, int begin_node = 1, int cycle = -1,
+                    NodeGenFunction nodes_weight_function = nullptr,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    PseudoTree<NodeType, EdgeType>(node_count, begin_node, cycle,
+                        nodes_weight_function, edges_weight_function)
+                {
+                    _TREE_GRAPH_DEFAULT
+                    this->_direction = true;
+                    this->_swap_node = false;       
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
+                PseudoOutTree(int node_count = 3, int begin_node = 1, int cycle = -1,
+                    EdgeGenFunction edges_weight_function = nullptr) :
+                    PseudoTree<NodeType, EdgeType>(node_count, begin_node, cycle,
+                        edges_weight_function)
+                {
+                    _TREE_GRAPH_DEFAULT
+                    this->_direction = true;
+                    this->_swap_node = false;    
+                }
+
+                template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
+                PseudoOutTree(int node_count = 3, int begin_node = 1, int cycle = -1,
+                    NodeGenFunction nodes_weight_function = nullptr) :
+                    PseudoTree<NodeType, EdgeType>(node_count, begin_node, cycle,
+                        nodes_weight_function)
+                {
+                    _TREE_GRAPH_DEFAULT
+                    this->_direction = true;
+                    this->_swap_node = false;         
+                }
+                
+                template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
+                PseudoOutTree(int node_count = 3, int begin_node = 1, int cycle = -1) :
+                    PseudoTree<NodeType, EdgeType>(node_count, begin_node, cycle)
+                {
+                    _TREE_GRAPH_DEFAULT
+                    this->_direction = true;
+                    this->_swap_node = false;        
+                }   
+                _OUTPUT_FUNCTION_SETTING(_Self)
+            protected:
+                _DEFAULT_GEN_FUNC(PseudoOutTree) 
+            };
         } // namespace basic
     } // namespace rand_graph
 } // namespace generator

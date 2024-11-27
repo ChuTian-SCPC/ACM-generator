@@ -134,6 +134,18 @@ namespace generator {
 
             template <typename NodeType>
             using PseudoTree = basic::PseudoTree<NodeType, void>;
+
+            template <typename NodeType>
+            using PseudoInTreeGen = basic::PseudoInTreeGen<NodeType, void>;
+
+            template <typename NodeType>
+            using PseudoInTree = basic::PseudoInTree<NodeType, void>;
+
+            template <typename NodeType>
+            using PseudoOutTreeGen = basic::PseudoOutTreeGen<NodeType, void>;
+
+            template <typename NodeType>
+            using PseudoOutTree = basic::PseudoOutTree<NodeType, void>;
         } // namespace node_weight
     } // namespace rand_graph
 } // namespace generator

@@ -75,6 +75,10 @@ namespace generator {
             using GridGraph = basic::GridGraph<void, void>;
             using PseudoTreeGen = basic::PseudoTreeGen<void, void>;
             using PseudoTree = basic::PseudoTree<void, void>;
+            using PseudoInTreeGen = basic::PseudoInTreeGen<void, void>;
+            using PseudoInTree = basic::PseudoInTree<void, void>;
+            using PseudoOutTreeGen = basic::PseudoOutTreeGen<void, void>;
+            using PseudoOutTree = basic::PseudoOutTree<void, void>;
         } // namespace unweight
     } // namespace rand_graph
 } // namespace generator

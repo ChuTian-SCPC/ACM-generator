@@ -134,6 +134,18 @@ namespace generator {
 
             template <typename EdgeType>
             using PseudoTree = basic::PseudoTree<void, EdgeType>;
+
+            template <typename EdgeType>
+            using PseudoInTreeGen = basic::PseudoInTreeGen<void, EdgeType>;
+
+            template <typename EdgeType>
+            using PseudoInTree = basic::PseudoInTree<void, EdgeType>;
+
+            template <typename EdgeType>
+            using PseudoOutTreeGen = basic::PseudoOutTreeGen<void, EdgeType>;
+
+            template <typename EdgeType>
+            using PseudoOutTree = basic::PseudoOutTree<void, EdgeType>;
         } // namespace edge_weight
     } // namespace rand_graph
 } // namespace generator
