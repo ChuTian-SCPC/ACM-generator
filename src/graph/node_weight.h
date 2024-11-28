@@ -40,6 +40,9 @@
 #ifndef _SGPCET_PSEUDO_TREE_H_
 #include "pseudo_tree.h"
 #endif // !_SGPCET_PSEUDO_TREE_H_
+#ifndef _SGPCET_CACTUS_H_
+#include "cactus.h"
+#endif // !_SGPCET_CACTUS_H_
 
 namespace generator {
     namespace rand_graph {
@@ -146,6 +149,12 @@ namespace generator {
 
             template <typename NodeType>
             using PseudoOutTree = basic::PseudoOutTree<NodeType, void>;
+
+            template <typename NodeType>
+            using CactusGen = basic::CactusGen<NodeType, void>;
+
+            template <typename NodeType>
+            using Cactus = basic::Cactus<NodeType, void>;
         } // namespace node_weight
     } // namespace rand_graph
 } // namespace generator

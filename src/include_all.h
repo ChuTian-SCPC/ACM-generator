@@ -133,6 +133,12 @@
 #ifndef _SGPCET_GRID_GRAPH_H_
 #include "graph/grid_graph.h"
 #endif // !_SGPCET_GRID_GRAPH_H_
+#ifndef _SGPCET_PSEUDO_TREE_H_
+#include "graph/pseudo_tree.h"
+#endif // !_SGPCET_PSEUDO_TREE_H_
+#ifndef _SGPCET_CACTUS_H_
+#include "graph/cactus.h"
+#endif // !_SGPCET_CACTUS_H_
 #ifndef _SGPCET_UNWEIGHT_H_
 #include "graph/unweight.h"
 #endif // !_SGPCET_UNWEIGHT_H_
@@ -145,9 +151,6 @@
 #ifndef _SGPCET_BOTH_WEIGHT_H_
 #include "graph/both_weight.h"
 #endif // !_SGPCET_BOTH_WEIGHT_H_
-#ifndef _SGPCET_PSEUDO_TREE_H_
-#include "graph/pseudo_tree.h"
-#endif // !_SGPCET_PSEUDO_TREE_H_
 
 namespace generator {
   namespace all {
