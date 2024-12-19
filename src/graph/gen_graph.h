@@ -143,13 +143,13 @@ namespace generator {
             };
 
             template<typename NodeType, typename EdgeType>
-            class _GenGraph : public _RandomFuncGraph<NodeType, EdgeType>, public _TreeGenSwitch {
+            class _GenGraph : public _RandomFuncGraph<NodeType, EdgeType>, public _GraphGenSwitch {
             protected:
                 using _Self = _GenGraph<NodeType,EdgeType>;
                 _OUTPUT_FUNCTION(_Self)
                 _DEF_GEN_FUNCTION
             public:
-                using _TreeGenSwitch::set_tree_generator;
+                using _GraphGenSwitch::set_graph_generator;
             public:
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
                 _GenGraph(int node_count, int edge_count, int begin_node,
@@ -159,7 +159,7 @@ namespace generator {
                     _RandomFuncGraph<NodeType, EdgeType>(node_count, edge_count, begin_node,
                         direction, multiply_edge, self_loop, connect, swap_node,
                         nodes_weight_function, edges_weight_function),
-                    _TreeGenSwitch() {}
+                    _GraphGenSwitch() {}
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
                 _GenGraph(int node_count, int edge_count, int begin_node,
@@ -168,7 +168,7 @@ namespace generator {
                     _RandomFuncGraph<NodeType, EdgeType>(node_count, edge_count, begin_node,
                         direction, multiply_edge, self_loop, connect, swap_node,
                         edges_weight_function),
-                    _TreeGenSwitch() {}
+                    _GraphGenSwitch() {}
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
                 _GenGraph(int node_count, int edge_count, int begin_node,
@@ -177,14 +177,14 @@ namespace generator {
                     _RandomFuncGraph<NodeType, EdgeType>(node_count, edge_count, begin_node,
                         direction, multiply_edge, self_loop, connect, swap_node,
                         nodes_weight_function),
-                    _TreeGenSwitch() {}
+                    _GraphGenSwitch() {}
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
                 _GenGraph(int node_count, int edge_count, int begin_node,
                     bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node) :
                     _RandomFuncGraph<NodeType, EdgeType>(node_count, edge_count, begin_node,
                         direction, multiply_edge, self_loop, connect, swap_node),
-                    _TreeGenSwitch() {}
+                    _GraphGenSwitch() {}
 
                 void gen() { this->_generator->generate(); }
             };
