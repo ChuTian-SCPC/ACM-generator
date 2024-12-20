@@ -1,48 +1,9 @@
 #ifndef _SGPCET_BOTH_WEIGHT_H_
 #define _SGPCET_BOTH_WEIGHT_H_
 
-#ifndef _SGPCET_TREE_H_
-#include "tree.h"
-#endif // !_SGPCET_TREE_H_
-#ifndef _SGPCET_CHAIN_H_
-#include "chain.h"
-#endif // !_SGPCET_CHAIN_H_
-#ifndef _SGPCET_FLOWER_H_
-#include "flower.h"
-#endif // !_SGPCET_FLOWER_H_
-#ifndef _SGPCET_HEIGHT_TREE_H_
-#include "graph/height_tree.h"
-#endif // !_SGPCET_HEIGHT_TREE_H_
-#ifndef _SGPCET_DEGREE_TREE_H_
-#include "degree_tree.h"
-#endif // !_SGPCET_DEGREE_TREE_H_
-#ifndef _SGPCET_SON_TREE_H_
-#include "son_tree.h"
-#endif // !_SGPCET_SON_TREE_H_
-#ifndef _SGPCET_GRAPH_H_
-#include "graph.h"
-#endif // !_SGPCET_GRAPH_H_
-#ifndef _SGPCET_BIPARTITE_GRAPH_H_
-#include "bipartite_graph.h"
-#endif // !_SGPCET_BIPARTITE_GRAPH_H_
-#ifndef _SGPCET_DAG_H_
-#include "dag.h"
-#endif // !_SGPCET_DAG_H_
-#ifndef _SGPCET_CYCLE_GRAPH_H_
-#include "cycle_graph.h"
-#endif // !_SGPCET_CYCLE_GRAPH_H_
-#ifndef _SGPCET_WHEEL_GRAPH_H_
-#include "wheel_graph.h"
-#endif // !_SGPCET_WHEEL_GRAPH_H_
-#ifndef _SGPCET_GRID_GRAPH_H_
-#include "grid_graph.h"
-#endif // !_SGPCET_GRID_GRAPH_H_
-#ifndef _SGPCET_PSEUDO_TREE_H_
-#include "pseudo_tree.h"
-#endif // !_SGPCET_PSEUDO_TREE_H_
-#ifndef _SGPCET_CACTUS_H_
-#include "cactus.h"
-#endif // !_SGPCET_CACTUS_H_
+#ifndef _SGPCET_ALL_TREE_GRAPH_H_
+#include "all_tree_graph.h"
+#endif // !_SGPCET_ALL_TREE_GRAPH_H_
 
 namespace generator {
     namespace rand_graph {
@@ -156,6 +117,12 @@ namespace generator {
 
             template <typename NodeType, typename EdgeType>
             using Cactus = basic::Cactus<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using LinkGen = basic::LinkGen<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using Link = basic::Link<NodeType, EdgeType>;
         } // namespace both_weight
     } // namespace rand_graph
 } // namespace generator

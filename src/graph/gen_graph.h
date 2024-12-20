@@ -32,6 +32,10 @@ namespace generator {
                 friend class _LinkImpl<NodeType, EdgeType>;
                 friend class _TreeLinkImpl<NodeType, EdgeType>;
             public:
+                _RandomFuncGraph() : 
+                    _BasicGraph(0, 0, 0, false, false, false, false, false, true, true),
+                    _RandomFunction<NodeType, EdgeType>(nullptr, nullptr) {}
+
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
                 _RandomFuncGraph(int node_count, int edge_count, int begin_node,
                     bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node,
@@ -151,6 +155,8 @@ namespace generator {
             public:
                 using _GraphGenSwitch::set_graph_generator;
             public:
+                _GenGraph() :  _RandomFuncGraph<NodeType, EdgeType>(), _GraphGenSwitch() {}
+
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
                 _GenGraph(int node_count, int edge_count, int begin_node,
                     bool direction, bool multiply_edge, bool self_loop, bool connect, bool swap_node,

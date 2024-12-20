@@ -122,6 +122,21 @@ namespace generator {
       RandomFather,
       Pruefer
     };
+
+    enum class LinkType {
+      Direct,
+      Increase,
+      Shuffle,           
+      Dedupe
+    };
+    
+    using MergeType = LinkType;
+    
+    enum class TreeLinkType {
+      Direct,
+      Increase,
+      Shuffle            
+    };
   } // namespace _enum
 } // namespace generator
 

@@ -32,6 +32,10 @@ namespace generator {
                 friend class _LinkImpl<NodeType, EdgeType>;
                 friend class _TreeLinkImpl<NodeType, EdgeType>;
             public:
+                _RandomFuncTree():
+                    _BasicTree(0, 0, false, 1, true, true),
+                    _RandomFunction<NodeType, EdgeType>(nullptr, nullptr) {}                   
+
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
                 _RandomFuncTree(int node_count, int begin_node, bool is_rooted, int root,
                     NodeGenFunction nodes_weight_function,
@@ -194,6 +198,8 @@ namespace generator {
             public:
                 using _TreeGenSwitch::set_tree_generator;
             public:
+                _GenTree() : _RandomFuncTree<NodeType, EdgeType>(), _TreeGenSwitch() {}
+
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
                 _GenTree(int node_count, int begin_node, bool is_rooted, int root,
                     NodeGenFunction nodes_weight_function,

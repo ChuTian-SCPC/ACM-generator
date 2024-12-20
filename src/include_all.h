@@ -94,51 +94,15 @@
 #ifndef _SGPCET_GEN_TREE_H_
 #include "graph/gen_tree.h"
 #endif // !_SGPCET_GEN_TREE_H_
-#ifndef _SGPCET_TREE_H_
-#include "graph/tree.h"
-#endif // !_SGPCET_TREE_H_
 #ifndef _SGPCET_GRAPH_STRATEGY_H_
 #include "graph/graph_strategy.h"
 #endif // !_SGPCET_GRAPH_STRATEGY_H_
-#ifndef _SGPCET_CHAIN_H_
-#include "graph/chain.h"
-#endif // !_SGPCET_CHAIN_H_
-#ifndef _SGPCET_FLOWER_H_
-#include "graph/flower.h"
-#endif // !_SGPCET_FLOWER_H_
-#ifndef _SGPCET_DEGREE_TREE_H_
-#include "graph/degree_tree.h"
-#endif // !_SGPCET_DEGREE_TREE_H_
-#ifndef _SGPCET_SON_TREE_H_
-#include "graph/son_tree.h"
-#endif // !_SGPCET_SON_TREE_H_
-#ifndef _SGPCET_HEIGHT_TREE_H_
-#include "graph/height_tree.h"
-#endif // !_SGPCET_HEIGHT_TREE_H_
-#ifndef _SGPCET_GRAPH_H_
-#include "graph/graph.h"
-#endif // !_SGPCET_GRAPH_H_
-#ifndef _SGPCET_BIPARTITE_GRAPH_H_
-#include "graph/bipartite_graph.h"
-#endif // !_SGPCET_BIPARTITE_GRAPH_H_
-#ifndef _SGPCET_DAG_H_
-#include "graph/dag.h"
-#endif // !_SGPCET_DAG_H_
-#ifndef _SGPCET_CYCLE_GRAPH_H_
-#include "graph/cycle_graph.h"
-#endif // !_SGPCET_CYCLE_GRAPH_H_
-#ifndef _SGPCET_WHEEL_GRAPH_H_
-#include "graph/wheel_graph.h"
-#endif // !_SGPCET_WHEEL_GRAPH_H_
-#ifndef _SGPCET_GRID_GRAPH_H_
-#include "graph/grid_graph.h"
-#endif // !_SGPCET_GRID_GRAPH_H_
-#ifndef _SGPCET_PSEUDO_TREE_H_
-#include "graph/pseudo_tree.h"
-#endif // !_SGPCET_PSEUDO_TREE_H_
-#ifndef _SGPCET_CACTUS_H_
-#include "graph/cactus.h"
-#endif // !_SGPCET_CACTUS_H_
+#ifndef _SGPCET_GEN_GRAPH_H_
+#include "graph/gen_graph.h"
+#endif // !_SGPCET_GEN_GRAPH_H_
+#ifndef _SGPCET_ALL_TREE_GRAPH_H_
+#include "graph/all_tree_graph.h"
+#endif // !_SGPCET_ALL_TREE_GRAPH_H_
 #ifndef _SGPCET_UNWEIGHT_H_
 #include "graph/unweight.h"
 #endif // !_SGPCET_UNWEIGHT_H_
@@ -188,6 +152,6 @@ namespace generator {
 #undef _DISABLE_MULTIPLY_EDGE
 #undef _DISABLE_SELF_LOOP
 #undef _DISABLE_CONNECT
-#endif
+#endif // _SGPCET_MACRO_H_
 
 #endif // !_SGPCET_INCLUDE_ALL_H_
