@@ -47,6 +47,8 @@ namespace generator {
             using Cactus = basic::Cactus<void, void>;
             using LinkGen = basic::LinkGen<void, void>;
             using Link = basic::Link<void, void>;
+            using TreeLinkGen = basic::TreeLinkGen<void, void>;
+            using TreeLink = basic::TreeLink<void, void>;
         } // namespace unweight
     } // namespace rand_graph
 } // namespace generator

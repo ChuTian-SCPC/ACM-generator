@@ -5840,18 +5840,7 @@ namespace generator{
                 
             };
             
-            template <typename U>
-            struct IsTreeOrGraph {
-                template <typename V>
-                static constexpr auto check(V *)
-                -> decltype(std::declval<V>().edges(), std::true_type());
 
-                template <typename V>
-                static constexpr std::false_type check(...);
-
-                static constexpr bool value =
-                        decltype(check<U>(nullptr))::value;
-            };
             
             // merge 2 tree or graph to a graph
             

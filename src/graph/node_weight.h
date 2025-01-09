@@ -122,6 +122,12 @@ namespace generator {
 
             template <typename NodeType>
             using Link = basic::Link<NodeType, void>;
+
+            template <typename NodeType>
+            using TreeLinkGen = basic::TreeLinkGen<NodeType, void>;
+
+            template <typename NodeType>
+            using TreeLink = basic::TreeLink<NodeType, void>;
         } // namespace node_weight
     } // namespace rand_graph
 } // namespace generator

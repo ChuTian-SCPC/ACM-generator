@@ -11,6 +11,19 @@
 namespace generator {
     namespace rand_graph {
         namespace basic {
+            template <typename U>
+            struct IsTreeOrGraph {
+                template <typename V>
+                static constexpr auto check(V *)
+                -> decltype(std::declval<V>().edges(), std::true_type());
+
+                template <typename V>
+                static constexpr std::false_type check(...);
+
+                static constexpr bool value =
+                        decltype(check<U>(nullptr))::value;
+            };
+
             template <typename NodeType, typename EdgeType>
             class Link;
 
@@ -80,6 +93,7 @@ namespace generator {
                    _CONTEXT_V_REF(connect) = target.connect();
                    _CONTEXT_V_REF(multiply_edge) = target.multiply_edge();
                    _CONTEXT_V_REF(self_loop) = target.self_loop();
+                   _CONTEXT_V_REF(output_edge_count) = target.output_edge_count();
                    this->__set_target_common(target);
                 }
 
@@ -92,6 +106,7 @@ namespace generator {
                 void __set_target_common(TG<NodeType, EdgeType>& target) {
                     _CONTEXT_V_REF(swap_node) = target.swap_node();
                     _CONTEXT_V_REF(begin_node) = target.begin_node();
+                    _CONTEXT_V_REF(output_node_count) = target.output_node_count();
                     this->__reset_nodes_weight_function(target);
                     this->__reset_edges_weight_function(target);
                 }
@@ -287,7 +302,7 @@ namespace generator {
                     for (int i = 0; i < node_count; i++) {
                         _father.emplace_back(i);
                     }
-                    for (auto edge : _CONTEXT_V(edges)) {
+                    for (auto edge : _CONTEXT_V_REF(edges)) {
                         int u = edge.u();
                         int v = edge.v();
                         int t1 = __find(u);
@@ -311,7 +326,10 @@ namespace generator {
                 int _extra_edges_count;
                 _enum::LinkType _link_type;
             public:
-                Link() : _GenGraph<NodeType, EdgeType>(), _extra_edges_count(0), _link_type(_enum::LinkType::Shuffle) {
+
+                Link(int extra_edge_count = 0, _enum::LinkType link_type = _enum::LinkType::Shuffle) :
+                    _GenGraph<NodeType, EdgeType>(), _extra_edges_count(extra_edge_count), _link_type(link_type) 
+                {
                     _TREE_GRAPH_DEFAULT
                 }
 
@@ -332,6 +350,101 @@ namespace generator {
             protected:
                 _DEFAULT_GEN_FUNC(Link)
             };    
+         
+            template <typename NodeType, typename EdgeType>
+            class TreeLink;          
+
+            template <typename NodeType, typename EdgeType>
+            class TreeLinkGen : public BasicTreeGen<TreeLink, NodeType, EdgeType> {
+            protected:
+                using Context = TreeLink<NodeType, EdgeType>;
+                Link<NodeType, EdgeType> _link;
+                int _source_count;    
+
+            public:
+                TreeLinkGen(Context& tree) : BasicTreeGen<TreeLink, NodeType, EdgeType>(tree), _link(), _source_count(0) {}
+                
+                void set_target(Tree<NodeType, EdgeType>& target) {
+                    _link.set_target(target);
+                    __set_target(target);
+                }
+
+                void add_source(Tree<NodeType, EdgeType>& source) {
+                    _link.add_source(source);
+                    _source_count++;
+                }
+
+                virtual void generate() override {
+                    _msg::OutStream graph_log(false);
+                    _msg::_defl.swap(graph_log);
+                    _link.set_extra_edges_count(_source_count -  1);
+                    _link.set_link_type(__convert_to_link_type());
+                    _link.set_connect(true);
+                    _link.gen();
+                    __dump_result();
+                    _msg::_defl.swap(graph_log);
+                };
+            protected:
+
+                void __set_target(Tree<NodeType, EdgeType>& target) {
+                    _CONTEXT_V_REF(is_rooted) = target.is_rooted();
+                    if (_CONTEXT_V(is_rooted))
+                        _CONTEXT_V_REF(root) = target.root_ref();
+                    _CONTEXT_V_REF(swap_node) = target.swap_node();
+                    _CONTEXT_V_REF(begin_node) = target.begin_node();
+                    _CONTEXT_V_REF(output_node_count) = target.output_node_count();
+                }   
+
+                _enum::LinkType __convert_to_link_type() {
+                    _CONTEXT_GET(link_type);
+                    if (link_type == _enum::TreeLinkType::Direct) return _enum::LinkType::Direct;
+                    else if(link_type == _enum::TreeLinkType::Increase) return _enum::LinkType::Increase;
+                    return _enum::LinkType::Shuffle;
+                }
+
+                void __dump_result() {
+                    _CONTEXT_V_REF(node_count) = _link.node_count();
+                    _CONTEXT_V_REF(node_indices) = _link.node_indices();
+                    _CONTEXT_V_REF(begin_node) = _link.begin_node();
+                    _CONTEXT_GET_REF(edges);
+                    edges = _link.edges_ref();
+                    shuffle(edges.begin(), edges.end());
+                }
+            };
+
+            template <typename NodeType, typename EdgeType>
+            class TreeLink : public _GenTree<NodeType, EdgeType> {
+            protected:
+                using _Self =  TreeLink<NodeType,EdgeType>;
+                _OUTPUT_FUNCTION(_Self)
+                _DEF_GEN_FUNCTION
+                _enum::TreeLinkType _link_type;
+            public:
+
+                TreeLink(_enum::TreeLinkType link_type = _enum::TreeLinkType::Shuffle) :
+                    _GenTree<NodeType, EdgeType>(), _link_type(link_type) 
+                {
+                    _TREE_GRAPH_DEFAULT
+                }
+
+                template<template<typename, typename> class TG>
+                void set_target(TG<NodeType, EdgeType>& target) {
+                    (dynamic_cast<TreeLinkGen<NodeType, EdgeType>*>(this->_generator))->set_target(target);
+                }
+
+                template<template<typename, typename> class TG>
+                void add_source(TG<NodeType, EdgeType>& source) {
+                    (dynamic_cast<TreeLinkGen<NodeType, EdgeType>*>(this->_generator))->add_source(source);
+                }
+
+
+                _SET_GET_VALUE(_enum::TreeLinkType, link_type);
+
+                _OUTPUT_FUNCTION_SETTING(_Self)
+            protected:
+                _DEFAULT_GEN_FUNC(TreeLink)
+            };
+
         } // namespace basic
     } // namespace rand_graph
 } // namespace generator
