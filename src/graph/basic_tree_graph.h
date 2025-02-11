@@ -25,12 +25,14 @@ namespace generator {
 
                 std::vector<int> _node_indices;
 
+                bool _log_change;
             public:
                 _BasicTreeGraph(int node_count, int begin_node, bool output_node_count, bool swap_node):
                     _node_count(node_count),
                     _begin_node(begin_node),
                     _output_node_count(output_node_count),
-                    _swap_node(swap_node) 
+                    _swap_node(swap_node),
+                    _log_change(true)
                 {
                     __init_node_indices();
                 }
@@ -55,6 +57,8 @@ namespace generator {
 
                 _SET_GET_VALUE(bool, output_node_count)
                 _SET_GET_VALUE(bool, swap_node)
+
+                _SET_GET_VALUE(bool, log_change)
 
                 void set_node_indices(std::vector<int> node_indices) {
                     if ((int)node_indices.size() != _node_count) {

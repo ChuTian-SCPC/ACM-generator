@@ -88,7 +88,7 @@ namespace generator {
                     return;
                 }
 
-                void __set_target(Graph<NodeType, EdgeType>& target) {
+                void __set_target(_GenGraph<NodeType, EdgeType>& target) {
                    _CONTEXT_V_REF(direction) = target.direction();
                    _CONTEXT_V_REF(connect) = target.connect();
                    _CONTEXT_V_REF(multiply_edge) = target.multiply_edge();
@@ -97,7 +97,7 @@ namespace generator {
                    this->__set_target_common(target);
                 }
 
-                void __set_target(Tree<NodeType, EdgeType>& target) {
+                void __set_target(_GenTree<NodeType, EdgeType>& target) {
                     _CONTEXT_V_REF(direction) = target.is_rooted();
                     this->__set_target_common(target);
                 }
@@ -113,7 +113,7 @@ namespace generator {
 
                 template<template<typename, typename> class TG, typename T = NodeType, _HasT<T> = 0>
                 void __add_source_nodes_weight(TG<NodeType, EdgeType>& source) {
-                    _source_nodes_weight = source.nodes_weight();
+                    _source_nodes_weight.emplace_back(source.nodes_weight());
                 }
 
 
@@ -364,12 +364,12 @@ namespace generator {
             public:
                 TreeLinkGen(Context& tree) : BasicTreeGen<TreeLink, NodeType, EdgeType>(tree), _link(), _source_count(0) {}
                 
-                void set_target(Tree<NodeType, EdgeType>& target) {
+                void set_target(_GenTree<NodeType, EdgeType>& target) {
                     _link.set_target(target);
                     __set_target(target);
                 }
 
-                void add_source(Tree<NodeType, EdgeType>& source) {
+                void add_source(_GenTree<NodeType, EdgeType>& source) {
                     _link.add_source(source);
                     _source_count++;
                 }
@@ -386,7 +386,7 @@ namespace generator {
                 };
             protected:
 
-                void __set_target(Tree<NodeType, EdgeType>& target) {
+                void __set_target(_GenTree<NodeType, EdgeType>& target) {
                     _CONTEXT_V_REF(is_rooted) = target.is_rooted();
                     if (_CONTEXT_V(is_rooted))
                         _CONTEXT_V_REF(root) = target.root_ref();

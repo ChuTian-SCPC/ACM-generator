@@ -16,14 +16,15 @@ namespace generator {
             public:
                 BasicGraphGen(GraphType<NodeType, EdgeType>& context) : tools::_BasicGen<GraphType<NodeType, EdgeType>>(context) {}
                 virtual void generate() override {
+                    _CONTEXT_GET(log_change);
                     _msg::OutStream graph_log(false);
-                    _msg::_defl.swap(graph_log);
+                    if (log_change) _msg::_defl.swap(graph_log);                        
                     __init();
                     __generate_graph(); 
                     __generate_nodes_weight();
                     _CONTEXT_GET_REF(edges)
                     shuffle(edges.begin(), edges.end());
-                    _msg::_defl.swap(graph_log);
+                    if (log_change) _msg::_defl.swap(graph_log);
                 };
 
             protected :

@@ -129,6 +129,12 @@ namespace generator {
 
             template <typename NodeType, typename EdgeType>
             using TreeLink = basic::TreeLink<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using ForestGen = basic::ForestGen<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using Forest = basic::Forest<NodeType, EdgeType>;
         } // namespace both_weight
     } // namespace rand_graph
 } // namespace generator
