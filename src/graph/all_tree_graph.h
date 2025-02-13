@@ -46,8 +46,11 @@
 #ifndef _SGPCET_LINK_H_
 #include "link.h"
 #endif // !_SGPCET_LINK_H_
-#ifndef _SGPCET_FOREST_H
+#ifndef _SGPCET_FOREST_H_
 #include "forest.h"
-#endif // !_SGPCET_FOREST_H
+#endif // !_SGPCET_FOREST_H_
+#ifndef _SGPCET_FLOWER_CHAIN_H_
+#include "flower_chain.h"
+#endif // !_SGPCET_FLOWER_CHAIN_H_
 
 #endif // !_SGPCET_ALL_TREE_GRAPH_H_

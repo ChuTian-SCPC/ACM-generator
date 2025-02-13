@@ -82,6 +82,11 @@ namespace generator {
                 template<typename T = NodeType, _HasT<T> = 0>
                 std::vector<_Node<NodeType>>& nodes_weight_ref() { return _nodes_weight; }
                 
+                void reroot() {
+                    __reroot_check();
+                    __reroot();
+                }
+
                 void reroot(int root) {
                     __reroot_set_check(root);
                     __reroot();
@@ -112,19 +117,23 @@ namespace generator {
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
 
-                void __reroot_set_check(int root) {
+                void __reroot_check() {
                     if (!_is_rooted) {
                         _msg::__warn_msg(_msg::_defl, "unrooted tree can't re-root.");
                         return;
-                    }
+                    } 
+                    if ((int)_edges.size() < _node_count - 1) {
+                        _msg::__warn_msg(_msg::_defl, "should use gen() to generate tree first.");
+                        return;
+                    }                                       
+                }
+
+                void __reroot_set_check(int root) {
+                    __reroot_check();
                     if (root < 1 || root > _node_count) {
                         _msg::__warn_msg(_msg::_defl, 
                             tools::string_format("limit of the root is [1, %d], but found %d.", 
                             _node_count, root));
-                        return;
-                    }
-                    if ((int)_edges.size() < _node_count - 1) {
-                        _msg::__warn_msg(_msg::_defl, "should use gen() to generate tree first.");
                         return;
                     }
                     _root = root - 1;

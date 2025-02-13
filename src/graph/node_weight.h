@@ -134,6 +134,12 @@ namespace generator {
 
             template <typename NodeType>
             using Forest = basic::Forest<NodeType, void>;
+
+            template <typename NodeType>
+            using FlowerChainGen = basic::FlowerChainGen<NodeType, void>;
+
+            template <typename NodeType>
+            using FlowerChain = basic::FlowerChain<NodeType, void>;
         } // namespace node_weight
     } // namespace rand_graph
 } // namespace generator

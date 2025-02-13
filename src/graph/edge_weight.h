@@ -134,6 +134,12 @@ namespace generator {
 
             template <typename EdgeType>
             using Forest = basic::Forest<void, EdgeType>;
+
+            template <typename EdgeType>
+            using FlowerChainGen = basic::FlowerChainGen<void, EdgeType>;
+
+            template <typename EdgeType>
+            using FlowerChain = basic::FlowerChain<void, EdgeType>;
         } // namespace edge_weight
     } // namespace rand_graph
 } // namespace generator

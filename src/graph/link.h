@@ -122,11 +122,11 @@ namespace generator {
                     return;
                 }
 
-                void __init_source(Graph<NodeType, EdgeType>& source) {
+                void __init_source(_GenGraph<NodeType, EdgeType>& source) {
                     if (source.edge_count() != (int)source.edges().size()) source.gen();
                 }
 
-                void __init_source(Tree<NodeType, EdgeType>& source) {
+                void __init_source(_GenTree<NodeType, EdgeType>& source) {
                     if (source.node_count() - 1 != (int)source.edges().size()) source.gen();
                 }
 
@@ -408,6 +408,7 @@ namespace generator {
                     _CONTEXT_V_REF(begin_node) = _link.begin_node();
                     _CONTEXT_GET_REF(edges);
                     edges = _link.edges_ref();
+                    if (_CONTEXT_V(is_rooted)) this->_context.reroot();
                     shuffle(edges.begin(), edges.end());
                 }
             };
