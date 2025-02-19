@@ -8,6 +8,7 @@ examples/*/*.exe
 build/
 src/test.*
 src/testlib.h
+src/basic/testlib.h
 
 # MacOS Cache
 .DS_Store
