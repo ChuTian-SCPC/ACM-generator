@@ -333,14 +333,14 @@ namespace generator {
                     _TREE_GRAPH_DEFAULT
                 }
 
-                template<template<typename, typename> class TG>
+                template<template<typename, typename> class TG, typename Gen = LinkGen<NodeType, EdgeType>>
                 void set_target(TG<NodeType, EdgeType>& target) {
-                    (dynamic_cast<LinkGen<NodeType, EdgeType>*>(this->_generator))->set_target(target);
+                    (dynamic_cast<Gen*>(this->_generator))->set_target(target);
                 }
 
-                template<template<typename, typename> class TG>
+                template<template<typename, typename> class TG, typename Gen = LinkGen<NodeType, EdgeType>>
                 void add_source(TG<NodeType, EdgeType>& source) {
-                    (dynamic_cast<LinkGen<NodeType, EdgeType>*>(this->_generator))->add_source(source);
+                    (dynamic_cast<Gen*>(this->_generator))->add_source(source);
                 }
 
                 _SET_GET_VALUE(int, extra_edges_count);
@@ -428,14 +428,14 @@ namespace generator {
                     _TREE_GRAPH_DEFAULT
                 }
 
-                template<template<typename, typename> class TG>
+                template<template<typename, typename> class TG, typename Gen = TreeLinkGen<NodeType, EdgeType>>
                 void set_target(TG<NodeType, EdgeType>& target) {
-                    (dynamic_cast<TreeLinkGen<NodeType, EdgeType>*>(this->_generator))->set_target(target);
+                    (dynamic_cast<Gen*>(this->_generator))->set_target(target);
                 }
 
-                template<template<typename, typename> class TG>
+                template<template<typename, typename> class TG, typename Gen = TreeLinkGen<NodeType, EdgeType>>
                 void add_source(TG<NodeType, EdgeType>& source) {
-                    (dynamic_cast<TreeLinkGen<NodeType, EdgeType>*>(this->_generator))->add_source(source);
+                    (dynamic_cast<Gen*>(this->_generator))->add_source(source);
                 }
 
 
