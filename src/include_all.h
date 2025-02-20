@@ -116,6 +116,12 @@
 #include "graph/both_weight.h"
 #endif // !_SGPCET_BOTH_WEIGHT_H_
 
+#ifndef _SGPCET_GEOMETRY_BASIC_H_
+#include "geometry/geometry_basic.h"
+#endif //!_SGPCET_GEOMETRY_BASIC_H_
+#ifndef _SGPCET_RANGE_FORMAT_H_
+#include "geometry/range_format.h"
+#endif //!_SGPCET_RANGE_FORMAT_H_
 namespace generator {
   namespace all {
     using namespace generator::tools;
@@ -126,6 +132,7 @@ namespace generator {
     using namespace generator::rand_numeric;
     using namespace generator::rand_array;
     using namespace generator::rand_graph;
+    using namespace generator::rand_geometry;
   }
 } // namespace generator
 
