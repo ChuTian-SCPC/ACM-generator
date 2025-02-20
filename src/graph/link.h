@@ -4,9 +4,9 @@
 #ifndef _SGPCET_TREE_H_
 #include "tree.h"
 #endif // !_SGPCET_TREE_H_
-#ifndef _SGPECT_GRAPH_H_
+#ifndef _SGPCET_GRAPH_H_
 #include "graph.h"
-#endif // !_SGPECT_GRAPH_H_
+#endif // !_SGPCET_GRAPH_H_
 
 namespace generator {
     namespace rand_graph {

@@ -69,7 +69,7 @@ namespace generator {
             if (ranges[0].type == types[1] || ranges[1].type == types[0]) std::swap(result.first, result.second);
             return result;
         }
-    } // namespace generator
-} // namespace rand_geometry
+    } // namespace rand_geometry
+} // namespace generator
 
 #endif // !_SGPCET_RANGE_FORMAT_H_

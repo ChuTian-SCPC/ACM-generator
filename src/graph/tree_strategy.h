@@ -15,7 +15,7 @@
 #endif // !_SGPCET_NODE_H_
 #ifndef _SGPCET_EDGE_H_
 #include "edge.h"
-#endif // !_SGPCET_NODE_H_
+#endif // !_SGPCET_EDGE_H_
 
 namespace generator {
     namespace rand_graph {

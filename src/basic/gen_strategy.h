@@ -3,7 +3,7 @@
 
 #ifndef _SGPCET_LOGGER_H_
 #include "log/logger.h"
-#endif // !_SGPECT_LOGGER_H_
+#endif // !_SGPCET_LOGGER_H_
 
 namespace generator {
     namespace tools {
