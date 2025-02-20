@@ -4,12 +4,20 @@
 
 - 重构：
   - 让`rand_int`,`rand_odd`,`rand_even`,`rand_real`和`rand_abs`用`format`的函数支持泛型。
-  - 重构了`Forest`的生成函数，提高生成速度。
+  - 将头文件拆分。
+  - 取消接口`make_inputs_exe`,`make_inputs_seed`,`fill_inputs_exe`,`fill_inputs_seed`,`make_outputs_exe`,`fill_outputs_seed`。所有相关接口统一成`make_inputs`,`fill_inputs`,`make_outputs`,`fill_outputs`。
+  - 命令行参数不直接作为函数传参，而是通过构造CommandPath,CommandFunc类。
+  - 树，图，几何生成器采用策略模式。
+  - 重构`Link`,`TreeLink`和`Forest`。
 - 新增功能：
   - 用`rand_bool`取代`rnd.next(2)`和`rnd.next(0,1)`。
   - 给`rand_even`和`rand_odd`添加泛型支持。
   - Line：直线，Segment：线段。
   - Triangle：三角形。
+  - 支持Windows log颜色。
+  - 对多次相同的warn log只输出一次。
+  - 支持validator验证生成数据合法性。
+  - 支持hack。
 - 修复bugs：
   - 修复树、图输出时存在多余空格的问题。
   - 修复了多次打开文件可能出现的问题。
