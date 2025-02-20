@@ -42,6 +42,9 @@ namespace generator {
     std::string compare_folder = "cmp";
     std::string hack_folder = "hack";
     std::string validate_folder = "validate";
+
+    std::string input_suffix = ".in";
+    std::string output_suffix = ".out";
     
     int _function_count = 0;
     

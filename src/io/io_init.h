@@ -60,8 +60,8 @@ namespace generator {
         }
 
         std::string _file_end[_enum::_MAX_END] = {
-            ".in",
-            ".out",
+            _setting::input_suffix,
+            _setting::output_suffix,
             ".ans",
             ".log",
             ".logc",
@@ -118,7 +118,8 @@ namespace generator {
             Path folder_path = __path_join(__current_path(), case_name);
         #ifdef ON_WINDOWS
             WIN32_FIND_DATA findFileData;
-            HANDLE hFind = FindFirstFile(folder_path.join("*.in").cname(), &findFileData);
+            std::string inputs_format = "*" + _setting::input_suffix;
+            HANDLE hFind = FindFirstFile(folder_path.join(inputs_format).cname(), &findFileData);
 
             if (hFind != INVALID_HANDLE_VALUE) {
                 do {
@@ -135,7 +136,7 @@ namespace generator {
                 struct dirent* entry;
                 while ((entry = readdir(dir)) != nullptr) {
                     std::string file_name = entry->d_name;
-                    if (file_name.size() >= 3 && file_name.substr(file_name.size() - 3) == ".in") {
+                    if (file_name.size() >= 3 && file_name.substr(file_name.size() - 3) == _setting::input_suffix) {
                         int num = std::stoi(file_name.substr(0, file_name.size() - 3));
                         inputs.emplace_back(num);
                     }
