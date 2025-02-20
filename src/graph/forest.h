@@ -26,11 +26,6 @@ namespace generator {
                         _msg::__fail_msg(_msg::_defl, tools::string_format("number of edges must less than %d.", node_count - 1));
                     }
                 }
-                
-                void __reset_connect(){
-                    _CONTEXT_GET_REF(connect)
-                    connect = (_CONTEXT_V(edge_count) == _CONTEXT_V(node_count) - 1);
-                }
 
                 void __reset_node_edge_count() {
                     _CONTEXT_GET(trees_size)
@@ -87,7 +82,7 @@ namespace generator {
                 virtual void __generate_graph() override {
                     if (_CONTEXT_V(trees_size).empty()) __generate_trees_size();
                     __reset_node_edge_count();
-                    __reset_connect();
+                    this->_context.__init_connect();
                     _link.set_target(this->_context);
                     for (int tree_size : _CONTEXT_V(trees_size)) {
                         Tree<NodeType, EdgeType> tree(tree_size);
@@ -166,8 +161,14 @@ namespace generator {
                     for (int tree_size : trees_size) add_tree_size(tree_size);
                 }
 
+                void __init_connect() {
+                    if (this->_edge_count == this->_node_count - 1) this->_connect = true;
+                    else this->_connect = false;
+                }
+
                 _DISABLE_MULTIPLY_EDGE
                 _DISABLE_SELF_LOOP
+                _DISABLE_CONNECT
                 _OUTPUT_FUNCTION_SETTING(_Self)
             
             protected:
