@@ -298,7 +298,7 @@ namespace generator {
                 _DISABLE_DIRECTION
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
-                _DEFAULT_GEN_FUNC(BipartiteGraph)
+                _DEFAULT_GRAPH_GEN_FUNC(BipartiteGraph)
 
                 virtual void __format_output_node(std::vector<int>& first_line) const override {
                     if (this->_output_node_count) {

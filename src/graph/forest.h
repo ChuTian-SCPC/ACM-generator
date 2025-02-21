@@ -172,7 +172,7 @@ namespace generator {
                 _OUTPUT_FUNCTION_SETTING(_Self)
             
             protected:
-                _DEFAULT_GEN_FUNC(Forest)
+                _DEFAULT_GRAPH_GEN_FUNC(Forest)
             };
 
         } // namespace basic

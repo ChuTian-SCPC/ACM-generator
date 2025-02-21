@@ -43,7 +43,7 @@ namespace generator {
                     _BasicTree(node_count, begin_node, is_rooted, root, true, true),
                     _RandomFunction<NodeType, EdgeType>(nodes_weight_function, edges_weight_function)
                 {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
@@ -52,7 +52,7 @@ namespace generator {
                     _BasicTree(node_count, begin_node, is_rooted, root, true, true),
                     _RandomFunction<NodeType, EdgeType>(nullptr, edges_weight_function)
                 {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
@@ -61,7 +61,7 @@ namespace generator {
                     _BasicTree(node_count, begin_node, is_rooted, root, true, true),
                     _RandomFunction<NodeType, EdgeType>(nodes_weight_function, nullptr)
                 {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
@@ -69,7 +69,7 @@ namespace generator {
                     _BasicTree(node_count, begin_node, is_rooted, root, true, true),
                     _RandomFunction<NodeType, EdgeType>(nullptr, nullptr)
                 {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
 
                 virtual ~_RandomFuncTree() {}

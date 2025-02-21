@@ -106,7 +106,7 @@ namespace generator {
                 _SET_GET_VALUE(int, height)
                 _MUST_IS_ROOTED
             protected:
-                _DEFAULT_GEN_FUNC(HeightTree)
+                _DEFAULT_GRAPH_GEN_FUNC(HeightTree)
             };   
         } // namespace basic
     } // namespace rand_graph

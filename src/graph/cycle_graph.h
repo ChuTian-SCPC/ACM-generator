@@ -97,7 +97,7 @@ namespace generator {
                     this->_edge_count = this->_node_count;
                 }
             protected:
-                _DEFAULT_GEN_FUNC(CycleGraph)
+                _DEFAULT_GRAPH_GEN_FUNC(CycleGraph)
             };   
         } // namespace basic
     } // namespace rand_graph

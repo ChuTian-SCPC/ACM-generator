@@ -66,7 +66,7 @@ namespace generator {
                 }  
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
-                _DEFAULT_GEN_FUNC(Graph)
+                _DEFAULT_GRAPH_GEN_FUNC(Graph)
             };   
         } // namespace basic
     } // namespace rand_graph

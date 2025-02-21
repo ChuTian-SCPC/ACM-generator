@@ -48,10 +48,10 @@ namespace generator {
                 _OUTPUT_FUNCTION(_Self)
             public:
                 _Edge(int u, int v) : _BasicEdge(u, v), _w(T()) {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
                 _Edge(int u, int v, T w) : _BasicEdge(u, v), _w(w) {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
 
                 _SET_GET_VALUE(T, w)
@@ -73,7 +73,7 @@ namespace generator {
                 _OUTPUT_FUNCTION(_Self)
             public:
                 _Edge(int u, int v) : _BasicEdge(u, v) {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
 
                 std::tuple<int, int> edge() const { return std::make_tuple(_u, _v); }

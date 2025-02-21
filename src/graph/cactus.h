@@ -150,7 +150,7 @@ namespace generator {
                 _DISABLE_MULTIPLY_EDGE
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
-                _DEFAULT_GEN_FUNC(Cactus)
+                _DEFAULT_GRAPH_GEN_FUNC(Cactus)
             };   
         } // namespace basic
     } // namespace rand_graph

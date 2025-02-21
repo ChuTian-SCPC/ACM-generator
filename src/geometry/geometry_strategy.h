@@ -15,12 +15,11 @@ namespace generator {
         public:
             BasicGeometryGen(GeoType<ValueType>& context) : tools::_BasicGen<GeoType<ValueType>>(context) {}
             virtual void generate() override {
-                _CONTEXT_GET(log_change);
-                _msg::OutStream geo_log(false);
-                if (log_change) _msg::_defl.swap(geo_log);                        
+                _msg::OutStream geometry_log(false);
+                _msg::_defl.swap(geometry_log);                        
                 __init();
-                __generate_geo();
-                if (log_change) _msg::_defl.swap(geo_log);
+                __generate_geometry();
+                _msg::_defl.swap(geometry_log);
             };
         protected:
             virtual void __init() {
@@ -39,16 +38,28 @@ namespace generator {
                 _CONTEXT_GET(y_left_limit);
                 _CONTEXT_GET(y_right_limit);
                 if (x_left_limit > x_right_limit)
-                    _msg::__fail_msg(_msg::_defl, "x range is not vaild : x_left_limit > x_right_limit.");
+                    _msg::__fail_msg(_msg::_defl, tools::string_format( "range [%s, %s] for x-coordinate is invalid.",
+                        std::to_string(x_left_limit).c_str(), std::to_string(x_right_limit).c_str()));
                 if (y_left_limit > y_right_limit)
-                    _msg::__fail_msg(_msg::_defl, "y range is not vaild : y_left_limit > y_right_limit.");
+                    _msg::__fail_msg(_msg::_defl, tools::string_format( "range [%s, %s] for y-coordinate is invalid.",
+                        std::to_string(y_left_limit).c_str(), std::to_string(y_right_limit).c_str()));
             }
+
+            virtual void __self_init() {}
 
             virtual void __judge_self_limit() {}
 
-            virtual void __generate_geo() {
+            virtual void __generate_geometry() {
                 _msg::__fail_msg(_msg::_defl, "unsupport geometry generator.");
             };
+        };
+
+        class _GeometryGenSwitch : public tools::_GenSwitch {
+        public:
+            void set_geometry_generator(tools::_Gen* gen) {
+                __delete_generator();
+                _generator = gen;
+            }
         };
     } // namespace rand_geometry
 } // namespace generator

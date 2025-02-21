@@ -114,7 +114,7 @@ namespace generator {
                 _SET_GET_VALUE(int, max_son)
                 _MUST_IS_ROOTED
             protected:
-                _DEFAULT_GEN_FUNC(SonTree)
+                _DEFAULT_GRAPH_GEN_FUNC(SonTree)
             };   
         } // namespace basic
     } // namespace rand_graph

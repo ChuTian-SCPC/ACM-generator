@@ -348,7 +348,7 @@ namespace generator {
 
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
-                _DEFAULT_GEN_FUNC(Link)
+                _DEFAULT_GRAPH_GEN_FUNC(Link)
             };    
          
             template <typename NodeType, typename EdgeType>
@@ -408,6 +408,7 @@ namespace generator {
                     _CONTEXT_V_REF(begin_node) = _link.begin_node();
                     _CONTEXT_GET_REF(edges);
                     edges = _link.edges_ref();
+                    // maybe not need?
                     if (_CONTEXT_V(is_rooted)) this->_context.reroot();
                     shuffle(edges.begin(), edges.end());
                 }
@@ -443,7 +444,7 @@ namespace generator {
 
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
-                _DEFAULT_GEN_FUNC(TreeLink)
+                _DEFAULT_GRAPH_GEN_FUNC(TreeLink)
             };
 
         } // namespace basic

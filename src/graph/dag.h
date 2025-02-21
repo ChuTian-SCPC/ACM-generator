@@ -116,7 +116,7 @@ namespace generator {
                 _DISABLE_DIRECTION
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
-                _DEFAULT_GEN_FUNC(DAG)
+                _DEFAULT_GRAPH_GEN_FUNC(DAG)
             };   
         } // namespace basic
     } // namespace rand_graph

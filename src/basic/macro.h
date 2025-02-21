@@ -91,12 +91,19 @@
     bool& is_rooted_ref() = delete;
 #endif // !_MUST_IS_ROOTED
 
-#ifndef _DEFAULT_GEN_FUNC
-#define _DEFAULT_GEN_FUNC(name) \
+#ifndef _DEFAULT_GRAPH_GEN_FUNC
+#define _DEFAULT_GRAPH_GEN_FUNC(name) \
   void __default_generator() { \
     this->_generator = new name##Gen<NodeType, EdgeType>(*this); \
   }
-#endif // !_DEFAULT_GEN_FUNC
+#endif // !_DEFAULT_GRAPH_GEN_FUNC
+
+#ifndef _DEFAULT_GEOMETRY_GEN_FUNC
+#define _DEFAULT_GEOMETRY_GEN_FUNC(name) \
+  void __default_generator() { \
+    this->_generator = new name##Gen<T>(*this); \
+  }
+#endif //!_DEFAULT_GEOMETRY_GEN_FUN
 
 #ifndef _DEFAULT_OUTPUT
 #define _DEFAULT_OUTPUT \
@@ -113,6 +120,11 @@
   _DEFAULT_OUTPUT \
   _DEFAULT_GEN
 #endif // !_TREE_GRAPH_DEFAULT
+
+#ifndef _GEOMETRY_DEFAULT
+#define _GEOMETRY_DEFAULT \
+  _TREE_GRAPH_DEFAULT
+#endif //!_GEOMETRY_DEFAULT
 
 #ifndef _DISABLE_EDGE_COUNT
 #define _DISABLE_EDGE_COUNT \

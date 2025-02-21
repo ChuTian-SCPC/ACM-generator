@@ -16,10 +16,10 @@ namespace generator {
                 _OUTPUT_FUNCTION(_Self)
             public:
                 _Node() : _w(U()) {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
                 _Node(U w) : _w(w) {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
                 
                 _SET_GET_VALUE(U, w)
@@ -38,7 +38,7 @@ namespace generator {
                 _OUTPUT_FUNCTION(_Self)
             public:
                 _Node(){
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
 
                 void default_output(std::ostream& os) const { return; }

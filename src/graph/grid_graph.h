@@ -233,7 +233,7 @@ namespace generator {
                 _DISABLE_SELF_LOOP
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
-                _DEFAULT_GEN_FUNC(GridGraph)
+                _DEFAULT_GRAPH_GEN_FUNC(GridGraph)
             };   
         } // namespace basic
     } // namespace rand_graph

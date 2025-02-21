@@ -45,7 +45,7 @@ namespace generator {
                         direction, multiply_edge, self_loop, connect, swap_node, true, true),
                     _RandomFunction<NodeType, EdgeType>(nodes_weight_function, edges_weight_function)
                 {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
@@ -56,7 +56,7 @@ namespace generator {
                         direction, multiply_edge, self_loop, connect, swap_node, true, true),
                     _RandomFunction<NodeType, EdgeType>(nullptr, edges_weight_function)
                 {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
@@ -67,7 +67,7 @@ namespace generator {
                         direction, multiply_edge, self_loop, connect, swap_node, true, true),
                     _RandomFunction<NodeType, EdgeType>(nodes_weight_function, nullptr)
                 {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
@@ -77,7 +77,7 @@ namespace generator {
                         direction, multiply_edge, self_loop, connect, swap_node, true, true),
                     _RandomFunction<NodeType, EdgeType>(nullptr, nullptr)
                 {
-                    _output_function = default_function();
+                    _DEFAULT_OUTPUT
                 }
 
                 virtual ~_RandomFuncGraph() {}

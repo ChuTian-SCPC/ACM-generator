@@ -104,7 +104,7 @@ namespace generator {
 
                 _SET_GET_VALUE(int, max_degree)
             protected:
-                _DEFAULT_GEN_FUNC(DegreeTree)
+                _DEFAULT_GRAPH_GEN_FUNC(DegreeTree)
             };   
         } // namespace basic
     } // namespace rand_graph

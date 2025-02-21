@@ -98,7 +98,7 @@ namespace generator {
                     this->_edge_count = 2 * this->_node_count - 2;
                 }
             protected:
-                _DEFAULT_GEN_FUNC(WheelGraph)
+                _DEFAULT_GRAPH_GEN_FUNC(WheelGraph)
             };   
         } // namespace basic
     } // namespace rand_graph

@@ -160,7 +160,7 @@ namespace generator {
                 _DISABLE_MULTIPLY_EDGE
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
-                _DEFAULT_GEN_FUNC(PseudoTree)
+                _DEFAULT_GRAPH_GEN_FUNC(PseudoTree)
             }; 
 
             template <typename NodeType, typename EdgeType>
@@ -225,7 +225,7 @@ namespace generator {
                 }   
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
-                _DEFAULT_GEN_FUNC(PseudoInTree) 
+                _DEFAULT_GRAPH_GEN_FUNC(PseudoInTree) 
             };
 
             template <typename NodeType, typename EdgeType>
@@ -298,7 +298,7 @@ namespace generator {
                 }   
                 _OUTPUT_FUNCTION_SETTING(_Self)
             protected:
-                _DEFAULT_GEN_FUNC(PseudoOutTree) 
+                _DEFAULT_GRAPH_GEN_FUNC(PseudoOutTree) 
             };
         } // namespace basic
     } // namespace rand_graph
