@@ -7,9 +7,6 @@
 #ifndef _SGPCET_GEN_STRATEGY_H_
 #include "basic/gen_strategy.h"
 #endif // !_SGPCET_GEN_STRATEGY_H_
-#ifndef _SGPCET_NUMERIC_H_
-#include "rand/numeric.h"
-#endif //!_SGPCET_NUMERIC_H_
 
 namespace generator {
     namespace rand_geometry {

@@ -125,6 +125,7 @@
 #ifndef _SGPCET_GEOMETRY_STRATEGY_H_
 #include "geometry/geometry_strategy.h"
 #endif //!_SGPCET_GEOMETRY_STRATEGY_H_
+#if
 namespace generator {
   namespace all {
     using namespace generator::tools;
