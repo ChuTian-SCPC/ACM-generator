@@ -125,7 +125,9 @@
 #ifndef _SGPCET_GEOMETRY_STRATEGY_H_
 #include "geometry/geometry_strategy.h"
 #endif //!_SGPCET_GEOMETRY_STRATEGY_H_
-#if
+#ifndef _SGPCET_COORDINATE_H_
+#include "geometry/coordinate.h"
+#endif //!_SGPCET_COORDINATE_H_
 namespace generator {
   namespace all {
     using namespace generator::tools;
