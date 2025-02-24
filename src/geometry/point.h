@@ -92,33 +92,17 @@ namespace generator {
                 return x1 * x2 + y1 * y2;
             }
 
-            void rand(T x_left, T x_right, T y_left, T y_right) {
-                RandomCoordinate<T> c;
-                c.set_xy_limit(x_left, x_right, y_left, y_right);
-                c.gen();
-                this->_x = c.x();
-                this->_y = c.y(); 
-            }
-
-            void rand(T left, T right) {
-                RandomCoordinate<T> c;
-                c.set_xy_limit(left, right);
-                c.gen();
-                this->_x = c.x();
-                this->_y = c.y();
-            }
-
-            void rand(std::string format) {
-                RandomCoordinate<T> c;
-                c.set_xy_limit(format);
-                c.gen();
-                this->_x = c.x();
-                this->_y = c.y();
-            }
-            
+            _GEOMETRY_IN_RAND_FUNC(RandomCoordinate)
             _OUTPUT_FUNCTION_SETTING(_Self)
+        protected:
+            void __rand(RandomCoordinate<T>& c) {
+                c.gen();
+                this->_x = c.x();
+                this->_y = c.y();
+            }
         };
 
+        _GEOMETRY_OUT_RAND_FUNC(rand_point, Point)        
         template <typename T, typename>
         class _2Points {
         protected:

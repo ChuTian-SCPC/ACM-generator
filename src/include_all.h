@@ -170,6 +170,8 @@ namespace generator {
 #undef _DISABLE_MULTIPLY_EDGE
 #undef _DISABLE_SELF_LOOP
 #undef _DISABLE_CONNECT
+#undef _GEOMETRY_IN_RAND_FUNC
+#undef _GEOMETRY_OUT_RAND_FUNC
 #endif // _SGPCET_MACRO_H_
 
 #endif // !_SGPCET_INCLUDE_ALL_H_

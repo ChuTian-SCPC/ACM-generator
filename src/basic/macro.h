@@ -156,4 +156,45 @@
     bool& connect_ref() = delete;
 #endif // !_DISABLE_CONNECT
 
+#ifndef _GEOMETRY_IN_RAND_FUNC
+#define _GEOMETRY_IN_RAND_FUNC(Gen) \
+  void rand(T x_left, T x_right, T y_left, T y_right) { \
+    Gen<T> g; \
+    g.set_xy_limit(x_left, x_right, y_left, y_right); \
+    __rand(g); \
+  } \
+  void rand(T left, T right) { \
+    Gen<T> g; \
+    g.set_xy_limit(left, right); \
+    __rand(g); \
+  } \
+  void rand(std::string format) { \
+    Gen<T> g; \
+    g.set_format(format); \
+    __rand(g); \
+  }
+#endif //!_GEOMETRY_IN_RAND_FUNC
+
+#ifndef _GEOMETRY_OUT_RAND_FUNC
+#define _GEOMETRY_OUT_RAND_FUNC(FuncName, ReturnType) \
+  template <typename T, typename = typename std::enable_if<is_point_type<T>::value>::type> \
+  ReturnType<T> FuncName(T x_left, T x_right, T y_left, T y_right) { \
+    ReturnType<T> r; \
+    r.rand(x_left, x_right, y_left, y_right); \
+    return r; \
+  } \
+  template <typename T, typename = typename std::enable_if<is_point_type<T>::value>::type> \
+  ReturnType<T> FuncName(T left, T right) { \
+    ReturnType<T> r; \
+    r.rand(left, right); \
+    return r; \
+  } \
+  template <typename T, typename = typename std::enable_if<is_point_type<T>::value>::type> \
+  ReturnType<T> FuncName(std::string format) { \
+    ReturnType<T> r; \
+    r.rand(format); \
+    return r; \
+  }
+#endif //!_GEOMETRY_OUT_RAND_FUNC
+
 #endif // !_SGPCET_MACRO_H_
