@@ -128,6 +128,9 @@
 #ifndef _SGPCET_COORDINATE_H_
 #include "geometry/coordinate.h"
 #endif //!_SGPCET_COORDINATE_H_
+#ifndef _SGPCET_POINT_H_
+#include "geometry/point.h"
+#endif //!_SGPCET_POINT_H_
 namespace generator {
   namespace all {
     using namespace generator::tools;

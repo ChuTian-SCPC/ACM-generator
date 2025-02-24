@@ -14,7 +14,7 @@
 namespace generator {
     namespace rand_geometry {
     
-        template<typename T>
+        template<typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
         class Coordinate {
         protected:
             T _x, _y;
@@ -26,6 +26,30 @@ namespace generator {
                 _DEFAULT_OUTPUT
             }
 
+            Coordinate(const Coordinate<T>& p) : _x(p._x), _y(p._y) {
+                _DEFAULT_OUTPUT
+            }
+
+            Coordinate(Coordinate<T>&& p) noexcept : _x(std::move(p._x)), _y(std::move(p._y)) {
+                _DEFAULT_OUTPUT
+            }
+
+            Coordinate<T>& operator=(const Coordinate<T>& p) {
+                if (this != &p) {
+                    _x = p._x;
+                    _y = p._y;
+                }
+                return *this;
+            }
+
+            Coordinate<T>& operator=(Coordinate<T>&& p) noexcept {
+                if (this != &p) {
+                    _x = std::move(p._x);
+                    _y = std::move(p._y);
+                }
+                return *this;
+            } 
+
             _SET_GET_VALUE(T, x);
             _SET_GET_VALUE(T, y);
 
@@ -36,7 +60,7 @@ namespace generator {
             _OUTPUT_FUNCTION_SETTING(_Self)
         };
 
-        template<typename T>
+        template<typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
         class LimitRange {
         protected:
             T _x_left_limit, _x_right_limit;
@@ -90,7 +114,7 @@ namespace generator {
             }
         };
 
-        template<typename T>
+        template<typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
         class RandomCoordinate;
 
         template<typename T>
@@ -112,7 +136,7 @@ namespace generator {
 
         };
 
-        template<typename T>
+        template<typename T, typename>
         class RandomCoordinate : public Coordinate<T>, public LimitRange<T>, public _GeometryGenSwitch {
         protected:
             using _Self = RandomCoordinate<T>;
