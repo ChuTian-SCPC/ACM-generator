@@ -1,9 +1,9 @@
 #ifndef _SGPCET_POINT_H_
 #define _SGPCET_POINT_H_
 
-#ifndef _SGPCEET_CORRDINATE_H_
+#ifndef _SGPCET_CORRDINATE_H_
 #include "coordinate.h"
-#endif //!_SGPCEET_COORDINATE_H_
+#endif //!_SGPCET_COORDINATE_H_
 
 namespace generator {
     namespace rand_geometry {
