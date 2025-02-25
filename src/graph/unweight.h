@@ -22,9 +22,9 @@ namespace generator {
             using HeightTreeGen = basic::HeightTreeGen<void, void>;
             using HeightTree = basic::HeightTree<void, void>;
             using DegreeTreeGen = basic::DegreeTreeGen<void, void>;
-            using DegreeTree = basic::DegreeTree<void, void>;
+            using MaxDegreeTree = basic::MaxDegreeTree<void, void>;
             using SonTreeGen = basic::SonTreeGen<void, void>;
-            using SonTree = basic::SonTree<void, void>;
+            using MaxSonTree = basic::MaxSonTree<void, void>;
             using GraphGen = basic::GraphGen<void, void>;
             using Graph = basic::Graph<void, void>;
             using BipartiteGraphGen = basic::BipartiteGraphGen<void, void>;

@@ -49,13 +49,13 @@ namespace generator {
             using DegreeTreeGen = basic::DegreeTreeGen<NodeType, void>;
 
             template <typename NodeType>
-            using DegreeTree = basic::DegreeTree<NodeType, void>;
+            using MaxDegreeTree = basic::MaxDegreeTree<NodeType, void>;
 
             template <typename NodeType>
             using SonTreeGen = basic::SonTreeGen<NodeType, void>;
 
             template <typename NodeType>
-            using SonTree = basic::SonTree<NodeType, void>;
+            using MaxSonTree = basic::MaxSonTree<NodeType, void>;
 
             template <typename NodeType>
             using GraphGen = basic::GraphGen<NodeType, void>;

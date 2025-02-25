@@ -9,14 +9,14 @@ namespace generator {
     namespace rand_graph {
         namespace basic {
             template<typename NodeType, typename EdgeType>
-            class SonTree;
+            class MaxSonTree;
 
             template <typename NodeType, typename EdgeType>
-            class SonTreeGen : public BasicPrueferGen<SonTree, NodeType, EdgeType> {
+            class SonTreeGen : public BasicPrueferGen<MaxSonTree, NodeType, EdgeType> {
             protected:
-                using Context = SonTree<NodeType, EdgeType>;
+                using Context = MaxSonTree<NodeType, EdgeType>;
             public:
-                SonTreeGen(Context& tree) : BasicPrueferGen<SonTree, NodeType, EdgeType>(tree) {}
+                SonTreeGen(Context& tree) : BasicPrueferGen<MaxSonTree, NodeType, EdgeType>(tree) {}
             protected:
                 virtual void __generate_tree() override {
                     _CONTEXT_GET(max_son)
@@ -66,15 +66,15 @@ namespace generator {
             };
 
             template <typename NodeType, typename EdgeType>
-            class SonTree : public _GenTree<NodeType, EdgeType> {
+            class MaxSonTree : public _GenTree<NodeType, EdgeType> {
             protected:
-                using _Self =  SonTree<NodeType,EdgeType>;
+                using _Self =  MaxSonTree<NodeType,EdgeType>;
                 _OUTPUT_FUNCTION(_Self)
                 _DEF_GEN_FUNCTION
                 int _max_son;
             public:
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
-                SonTree(int node = 1, int begin_node = 1, int root = 1, int max_son = -1,
+                MaxSonTree(int node = 1, int begin_node = 1, int root = 1, int max_son = -1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr) :
                     _GenTree<NodeType, EdgeType>(node, begin_node, true, root,
@@ -85,7 +85,7 @@ namespace generator {
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
-                SonTree(int node = 1, int begin_node = 1, int root = 1, int max_son = -1,
+                MaxSonTree(int node = 1, int begin_node = 1, int root = 1, int max_son = -1,
                     EdgeGenFunction edges_weight_function = nullptr) :
                     _GenTree<NodeType, EdgeType>(node, begin_node, true, root, edges_weight_function),
                     _max_son(max_son)
@@ -94,7 +94,7 @@ namespace generator {
                 }
 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
-                SonTree(int node = 1, int begin_node = 1, int root = 1, int max_son = -1,
+                MaxSonTree(int node = 1, int begin_node = 1, int root = 1, int max_son = -1,
                     NodeGenFunction nodes_weight_function = nullptr) :
                     _GenTree<NodeType, EdgeType>(node, begin_node, true, root, nodes_weight_function),
                     _max_son(max_son)
@@ -103,7 +103,7 @@ namespace generator {
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
-                SonTree(int node = 1, int begin_node = 1, int root = 1, int max_son = -1) :
+                MaxSonTree(int node = 1, int begin_node = 1, int root = 1, int max_son = -1) :
                     _GenTree<NodeType, EdgeType>(node, begin_node, true, root),
                     _max_son(max_son)
                 {
@@ -114,7 +114,7 @@ namespace generator {
                 _SET_GET_VALUE(int, max_son)
                 _MUST_IS_ROOTED
             protected:
-                _DEFAULT_GRAPH_GEN_FUNC(SonTree)
+                _DEFAULT_GRAPH_GEN_FUNC(MaxSonTree)
             };   
         } // namespace basic
     } // namespace rand_graph

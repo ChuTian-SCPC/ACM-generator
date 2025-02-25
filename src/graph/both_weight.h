@@ -50,13 +50,13 @@ namespace generator {
             using DegreeTreeGen = basic::DegreeTreeGen<NodeType, EdgeType>;
 
             template <typename NodeType, typename EdgeType>
-            using DegreeTree = basic::DegreeTree<NodeType, EdgeType>;
+            using MaxDegreeTree = basic::MaxDegreeTree<NodeType, EdgeType>;
 
             template <typename NodeType, typename EdgeType>
             using SonTreeGen = basic::SonTreeGen<NodeType, EdgeType>;
 
             template <typename NodeType, typename EdgeType>
-            using SonTree = basic::SonTree<NodeType, EdgeType>;
+            using MaxSonTree = basic::MaxSonTree<NodeType, EdgeType>;
 
             template <typename NodeType, typename EdgeType>
             using GraphGen = basic::GraphGen<NodeType, EdgeType>;

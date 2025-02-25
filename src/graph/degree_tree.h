@@ -9,14 +9,14 @@ namespace generator {
     namespace rand_graph {
         namespace basic {
             template<typename NodeType, typename EdgeType>
-            class DegreeTree;
+            class MaxDegreeTree;
 
             template <typename NodeType, typename EdgeType>
-            class DegreeTreeGen : public BasicPrueferGen<DegreeTree, NodeType, EdgeType> {
+            class DegreeTreeGen : public BasicPrueferGen<MaxDegreeTree, NodeType, EdgeType> {
             protected:
-                using Context = DegreeTree<NodeType, EdgeType>;
+                using Context = MaxDegreeTree<NodeType, EdgeType>;
             public:
-                DegreeTreeGen(Context& tree) : BasicPrueferGen<DegreeTree, NodeType, EdgeType>(tree) {}
+                DegreeTreeGen(Context& tree) : BasicPrueferGen<MaxDegreeTree, NodeType, EdgeType>(tree) {}
             protected:
                 virtual void __generate_tree() override {
                     _CONTEXT_GET(node_count)
@@ -57,15 +57,15 @@ namespace generator {
             };
 
             template <typename NodeType, typename EdgeType>
-            class DegreeTree : public _GenTree<NodeType, EdgeType> {
+            class MaxDegreeTree : public _GenTree<NodeType, EdgeType> {
             protected:
-                using _Self =  DegreeTree<NodeType,EdgeType>;
+                using _Self =  MaxDegreeTree<NodeType,EdgeType>;
                 _OUTPUT_FUNCTION(_Self)
                 _DEF_GEN_FUNCTION
                 int _max_degree;
             public:
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>
-                DegreeTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
+                MaxDegreeTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
                     NodeGenFunction nodes_weight_function = nullptr,
                     EdgeGenFunction edges_weight_function = nullptr) :
                     _GenTree<NodeType, EdgeType>(node, begin_node, is_rooted, root,
@@ -76,7 +76,7 @@ namespace generator {
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsEdgeWeight<T, U> = 0>
-                DegreeTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
+                MaxDegreeTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
                     EdgeGenFunction edges_weight_function = nullptr) :
                     _GenTree<NodeType, EdgeType>(node, begin_node, is_rooted, root, edges_weight_function),
                     _max_degree(max_degree)
@@ -85,7 +85,7 @@ namespace generator {
                 }
 
                 template<typename T = NodeType, typename U = EdgeType, _IsNodeWeight<T, U> = 0>
-                DegreeTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
+                MaxDegreeTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1,
                     NodeGenFunction nodes_weight_function = nullptr) :
                     _GenTree<NodeType, EdgeType>(node, begin_node, is_rooted, root, nodes_weight_function),
                     _max_degree(max_degree)
@@ -94,7 +94,7 @@ namespace generator {
                 }
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
-                DegreeTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1) :
+                MaxDegreeTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1) :
                     _GenTree<NodeType, EdgeType>(node, begin_node, true, root),
                     _max_degree(max_degree)
                 {
@@ -104,7 +104,7 @@ namespace generator {
 
                 _SET_GET_VALUE(int, max_degree)
             protected:
-                _DEFAULT_GRAPH_GEN_FUNC(DegreeTree)
+                _DEFAULT_GRAPH_GEN_FUNC(MaxDegreeTree)
             };   
         } // namespace basic
     } // namespace rand_graph
