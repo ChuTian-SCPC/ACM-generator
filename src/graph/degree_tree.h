@@ -12,11 +12,11 @@ namespace generator {
             class MaxDegreeTree;
 
             template <typename NodeType, typename EdgeType>
-            class DegreeTreeGen : public BasicPrueferGen<MaxDegreeTree, NodeType, EdgeType> {
+            class MaxDegreeTreeGen : public BasicPrueferGen<MaxDegreeTree, NodeType, EdgeType> {
             protected:
                 using Context = MaxDegreeTree<NodeType, EdgeType>;
             public:
-                DegreeTreeGen(Context& tree) : BasicPrueferGen<MaxDegreeTree, NodeType, EdgeType>(tree) {}
+                MaxDegreeTreeGen(Context& tree) : BasicPrueferGen<MaxDegreeTree, NodeType, EdgeType>(tree) {}
             protected:
                 virtual void __generate_tree() override {
                     _CONTEXT_GET(node_count)

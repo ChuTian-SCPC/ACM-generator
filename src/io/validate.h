@@ -4,6 +4,9 @@
 #ifndef _SGPCET_IO_REPORTER_H_
 #include "io_reporter.h"
 #endif // !_SGPCET_IO_REPORTER_H_
+#ifndef _SGPCET_PROGRAM_H_
+#include "program.h"
+#endif //!_SGPCET_PROGRAM_H_
 
 namespace generator {
     namespace io {

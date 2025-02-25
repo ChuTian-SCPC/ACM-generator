@@ -46,13 +46,13 @@ namespace generator {
             using HeightTree = basic::HeightTree<void, EdgeType>;
 
             template <typename EdgeType>
-            using DegreeTreeGen = basic::DegreeTreeGen<void, EdgeType>;
+            using MaxDegreeTreeGen = basic::MaxDegreeTreeGen<void, EdgeType>;
 
             template <typename EdgeType>
             using MaxDegreeTree = basic::MaxDegreeTree<void, EdgeType>;
 
             template <typename EdgeType>
-            using SonTreeGen = basic::SonTreeGen<void, EdgeType>;
+            using MaxSonTreeGen = basic::MaxSonTreeGen<void, EdgeType>;
 
             template <typename EdgeType>
             using MaxSonTree = basic::MaxSonTree<void, EdgeType>;

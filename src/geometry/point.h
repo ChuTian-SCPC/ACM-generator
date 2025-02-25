@@ -1,7 +1,7 @@
 #ifndef _SGPCET_POINT_H_
 #define _SGPCET_POINT_H_
 
-#ifndef _SGPCET_CORRDINATE_H_
+#ifndef _SGPCET_COORDINATE_H_
 #include "coordinate.h"
 #endif //!_SGPCET_COORDINATE_H_
 

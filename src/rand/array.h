@@ -5,7 +5,7 @@
 #include "rand/numeric.h"
 #endif // !_SGPCET_NUMERIC_H_
 #ifndef _SGPCET_SETTING_H_
-#include "rand/setting.h"
+#include "basic/setting.h"
 #endif // !_SGPCET_SETTING_H_
 
 namespace generator {

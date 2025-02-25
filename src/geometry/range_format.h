@@ -5,7 +5,7 @@
 #include "geometry_basic.h"
 #endif //!_SGPCET_GEOMETRY_BASIC_H_
 #ifndef _SGPCET_NUMBER_FORMAT_H_
-#include "number_format.h"
+#include "rand/number_format.h"
 #endif //!_SGPCET_NUMBER_FORMAT_H_
 
 namespace generator {

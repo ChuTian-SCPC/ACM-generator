@@ -21,9 +21,9 @@ namespace generator {
             using Flower = basic::Flower<void, void>;
             using HeightTreeGen = basic::HeightTreeGen<void, void>;
             using HeightTree = basic::HeightTree<void, void>;
-            using DegreeTreeGen = basic::DegreeTreeGen<void, void>;
+            using MaxDegreeTreeGen = basic::MaxDegreeTreeGen<void, void>;
             using MaxDegreeTree = basic::MaxDegreeTree<void, void>;
-            using SonTreeGen = basic::SonTreeGen<void, void>;
+            using MaxSonTreeGen = basic::MaxSonTreeGen<void, void>;
             using MaxSonTree = basic::MaxSonTree<void, void>;
             using GraphGen = basic::GraphGen<void, void>;
             using Graph = basic::Graph<void, void>;
