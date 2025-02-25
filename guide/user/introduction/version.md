@@ -9,6 +9,8 @@
   - 命令行参数不直接作为函数传参，而是通过构造CommandPath,CommandFunc类。
   - 树，图，几何生成器采用策略模式。
   - 重构`Link`,`TreeLink`和`Forest`。
+  - 重命名`DegreeTree`为`MaxDegreeTree`。
+  - 重命名`SonTree`为`MaxSonTree`。
 - 新增功能：
   - 用`rand_bool`取代`rnd.next(2)`和`rnd.next(0,1)`。
   - 给`rand_even`和`rand_odd`添加泛型支持。
