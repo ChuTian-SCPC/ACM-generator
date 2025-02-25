@@ -134,6 +134,10 @@
 #ifndef _SGPCET_POINTS_H_
 #include "geometry/points.h"
 #endif //!_SGPCET_POINTS_H_
+#ifndef _SGPCET_LINE_SEGMENT_H_
+#include "geometry/line_segment.h"
+#endif //!_SGPCET_LINE_SEGMENT_H_
+
 namespace generator {
   namespace all {
     using namespace generator::tools;

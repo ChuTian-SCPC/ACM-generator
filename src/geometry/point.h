@@ -18,7 +18,11 @@ namespace generator {
             _OUTPUT_FUNCTION(_Self)
         
         public:
-            Point(T x = 0, T y = 0) : Coordinate<T>(x, y) { 
+            Point() : Coordinate<T>(0, 0) {
+                _DEFAULT_OUTPUT
+            }
+
+            Point(T x, T y) : Coordinate<T>(x, y) { 
                 _DEFAULT_OUTPUT
             }
 
@@ -103,23 +107,6 @@ namespace generator {
         };
 
         _GEOMETRY_OUT_RAND_FUNC(rand_point, Point)        
-        template <typename T, typename>
-        class _2Points {
-        protected:
-            using _Self = _2Points<T>;
-            _OUTPUT_FUNCTION(_Self)
-            Point<T> _start, _end;
-        public:
-    
-            _SET_GET_VALUE(Point<T>, start)
-            _SET_GET_VALUE(Point<T>, end)
-
-            void default_output(std::ostream& os) const {
-                os << _start << " " << _end;
-            }
-
-            _OUTPUT_FUNCTION_SETTING(_Self)
-        };
     }    // namespace rand_geometry
 }    // namespace generator
 #endif // !_SGPCET_POINT_H_
