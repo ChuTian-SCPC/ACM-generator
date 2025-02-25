@@ -137,6 +137,14 @@ namespace generator {
       Increase,
       Shuffle            
     };
+
+    enum PointDirection {
+      COUNTER_CLOCKWISE,
+      CLOCKWISE,
+      ONLINE_BACK,
+      ONLINE_FRONT,
+      ON_SEGMENT
+    };
   } // namespace _enum
 } // namespace generator
 

@@ -137,6 +137,9 @@
 #ifndef _SGPCET_LINE_SEGMENT_H_
 #include "geometry/line_segment.h"
 #endif //!_SGPCET_LINE_SEGMENT_H_
+#ifndef _SGPCET_GEOMETRY_ALGORITHM_H_
+#include "geometry/geometry_algorithm.h"
+#endif //!_SGPCET_GEOMETRY_ALGORITHM_H_
 
 namespace generator {
   namespace all {
