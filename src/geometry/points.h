@@ -7,49 +7,18 @@
 
 namespace generator {
     namespace rand_geometry {
-        
-        template <typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
-        class RandomPoints;
 
-        template <typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
-        class RandomPointsGen : public BasicGeometryGen<RandomPoints, T> {
-        protected:
-            std::set<Point<T>> _p;
+        template<template<typename> class GeoType, typename T>
+        class BasicPolygonGen : public BasicGeometryGen<GeoType, T> {
         public:
-            using Context = RandomPoints<T>;
-            RandomPointsGen(Context& points) : BasicGeometryGen<RandomPoints, T>(points) {}
-        public:
-            virtual void __generate_geometry() override {
-                _CONTEXT_GET(x_left_limit);
-                _CONTEXT_GET(x_right_limit);
-                _CONTEXT_GET(y_left_limit);
-                _CONTEXT_GET(y_right_limit);
-                _CONTEXT_GET(node_count);
-                for (int i = 0; i < node_count; i++) {
-                    Point<T> p;
-                    do {
-                        p = rand_point<T>(x_left_limit, x_right_limit, y_left_limit, y_right_limit);
-                    } while (__judge_same_point(p));
-                    __add_point(p);
-                }
-            }
-
+            BasicPolygonGen(GeoType<T>& context) : BasicGeometryGen<GeoType, T>(context) {}  
         protected:
-            bool __judge_same_point(Point<T>& p) {
-                if (_CONTEXT_V(same_point)) return false;
-                return _p.find(p) != _p.end();
-            }
-
-            void __add_point(Point<T>& p) {
-                if (!_CONTEXT_V(same_point)) _p.insert(p);
+            virtual void __add_point(Point<T>& p) {
                 _CONTEXT_GET_REF(points);
                 points.push_back(p);
             }
-            virtual void __self_init() override {
-                if (!_CONTEXT_V(same_point)) _p.clear();
-            }
 
-            virtual void __judge_self_limit() override{
+            virtual void __judge_self_limit() override {
                 _CONTEXT_GET(node_count);
                 if (node_count <= 0) {
                     _msg::__fail_msg(_msg::_defl, 
@@ -79,6 +48,49 @@ namespace generator {
                 if (max_node_count >= node_count) return;
                 _msg::__fail_msg(_msg::_defl,
                     tools::string_format("node_count should be less than or equal to %d, but found %d.", max_node_count, node_count));
+            }
+        };
+
+        template <typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
+        class RandomPoints;
+
+        template <typename T, typename = typename std::enable_if<is_point_type<T>::value>::type>
+        class RandomPointsGen : public BasicPolygonGen<RandomPoints, T> {
+        protected:
+            std::set<Point<T>> _p;
+        public:
+            using Context = RandomPoints<T>;
+            using Super = BasicPolygonGen<RandomPoints, T>;
+            RandomPointsGen(Context& points) : BasicPolygonGen<RandomPoints, T>(points) {}
+        protected:
+            virtual void __generate_geometry() override {
+                _CONTEXT_GET(x_left_limit);
+                _CONTEXT_GET(x_right_limit);
+                _CONTEXT_GET(y_left_limit);
+                _CONTEXT_GET(y_right_limit);
+                _CONTEXT_GET(node_count);
+                for (int i = 0; i < node_count; i++) {
+                    Point<T> p;
+                    do {
+                        p = rand_point<T>(x_left_limit, x_right_limit, y_left_limit, y_right_limit);
+                    } while (this->__judge_same_point(p));
+                    this->__add_point(p);
+                }
+            }
+        
+            bool __judge_same_point(Point<T>& p) {
+                if (_CONTEXT_V(same_point)) return false;
+                return _p.find(p) != _p.end();
+            }
+
+            virtual void __add_point(Point<T>& p) override {
+                if (!_CONTEXT_V(same_point)) _p.insert(p);
+                Super::__add_point(p);
+            }
+            virtual void __self_init() override {
+                _CONTEXT_GET_REF(points);
+                points.clear();
+                if (!_CONTEXT_V(same_point)) _p.clear();
             }
         };
 

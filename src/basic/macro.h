@@ -197,4 +197,10 @@
   }
 #endif //!_GEOMETRY_OUT_RAND_FUNC
 
+#ifndef _DISABLE_SAME_POINT
+#define _DISABLE_SAME_POINT \
+    void set_same_point(bool same_point) = delete; \
+    bool& same_point_ref() = delete;
+#endif //!_DISABLE_SAME_POINT
+
 #endif // !_SGPCET_MACRO_H_

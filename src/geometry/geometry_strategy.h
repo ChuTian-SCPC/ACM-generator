@@ -10,10 +10,10 @@
 
 namespace generator {
     namespace rand_geometry {
-        template<template<typename> class GeoType, typename ValueType>
-        class BasicGeometryGen : public tools::_BasicGen<GeoType<ValueType>> {
+        template<template<typename> class GeoType, typename T>
+        class BasicGeometryGen : public tools::_BasicGen<GeoType<T>> {
         public:
-            BasicGeometryGen(GeoType<ValueType>& context) : tools::_BasicGen<GeoType<ValueType>>(context) {}
+            BasicGeometryGen(GeoType<T>& context) : tools::_BasicGen<GeoType<T>>(context) {}
             virtual void generate() override {
                 _msg::OutStream geometry_log(false);
                 _msg::_defl.swap(geometry_log);                        
@@ -52,6 +52,17 @@ namespace generator {
             virtual void __generate_geometry() {
                 _msg::__fail_msg(_msg::_defl, "unsupport geometry generator.");
             };
+
+            T __rand_x() { 
+                _CONTEXT_GET(x_left_limit);
+                _CONTEXT_GET(x_right_limit);
+                return rand_numeric::__rand_value<T>(x_left_limit, x_right_limit); 
+            }
+            T __rand_y() {
+                _CONTEXT_GET(y_left_limit);
+                _CONTEXT_GET(y_right_limit);
+                return rand_numeric::__rand_value<T>(y_left_limit, y_right_limit);
+            }
         };
 
         class _GeometryGenSwitch : public tools::_GenSwitch {

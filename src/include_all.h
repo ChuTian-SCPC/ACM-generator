@@ -140,6 +140,9 @@
 #ifndef _SGPCET_GEOMETRY_ALGORITHM_H_
 #include "geometry/geometry_algorithm.h"
 #endif //!_SGPCET_GEOMETRY_ALGORITHM_H_
+#ifndef _SGPCET_CONVEX_HULL_H_
+#include "geometry/convex_hull.h"
+#endif //!_SGPCET_CONVEX_HULL_H_
 
 namespace generator {
   namespace all {
@@ -182,6 +185,7 @@ namespace generator {
 #undef _DISABLE_CONNECT
 #undef _GEOMETRY_IN_RAND_FUNC
 #undef _GEOMETRY_OUT_RAND_FUNC
+#undef _DISABLE_SAME_POINT
 #endif // _SGPCET_MACRO_H_
 
 #endif // !_SGPCET_INCLUDE_ALL_H_
