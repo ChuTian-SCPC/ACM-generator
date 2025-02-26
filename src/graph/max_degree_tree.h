@@ -95,7 +95,7 @@ namespace generator {
                 
                 template<typename T = NodeType, typename U = EdgeType, _IsUnweight<T, U> = 0>
                 MaxDegreeTree(int node = 1, int begin_node = 1, bool is_rooted = false, int root = 1, int max_degree = -1) :
-                    _GenTree<NodeType, EdgeType>(node, begin_node, true, root),
+                    _GenTree<NodeType, EdgeType>(node, begin_node, is_rooted, root),
                     _max_degree(max_degree)
                 {
                     _TREE_GRAPH_DEFAULT       
