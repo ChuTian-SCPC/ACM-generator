@@ -146,6 +146,9 @@
 #ifndef _SGPCET_TRIANGLE_H_
 #include "geometry/triangle.h"
 #endif //!_SGPCET_TRIANGLE_H_
+#ifndef _SGPCET_SIMPLE_POLYGON_H_
+#include "geometry/simple_polygon.h"
+#endif //!_SGPCET_SIMPLE_POLYGON_H_
 namespace generator {
   namespace all {
     using namespace generator::tools;

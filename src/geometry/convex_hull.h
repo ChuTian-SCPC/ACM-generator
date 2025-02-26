@@ -23,6 +23,7 @@ namespace generator {
         protected:
             virtual void __judge_self_limit() override {
                 Super::__judge_self_limit();
+                __judge_max_try();
             }
 
             void __judge_max_try() {
