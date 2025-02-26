@@ -10,7 +10,7 @@
 
 namespace generator {
     namespace rand_geometry {
-        template<template<typename> class GeoType, typename T>
+        template<template<typename, typename...> class GeoType, typename T>
         class BasicGeometryGen : public tools::_BasicGen<GeoType<T>> {
         public:
             BasicGeometryGen(GeoType<T>& context) : tools::_BasicGen<GeoType<T>>(context) {}
