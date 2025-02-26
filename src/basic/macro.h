@@ -126,6 +126,12 @@
   _TREE_GRAPH_DEFAULT
 #endif //!_GEOMETRY_DEFAULT
 
+#ifndef _DISABLE_NODE_COUNT
+#define _DISABLE_NODE_COUNT \
+    void set_node_count(int node_count) = delete; \
+    int& node_count_ref() = delete;
+#endif //!_DISABLE_NODE_COUNT
+
 #ifndef _DISABLE_EDGE_COUNT
 #define _DISABLE_EDGE_COUNT \
     void set_edge_count(int edge_count) = delete; \

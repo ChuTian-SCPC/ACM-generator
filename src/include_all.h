@@ -143,7 +143,9 @@
 #ifndef _SGPCET_CONVEX_HULL_H_
 #include "geometry/convex_hull.h"
 #endif //!_SGPCET_CONVEX_HULL_H_
-
+#ifndef _SGPCET_TRIANGLE_H_
+#include "geometry/triangle.h"
+#endif //!_SGPCET_TRIANGLE_H_
 namespace generator {
   namespace all {
     using namespace generator::tools;
@@ -178,6 +180,7 @@ namespace generator {
 #undef _DEFAULT_GEN
 #undef _TREE_GRAPH_DEFAULT
 #undef _GEOMETRY_DEFAULT
+#undef _DISABLE_NODE_COUNT
 #undef _DISABLE_EDGE_COUNT
 #undef _DISABLE_DIRECTION
 #undef _DISABLE_MULTIPLY_EDGE
