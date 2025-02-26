@@ -136,8 +136,9 @@ namespace generator {
                 struct dirent* entry;
                 while ((entry = readdir(dir)) != nullptr) {
                     std::string file_name = entry->d_name;
-                    if (file_name.size() >= 3 && file_name.substr(file_name.size() - 3) == _setting::input_suffix) {
-                        int num = std::stoi(file_name.substr(0, file_name.size() - 3));
+                    size_t suffix_len = _setting::input_suffix.size();
+                    if (file_name.size() >= suffix_len && file_name.substr(file_name.size() - suffix_len) == _setting::input_suffix) {
+                        int num = std::stoi(file_name.substr(0, file_name.size() - suffix_len));
                         inputs.emplace_back(num);
                     }
                 }
