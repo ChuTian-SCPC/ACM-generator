@@ -13,12 +13,12 @@
 #ifndef _SGPCET_HEIGHT_TREE_H_
 #include "height_tree.h"
 #endif // !_SGPCET_HEIGHT_TREE_H_
-#ifndef _SGPCET_DEGREE_TREE_H_
-#include "degree_tree.h"
-#endif // !_SGPCET_DEGREE_TREE_H_
-#ifndef _SGPCET_SON_TREE_H_
-#include "son_tree.h"
-#endif // !_SGPCET_SON_TREE_H_
+#ifndef _SGPCET_MAX_DEGREE_TREE_H_
+#include "max_degree_tree.h"
+#endif // !_SGPCET_MAX_DEGREE_TREE_H_
+#ifndef _SGPCET_MAX_SON_TREE_H_
+#include "max_son_tree.h"
+#endif // !_SGPCET_MAX_SON_TREE_H_
 #ifndef _SGPCET_GRAPH_H_
 #include "graph.h"
 #endif // !_SGPCET_GRAPH_H_

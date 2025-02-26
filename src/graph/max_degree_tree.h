@@ -1,5 +1,5 @@
-#ifndef _SGPCET_DEGREE_TREE_H_
-#define _SGPCET_DEGREE_TREE_H_
+#ifndef _SGPCET_MAX_DEGREE_TREE_H_
+#define _SGPCET_MAX_DEGREE_TREE_H_
 
 #ifndef _SGPCET_TREE_H_
 #include "tree.h"
@@ -110,4 +110,4 @@ namespace generator {
     } // namespace rand_graph
 } // namespace generator
 
-#endif // !_SGPCET_DEGREE_TREE_H_
+#endif // !_SGPCET_MAX_DEGREE_TREE_H_
