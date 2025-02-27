@@ -160,7 +160,7 @@ namespace generator {
     using namespace generator::rand_array;
     using namespace generator::rand_graph;
     using namespace generator::rand_geometry;
-  }
+  } // namespace all
 } // namespace generator
 
 #ifdef _SGPCET_MACRO_H_
