@@ -49,7 +49,7 @@ namespace generator {
             _GET_VALUE(std::function<void()>, func)
             template <typename T>
             typename std::enable_if<IsFunctionConvertible<T>::value, void>::type
-            set_fun(T func) {
+            set_func(T func) {
                 _func = std::function<void()>(func);
             }
 

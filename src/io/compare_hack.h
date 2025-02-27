@@ -49,7 +49,7 @@ namespace generator {
         typename std::enable_if<IsProgram<T>::value, void>::type
         __check_result(Path& input_file, Path& std_output_file, Path& ans_file, Path& testlib_out_file,
             T checker, _enum::_JudgeState& result, std::string& testlib_result) {
-            checker.add_args(input_file, ans_file, std_output_file);
+            if (checker.enable_default_args()) checker.add_args(input_file, ans_file, std_output_file);
             __run_program(checker, _setting::_default_path, _setting::_default_path, 
                 testlib_out_file, _setting::time_limit_inf, _enum::_CHECKER);       
             std::ifstream check_stream(testlib_out_file.path());
