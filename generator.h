@@ -2804,18 +2804,7 @@ namespace generator {
             if (n % 2 == 0) lower ?  n++ : n--;
             return (n - 1) / 2;
         }
-        
-        template <typename T>
-        T __rand_odd_impl(T n) {
-            if (n <= 0) {
-                _msg::__fail_msg(_msg::_defl, tools::string_format("There is no odd number between [1, %s].",
-                    std::to_string(n).c_str()));
-            }
-            T r = __to_odd_need_limit(n, false) + 1;
-            T v = rand_int(r);
-            return v * 2 + 1;
-        }
-        
+         
         template <typename T>
         T __rand_odd_impl(T from, T to) {
             if (to < from || (to == from && to % 2 == 0)) {
@@ -2827,8 +2816,16 @@ namespace generator {
             T v = rand_int(l, r);
             return v * 2 + 1;
         }
-        
-        // rand a odd number between [1,n]
+
+        template <typename T>
+        T __rand_odd_impl(T n) {
+            if (n <= 1) {
+                _msg::__fail_msg(_msg::_defl, tools::string_format("There is no odd number between [1, %s).",
+                    std::to_string(n).c_str()));
+            }
+            return __rand_odd_impl<T>(0, n - 1);
+        }  
+
         template <typename T = int>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_odd(T n){
@@ -2864,17 +2861,6 @@ namespace generator {
             if (n % 2 != 0) lower ? n++ : n--;
             return n / 2;
         }
-
-        template <typename T>
-        T __rand_even_impl(T n) {
-            if (n < 0) {
-                _msg::__fail_msg(_msg::_defl, tools::string_format("There is no even number between [0, %s].", 
-                    std::to_string(n).c_str()));
-            }
-            T r = __to_even_need_limit(n, false) + 1;
-            T v = rand_int(r);
-            return v * 2;
-        }
         
         template <typename T>
         T __rand_even_impl(T from, T to) {
@@ -2886,6 +2872,15 @@ namespace generator {
             T r = __to_even_need_limit(to, false);
             T v = rand_int(l, r);
             return v * 2;
+        }
+
+        template <typename T>
+        T __rand_even_impl(T n) {
+            if (n <= 0) {
+                _msg::__fail_msg(_msg::_defl, tools::string_format("There is no even number between [0, %s).", 
+                    std::to_string(n).c_str()));
+            }
+            return __rand_even_impl<T>(0, n - 1);
         }
 
         template <typename T = int>
@@ -3004,7 +2999,19 @@ namespace generator {
         __rand_value(std::string s) {
             return rand_real<T>(s.c_str());
         }
+
+        template <typename T>
+        typename std::enable_if<std::is_integral<T>::value, T>::type
+        __rand_value(T n) {
+            return rand_int<T>(n);
+        }
         
+        template <typename T>
+        typename std::enable_if<std::is_floating_point<T>::value, T>::type
+        __rand_value(T n) {
+            return rand_real<T>(n);
+        }
+
         template <typename T>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         __rand_value(T from, T to) {
@@ -3024,8 +3031,8 @@ namespace generator {
 
         template <typename T>
         typename std::enable_if<IsNumeric<T>::value, T>::type
-        rand_abs(T from) {
-            T x = __rand_value<T>(T(0), from);
+        rand_abs(T n) {
+            T x = __rand_value<T>(n);
             return rand_bool() ? x : -x;
         }
         
