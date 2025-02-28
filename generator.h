@@ -2829,13 +2829,13 @@ namespace generator {
         }
         
         // rand a odd number between [1,n]
-        template <typename T = long long>
+        template <typename T = int>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_odd(T n){
             return __rand_odd_impl<T>(n);
         }
         
-        template <typename T = long long>
+        template <typename T = int>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_odd(T from, T to){
             return __rand_odd_impl<T>(from, to);
@@ -2888,13 +2888,13 @@ namespace generator {
             return v * 2;
         }
 
-        template <typename T = long long>
+        template <typename T = int>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_even(T n){
             return __rand_even_impl<T>(n);
         }
         
-        template <typename T = long long>
+        template <typename T = int>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_even(T from, T to){
             return __rand_even_impl<T>(from, to);
