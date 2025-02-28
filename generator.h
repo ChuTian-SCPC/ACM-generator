@@ -3195,13 +3195,15 @@ namespace generator {
         }
 
         template<typename T>
-        std::vector<T> rand_sum(int size,T sum) {
+        typename std::enable_if<std::is_integral<T>::value , std::vector<T> >::type
+        rand_sum(int size,T sum) {
             auto v = rnd.partition(size,sum);
             return v;
         }
 
         template<typename T>
-        std::vector<T> rand_sum(int size,T sum,T min_part) {
+        typename std::enable_if<std::is_integral<T>::value , std::vector<T> >::type
+        rand_sum(int size,T sum,T min_part) {
             auto v = rnd.partition(size,sum,min_part);
             return v;
         }
@@ -3259,7 +3261,8 @@ namespace generator {
         }
         
         template<typename T>
-        std::vector<T> rand_sum(int size, T sum, T from, T to) {
+        typename std::enable_if<std::is_integral<T>::value , std::vector<T> >::type
+        rand_sum(int size, T sum, T from, T to) {
             __judge_vector_lower_bound(size, "vector");
             __judge_vector_upper_bound(size, "vector");
             __judge_range(from, to);
@@ -3313,6 +3316,19 @@ namespace generator {
                     std::to_string(result_sum).c_str(), std::to_string(ask_sum).c_str()));
             }
             return v;
+        }
+
+        template <typename R = long long, typename S, typename T, typename U>
+        typename std::enable_if<
+            std::is_integral<R>::value &&
+            std::is_convertible<S, R>::value && 
+            std::is_convertible<T, R>::value && 
+            std::is_convertible<U, R>::value, std::vector<R> >::type
+        rand_sum(int size, R sum, T from, U to) {
+            R sum_r = rand_numeric::__change_to_int<S, R>(sum, "sum");
+            R from_r = rand_numeric::__change_to_int<T, R>(from, "from");
+            R to_r = rand_numeric::__change_to_int<U, R>(to, "to");
+            return rand_sum<R>(size, sum_r, from_r, to_r);
         }
 
         template <typename T>
