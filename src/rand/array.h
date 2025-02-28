@@ -70,12 +70,16 @@ namespace generator {
 
         template <typename T>
         std::vector<T> rand_p(T n){
+            __judge_vector_lower_bound(n, "vector");
+            __judge_vector_upper_bound(n, "vector");
             std::vector<T> v = rnd.perm(n, T(0));
             return v;
         }
 
         template <typename T,typename E>
         std::vector<E> rand_p(T n, E s){
+            __judge_vector_lower_bound(n, "vector");
+            __judge_vector_upper_bound(n, "vector");
             std::vector<E> v = rnd.perm(n, s);
             return v;
         }
@@ -83,6 +87,8 @@ namespace generator {
         template<typename T>
         typename std::enable_if<std::is_integral<T>::value , std::vector<T> >::type
         rand_sum(int size,T sum) {
+            __judge_vector_lower_bound(size, "vector");
+            __judge_vector_upper_bound(size, "vector");
             auto v = rnd.partition(size,sum);
             return v;
         }
@@ -90,6 +96,9 @@ namespace generator {
         template<typename T>
         typename std::enable_if<std::is_integral<T>::value , std::vector<T> >::type
         rand_sum(int size,T sum,T min_part) {
+            __judge_vector_lower_bound(size, "vector");
+            __judge_vector_upper_bound(size, "vector");
+            __judge_range(T(0), min_part);
             auto v = rnd.partition(size,sum,min_part);
             return v;
         }
@@ -211,9 +220,12 @@ namespace generator {
             std::is_convertible<T, R>::value && 
             std::is_convertible<U, R>::value, std::vector<R> >::type
         rand_sum(int size, R sum, T from, U to) {
+            __judge_vector_lower_bound(size, "vector");
+            __judge_vector_upper_bound(size, "vector");
             R sum_r = rand_numeric::__change_to_int<S, R>(sum, "sum");
             R from_r = rand_numeric::__change_to_int<T, R>(from, "from");
             R to_r = rand_numeric::__change_to_int<U, R>(to, "to");
+            __judge_range(from_r, to_r);
             return rand_sum<R>(size, sum_r, from_r, to_r);
         }
 
