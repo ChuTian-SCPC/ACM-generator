@@ -127,9 +127,10 @@ namespace generator {
             T left = __string_to_value<T>(left_str);
             T right = __string_to_value<T>(right_str);
             accuracy = std::max(accuracy, std::max(__number_accuracy(left_str), __number_accuracy(right_str)));
-            double eps = std::pow(10.0, -accuracy);
-            if(s[open] == '(') left += eps;
-            if(s[close] == ']') right += eps;
+            double eps1 = std::pow(10.0, -accuracy + 1);
+            double eps2 = std::pow(10.0, -accuracy);
+            if(s[open] == '(') left += eps1;
+            if(s[close] == ']') right += eps2;
             _msg::__warn_msg(_msg::_defl, tools::string_format("translate format \"%s\" into range [%.*f, %.*f), the accuracy is 10^{-%d}, please check.",
                 s.c_str(), accuracy, left, accuracy, right, accuracy - 1));
             return std::make_pair(left, right);
