@@ -547,38 +547,32 @@ namespace generator {
 
 #ifndef _DISABLE_NODE_COUNT
 #define _DISABLE_NODE_COUNT \
-    void set_node_count(int node_count) = delete; \
-    int& node_count_ref() = delete;
+    void set_node_count(int node_count) = delete; 
 #endif //!_DISABLE_NODE_COUNT
 
 #ifndef _DISABLE_EDGE_COUNT
 #define _DISABLE_EDGE_COUNT \
-    void set_edge_count(int edge_count) = delete; \
-    int& edge_count_ref() = delete;
+    void set_edge_count(int edge_count) = delete; 
 #endif // !_DISABLE_EDGE_COUNT
 
 #ifndef _DISABLE_DIRECTION
 #define _DISABLE_DIRECTION  \
-    void set_direction(bool direction) = delete; \
-    bool& direction_ref() = delete;
+    void set_direction(bool direction) = delete; 
 #endif // !_DISABLE_DIRECTION
 
 #ifndef _DISABLE_MULTIPLY_EDGE
 #define _DISABLE_MULTIPLY_EDGE \
-    void set_multiply_edge(bool multiply_edge) = delete; \
-    bool& multiply_edge_ref() = delete;
+    void set_multiply_edge(bool multiply_edge) = delete; 
 #endif // !_DISABLE_MULTIPLY_EDGE
 
 #ifndef _DISABLE_SELF_LOOP
 #define _DISABLE_SELF_LOOP \
-    void set_self_loop(bool self_loop) = delete; \
-    bool& self_loop_ref() = delete;
+    void set_self_loop(bool self_loop) = delete; 
 #endif // !_DISABLE_SELF_LOOP
 
 #ifndef _DISABLE_CONNECT
 #define _DISABLE_CONNECT \
-    void set_connect(bool connect) = delete; \
-    bool& connect_ref() = delete;
+    void set_connect(bool connect) = delete; 
 #endif // !_DISABLE_CONNECT
 
 #ifndef _GEOMETRY_IN_RAND_FUNC
@@ -624,8 +618,7 @@ namespace generator {
 
 #ifndef _DISABLE_SAME_POINT
 #define _DISABLE_SAME_POINT \
-    void set_same_point(bool same_point) = delete; \
-    bool& same_point_ref() = delete;
+    void set_same_point(bool same_point) = delete; 
 #endif //!_DISABLE_SAME_POINT
 
 #endif // !_SGPCET_MACRO_H_
@@ -3434,7 +3427,7 @@ namespace generator {
             res += close[pos];
         }
         
-        std::string rand_bracket_seq(int len, std::string brackets) {
+        std::string rand_bracket_seq(int len, std::string brackets = "()") {
             __judge_vector_lower_bound(len, "string");
             __judge_vector_upper_bound(len, "string");
             if (len < 0 || len % 2) {
@@ -3447,7 +3440,7 @@ namespace generator {
             int n = brackets.size();
             if (n == 0 || n %2) {
                 _msg::__fail_msg(_msg::_defl, 
-                tools::string_format("bracket must appear in pairs and the length must be greater than 0.)"));
+                    tools::string_format("bracket must appear in pairs and the length must be greater than 0, but found %d.", n));
             }
             for (int i = 0; i < n; i++) {
                 if (i % 2 == 0) open += brackets[i];
@@ -3463,21 +3456,13 @@ namespace generator {
             while(!st.empty())  __rand_bracket_close(res, close, st);
             return res;
         }
-
-        std::string rand_bracket_seq(int len) {
-            return rand_bracket_seq(len, "()");
-        }
         
-        std::string rand_bracket_seq(int from, int to, std::string brackets) {
+        std::string rand_bracket_seq(int from, int to, std::string brackets = "()") {
             __judge_range(from, to);
             __judge_vector_lower_bound(from, "string");
             __judge_vector_upper_bound(to, "string");
             int len = rand_numeric::rand_even(from, to);
             return rand_bracket_seq(len, brackets);
-        }
-
-        std::string rand_bracket_seq(int from, int to) {
-            return rand_bracket_seq(from, to, "()");
         }
     } // namespace rand_array
 } // namespace generator
@@ -6017,7 +6002,13 @@ namespace generator {
             
             protected:
                 virtual void __self_init() override {
-                    this->_context.__init_edge_count();
+                    __init_edge_count();
+                }
+
+                void __init_edge_count() {
+                    _CONTEXT_GET_REF(edge_count)
+                    _CONTEXT_GET(node_count)
+                    edge_count = node_count;
                 }
 
                 virtual void __judge_lower_limit() override {
@@ -6090,9 +6081,6 @@ namespace generator {
                 _DISABLE_EDGE_COUNT
                 _OUTPUT_FUNCTION_SETTING(_Self)
 
-                void __init_edge_count() {
-                    this->_edge_count = this->_node_count;
-                }
             protected:
                 _DEFAULT_GRAPH_GEN_FUNC(CycleGraph)
             };   
@@ -6123,7 +6111,13 @@ namespace generator {
             
             protected:
                 virtual void __self_init() override {
-                    this->_context.__init_edge_count();
+                    __init_edge_count();
+                }
+
+                void __init_edge_count() {
+                    _CONTEXT_GET_REF(edge_count)
+                    _CONTEXT_GET(node_count)
+                    edge_count = 2 * node_count - 2;
                 }
 
                 virtual void __judge_lower_limit() override {
@@ -6197,9 +6191,6 @@ namespace generator {
                 _DISABLE_EDGE_COUNT
                 _OUTPUT_FUNCTION_SETTING(_Self)
 
-                void __init_edge_count() {
-                    this->_edge_count = 2 * this->_node_count - 2;
-                }
             protected:
                 _DEFAULT_GRAPH_GEN_FUNC(WheelGraph)
             };   
@@ -6473,13 +6464,19 @@ namespace generator {
             
             protected:
                 virtual void __self_init() override {
-                    this->_context.__init_edge_count();
+                    __init_edge_count();
                     _CONTEXT_GET(node_count)
                     _CONTEXT_GET_REF(cycle)
                     _rank = rnd.perm(node_count, 0);
                     if (cycle == -1) {
                         cycle = rnd.next(3, node_count);
                     }
+                }
+
+                void __init_edge_count() {
+                    _CONTEXT_GET_REF(edge_count)
+                    _CONTEXT_GET(node_count)
+                    edge_count = node_count;
                 }
 
                 virtual void __judge_self_limit() override {
@@ -6598,10 +6595,6 @@ namespace generator {
                 {
                     _TREE_GRAPH_DEFAULT       
                 } 
-
-                void __init_edge_count() {
-                    this->_edge_count = this->_node_count;
-                }
 
                 _SET_GET_VALUE(int, cycle)
 
@@ -7454,7 +7447,7 @@ namespace generator {
                 virtual void __generate_graph() override {
                     if (_CONTEXT_V(trees_size).empty()) __generate_trees_size();
                     __reset_node_edge_count();
-                    this->_context.__init_connect();
+                    __init_connect();
                     _link.set_target(this->_context);
                     for (int tree_size : _CONTEXT_V(trees_size)) {
                         Tree<NodeType, EdgeType> tree(tree_size);
@@ -7465,6 +7458,13 @@ namespace generator {
                     }
                     _link.gen();
                     __dump_result();
+                }
+
+                void __init_connect() {
+                    _CONTEXT_GET_REF(connect)
+                    _CONTEXT_GET(node_count)
+                    _CONTEXT_GET(edge_count)
+                    connect = edge_count == node_count - 1;
                 }
 
                 void __dump_result() {
@@ -7531,11 +7531,6 @@ namespace generator {
                 void set_trees_size(std::vector<int> trees_size) {
                     _trees_size.clear();
                     for (int tree_size : trees_size) add_tree_size(tree_size);
-                }
-
-                void __init_connect() {
-                    if (this->_edge_count == this->_node_count - 1) this->_connect = true;
-                    else this->_connect = false;
                 }
 
                 _DISABLE_MULTIPLY_EDGE

@@ -128,38 +128,32 @@
 
 #ifndef _DISABLE_NODE_COUNT
 #define _DISABLE_NODE_COUNT \
-    void set_node_count(int node_count) = delete; \
-    int& node_count_ref() = delete;
+    void set_node_count(int node_count) = delete; 
 #endif //!_DISABLE_NODE_COUNT
 
 #ifndef _DISABLE_EDGE_COUNT
 #define _DISABLE_EDGE_COUNT \
-    void set_edge_count(int edge_count) = delete; \
-    int& edge_count_ref() = delete;
+    void set_edge_count(int edge_count) = delete; 
 #endif // !_DISABLE_EDGE_COUNT
 
 #ifndef _DISABLE_DIRECTION
 #define _DISABLE_DIRECTION  \
-    void set_direction(bool direction) = delete; \
-    bool& direction_ref() = delete;
+    void set_direction(bool direction) = delete; 
 #endif // !_DISABLE_DIRECTION
 
 #ifndef _DISABLE_MULTIPLY_EDGE
 #define _DISABLE_MULTIPLY_EDGE \
-    void set_multiply_edge(bool multiply_edge) = delete; \
-    bool& multiply_edge_ref() = delete;
+    void set_multiply_edge(bool multiply_edge) = delete; 
 #endif // !_DISABLE_MULTIPLY_EDGE
 
 #ifndef _DISABLE_SELF_LOOP
 #define _DISABLE_SELF_LOOP \
-    void set_self_loop(bool self_loop) = delete; \
-    bool& self_loop_ref() = delete;
+    void set_self_loop(bool self_loop) = delete; 
 #endif // !_DISABLE_SELF_LOOP
 
 #ifndef _DISABLE_CONNECT
 #define _DISABLE_CONNECT \
-    void set_connect(bool connect) = delete; \
-    bool& connect_ref() = delete;
+    void set_connect(bool connect) = delete; 
 #endif // !_DISABLE_CONNECT
 
 #ifndef _GEOMETRY_IN_RAND_FUNC
@@ -205,8 +199,7 @@
 
 #ifndef _DISABLE_SAME_POINT
 #define _DISABLE_SAME_POINT \
-    void set_same_point(bool same_point) = delete; \
-    bool& same_point_ref() = delete;
+    void set_same_point(bool same_point) = delete; 
 #endif //!_DISABLE_SAME_POINT
 
 #endif // !_SGPCET_MACRO_H_

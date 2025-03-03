@@ -21,13 +21,19 @@ namespace generator {
             
             protected:
                 virtual void __self_init() override {
-                    this->_context.__init_edge_count();
+                    __init_edge_count();
                     _CONTEXT_GET(node_count)
                     _CONTEXT_GET_REF(cycle)
                     _rank = rnd.perm(node_count, 0);
                     if (cycle == -1) {
                         cycle = rnd.next(3, node_count);
                     }
+                }
+
+                void __init_edge_count() {
+                    _CONTEXT_GET_REF(edge_count)
+                    _CONTEXT_GET(node_count)
+                    edge_count = node_count;
                 }
 
                 virtual void __judge_self_limit() override {
@@ -146,10 +152,6 @@ namespace generator {
                 {
                     _TREE_GRAPH_DEFAULT       
                 } 
-
-                void __init_edge_count() {
-                    this->_edge_count = this->_node_count;
-                }
 
                 _SET_GET_VALUE(int, cycle)
 

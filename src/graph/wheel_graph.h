@@ -20,7 +20,13 @@ namespace generator {
             
             protected:
                 virtual void __self_init() override {
-                    this->_context.__init_edge_count();
+                    __init_edge_count();
+                }
+
+                void __init_edge_count() {
+                    _CONTEXT_GET_REF(edge_count)
+                    _CONTEXT_GET(node_count)
+                    edge_count = 2 * node_count - 2;
                 }
 
                 virtual void __judge_lower_limit() override {
@@ -94,9 +100,6 @@ namespace generator {
                 _DISABLE_EDGE_COUNT
                 _OUTPUT_FUNCTION_SETTING(_Self)
 
-                void __init_edge_count() {
-                    this->_edge_count = 2 * this->_node_count - 2;
-                }
             protected:
                 _DEFAULT_GRAPH_GEN_FUNC(WheelGraph)
             };   

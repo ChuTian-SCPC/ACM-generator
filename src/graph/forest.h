@@ -82,7 +82,7 @@ namespace generator {
                 virtual void __generate_graph() override {
                     if (_CONTEXT_V(trees_size).empty()) __generate_trees_size();
                     __reset_node_edge_count();
-                    this->_context.__init_connect();
+                    __init_connect();
                     _link.set_target(this->_context);
                     for (int tree_size : _CONTEXT_V(trees_size)) {
                         Tree<NodeType, EdgeType> tree(tree_size);
@@ -93,6 +93,13 @@ namespace generator {
                     }
                     _link.gen();
                     __dump_result();
+                }
+
+                void __init_connect() {
+                    _CONTEXT_GET_REF(connect)
+                    _CONTEXT_GET(node_count)
+                    _CONTEXT_GET(edge_count)
+                    connect = edge_count == node_count - 1;
                 }
 
                 void __dump_result() {
@@ -159,11 +166,6 @@ namespace generator {
                 void set_trees_size(std::vector<int> trees_size) {
                     _trees_size.clear();
                     for (int tree_size : trees_size) add_tree_size(tree_size);
-                }
-
-                void __init_connect() {
-                    if (this->_edge_count == this->_node_count - 1) this->_connect = true;
-                    else this->_connect = false;
                 }
 
                 _DISABLE_MULTIPLY_EDGE
