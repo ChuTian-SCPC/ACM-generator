@@ -4529,6 +4529,8 @@ namespace generator {
                     this->__delete_generator();
                     this->_generator = new PrueferGen<NodeType, EdgeType>(*this);
                 }
+
+                _OUTPUT_FUNCTION_SETTING(_Self)
             };
 
         } // namespace basic
