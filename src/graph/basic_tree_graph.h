@@ -76,6 +76,7 @@ namespace generator {
                             _node_count, index));
                         return;
                     }
+                    if (_node_indices.size() != _node_count) __init_node_indices();
                     _node_indices[index - 1] = number;
                 }
                 _GET_VALUE(std::vector<int>, node_indices)
