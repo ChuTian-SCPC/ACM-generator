@@ -40,13 +40,8 @@ namespace generator {
                     _edges_weight_function = edges_weight_function;
                 }
                 
-                NodeGenFunction nodes_weight_function() {
-                    return _nodes_weight_function;
-                }
-                
-                EdgeGenFunction edges_weight_function() {
-                    return _edges_weight_function;
-                }
+                _GET_VALUE(NodeGenFunction, nodes_weight_function)
+                _GET_VALUE(EdgeGenFunction, edges_weight_function)
 
                 void check_gen_function() {
                     __check_nodes_weight_function();
