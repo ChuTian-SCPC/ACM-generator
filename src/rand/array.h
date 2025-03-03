@@ -320,7 +320,7 @@ namespace generator {
             res += close[pos];
         }
         
-        std::string rand_bracket_seq(int len, std::string brackets) {
+        std::string rand_bracket_seq(int len, std::string brackets = "()") {
             __judge_vector_lower_bound(len, "string");
             __judge_vector_upper_bound(len, "string");
             if (len < 0 || len % 2) {
@@ -333,7 +333,7 @@ namespace generator {
             int n = brackets.size();
             if (n == 0 || n %2) {
                 _msg::__fail_msg(_msg::_defl, 
-                tools::string_format("bracket must appear in pairs and the length must be greater than 0.)"));
+                    tools::string_format("bracket must appear in pairs and the length must be greater than 0, but found %d.", n));
             }
             for (int i = 0; i < n; i++) {
                 if (i % 2 == 0) open += brackets[i];
@@ -349,21 +349,13 @@ namespace generator {
             while(!st.empty())  __rand_bracket_close(res, close, st);
             return res;
         }
-
-        std::string rand_bracket_seq(int len) {
-            return rand_bracket_seq(len, "()");
-        }
         
-        std::string rand_bracket_seq(int from, int to, std::string brackets) {
+        std::string rand_bracket_seq(int from, int to, std::string brackets = "()") {
             __judge_range(from, to);
             __judge_vector_lower_bound(from, "string");
             __judge_vector_upper_bound(to, "string");
             int len = rand_numeric::rand_even(from, to);
             return rand_bracket_seq(len, brackets);
-        }
-
-        std::string rand_bracket_seq(int from, int to) {
-            return rand_bracket_seq(from, to, "()");
         }
     } // namespace rand_array
 } // namespace generator
