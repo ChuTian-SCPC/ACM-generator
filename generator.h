@@ -4953,7 +4953,6 @@ namespace generator {
                     _CONTEXT_GET(node_count)
                     if (max_son == -1) {
                         if (node_count == 1) max_son = 0;
-                        else if (node_count == 2) max_son = 1;
                         else max_son = rnd.next(2, node_count - 1);
                     }
                 }
