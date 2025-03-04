@@ -57,7 +57,7 @@ namespace generator {
                     if (max_son < max_son_limit) {
                         _msg::__fail_msg(_msg::_defl,
                             tools::string_format("the max_son limit of %s node's tree is greater than or equal to %d, but found %d.",
-                            node_count > 2 ? "3 or more" : std::to_string(node_count).c_str(),
+                            node_count > 1 ? "2 or more" : std::to_string(node_count).c_str(),
                             max_son_limit, max_son));
                     }
                 }
