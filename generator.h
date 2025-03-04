@@ -422,7 +422,7 @@ namespace generator {
 
 #ifndef _GET_VALUE_CONST
 #define _GET_VALUE_CONST(type, name) \
-  type name() const { return _##name; }
+  const type name() const { return _##name; }
 #endif // !_GET_VALUE_CONST
 
 #ifndef _GET_VALUE_REF
@@ -4246,11 +4246,11 @@ namespace generator {
 
                 virtual ~_RandomFuncTree() {}
 
-                std::vector<_Edge<EdgeType>> edges() const { return __get_output_edges(); }
+                const std::vector<_Edge<EdgeType>> edges() const { return __get_output_edges(); }
                 std::vector<_Edge<EdgeType>>& edges_ref() { return _edges; }
 
                 template<typename T = NodeType, _HasT<T> = 0>
-                std::vector<_Node<NodeType>> nodes_weight() const { return _nodes_weight; }
+                const std::vector<_Node<NodeType>> nodes_weight() const { return _nodes_weight; }
                 template<typename T = NodeType, _HasT<T> = 0>
                 std::vector<_Node<NodeType>>& nodes_weight_ref() { return _nodes_weight; }
                 

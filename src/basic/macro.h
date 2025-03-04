@@ -3,7 +3,7 @@
 
 #ifndef _GET_VALUE_CONST
 #define _GET_VALUE_CONST(type, name) \
-  type name() const { return _##name; }
+  const type name() const { return _##name; }
 #endif // !_GET_VALUE_CONST
 
 #ifndef _GET_VALUE_REF
