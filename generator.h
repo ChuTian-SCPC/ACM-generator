@@ -7696,8 +7696,9 @@ namespace generator {
                 void set_flower_chain_size(int flower_size, int chain_size) {
                     _flower_size = flower_size;
                     _chain_size = chain_size;
-                    this->_node_count = flower_size + chain_size;
-                    this->__init_node_indices();
+                    if (flower_size + chain_size != this->_node_count) {
+                        this->set_node_count(flower_size + chain_size);
+                    }
                 } 
 
                 _OUTPUT_FUNCTION_SETTING(_Self)
