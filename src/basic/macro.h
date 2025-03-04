@@ -87,7 +87,7 @@
 
 #ifndef _MUST_IS_ROOTED
 #define _MUST_IS_ROOTED \
-    void set_is_rooted(int is_rooted) = delete; \
+    void set_is_rooted(int is_rooted) = delete; 
 #endif // !_MUST_IS_ROOTED
 
 #ifndef _DEFAULT_GRAPH_GEN_FUNC
