@@ -77,7 +77,6 @@ namespace generator {
                             for (int i = 1; i <= node_count; i++) {
                                 int x = i, y = (node_count + i - 1) / i;
                                 long long w = __count_edge_count(x, y);
-                                if (_CONTEXT_V(direction)) w *= 2;
                                 if (w > max.first) max = {w, i};
                                 if (w >= edge_count) possible.push_back(i);
                             }
