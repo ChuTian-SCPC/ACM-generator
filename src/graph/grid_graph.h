@@ -34,9 +34,6 @@ namespace generator {
                     _CONTEXT_GET(edge_count)
                     if (!_CONTEXT_V(multiply_edge)) {
                         limit = __count_edge_count(_CONTEXT_V(row), _CONTEXT_V(column));
-                        if (_CONTEXT_V(direction)) {
-                            limit *= 2;
-                        }
                         if (edge_count > limit) {
                             _msg::__fail_msg(_msg::_defl, 
                                 tools::string_format("edge_count must less than or equal to %lld, but found %d.",
