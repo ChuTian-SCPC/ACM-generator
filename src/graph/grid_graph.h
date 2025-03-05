@@ -82,7 +82,7 @@ namespace generator {
                                 if (w >= edge_count) possible.push_back(i);
                             }
                             if (possible.size() == 0) {
-                                edge_count = std::max((long long)_setting::edge_limit, max.first);
+                                edge_count = std::min((long long)_setting::edge_limit, max.first);
                                 _msg::__warn_msg(_msg::_defl,
                                     tools::string_format("edge_count is large than the maximum possible, use upper edges limit %d.",
                                     edge_count));
