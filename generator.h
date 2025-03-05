@@ -422,7 +422,7 @@ namespace generator {
 
 #ifndef _GET_VALUE_CONST
 #define _GET_VALUE_CONST(type, name) \
-  const type name() const { return _##name; }
+  type name() const { return _##name; }
 #endif // !_GET_VALUE_CONST
 
 #ifndef _GET_VALUE_REF
@@ -4247,11 +4247,11 @@ namespace generator {
 
                 virtual ~_RandomFuncTree() {}
 
-                const std::vector<_Edge<EdgeType>> edges() const { return __get_output_edges(); }
+                std::vector<_Edge<EdgeType>> edges() const { return __get_output_edges(); }
                 std::vector<_Edge<EdgeType>>& edges_ref() { return _edges; }
 
                 template<typename T = NodeType, _HasT<T> = 0>
-                const std::vector<_Node<NodeType>> nodes_weight() const { return _nodes_weight; }
+                std::vector<_Node<NodeType>> nodes_weight() const { return _nodes_weight; }
                 template<typename T = NodeType, _HasT<T> = 0>
                 std::vector<_Node<NodeType>>& nodes_weight_ref() { return _nodes_weight; }
                 
@@ -6120,7 +6120,7 @@ namespace generator {
                 virtual void __generate_graph() override {
                     _CONTEXT_GET(node_count)
                     std::vector<int> p = rnd.perm(node_count);
-                    for (int i = 0; i < node_count; i++) {
+                    for (int i = 0; i < node_count - 1; i++) {
                         this->__add_edge(p[i], p[(i + 1) % (node_count - 1)]);
                         this->__add_edge(p[i], p[node_count - 1]);
                     }

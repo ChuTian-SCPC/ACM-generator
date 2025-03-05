@@ -41,7 +41,7 @@ namespace generator {
                 virtual void __generate_graph() override {
                     _CONTEXT_GET(node_count)
                     std::vector<int> p = rnd.perm(node_count);
-                    for (int i = 0; i < node_count; i++) {
+                    for (int i = 0; i < node_count - 1; i++) {
                         this->__add_edge(p[i], p[(i + 1) % (node_count - 1)]);
                         this->__add_edge(p[i], p[node_count - 1]);
                     }
