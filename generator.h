@@ -7382,14 +7382,14 @@ namespace generator {
                         count += tree_size;
                     }
                     if (count != node_count) {
-                        _msg::__info_msg(_msg::_defl, tools::string_format(
-                            "Node count will be changed because the sum of Trees' size %d is not equal to node count %d.",
+                        _msg::__warn_msg(_msg::_defl, tools::string_format(
+                            "node_count will be changed because the sum of Trees' size %d is not equal to node count %d.",
                             count, node_count));
                         this->_context.set_node_count(count);
                     }
                     if (count - (int)trees_size.size() != edge_count) {
-                        _msg::__info_msg(_msg::_defl, tools::string_format(
-                            "Edge count will be changed because the sum of Trees' edges %d is not equal to edge count %d.",
+                        _msg::__warn_msg(_msg::_defl, tools::string_format(
+                            "edge_count will be changed because the sum of Trees' edges %d is not equal to edge count %d.",
                             count - (int)trees_size.size(), edge_count));
                         this->_context.set_edge_count(count - trees_size.size());                       
                     }
@@ -7425,16 +7425,21 @@ namespace generator {
                     this->_context.set_trees_size(rand_array::rand_sum(tree_count, node_count, 1));
                 }
 
-                virtual void __generate_graph() override {
+                virtual void __self_init() override {
                     if (_CONTEXT_V(trees_size).empty()) __generate_trees_size();
                     __reset_node_edge_count();
-                    __init_connect();
-                    _link.set_target(this->_context);
+                    __init_connect();                    
+                }
+
+                virtual void __generate_graph() override {
+                    _link.set_target(this->_context);                        
+                    Tree<NodeType, EdgeType> tree;
+                    __reset_nodes_weight_function(tree);
+                    __reset_edges_weight_function(tree);
+                    tree.set_log_change(false);
                     for (int tree_size : _CONTEXT_V(trees_size)) {
-                        Tree<NodeType, EdgeType> tree(tree_size);
-                        __reset_nodes_weight_function(tree);
-                        __reset_edges_weight_function(tree);
-                        tree.set_log_change(false);
+                        tree.set_node_count(tree_size);
+                        tree.gen();
                         _link.add_source(tree);
                     }
                     _link.gen();
@@ -7514,6 +7519,7 @@ namespace generator {
                     for (int tree_size : trees_size) add_tree_size(tree_size);
                 }
 
+                _DISABLE_DIRECTION
                 _DISABLE_MULTIPLY_EDGE
                 _DISABLE_SELF_LOOP
                 _DISABLE_CONNECT
