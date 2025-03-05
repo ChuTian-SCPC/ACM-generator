@@ -56,7 +56,7 @@ namespace generator {
                     _msg::OutStream graph_log(false);
                     _msg::_defl.swap(graph_log);
                     this->__merge_source();
-                    this->_context.check_gen_function();
+                    if (_CONTEXT_V(extra_edges_count)) this->_context.check_edges_weight_function();
                     this->__judge_limits();
                     this->__generate_graph(); 
                     _CONTEXT_GET_REF(edges)
@@ -66,7 +66,6 @@ namespace generator {
             protected:
                 template<template<typename, typename> class TG, typename T = NodeType, _HasT<T> = 0>
                 void __reset_nodes_weight_function(TG<NodeType, EdgeType>& graph) {
-                    graph.check_gen_function();
                     auto func = graph.nodes_weight_function();
                     this->_context.set_nodes_weight_function(func);
                 }
@@ -78,7 +77,6 @@ namespace generator {
                 
                 template<template<typename, typename> class TG, typename T = EdgeType, _HasT<T> = 0>
                 void __reset_edges_weight_function(TG<NodeType, EdgeType>& graph) {
-                    graph.check_gen_function();
                     auto func = graph.nodes_weight_function();
                     this->_context.set_edges_weight_function(func);
                 }
@@ -242,7 +240,7 @@ namespace generator {
                     if (link_type == _enum::LinkType::Dedupe) {
                         std::set<int> appear;
                         nodes_weight.resize(_CONTEXT_V(node_count));
-                        for (auto it : _node_merge_map) {
+                        for (auto& it : _node_merge_map) {
                             if (appear.find(it.second) == appear.end()) {
                                 appear.insert(it.second);
                                 nodes_weight[it.second] = _source_nodes_weight[it.first.first][it.first.second];
@@ -250,10 +248,9 @@ namespace generator {
                         }
                     }
                     else {
-                        for (int i = 0 ; i < _source_count; i++) {
-                            for (auto x : _source_nodes_weight[i]) {
-                                nodes_weight.emplace_back(x);
-                            }
+                        nodes_weight.resize(_CONTEXT_V(node_count));
+                        for (auto& it : _node_merge_map) {
+                            nodes_weight[it.second] = _source_nodes_weight[it.first.first][it.first.second];
                         }
                     }
                 }
@@ -359,13 +356,12 @@ namespace generator {
             protected:
                 using Context = TreeLink<NodeType, EdgeType>;
                 Link<NodeType, EdgeType> _link;
-                int _source_count;    
+                int _source_count;   
 
             public:
                 TreeLinkGen(Context& tree) : BasicTreeGen<TreeLink, NodeType, EdgeType>(tree), _link(), _source_count(0) {}
                 
                 void set_target(_GenTree<NodeType, EdgeType>& target) {
-                    _link.set_target(target);
                     __set_target(target);
                 }
 
@@ -377,6 +373,7 @@ namespace generator {
                 virtual void generate() override {
                     _msg::OutStream graph_log(false);
                     _msg::_defl.swap(graph_log);
+                    _link.set_target(this->_context);
                     _link.set_extra_edges_count(_source_count -  1);
                     _link.set_link_type(__convert_to_link_type());
                     _link.set_connect(true);
@@ -385,15 +382,47 @@ namespace generator {
                     _msg::_defl.swap(graph_log);
                 };
             protected:
+                template<template<typename, typename> class TG, typename T = NodeType, _HasT<T> = 0>
+                void __reset_nodes_weight_function(TG<NodeType, EdgeType>& graph) {
+                    auto func = graph.nodes_weight_function();
+                    this->_context.set_nodes_weight_function(func);
+                }
+                
+                template<template<typename, typename> class TG, typename T = NodeType, _NotHasT<T> = 0>
+                void __reset_nodes_weight_function(TG<NodeType, EdgeType>&) {
+                    return;
+                }
+                
+                template<template<typename, typename> class TG, typename T = EdgeType, _HasT<T> = 0>
+                void __reset_edges_weight_function(TG<NodeType, EdgeType>& graph) {
+                    auto func = graph.nodes_weight_function();
+                    this->_context.set_edges_weight_function(func);
+                }
+                
+                template<template<typename, typename> class TG, typename T = EdgeType, _NotHasT<T> = 0>
+                void __reset_edges_weight_function(TG<NodeType, EdgeType>&) {
+                    return;
+                }
 
-                void __set_target(_GenTree<NodeType, EdgeType>& target) {
-                    _CONTEXT_V_REF(is_rooted) = target.is_rooted();
-                    if (_CONTEXT_V(is_rooted))
-                        _CONTEXT_V_REF(root) = target.root_ref();
+                template<template<typename, typename> class TG>
+                void __set_target_common(TG<NodeType, EdgeType>& target) {
                     _CONTEXT_V_REF(swap_node) = target.swap_node();
                     _CONTEXT_V_REF(begin_node) = target.begin_node();
                     _CONTEXT_V_REF(output_node_count) = target.output_node_count();
-                }   
+                    this->__reset_nodes_weight_function(target);
+                    this->__reset_edges_weight_function(target);
+                }
+
+                void __set_target(_GenTree<NodeType, EdgeType>& target) {
+                    _CONTEXT_V_REF(is_rooted) = target.is_rooted();
+                    if (_CONTEXT_V(is_rooted)) _CONTEXT_V_REF(root) = target.root_ref();
+                    __set_target_common(target);
+                } 
+
+                void __set_target(_GenGraph<NodeType, EdgeType>& target) {
+                    _CONTEXT_V_REF(is_rooted) = target.direction();
+                    __set_target_common(target);
+                } 
 
                 _enum::LinkType __convert_to_link_type() {
                     _CONTEXT_GET(link_type);
@@ -406,11 +435,8 @@ namespace generator {
                     _CONTEXT_V_REF(node_count) = _link.node_count();
                     _CONTEXT_V_REF(node_indices) = _link.node_indices();
                     _CONTEXT_V_REF(begin_node) = _link.begin_node();
-                    _CONTEXT_GET_REF(edges);
-                    edges = _link.edges_ref();
-                    // maybe not need?
-                    if (_CONTEXT_V(is_rooted)) this->_context.reroot();
-                    shuffle(edges.begin(), edges.end());
+                    _CONTEXT_V_REF(nodes_weight) = _link.nodes_weight();
+                    _CONTEXT_V_REF(edges) = _link.edges_ref();
                 }
             };
 

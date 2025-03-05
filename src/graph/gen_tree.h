@@ -33,7 +33,7 @@ namespace generator {
                 friend class _TreeLinkImpl<NodeType, EdgeType>;
             public:
                 _RandomFuncTree():
-                    _BasicTree(0, 0, false, 1, true, true),
+                    _BasicTree(0, 1, false, 1, true, true),
                     _RandomFunction<NodeType, EdgeType>(nullptr, nullptr) {}                   
 
                 template<typename T = NodeType, typename U = EdgeType, _IsBothWeight<T, U> = 0>

@@ -47,6 +47,14 @@ namespace generator {
                     __check_nodes_weight_function();
                     __check_edges_weight_function();
                 }
+
+                void check_nodes_weight_function() {
+                    __check_nodes_weight_function();
+                }
+
+                void check_edges_weight_function() {
+                    __check_edges_weight_function();
+                }
             protected:
                                                            
                 template<typename T = NodeType, _HasT<T> = 0>
