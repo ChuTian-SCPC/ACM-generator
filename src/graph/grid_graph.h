@@ -210,8 +210,8 @@ namespace generator {
                     long long node = (long long)row * (long long)column - (long long)ignore;
                     if (ignore >= column) {
                         _msg::__set_fail_msg(_msg::_defl, 
-                            tools::string_format("the ignored nodes %d is large than or equal to cloumn %d,",
-                            ignore, column));
+                            tools::string_format("the ignored nodes should in range [0, %d), but found %d.",
+                            column, ignore));
                         return;
                     }
                     if (node > _setting::node_limit) {
@@ -222,10 +222,7 @@ namespace generator {
                     }
                     _row = row;
                     _column = column;
-                    if (this->_node_count != node) {
-                        this->_node_count = node;
-                        this->__init_node_indices();
-                    }                   
+                    if (this->_node_count != node) this->set_node_count(node);                  
                 }
                 _GET_VALUE(int, row)
                 _GET_VALUE(int, column)
