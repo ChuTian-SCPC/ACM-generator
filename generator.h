@@ -5561,14 +5561,16 @@ namespace generator {
                     _CONTEXT_GET(edge_count)
                     int l = 0, r = node_count / 2, limit;
                     if (!_CONTEXT_V(multiply_edge)) {
-                        if (edge_count > r * (node_count - r)) {
+                        long long max_limit = (long long)r * (long long)(node_count - r);
+                        if (edge_count > max_limit) {
                             _msg::__fail_msg(_msg::_defl,
-                                tools::string_format("edges_count must less than or equal to %d, but found %d.",
-                                r * (node_count - r), edge_count));
+                                tools::string_format("edges_count must less than or equal to %lld, but found %d.",
+                                max_limit, edge_count));
                         }
                         while (l <= r) {
                             int mid = (l + r) / 2;
-                            if (mid * (node_count - mid) < edge_count) {
+                            long long max_edge_count = (long long)mid * (long long)(node_count - mid);
+                            if (max_edge_count < edge_count) {
                                 l = mid + 1;
                             } else {
                                 limit = r;
@@ -5578,7 +5580,7 @@ namespace generator {
                     } else {
                         limit = 1;
                     }
-                    left = rnd.next(limit, node_count / 2);
+                    left = rnd.next(limit, node_count - limit);
                     right = node_count - left;
                 }   
 
