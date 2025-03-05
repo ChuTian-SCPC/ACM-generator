@@ -86,24 +86,12 @@ namespace generator {
                         _degree[i].clear();
                     }
                     std::vector<int> p = rnd.perm(node_count);
-                    for (int i = 0; i < left; i++) {
-                        _part[0].push_back(p[i]);
-                    }
-                    for (int i = left; i < node_count; i++) {
-                        _part[1].push_back(p[i]);
-                    }
-                    if (_CONTEXT_V(different_part)) {
-                        __remark_node_indices();
-                    }
+                    for (int i = 0; i < left; i++) _part[0].push_back(p[i]);
+                    for (int i = left; i < node_count; i++) _part[1].push_back(p[i]);
+                    if (_CONTEXT_V(different_part)) __remark_node_indices();
                     if (_CONTEXT_V(connect)) {
-                        _degree[0].resize(left, 1);
-                        _degree[1].resize(right, 1);
-                        for (int i = left; i < node_count - 1; i++) {
-                            _degree[0][rnd.next(left)]++;
-                        }
-                        for (int i = right; i < node_count - 1; i++) {
-                            _degree[1][rnd.next(right)]++;
-                        }
+                        _degree[0] = rand_array::rand_sum(left, node_count - 1, 1);
+                        _degree[1] = rand_array::rand_sum(right, node_count - 1, 1);
                         _d[0] = node_count - 1;
                         _d[1] = node_count - 1;
                     }
