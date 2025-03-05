@@ -42,6 +42,7 @@ namespace generator {
                 void set_node_count(int node_count) { 
                     if (node_count != _node_count) {
                         _node_count = node_count; 
+                        _msg::__warn_msg(_msg::_defl, "using default `node_indices` for `node_count` changed.");
                         __init_node_indices();               
                     }             
                 }
@@ -49,7 +50,8 @@ namespace generator {
 
                 void set_begin_node(int begin_node) { 
                     if (begin_node != _begin_node) {
-                        _begin_node = begin_node; 
+                        _begin_node = begin_node;
+                        _msg::__warn_msg(_msg::_defl, "using default `node_indices` for `begin_node` changed.");
                         __init_node_indices();                 
                     }                 
                 }
