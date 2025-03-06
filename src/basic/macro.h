@@ -169,7 +169,7 @@
   } \
   void rand(std::string format) { \
     Gen<T> g; \
-    g.set_format(format); \
+    g.set_xy_limit(format); \
     __rand(g); \
   }
 #endif //!_GEOMETRY_IN_RAND_FUNC

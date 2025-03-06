@@ -588,7 +588,7 @@ namespace generator {
   } \
   void rand(std::string format) { \
     Gen<T> g; \
-    g.set_format(format); \
+    g.set_xy_limit(format); \
     __rand(g); \
   }
 #endif //!_GEOMETRY_IN_RAND_FUNC
@@ -8722,13 +8722,13 @@ namespace generator {
                 _DEFAULT_OUTPUT
             }
             
-            Point operator+(const Point& b){ return Point(this->_x + b._x, this->_y + b._y); }
+            Point operator+(const Point& b) const { return Point(this->_x + b._x, this->_y + b._y); }
             Point& operator+=(const Point& b) {
                 this->_x += b._x;
                 this->_y += b._y;
                 return *this;
             }
-            Point operator-(const Point& b){ return Point(this->_x - b._x, this->_y - b._y); }
+            Point operator-(const Point& b) const { return Point(this->_x - b._x, this->_y - b._y); }
             Point& operator-=(const Point& b) {
                 this->_x -= b._x;
                 this->_y -= b._y;
@@ -8955,10 +8955,10 @@ namespace generator {
 
             Point<T> to_vector() { return _end - _start; }
 
-            _ResultTypeT<T> operator^(const Point<T>& b) { return (_end - _start) ^ b; }
-            _ResultTypeT<T> operator^(const _2Points<T>& l) { return (_end - _start) ^ (l._end - l._start); }
-            _ResultTypeT<T> operator*(const Point<T>& b) { return (_end - _start) * b; }
-            _ResultTypeT<T> operator*(const _2Points<T>& l) { return (_end - _start) * (l._end - l._start); }        
+            _ResultTypeT<T> operator^(const Point<T>& b) const { return (_end - _start) ^ b; }
+            _ResultTypeT<T> operator^(const _2Points<T>& l) const { return (_end - _start) ^ (l._end - l._start); }
+            _ResultTypeT<T> operator*(const Point<T>& b) const { return (_end - _start) * b; }
+            _ResultTypeT<T> operator*(const _2Points<T>& l) const { return (_end - _start) * (l._end - l._start); }        
 
             void default_output(std::ostream& os) const {
                 os << _start << " " << _end;
@@ -8986,7 +8986,7 @@ namespace generator {
             Line() : _2Points<T>() {
                 _DEFAULT_OUTPUT
             }
-            Line(Point<T> start, Point<T> end) : _2Points<T>(start, end) {
+            Line(const Point<T>& start, const Point<T>& end) : _2Points<T>(start, end) {
                 _DEFAULT_OUTPUT
             }
             
@@ -9004,7 +9004,7 @@ namespace generator {
             Segment() : _2Points<T>() {
                 _DEFAULT_OUTPUT
             }
-            Segment(Point<T> start, Point<T> end) : _2Points<T>(start, end) {
+            Segment(const Point<T>& start, const Point<T>& end) : _2Points<T>(start, end) {
                 _DEFAULT_OUTPUT
             }
             

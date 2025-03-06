@@ -46,13 +46,13 @@ namespace generator {
                 _DEFAULT_OUTPUT
             }
             
-            Point operator+(const Point& b){ return Point(this->_x + b._x, this->_y + b._y); }
+            Point operator+(const Point& b) const { return Point(this->_x + b._x, this->_y + b._y); }
             Point& operator+=(const Point& b) {
                 this->_x += b._x;
                 this->_y += b._y;
                 return *this;
             }
-            Point operator-(const Point& b){ return Point(this->_x - b._x, this->_y - b._y); }
+            Point operator-(const Point& b) const { return Point(this->_x - b._x, this->_y - b._y); }
             Point& operator-=(const Point& b) {
                 this->_x -= b._x;
                 this->_y -= b._y;
