@@ -1,8 +1,6 @@
 .vscode/
 .idea/
 debug/
-examples/*.exe
-examples/*/*.exe
 # Xmake cache
 .xmake/
 build/
