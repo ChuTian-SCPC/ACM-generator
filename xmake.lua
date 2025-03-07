@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-task("amalgamate")
+task("merge")
     on_run(function()
         -- 获取 Commit Short Hash
         local commit_hash = "unknown"
