@@ -4,7 +4,6 @@ debug/
 # Xmake cache
 .xmake/
 build/
-src/test.*
 src/testlib.h
 src/basic/testlib.h
 
