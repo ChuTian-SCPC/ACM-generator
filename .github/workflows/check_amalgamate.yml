@@ -15,7 +15,7 @@ jobs:
 
       - name: Validate Consistency
         run: |
-          if ! diff <(sed '/^\/\/ Timestamp: /d' generator.h) <(sed '/^\/\/ Timestamp: /d' HEAD:generator.h); then
+          if ! diff <(sed '/^\/\/ Timestamp: /d' generator.h) <(git show HEAD:generator.h | sed '/^\/\/ Timestamp: /d'); then
             echo "::error::generator.h 未与 src/ 同步，请运行 'xmake amalgamate' 并提交更新"
             exit 1
           fi
