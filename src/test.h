@@ -9,4 +9,10 @@ public:
     ~Test();
 };
 
+class Test2 {
+public:
+    Test2();
+    ~Test2();
+}
+
 #endif // TEST_H
