@@ -11,7 +11,7 @@ jobs:
         run: bash <(curl -fsSL https://xmake.io/shget.text)
 
       - name: Generate Header
-        run: xmake amalgamate
+        run: xmake merge
 
       - name: Validate Consistency
         run: |
