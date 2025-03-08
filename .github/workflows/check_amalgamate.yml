@@ -1,0 +1,21 @@
+name: Check Amalgamate
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Xmake
+        run: bash <(curl -fsSL https://xmake.io/shget.text)
+
+      - name: Generate Header
+        run: xmake merge
+
+      - name: Validate Consistency
+        run: |
+          if ! diff <(sed '/^\/\/ Time: /d' generator.h) <(git show HEAD:generator.h | sed '/^\/\/ Time: /d'); then
+            echo "::error::generator.h 未与 src/ 同步，请运行 'xmake merge' 并提交更新"
+            exit 1
+          fi
