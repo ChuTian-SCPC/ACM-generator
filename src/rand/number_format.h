@@ -75,7 +75,7 @@ namespace generator {
         
         template <typename T = long long>
         typename std::enable_if<std::is_integral<T>::value, std::pair<T, T>>::type
-        __format_to_int_range(std::string& s) {
+        __format_to_int_range(std::string s) {
             size_t open = s.find_first_of("[(");
             size_t close = s.find_first_of(")]");
             size_t comma = s.find(',');
