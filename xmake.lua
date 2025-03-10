@@ -39,6 +39,8 @@ target("generator")
 
 target("tests")
     set_kind("binary")
+    add_cxxflags("/utf-8") 
+    set_languages("cxx17")
     add_files("test/*.cpp")
     add_includedirs("test")
     add_includedirs("src")

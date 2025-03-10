@@ -1,3 +1,4 @@
+#pragma once
 #include "test_basic.hpp"
 using namespace generator::all;
 

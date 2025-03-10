@@ -1,7 +1,7 @@
 #include "test_basic.hpp"
-#include "algorithm/DSU.h"
 #include "algorithm/Prufer.h"
 #include "algorithm/VectorTree.h"
+#include "algorithm/DSU.h"
 using namespace generator::all;
 
 template<typename NodeType, typename EdgeType>
@@ -222,3 +222,28 @@ TEST_CASE("rand max son tree", "[rand_graph][rand_graph-tree][MaxSonTree]") {
     CHECK(f);
 }
 
+TEST_CASE("tree link", "[rand_graph][TreeLink]") {
+    unweight::Tree t1(10);
+    unweight::Chain t2(10);
+
+    unweight::TreeLink l1;
+    l1.add_source(t1);
+    l1.add_source(t2);
+
+    l1.gen();
+    CHECK(is_tree(l1));
+
+    unweight::MaxDegreeTree t3(20);
+    t3.set_max_degree(3);
+    l1.add_source(t3);
+    l1.gen();
+    CHECK(is_tree(l1));
+
+    unweight::TreeLink l2;
+    l2.add_source(t1);
+    l2.add_source(t2);
+    l2.add_source(t3);
+    l2.set_link_type(TreeLinkType::Direct);
+    l2.gen();
+    CHECK(is_tree(l2));
+}

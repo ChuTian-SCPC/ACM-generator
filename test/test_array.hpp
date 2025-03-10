@@ -1,3 +1,4 @@
+#pragma once
 #include "test_basic.hpp"
 #include "algorithm/Manacher.h"
 using namespace generator::all;
