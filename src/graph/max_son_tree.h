@@ -18,7 +18,7 @@ namespace generator {
             public:
                 MaxSonTreeGen(Context& tree) : BasicPrueferGen<MaxSonTree, NodeType, EdgeType>(tree) {}
             protected:
-                virtual void __generate_tree() override {
+                virtual void __generate_pruefer() override {
                     _CONTEXT_GET(max_son)
                     _CONTEXT_GET(node_count)
                     int max_degree = max_son + 1;
@@ -40,7 +40,7 @@ namespace generator {
                     _CONTEXT_GET(node_count)
                     if (max_son == -1) {
                         if (node_count == 1) max_son = 0;
-                        else max_son = rnd.next(2, node_count - 1);
+                        else max_son = rnd.next(1, node_count - 1);
                     }
                 }
 

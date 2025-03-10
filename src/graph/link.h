@@ -177,6 +177,7 @@ namespace generator {
                     _node_merge_map.clear();    
                     _CONTEXT_GET(link_type); 
                     _CONTEXT_GET_REF(node_indices);
+                    node_indices.clear();
                     if (link_type == _enum::LinkType::Dedupe) {
                         std::map<int, int> first_appear;
                         int cnt = 0;
@@ -237,6 +238,7 @@ namespace generator {
                 void __merge_nodes_weight() {
                     _CONTEXT_GET(link_type);
                     _CONTEXT_GET_REF(nodes_weight);
+                    nodes_weight.clear();
                     if (link_type == _enum::LinkType::Dedupe) {
                         std::set<int> appear;
                         nodes_weight.resize(_CONTEXT_V(node_count));
@@ -261,6 +263,8 @@ namespace generator {
                 }
 
                 void __merge_edges() {
+                    _CONTEXT_GET_REF(edges);
+                    edges.clear();
                     int ignore_edges = 0;
                     for (int i = 0; i < _source_count; i++) {
                         int sz = _source_edges[i].size();

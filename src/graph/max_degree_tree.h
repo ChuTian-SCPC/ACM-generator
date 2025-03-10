@@ -18,7 +18,7 @@ namespace generator {
             public:
                 MaxDegreeTreeGen(Context& tree) : BasicPrueferGen<MaxDegreeTree, NodeType, EdgeType>(tree) {}
             protected:
-                virtual void __generate_tree() override {
+                virtual void __generate_pruefer() override {
                     _CONTEXT_GET(node_count)
                     _CONTEXT_GET(max_degree)
                     std::vector<int> times = rand_array::rand_sum(node_count, node_count - 2, 0, max_degree - 1);
