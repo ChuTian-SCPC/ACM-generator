@@ -121,11 +121,11 @@ namespace generator {
                 }
 
                 void __init_source(_GenGraph<NodeType, EdgeType>& source) {
-                    if (source.edge_count() != (int)source.edges().size()) source.gen();
+                    if (source.edge_count() != (int)source.edges_ref().size()) source.gen();
                 }
 
                 void __init_source(_GenTree<NodeType, EdgeType>& source) {
-                    if (source.node_count() - 1 != (int)source.edges().size()) source.gen();
+                    if (source.node_count() - 1 != (int)source.edges_ref().size()) source.gen();
                 }
 
                 template<template<typename, typename> class TG>
@@ -177,6 +177,7 @@ namespace generator {
                     _node_merge_map.clear();    
                     _CONTEXT_GET(link_type); 
                     _CONTEXT_GET_REF(node_indices);
+                    node_indices.clear();
                     if (link_type == _enum::LinkType::Dedupe) {
                         std::map<int, int> first_appear;
                         int cnt = 0;
@@ -237,6 +238,7 @@ namespace generator {
                 void __merge_nodes_weight() {
                     _CONTEXT_GET(link_type);
                     _CONTEXT_GET_REF(nodes_weight);
+                    nodes_weight.clear();
                     if (link_type == _enum::LinkType::Dedupe) {
                         std::set<int> appear;
                         nodes_weight.resize(_CONTEXT_V(node_count));
@@ -261,6 +263,9 @@ namespace generator {
                 }
 
                 void __merge_edges() {
+                    _CONTEXT_GET_REF(edges);
+                    edges.clear();
+                    if (!_CONTEXT_V(multiply_edge)) this->_e.clear();
                     int ignore_edges = 0;
                     for (int i = 0; i < _source_count; i++) {
                         int sz = _source_edges[i].size();
@@ -431,11 +436,20 @@ namespace generator {
                     return _enum::LinkType::Shuffle;
                 }
 
+                template<typename T = NodeType, _NotHasT<T> = 0>
+                void __dump_nodes_weight() {
+                    return;
+                }
+
+                template<typename T = NodeType, _HasT<T> = 0>
+                void __dump_nodes_weight() {
+                    _CONTEXT_V_REF(nodes_weight) = _link.nodes_weight();
+                }               
                 void __dump_result() {
                     _CONTEXT_V_REF(node_count) = _link.node_count();
                     _CONTEXT_V_REF(node_indices) = _link.node_indices();
                     _CONTEXT_V_REF(begin_node) = _link.begin_node();
-                    _CONTEXT_V_REF(nodes_weight) = _link.nodes_weight();
+                    __dump_nodes_weight();
                     _CONTEXT_V_REF(edges) = _link.edges_ref();
                 }
             };

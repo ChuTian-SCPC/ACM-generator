@@ -175,9 +175,15 @@ namespace generator {
             protected:
                 virtual void __generate_tree() override {
                     _CONTEXT_GET(node_count)
+                    if (node_count == 1) return;
+                    __generate_pruefer();
+                }
+
+                virtual void __generate_pruefer() {
+                    _CONTEXT_GET(node_count);
                     std::vector<int> times = rand_array::rand_sum(node_count, node_count - 2, 0);
                     std::vector<int> pruefer = rand_array::shuffle_index(times);
-                    __pruefer_decode(pruefer);
+                    __pruefer_decode(pruefer);                    
                 }
                 void __pruefer_decode(std::vector<int> pruefer) {
                     _CONTEXT_GET(node_count)

@@ -219,7 +219,7 @@ namespace generator {
             std::is_convertible<S, R>::value && 
             std::is_convertible<T, R>::value && 
             std::is_convertible<U, R>::value, std::vector<R> >::type
-        rand_sum(int size, R sum, T from, U to) {
+        rand_sum(int size, S sum, T from, U to) {
             __judge_vector_lower_bound(size, "vector");
             __judge_vector_upper_bound(size, "vector");
             R sum_r = rand_numeric::__change_to_int<S, R>(sum, "sum");

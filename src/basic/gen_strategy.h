@@ -30,6 +30,8 @@ namespace generator {
                 _GenSwitch() : _generator(nullptr) {}
                 virtual ~_GenSwitch() { __delete_generator(); }
 
+                _SET_GET_VALUE(_Gen*, generator);
+
             protected:
                 void __delete_generator() {
                     if (_generator) delete _generator;
