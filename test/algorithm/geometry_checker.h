@@ -17,16 +17,16 @@ bool is_simple_polygon(const SimplePolygon<T>& polygon) {
     auto points = polygon.points();
     int n = points.size();
     if (n < 3) return true;
+    std::cout << n << std::endl;
+    for (int i = 0; i < n; i++) {
+       std::cout << points[i] << std::endl; 
+    }
     for (int i = 0; i < n; i++) {
         Point A = points[i];
         Point B = points[(i + 1) % n];
         for (int j = i + 1; j < n; j++) {
             Point C = points[j];
             Point D = points[(j + 1) % n];
-            if (A == Point<T>(487, -391) && B == Point<T>(481, -378) &&
-                C == Point<T>(-489, 464) && D == Point<T>(518, -413)) {
-                    REQUIRE(false);
-                }
             if (is_segment_intersect(A, B, C, D)) {
                 return false; 
             }
