@@ -19,9 +19,6 @@ bool is_simple_polygon(const SimplePolygon<T>& polygon) {
     if (n < 3) return true;
     std::cout << n << std::endl;
     for (int i = 0; i < n; i++) {
-       std::cout << points[i] << std::endl; 
-    }
-    for (int i = 0; i < n; i++) {
         Point A = points[i];
         Point B = points[(i + 1) % n];
         for (int j = i + 1; j < n; j++) {
