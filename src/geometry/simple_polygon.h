@@ -42,7 +42,8 @@ namespace generator {
                     x_sum += p.x();
                     y_sum += p.y();
                 }
-                return Point<T>(x_sum / points.size(), y_sum / points.size());
+                _ResultTypeT<T> n = points.size();
+                return Point<T>(x_sum / n, y_sum / n);
             }
         };
 
