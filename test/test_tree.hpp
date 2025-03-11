@@ -182,11 +182,10 @@ bool max_degree_tree_check(int n) {
     unweight::MaxDegreeTree t(n);
     t.gen();
     auto edge = t.edges_ref();
-    OY::VectorTree::Tree<bool> T(n);
-    for (auto& e : edge) T.add_edge(e.u(), e.v());
     std::vector<int> deg(n, 0);
-    for (int i = 0; i < n; i++) {
-        T.do_for_each_adj_vertex(i, [&](int to) { deg[i]++; });
+    for (auto& e : edge) {
+        deg[e.u()]++;
+        deg[e.v()]++;
     }
     int max_degree = 0;
     for (auto& d : deg) max_degree = std::max(max_degree, d);
@@ -246,4 +245,53 @@ TEST_CASE("tree link", "[rand_graph][TreeLink]") {
     l2.set_link_type(TreeLinkType::Direct);
     l2.gen();
     CHECK(is_tree(l2));
+}
+
+bool check_degrees(unweight::DegreeTree& t) {
+    int n = t.node_count();
+    auto edge = t.edges_ref(); 
+    std::vector<int> deg(n, 0);
+    for (auto& e : edge) {
+        deg[e.u()]++;
+        deg[e.v()]++;
+    }
+    auto degrees = t.degrees();
+    for (int i = 0; i < n; i++) {
+        if (deg[i] != degrees[i]) return false;
+    }
+    return true;    
+}
+
+bool degree_tree_check(int n) {
+    unweight::DegreeTree t(n);
+    t.gen();
+    return check_degrees(t);
+}
+
+TEST_CASE("rand degree tree", "[rand_graph][rand_graph-tree][DegreeTree]") {
+    init_gen();
+    CHECK(degree_tree_check(1)); // 特判node_count = 1
+    bool f = loop_check([]() { int n = rand_int(2, 1000); return degree_tree_check(n);}, 10);
+    CHECK(f);
+}
+
+TEST_CASE("set degree tree", "[rand_graph][rand_graph-tree][DegreeTree]") {
+    unweight::DegreeTree t1(6);
+    std::vector<int> expected{3, 1, 3, 1, 1, 1};
+    t1.set_degrees(expected);
+    t1.gen();
+    auto degrees = t1.degrees();
+    for (int i = 0; i < 6; i++) {
+        CHECK(degrees[i] == expected[i]);
+    }
+    CHECK(check_degrees(t1));
+
+    unweight::DegreeTree t2(10);
+    t2.set_degrees(1, 5);
+    t2.set_degrees(10, 3);
+    t2.gen();
+    degrees = t2.degrees();
+    CHECK(degrees[0] == 5);
+    CHECK(degrees[9] == 3);
+    CHECK(check_degrees(t2));
 }

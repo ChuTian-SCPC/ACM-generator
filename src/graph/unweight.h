@@ -53,6 +53,8 @@ namespace generator {
             using Forest = basic::Forest<void, void>;
             using FlowerChainGen = basic::FlowerChainGen<void, void>;
             using FlowerChain = basic::FlowerChain<void, void>;
+            using DegreeTree = basic::DegreeTree<void, void>;
+            using DegreeTreeGen = basic::DegreeTreeGen<void, void>;
         } // namespace unweight
     } // namespace rand_graph
 } // namespace generator
