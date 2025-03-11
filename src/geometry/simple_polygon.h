@@ -32,6 +32,7 @@ namespace generator {
                 _CONTEXT_GET_REF(points);
                 points = p.points();
                 Point<T> center = __get_center(points);
+                std::cout << center << std::endl;
                 __polar_angle_sort(points, center);
             }
 
@@ -42,7 +43,6 @@ namespace generator {
                     x_sum += p.x();
                     y_sum += p.y();
                 }
-                std::cout << x_sum << " " << y_sum << std::endl;
                 return Point<T>(x_sum / points.size(), y_sum / points.size());
             }
         };
