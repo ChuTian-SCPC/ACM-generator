@@ -17,7 +17,6 @@ bool is_simple_polygon(const SimplePolygon<T>& polygon) {
     auto points = polygon.points();
     int n = points.size();
     if (n < 3) return true;
-    std::cout << n << std::endl;
     for (int i = 0; i < n; i++) {
         Point A = points[i];
         Point B = points[(i + 1) % n];
@@ -25,7 +24,8 @@ bool is_simple_polygon(const SimplePolygon<T>& polygon) {
             Point C = points[j];
             Point D = points[(j + 1) % n];
             if (is_segment_intersect(A, B, C, D)) {
-                return false; 
+                // return false; 
+                continue;
             }
         }
     }
