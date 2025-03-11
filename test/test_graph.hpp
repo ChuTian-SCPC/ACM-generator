@@ -194,7 +194,7 @@ TEST_CASE("rand pseudo_tree","[rand_graph][rand_graph-graph][PseudoTree][PseudoI
 }
 
 bool cactus_check() {
-    int n = rand_int(3, 10);
+    int n = rand_int(3, 1000);
     int m = rand_int(n - 1, n - 1 + (n - 1) / 2);
     unweight::Cactus g(n, m);
     g.gen();
