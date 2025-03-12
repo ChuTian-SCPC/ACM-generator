@@ -8,6 +8,8 @@ task("merge")
         -- 运行合并命令
         os.exec("xmake l cli.amalgamate -o . generator")
 
+        -- 测试使用
+        os.exec("xmake l cli.amalgamate generator")
         -- 读取生成的内容
         local content = io.readfile("generator.h")
 
