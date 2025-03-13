@@ -55,5 +55,8 @@
 #ifndef _SGPCET_DEGREE_TREE_H_
 #include "degree_tree.h"
 #endif //!_SGPCET_DEGREE_TREE_H_
+#ifndef _SGPCET_SON_TREE_H_
+#include "son_tree.h"
+#endif //!_SGPCET_SON_TREE_H_
 
 #endif // !_SGPCET_ALL_TREE_GRAPH_H_

@@ -146,6 +146,12 @@ namespace generator {
 
             template <typename NodeType>
             using DegreeTreeGen = basic::DegreeTreeGen<NodeType, void>;
+
+            template <typename NodeType>
+            using SonTree = basic::SonTree<NodeType, void>;
+
+            template <typename NodeType>
+            using SonTreeGen = basic::SonTreeGen<NodeType, void>;
         } // namespace node_weight
     } // namespace rand_graph
 } // namespace generator
