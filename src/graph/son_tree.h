@@ -134,11 +134,12 @@ namespace generator {
                 _SET_GET_VALUE(std::vector<int>, sons)
 
                 void set_sons(int index, int son) {
-                    if (index <= 0) {
-                        _msg::__set_fail_msg(_msg::_defl, "the index can't be less than 1.");
+                    if (index <= 0 && index > this->_node_count) {
+                        _msg::__set_fail_msg(_msg::_defl, 
+                            tools::string_format("the index should in range [1, %d], but found %d.", this->_node_count, index));
                         return;
                     }
-                    _sons.resize(index, -1);
+                    if (_sons.size() < index) _sons.resize(this->_node_count, -1);
                     _sons[index - 1] = son; 
                 }
             protected:

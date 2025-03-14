@@ -115,11 +115,12 @@ namespace generator {
                 _SET_GET_VALUE(std::vector<int>, degrees)
 
                 void set_degrees(int index, int degree) {
-                    if (index <= 0) {
-                        _msg::__set_fail_msg(_msg::_defl, "the index can't be less than 1.");
+                    if (index <= 0 && index > this->_node_count) {
+                        _msg::__set_fail_msg(_msg::_defl, 
+                            tools::string_format("the index should in range [1, %d], but found %d.", this->_node_count, index));
                         return;
                     }
-                    _degrees.resize(index, -1);
+                    if (_degrees.size() < index) _degrees.resize(this->_node_count, -1);
                     _degrees[index - 1] = degree;
                 }
 
