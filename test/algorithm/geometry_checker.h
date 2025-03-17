@@ -42,6 +42,7 @@ bool is_convex_hull(const ConvexHull<T>& polygon) {
         Point O = points[i];
         Point A = points[(i + 1) % n];
         Point B = points[(i + 2) % n];
+        if (O == A || A == B) return false;
         double c = (A - O) ^ (B - O);
 
         if (c == 0) continue;

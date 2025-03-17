@@ -46,3 +46,26 @@ TEST_CASE("rand simple polygon", "[rand_geometry][SimplePolygon]") {
     bool f = loop_check([]() { return simple_polygon_check();}, 10);
     CHECK(f); 
 }
+
+class ConvexHullCheck : public ConvexHullGen<int> {
+public:
+    using Context = ConvexHullGen<int>::Context;
+    ConvexHullCheck(Context& points) : ConvexHullGen<int>(points) {}
+    std::vector<Point<int>> rand_no_origin_points(std::vector<int>& x_vec, std::vector<int>& y_vec) {
+        return __rand_no_origin_points(x_vec, y_vec);
+    }
+};
+
+TEST_CASE("convex hull rand no origin points", "[rand_geometry][ConvexHull]") {
+    init_gen();
+    ConvexHull<int> c;
+    c.set_geometry_generator(new ConvexHullCheck(c));
+    std::vector<int> x_vec = {0, 0, 0, 1, 2, 3};
+    std::vector<int> y_vec = {0, 0, 0, 4, 5, 6};
+    auto points = dynamic_cast<ConvexHullCheck*>(c.generator())->rand_no_origin_points(x_vec, y_vec);
+    for (auto& p : points) CHECK(p != Point<int>(0, 0));
+    x_vec = {0, 0, 0, -1, -2, -3};
+    y_vec = {0, 0, 0, 4, 5, 6};
+    points = dynamic_cast<ConvexHullCheck*>(c.generator())->rand_no_origin_points(x_vec, y_vec);
+    for (auto& p : points) CHECK(p!= Point<int>(0, 0));
+}

@@ -125,8 +125,11 @@ namespace generator {
 
             std::vector<Point<T>> __rand_no_origin_points(std::vector<T>& x_vec, std::vector<T>& y_vec) {
                 std::vector<Point<T>> points;
-                std::sort(x_vec.begin(), x_vec.end());
-                std::sort(y_vec.begin(), y_vec.end());
+                auto __sort_zero = [](T a, T b) {
+                    return a == 0 && b != 0;
+                };
+                std::sort(x_vec.begin(), x_vec.end(), __sort_zero);
+                std::sort(y_vec.begin(), y_vec.end(), __sort_zero);
                 int p_x = __find_none_zero_index(x_vec);
                 int p_y = __find_none_zero_index(y_vec);
                 shuffle(x_vec.begin() + p_x, x_vec.end());
