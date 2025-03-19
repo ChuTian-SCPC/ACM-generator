@@ -41,23 +41,22 @@ namespace generator {
           OutStream(const OutStream&) = delete;
           OutStream& operator=(const OutStream&) = delete;
           
-          OutStream(OutStream&& other) noexcept
-            : _stream(std::move(other._stream)), _file(std::move(other._file)), _path(std::move(other._path)) {
+          OutStream(OutStream&& other) noexcept : _logs(other._logs), _log_same(other._log_same) {
+            open(std::move(other._path));
           }
           
           OutStream& operator=(OutStream&& other) noexcept {
             if (this != &other) {
-              _stream = std::move(other._stream);
-              _file = std::move(other._file);
-              _path = std::move(other._path);
+              open(std::move(other._path));
+              _logs = std::move(other._logs);
+              _log_same = other._log_same;
             }
             return *this;
           }
           
           void swap(OutStream& other) noexcept {
-            std::swap(_stream, other._stream);
-            std::swap(_file, other._file);
             std::swap(_path, other._path);
+            open(_path);
             std::swap(_logs, other._logs);
             std::swap(_log_same, other._log_same);
           }
@@ -111,15 +110,17 @@ namespace generator {
           void open(std::string path) {
             close(); 
             if (!path.empty()) {
-              _file = std::ofstream(path);
+              _file.open(path);
               if (_file.is_open()) {
                 _stream = &_file;
                 _path = path;
                 return; 
               }
+              else {
+                std::cerr << "Error opening file: " << path << std::endl;
+                std::cerr << "Using std::cerr instead." << std::endl;                
+              }
             }
-            std::cerr << "Error opening file: " << path << std::endl;
-            std::cerr << "Using std::cerr instead." << std::endl;
             __default_output(); 
           }
           
