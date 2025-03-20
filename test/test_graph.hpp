@@ -5,6 +5,7 @@
 #include "algorithm/TopologicalSort.h"
 #include "algorithm/Pseudotree_ug.h"
 #include "algorithm/cactus_checker.h"
+#include "algorithm/start_reachable_graph_checker.h"
 using namespace generator::all;
 
 TEST_CASE("rand 4 type graph", "[rand_graph][rand_graph-graph][Graph]") {
@@ -319,4 +320,34 @@ TEST_CASE("link test", "[rand_graph][Link][TreeLink]") {
     };
     CHECK(check_node_indices(exp_node_idx, l.node_indices()));
     CHECK(check_edges(exp_edges, l.edges()));
+}
+
+bool start_reachable_check(int n, int m) {
+    unweight::StartReachableGraph g(n, m, 0);
+    g.set_start(rand_int(1, n));
+    g.gen();
+    StartReachableGraphChecker c(g);
+    return c.check();
+}
+
+TEST_CASE("start reachable graph", "[rand_graph][rand_graph-graph][StartReachableGraph]") {
+    init_gen();
+    bool f1 = loop_check([]() {
+        int n = rand_int(1, 1000);
+        int m = rand_int(n - 1, n * (n - 1));
+        return start_reachable_check(n, m);
+    }, 10);
+    CHECK(f1);
+    
+    bool f2 = loop_check([]() {
+        int n = rand_int(1, 1000);
+        return start_reachable_check(n, n - 1);
+    }, 10);
+    CHECK(f2);
+
+    bool f3 = loop_check([]() {
+        int n = rand_int(1, 1000);
+        return start_reachable_check(n, n * (n - 1)); 
+    }, 10);
+    CHECK(f3);
 }

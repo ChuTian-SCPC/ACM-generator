@@ -57,6 +57,8 @@ namespace generator {
             using DegreeTreeGen = basic::DegreeTreeGen<void, void>;
             using SonTree = basic::SonTree<void, void>;
             using SonTreeGen = basic::SonTreeGen<void, void>;
+            using StartReachableGraph = basic::StartReachableGraph<void, void>;
+            using StartReachableGraphGen = basic::StartReachableGraphGen<void, void>;
         } // namespace unweight
     } // namespace rand_graph
 } // namespace generator

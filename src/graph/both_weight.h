@@ -153,6 +153,12 @@ namespace generator {
 
             template <typename NodeType, typename EdgeType>
             using SonTreeGen = basic::SonTreeGen<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using StartReachableGraph = basic::StartReachableGraph<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using StartReachableGraphGen = basic::StartReachableGraphGen<NodeType, EdgeType>;
         } // namespace both_weight
     } // namespace rand_graph
 } // namespace generator
