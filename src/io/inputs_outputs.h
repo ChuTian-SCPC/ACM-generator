@@ -81,7 +81,7 @@ namespace generator {
             for (int i : outputs) {
                 Path input = __testcase_input_file_path(i);
                 Path output = __testcase_output_file_path(i);
-                _msg::__info_msg(_msg::_defl, tools::string_format("Generating output : %s", input.cname()));
+                _msg::__info_msg(_msg::_defl, tools::string_format("Generating output : %s", output.cname()));
                 ReturnState state = __run_program(
                     __result_program(program), input, output, _setting::_default_path, time_limit, _enum::_RESULT);
                 results[i] = __is_success(state.exit_code) && !__time_limit_exceed(state.time, time_limit);
