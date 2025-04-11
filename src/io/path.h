@@ -75,7 +75,7 @@ namespace generator {
         __unify_split();
         size_t pos = _path.find_last_of(_setting::_path_split);
         std::string file_full_name = pos == std::string::npos ? _path : _path.substr(pos + 1);
-        size_t pos_s = _path.find_last_of('.');
+        size_t pos_s = file_full_name.find_last_of('.');
         std::string file_name = pos_s == std::string::npos ? file_full_name : file_full_name.substr(0, pos_s);
         return file_name;
       }
