@@ -1,10 +1,11 @@
 .vscode/
 .idea/
 debug/
-examples/*.exe
-examples/*/*.exe
-tests/**/*.exe
-tests/**/*.obj
-tests/.sconsign.dblite
-tests/**/*.o
-tests/build/
+# Xmake cache
+.xmake/
+build/
+src/testlib.h
+src/basic/testlib.h
+
+# MacOS Cache
+.DS_Store

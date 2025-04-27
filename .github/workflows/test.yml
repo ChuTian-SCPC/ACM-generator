@@ -1,0 +1,27 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Xmake
+      run: |
+        wget https://xmake.io/shget.text -O - | bash
+        export PATH=$HOME/.xmake/bin:$PATH
+
+    - name: Run Xmake tests
+      run: |
+        xmake f -y
+        xmake run_test
