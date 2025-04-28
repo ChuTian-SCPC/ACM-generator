@@ -22,6 +22,11 @@
 #include <dirent.h> 
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <csignal>
+#endif
+
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
 #endif
 
 #endif // !_SGPCET_COMMON_H_

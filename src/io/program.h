@@ -1,6 +1,10 @@
 #ifndef _SGPCET_PROGRAM_H_
 #define _SGPCET_PROGRAM_H_
 
+#include <sys/_types/_pid_t.h>
+#ifndef _SGPCET_LOGGER_H_
+#include "log/logger.h"
+#endif // !_SGPCET_LOGGER_H_
 #ifndef _SGPCET_IO_INIT_H_
 #include "io_init.h"
 #endif // !_SGPCET_IO_INIT_H_
@@ -346,7 +350,7 @@ namespace generator {
                 __set_default_args();
                 int exit_code = __run_child_program(program, input_file_path, output_file_path, error_file_path, func_type);
                 __close_files<T1>(input_file_path, output_file_path, error_file_path);
-                exit(exit_code);           
+                _exit(exit_code == 0 ? 0 : -1);
             } 
             else if (pid > 0) {
 

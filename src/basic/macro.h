@@ -1,6 +1,8 @@
 #ifndef _SGPCET_MACRO_H_
 #define _SGPCET_MACRO_H_
 
+#include <functional>
+
 #ifndef _GET_VALUE_CONST
 #define _GET_VALUE_CONST(type, name) \
   type name() const { return _##name; }
