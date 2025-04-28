@@ -1,7 +1,6 @@
 #ifndef _SGPCET_PROGRAM_H_
 #define _SGPCET_PROGRAM_H_
 
-#include <sys/_types/_pid_t.h>
 #ifndef _SGPCET_LOGGER_H_
 #include "log/logger.h"
 #endif // !_SGPCET_LOGGER_H_
