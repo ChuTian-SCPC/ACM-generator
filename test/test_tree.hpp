@@ -162,7 +162,9 @@ TEST_CASE("rand flower", "[rand_graph][rand_graph-tree][Flower]") {
 
 bool flower_chain_check(int n, int flower_size = -1) {
     unweight::FlowerChain t(n);
-    t.set_flower_size(flower_size);
+    if (flower_size != -1) {
+        t.set_flower_size(flower_size);
+    }
     t.gen();
     if (t.node_count() != n) return false;
     if (t.edges().size() != n - 1) return false;
