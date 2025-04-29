@@ -33,6 +33,8 @@ namespace generator {
     std::string _checker_folder = "checker";
   #ifdef ON_WINDOWS
     std::string _sub_checker_folder = "windows";
+  #elif defined(__APPLE__)
+    std::string _sub_checker_folder = "macos";
   #else
     std::string _sub_checker_folder = "linux";
   #endif // ON_WINDOWS

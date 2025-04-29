@@ -33,7 +33,7 @@ namespace generator {
           OutStream(std::ostream& stream, bool log_same = true) : 
             _stream(&stream), _path(""), _log_same(log_same) {}
           OutStream(const io::Path& path, bool log_same = true);
-          OutStream(const std::string& path, bool log_same = true) : _log_same(log_same), _stream(nullptr) {
+          OutStream(const std::string& path, bool log_same = true) : _stream(nullptr), _log_same(log_same) {
             open(path);
           }
           ~OutStream() { close(); }

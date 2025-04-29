@@ -16,6 +16,12 @@
 #ifndef _SGPCET_EDGE_H_
 #include "edge.h"
 #endif // !_SGPCET_EDGE_H_
+#ifndef _SGPCET_WEIGHT_TYPE_H_
+#include "weight_type.h"
+#endif // !_SGPCET_WEIGHT_TYPE_H_
+#ifndef _SGPCET_ARRAY_H_
+#include "rand/array.h"
+#endif // !_SGPCET_ARRAY_H_
 
 namespace generator {
     namespace rand_graph {
