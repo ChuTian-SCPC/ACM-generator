@@ -138,6 +138,10 @@ namespace generator {
     #ifdef ON_WINDOWS
         char buffer[MAX_PATH];
         GetModuleFileName(NULL, buffer, MAX_PATH);
+    #elif defined(__APPLE__)
+        char buffer[PATH_MAX];
+        uint32_t size = sizeof(buffer);
+        _NSGetExecutablePath(buffer, &size);
     #else
         char buffer[PATH_MAX];
         ssize_t length = readlink("/proc/self/exe", buffer, sizeof(buffer));
