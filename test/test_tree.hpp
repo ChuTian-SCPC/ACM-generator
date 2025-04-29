@@ -160,6 +160,26 @@ TEST_CASE("rand flower", "[rand_graph][rand_graph-tree][Flower]") {
     CHECK(f); 
 }
 
+bool flower_chain_check(int n, int flower_size = -1) {
+    unweight::FlowerChain t(n);
+    t.set_flower_size(flower_size);
+    t.gen();
+    if (t.node_count() != n) return false;
+    if (t.edges().size() != n - 1) return false;
+    if (!is_tree(t)) return false;
+    return true;
+}
+
+TEST_CASE("rand FlowerChain", "[rand_graph][rand_graph-tree][FlowerChain]") {
+    init_gen();
+    int n = 5;
+    for (int flower_size = 0; flower_size <= n; flower_size++) {
+        CHECK(flower_chain_check(n, flower_size));
+    }
+    bool f = loop_check([]() { int n = rand_int(1, 1000); return flower_chain_check(n);}, 10);
+    CHECK(f);
+}
+
 bool height_tree_check(int n) {
     unweight::HeightTree t(n);
     t.set_root(rand_int(1, n));
