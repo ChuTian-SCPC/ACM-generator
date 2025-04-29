@@ -42,15 +42,46 @@ target("tests")
     add_cxxflags("/utf-8") 
     set_languages("cxx17")
     add_files("test/*.cpp")
-    add_includedirs("test")
+    add_files("test/catch/catch_amalgamated.cpp")
+    add_includedirs("./test/catch")
     add_includedirs("src")
     add_deps("generator")
+
+target("val_test_val")
+    set_kind("binary")
+    set_targetdir("./test/validate")
+    set_filename("val")
+    add_files("./test/validate/val.cpp")
+
+target("val_test_test")
+    set_kind("binary")
+    set_targetdir("./test/validate")
+    set_filename("test")
+    add_includedirs("./test/catch")
+    add_files("./test/validate/test.cpp")
+    add_files("test/catch/catch_amalgamated.cpp")
+    add_deps("val_test_val")
+
+task("validate_test")
+    on_run(function ()
+        os.exec("xmake build val_test_val")
+        os.exec("xmake build val_test_test")
+        os.exec("./test/validate/test")
+        os.rm("./test/validate/testcases")
+        os.rm("./test/validate/validate")
+        os.rm("./test/validate/val")
+        os.rm("./test/validate/test")
+    end)
+    set_menu {
+        description = "validate测试"
+    }
 
 task("run_test")
     on_run(function()
         import("core.base.task")
         task.run("build", {target = "tests"})
         os.exec("xmake run tests")
+        os.exec("xmake validate_test")
     end)
     set_menu {
         description = "测试"
