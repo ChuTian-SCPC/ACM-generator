@@ -77,7 +77,7 @@ namespace generator {
                 
                 template<template<typename, typename> class TG, typename T = EdgeType, _HasT<T> = 0>
                 void __reset_edges_weight_function(TG<NodeType, EdgeType>& graph) {
-                    auto func = graph.nodes_weight_function();
+                    auto func = graph.edges_weight_function();
                     this->_context.set_edges_weight_function(func);
                 }
                 
@@ -400,7 +400,7 @@ namespace generator {
                 
                 template<template<typename, typename> class TG, typename T = EdgeType, _HasT<T> = 0>
                 void __reset_edges_weight_function(TG<NodeType, EdgeType>& graph) {
-                    auto func = graph.nodes_weight_function();
+                    auto func = graph.edges_weight_function();
                     this->_context.set_edges_weight_function(func);
                 }
                 
