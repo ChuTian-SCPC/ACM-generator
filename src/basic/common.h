@@ -14,6 +14,10 @@
 #ifdef ON_WINDOWS
 #include <direct.h>
 #include <windows.h>
+#include <io.h>
+#define dup _dup
+#define dup2 _dup2
+#define fileno _fileno
 #define mkdir(dir, mode) _mkdir(dir)
 #define stat _stat 
 #else
