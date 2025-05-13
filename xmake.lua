@@ -68,11 +68,13 @@ task("validate_test")
     on_run(function ()
         os.exec("xmake build val_test_val")
         os.exec("xmake build val_test_test")
-        os.exec("./test/validate/test")
+        local val_exe = os.host() == "windows" and "val.exe" or "val"
+        local test_exe = os.host() == "windows" and "test.exe" or "test"
+        os.exec("./test/validate/" .. test_exe)
         os.rm("./test/validate/testcases")
         os.rm("./test/validate/validate")
-        os.rm("./test/validate/val")
-        os.rm("./test/validate/test")
+        os.rm("./test/validate/" .. val_exe)
+        os.rm("./test/validate/" .. test_exe)
     end)
     set_menu {
         description = "validate测试"

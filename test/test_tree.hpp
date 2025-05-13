@@ -352,6 +352,7 @@ TEST_CASE("rand son tree", "[rand_graph][rand_graph-tree][SonTree]") {
     init_gen();
     CHECK(son_tree_check(1)); // 特判node_count = 1
     bool f = loop_check([]() { int n = rand_int(2, 1000); return son_tree_check(n);}, 10); 
+    CHECK(f);
 }
 
 TEST_CASE("set son tree", "[rand_graph][rand_graph-tree][SonTree]") {
