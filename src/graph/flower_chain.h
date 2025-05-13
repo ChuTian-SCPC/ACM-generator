@@ -77,8 +77,12 @@ namespace generator {
                     flower.set_log_change(false);
                     chain.set_log_change(false);
                     _link.set_target(this->_context);
-                    _link.add_source(flower);
-                    _link.add_source(chain);
+                    if (flower_size != 0) {
+                        _link.add_source(flower);
+                    }
+                    if (chain_size != 0) {
+                        _link.add_source(chain);
+                    }
                     _link.gen();
                     __dump_result();
                 }
