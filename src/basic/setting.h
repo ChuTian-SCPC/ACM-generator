@@ -92,9 +92,15 @@ namespace generator {
       static void set_labels(int idx, const std::string& l) {
         auto& _labels = labels();
         auto& _labels_map = labels_map();
+        auto& _multi_label = __multi_label();
         if (_labels.size() < idx + 1) _labels.resize(idx + 1);
+        else if (_labels[idx] != "") {
+          if (_labels[idx].size() != 1) _multi_label--;
+          _labels_map.erase(_labels[idx]);
+        }
         _labels[idx] = l;
         _labels_map[l] = idx; 
+        if (l.size() != 1) _multi_label++;
       }
 
       static void set_labels(int idx, char l) {
@@ -111,14 +117,28 @@ namespace generator {
           return instance;
       }
 
+      static bool is_single_label() {
+        return __multi_label() == 0;
+      }
+
+      static bool has_empty_or_same_label() {
+        return labels().size() != labels_map().size();
+      }
     private:
+      static int& __multi_label() {
+        static int multi_label = 0;
+        return multi_label;
+      }
+
       template<typename T>
       static void __set_labels(const T& l) {
         auto& _labels = labels();
         auto& _labels_map = labels_map();
+        auto& _multi_label = __multi_label();
         _labels.clear();
         _labels_map.clear();
         _labels.resize(l.size());
+        _multi_label = 0;
         for (int i = 0; i < l.size(); i++) set_labels(i, l[i]);
       }
     };
