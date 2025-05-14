@@ -63,12 +63,11 @@ namespace generator {
                 while (_data.size() > 1 && _data.back() == 0) _data.pop_back();
                 if (_data.size() == 1 && _data.back() == 0) _is_negative = false;
             }
-            
+
             TYPE& __add(const TYPE& other) {
                 if (size() < other.size()) _data.resize(other.size(), 0);
                 i64 add = 0;
                 for (size_t i = 0; i < other.size(); i++) {
-                    std::cout << _data[i] << std::endl;
                     static_cast<TYPE*>(this)->__carry(add, _data[i], _data[i] + other._data[i]);
                 }
                 for (size_t i = other.size(); i < size(); i++) {
