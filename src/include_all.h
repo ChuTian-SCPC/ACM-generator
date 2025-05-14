@@ -60,6 +60,12 @@
 #ifndef _SGPCET_NTT_H_
 #include "math/ntt.h"
 #endif //!_SGPCET_NTT_H_
+#ifndef _SGPCET_BIG_INT_CALCULATOR_H_
+#include "math/big_int_calculator.h"
+#endif //!_SGPCET_BIG_INT_CALCULATOR_H_
+#ifndef _SGPCET_BIG_INT_BASE_H_
+#include "math/big_int_base.h"
+#endif //!_SGPCET_BIG_INT_BASE_H_
 
 #ifndef _SGPCET_NUMBER_CONST_H_
 #include "rand/number_const.h"
