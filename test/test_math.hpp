@@ -65,11 +65,31 @@ TEST_CASE("test big number setting", "[math][big_number][setting]") {
 }
 
 std::vector<long long> brute_multiply(const std::vector<long long>& a, const std::vector<long long>& b, long long MOD = 998244353) {
-    std::vector<long long> c(a.size() + b.size() - 1, 0);
-    for (size_t i = 0; i < a.size(); ++i)
-        for (size_t j = 0; j < b.size(); ++j)
-            c[i + j] = (c[i + j] + a[i] * b[j]) % MOD;
-    return c;
+    size_t len_a = a.size();
+    size_t len_b = b.size();
+    std::vector<long long> result(len_a + len_b, 0);
+    
+    for (size_t i = 0; i < len_a; ++i) {
+        long long carry = 0;
+        for (size_t j = 0; j < len_b; ++j) {
+            long long product = a[i] * b[j] + result[i + j] + carry;
+            result[i + j] = product % MOD;
+            carry = product / MOD;
+        }
+        size_t k = i + len_b;
+        while (carry > 0) {
+            long long sum = result[k] + carry;
+            result[k] = sum % MOD;
+            carry = sum / MOD;
+            ++k;
+        }
+    }
+    
+    while (result.size() > 1 && result.back() == 0) {
+        result.pop_back();
+    }
+    
+    return result;
 }
 
 bool ntt_multiply_test() {
@@ -87,4 +107,33 @@ bool ntt_multiply_test() {
 
 TEST_CASE("test ntt", "[math][ntt]") {
     loop_check([&]() { return ntt_multiply_test();}, 10);
+}
+
+bool crt_multiply_test() {
+    const long long l = 1000000; 
+    int n = 100;
+    std::vector<long long> a = rand_vector<long long>(1, n, [&](){return rand_int(l);});
+    std::vector<long long> b = rand_vector<long long>(1, n, [&](){return rand_int(l);});
+    std::vector<long long> c = CrtMultiplier<long long, l>::multiply(a, b);
+    std::vector<long long> d = brute_multiply(a, b, l);
+    std::string res1 = "";
+    std::string res2 = "";
+    for (int i = c.size() - 1; i >= 0; i--) {
+        res1 += std::to_string(c[i]);
+    }
+    for (int i = d.size() - 1; i >= 0; i--) {
+        res2 += std::to_string(d[i]);
+    }
+    CHECK(res1 == res2);
+    return true;
+}
+
+TEST_CASE("test crt", "[math][crt]") {
+    auto res1 = CrtMultiplier<>::multiply({1, 2, 3, 4, 5, 6, 7, 8, 9}, {9, 8, 7, 6, 5, 4, 3, 2, 1});
+    std::string res2 = "";
+    for (int i = res1.size() - 1; i >= 0; i--) {
+        res2 += std::to_string(res1[i]);
+    }
+    CHECK(res2 == "121932631112635269");
+    loop_check([&]() { return crt_multiply_test();}, 10);
 }
