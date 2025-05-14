@@ -34,14 +34,14 @@ namespace generator {
                 if (val == 0) {
                     _data.push_back(0);
                     _is_negative = false;
-                    return *this;
+                    return static_cast<TYPE&>(*this);
                 }
                 i32 base = static_cast<TYPE*>(this)->__base();
                 while (v) {
                     _data.push_back(v % base);
                     v /= base; 
                 }
-                return *this;
+                return static_cast<TYPE&>(*this);
             }
 
             size_t size() { return _data.size(); }
@@ -63,15 +63,20 @@ namespace generator {
                 while (_data.size() > 1 && _data.back() == 0) _data.pop_back();
                 if (_data.size() == 1 && _data.back() == 0) _is_negative = false;
             }
+            
             TYPE& __add(const TYPE& other) {
                 if (size() < other.size()) _data.resize(other.size(), 0);
                 i64 add = 0;
-                for (size_t i = 0; i < size(); i++) {
+                for (size_t i = 0; i < other.size(); i++) {
+                    std::cout << _data[i] << std::endl;
                     static_cast<TYPE*>(this)->__carry(add, _data[i], _data[i] + other._data[i]);
+                }
+                for (size_t i = other.size(); i < size(); i++) {
+                    static_cast<TYPE*>(this)->__carry(add, _data[i], _data[i]); 
                 }
                 if(add) _data.push_back(add);
                 __trim();
-                return *this;
+                return static_cast<TYPE&>(*this);
             }
 
             // 需要保证*this >= other
@@ -80,7 +85,7 @@ namespace generator {
                 for (size_t i = 0; i < size(); i++) {
                     static_cast<TYPE*>(this)->__borrow(add, _data[i], _data[i] - other._data[i]);
                 }
-                return *this;
+                return static_cast<TYPE&>(*this);
             }
 
             TYPE& __mul_int(u32 val)  {
@@ -94,7 +99,7 @@ namespace generator {
                     add /= base;
                 }
                 __trim();
-                return *this;
+                return static_cast<TYPE&>(*this);
             }
 
             TYPE& __simple_mul(const TYPE& other) {
@@ -111,14 +116,15 @@ namespace generator {
                     }
                 }
                 _data = std::move(result);
-                return *this;
+                return static_cast<TYPE&>(*this);
             }
 
             TYPE& __ntt_mul(const TYPE& other) {
-                CrtMultiplier<i32, MAX_BASE> crt;
+                const i32 base = static_cast<TYPE*>(this)->__base();
+                CrtMultiplier<i32, base> crt;
                 auto result = crt.multiply(_data, other._data);
                 _data = std::move(result);
-                return *this;
+                return static_cast<TYPE&>(*this);
             }
         };
     } // namespace math

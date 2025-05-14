@@ -9,6 +9,7 @@ namespace generator {
     namespace math {
         class BigIntBase : public BigIntCalculator<BigIntBase> {
         public:
+            friend class BigIntCalculator<BigIntBase>;
             const static i32 MAX_BASE = 1 << 15;
             const static i32 NTT_THRESHOLD = 1000;
         protected:
