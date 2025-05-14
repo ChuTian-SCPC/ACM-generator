@@ -83,10 +83,28 @@ task("validate_test")
 task("run_test")
     on_run(function()
         import("core.base.task")
+        import("core.base.option")
+        
         task.run("build", {target = "tests"})
-        os.exec("xmake run tests")
-        os.exec("xmake validate_test")
+        
+        local tags = option.get("tags")
+        local test_cmd = "xmake run tests"
+        
+        if tags then
+            test_cmd = test_cmd .. " " .. tags
+        end
+        
+        os.exec(test_cmd)
+        
+        local do_validate = option.get("validate-test")
+        if do_validate then
+            os.exec("xmake validate_test")
+        end
     end)
     set_menu {
-        description = "测试"
+        options = {
+            {"t", "tags", "kv", nil, "Catch2标签过滤（如 [tag1][tag2]）"},
+            {"V", "validate-test", "k", nil, "validate测试"}
+        },
+        description = "运行测试"
     }

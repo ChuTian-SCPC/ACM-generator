@@ -106,6 +106,7 @@ bool ntt_multiply_test() {
 }
 
 TEST_CASE("test ntt", "[math][ntt]") {
+    init_gen();
     loop_check([&]() { return ntt_multiply_test();}, 10);
 }
 
@@ -129,6 +130,7 @@ bool crt_multiply_test() {
 }
 
 TEST_CASE("test crt", "[math][crt]") {
+    init_gen();
     auto res1 = CrtMultiplier<>::multiply({1, 2, 3, 4, 5, 6, 7, 8, 9}, {9, 8, 7, 6, 5, 4, 3, 2, 1});
     std::string res2 = "";
     for (int i = res1.size() - 1; i >= 0; i--) {
