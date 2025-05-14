@@ -13,17 +13,19 @@ namespace generator {
             const static i32 MAX_BASE = 1 << 15;
             const static i32 NTT_THRESHOLD = 1000;
         protected:
+            i32 _radix;
             i32 _base;
             i32 _digits;
         public:
 
             BigIntBase() {
-                set_base(10);
+                set_radix(10);
             }
 
-            void set_base(i32 base) {
-                _base = base;
-                for (_digits = 1; _base * base <= MAX_BASE; _digits++, _base *= base);
+            void set_radix(i32 radix) {
+                _radix = radix;
+                _base = radix;
+                for (_digits = 1; _base * radix <= MAX_BASE; _digits++, _base *= radix);
                 this->set_value(0);
             }
         protected:
@@ -42,6 +44,8 @@ namespace generator {
             }
 
             i32 __base() { return _base; }
+            i32 __radix() { return _radix; }
+            i32 __digits() { return _digits; }
         };
     } // namespace math
 } // namespace generator

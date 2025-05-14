@@ -2907,10 +2907,10 @@ namespace generator {
         public:
 
             BigIntBase() {
-                set_base(10);
+                set_radix(10);
             }
 
-            void set_base(i32 base) {
+            void set_radix(i32 base) {
                 _base = base;
                 for (_digits = 1; _base * base <= MAX_BASE; _digits++, _base *= base);
                 this->set_value(0);
