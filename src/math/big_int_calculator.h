@@ -74,10 +74,25 @@ namespace generator {
             size_t size() { return _data.size(); }
             size_t size() const { return _data.size(); }
 
+            TYPE operator+() const {
+                return static_cast<TYPE&>(*this);
+            }
+
             TYPE operator+(const TYPE& other) {
                 if ((_is_negative ^ other._is_negative) == 0) return TYPE::__add(static_cast<const TYPE&>(*this), other); // 同号
                 else if (_is_negative) return TYPE::__sub(other, static_cast<const TYPE&>(*this)); // 负数 + 正数
                 else return TYPE::__sub(static_cast<const TYPE&>(*this), other); // 正数 + 负数
+            }
+
+            TYPE operator++() {
+               *this = *this + 1;
+               return static_cast<TYPE&>(*this); 
+            }
+
+            TYPE operator++(int) {
+                TYPE result(static_cast<const TYPE&>(*this));
+                *this = *this + 1;
+                return result; 
             }
 
             TYPE operator-() {
@@ -92,6 +107,17 @@ namespace generator {
                 else return TYPE::__sub(static_cast<const TYPE&>(*this), other); // 正数 - 正数
             }
 
+            TYPE operator--() {
+                *this = *this - 1;
+                return static_cast<TYPE&>(*this); 
+            }
+
+            TYPE operator--(int) {
+                TYPE result(static_cast<const TYPE&>(*this));
+                *this = *this - 1;
+                return result; 
+            }
+
             template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
             TYPE operator*(const T& other) {
                 return (*this) * TYPE(other);
@@ -99,6 +125,7 @@ namespace generator {
 
             TYPE operator*(const TYPE& other) {
                 if (__is_zero() || other.__is_zero()) return TYPE();
+                if (this == &other) return TYPE::__ntt_square(other);
                 TYPE result;
                 if (__one_size()) result = TYPE::__mul_int(other, _data[0]);
                 if (other.__one_size()) result = TYPE::__mul_int(static_cast<const TYPE&>(*this), other._data[0]);
@@ -213,6 +240,17 @@ namespace generator {
                 CrtMultiplier<u32> crt(base);
                 auto data = crt.multiply(a._data, b._data);
                 result._data = std::move(data);
+                return result;
+            }
+
+            static TYPE __ntt_square(const TYPE& a) {
+                if (a.__is_zero()) return TYPE();
+                TYPE result;
+                i32 base = a.__base();
+                CrtMultiplier<u32> crt(base);
+                auto data = crt.square(a._data); 
+                result._data = std::move(data);
+                result._is_negative = false;
                 return result;
             }
 

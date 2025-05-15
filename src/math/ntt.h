@@ -12,9 +12,11 @@ namespace generator {
     namespace math {
         template <typename T = long long, T MOD = 998244353, T G = 3>
         class NTT {
+        private:
+            using i64 = int64_t;
         public:
-            static T qpow(T a, T b) {
-                T res = 1;
+            static i64 qpow(i64 a, i64 b) {
+                i64 res = 1;
                 while (b) {
                     if (b & 1) res = (res * a) % MOD;
                     a = (a * a) % MOD;
@@ -23,7 +25,7 @@ namespace generator {
                 return res;
             }
         
-            static T inv(T a) {
+            static i64 inv(i64 a) {
                 return qpow(a, MOD - 2);
             }
         
@@ -44,14 +46,14 @@ namespace generator {
                 bit_reverse(a);
         
                 for (int len = 2; len <= n; len <<= 1) {
-                    T wn = qpow(G, (MOD - 1) / len);
+                    i64 wn = qpow(G, (MOD - 1) / len);
                     if (inverse) wn = inv(wn);
         
                     for (int i = 0; i < n; i += len) {
-                        T w = 1;
+                        i64 w = 1;
                         for (int j = 0; j < len / 2; j++) {
-                            T u = a[i + j];
-                            T v = (w * a[i + j + len / 2]) % MOD;
+                            i64 u = a[i + j];
+                            i64 v = (w * a[i + j + len / 2]) % MOD;
                             a[i + j] = (u + v) % MOD;
                             a[i + j + len / 2] = (u - v + MOD) % MOD;
                             w = (w * wn) % MOD;
@@ -60,27 +62,33 @@ namespace generator {
                 }
         
                 if (inverse) {
-                    T inv_n = inv(n);
-                    for (T& x : a)
-                        x = (x * inv_n) % MOD;
+                    i64 inv_n = inv(n);
+                    for (T& x : a) 
+                        x = ((i64)x * inv_n) % MOD;
                 }
             }
         
             static std::vector<T> multiply(const std::vector<T>& a, const std::vector<T>& b) {
                 std::vector<T> fa(a.begin(), a.end()), fb(b.begin(), b.end());
                 int n = 1;
-                while (n < a.size() + b.size())
-                    n <<= 1;
+                while (n < a.size() + b.size()) n <<= 1;
         
                 fa.resize(n);
                 fb.resize(n);
-        
                 transform(fa, false);
                 transform(fb, false);
-        
-                for (int i = 0; i < n; i++)
-                    fa[i] = (fa[i] * fb[i]) % MOD;
-        
+                for (int i = 0; i < n; i++) fa[i] = ((i64)fa[i] * fb[i]) % MOD;
+                transform(fa, true);
+                return fa;
+            }
+
+            static std::vector<T> square(const std::vector<T>& a) {
+                std::vector<T> fa(a.begin(), a.end());
+                int n = 1;
+                while (n < a.size() * 2) n <<= 1;
+                fa.resize(n);
+                transform(fa, false);
+                for (int i = 0; i < n; i++) fa[i] = ((i64)fa[i] * fa[i]) % MOD;
                 transform(fa, true);
                 return fa;
             }
@@ -89,9 +97,10 @@ namespace generator {
         template <typename T = long long,  T MOD1 = 998244353, T G1 = 3, T MOD2 = 985661441, T G2 = 3>
         class CrtMultiplier {
         private:
+            using i64 = int64_t;
             // 预计算的CRT参数
-            static constexpr T crt_mod = MOD1 * MOD2;
-            static T m1_inv_m2; // MOD1在MOD2下的逆元
+            static constexpr i64 crt_mod = (i64)MOD1 * (i64)MOD2;
+            static i64 m1_inv_m2; // MOD1在MOD2下的逆元
             int _base;
             
             class NTT1 : public NTT<T, MOD1, G1> {};
@@ -105,7 +114,7 @@ namespace generator {
                     _msg::__error_msg(_msg::_defl, "NTT1 and NTT2 result size not equal, NTT1 size: %d, NTT2 size: %d", fa1.size(), fa2.size());
                 }
                 int n = fa1.size();
-                std::vector<T> res(n);
+                std::vector<i64> res(n);
                 for (int i = 0; i < n; i++) {
                     res[i] = crt(fa1[i], fa2[i]);
                 }
@@ -113,18 +122,33 @@ namespace generator {
                 // 处理进位并规范化
                 return normalize(res);
             }
+
+            std::vector<T> square(const std::vector<T>& a) {
+                auto fa1 = NTT1::square(a);
+                auto fa2 = NTT2::square(a);
+                if (fa1.size()!= fa2.size()) {
+                    _msg::__error_msg(_msg::_defl, "NTT1 and NTT2 result size not equal, NTT1 size: %d, NTT2 size: %d", fa1.size(), fa2.size()); 
+                }
+                int n = fa1.size();
+                std::vector<i64> res(n);
+                for (int i = 0; i < n; i++) {
+                    res[i] = crt(fa1[i], fa2[i]);
+                }
+                // 处理进位并规范化
+                return normalize(res); 
+            }
         private:
             // 初始化CRT参数
             void init_crt() {
                 if (m1_inv_m2 == 0) {
-                    T x, y;
+                    i64 x, y;
                     exgcd(MOD1, MOD2, x, y);
                     m1_inv_m2 = (x % MOD2 + MOD2) % MOD2;
                 }
             }
 
             // 扩展欧几里得算法
-            void exgcd(T a, T b, T& x, T& y) {
+            void exgcd(i64 a, i64 b, i64& x, i64& y) {
                 if (b == 0) {
                     x = 1;
                     y = 0;
@@ -135,19 +159,19 @@ namespace generator {
             }
 
             // 中国剩余定理
-            T crt(T r1, T r2) {
+            i64 crt(T r1, T r2) {
                 init_crt();
-                T diff = (r2 - r1) % MOD2;
+                i64 diff = (r2 - r1) % MOD2;
                 if (diff < 0) diff += MOD2;
-                T k = (diff * m1_inv_m2) % MOD2;
+                i64 k = (diff * m1_inv_m2) % MOD2;
                 return (r1 + k * MOD1) % crt_mod;
             }
 
             // 规范化结果
-            std::vector<T> normalize(std::vector<T>& num) {
+            std::vector<T> normalize(std::vector<i64>& num) {
                 std::vector<T> res;
-                T carry = 0;
-                for (T x : num) {
+                i64 carry = 0;
+                for (i64 x : num) {
                     x += carry;
                     res.push_back(x % _base);
                     carry = x / _base;
@@ -163,7 +187,7 @@ namespace generator {
             }
         };
         template <typename T, T MOD1, T G1, T MOD2, T G2>
-        T CrtMultiplier<T, MOD1, G1, MOD2, G2>::m1_inv_m2 = 0;
+        int64_t CrtMultiplier<T, MOD1, G1, MOD2, G2>::m1_inv_m2 = 0;
     } // namespace math
 
 } // namespace generator
