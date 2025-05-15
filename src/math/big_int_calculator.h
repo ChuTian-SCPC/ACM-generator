@@ -135,6 +135,25 @@ namespace generator {
                 return result;
             }
 
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            TYPE pow(T val) {
+                if (val < 0) {
+                    if (__is_zero()) _msg::__error_msg(_msg::_defl, "Zero cannot be raised to a negative power.");
+                    else if (__is_one()) return TYPE(1);
+                    else return TYPE(0);
+                }
+                if (val == 0) return TYPE(1);
+                if (val == 1) return TYPE(static_cast<const TYPE&>(*this));
+                TYPE result(1);
+                TYPE base(static_cast<const TYPE&>(*this));
+                while (val) {
+                    if (val & 1) result = result * base;
+                    base = base * base;
+                    val >>= 1;
+                }
+                return result;
+            }
+
             _GET_VALUE(std::vector<u32>, data)
             _GET_VALUE(bool, is_negative)
         protected:
@@ -149,6 +168,14 @@ namespace generator {
 
             bool __is_zero() const {
                 return _data.size() == 1 && _data[0] == 0;
+            }
+
+            bool __is_one() {
+                return _data.size() == 1 && _data[0] == 1;
+            }
+
+            bool __is_one() const {
+                return _data.size() == 1 && _data[0] == 1; 
             }
 
             bool __one_size() {
