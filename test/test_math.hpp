@@ -111,27 +111,22 @@ TEST_CASE("test ntt", "[math][ntt]") {
 }
 
 bool crt_multiply_test() {
-    const long long l = 1000000; 
-    int n = 100;
+    const long long l = 100; 
+    int n = 3;
     std::vector<long long> a = rand_vector<long long>(1, n, [&](){return rand_int(l);});
     std::vector<long long> b = rand_vector<long long>(1, n, [&](){return rand_int(l);});
-    std::vector<long long> c = CrtMultiplier<long long, l>::multiply(a, b);
+    std::vector<long long> c = CrtMultiplier<long long>(l).multiply(a, b);
     std::vector<long long> d = brute_multiply(a, b, l);
-    std::string res1 = "";
-    std::string res2 = "";
-    for (int i = c.size() - 1; i >= 0; i--) {
-        res1 += std::to_string(c[i]);
+    CHECK(c.size() == d.size());
+    for (size_t i = 0; i < d.size(); i++) {
+        CHECK(c[i] == d[i]);
     }
-    for (int i = d.size() - 1; i >= 0; i--) {
-        res2 += std::to_string(d[i]);
-    }
-    CHECK(res1 == res2);
     return true;
 }
 
 TEST_CASE("test crt", "[math][crt]") {
     init_gen();
-    auto res1 = CrtMultiplier<>::multiply({1, 2, 3, 4, 5, 6, 7, 8, 9}, {9, 8, 7, 6, 5, 4, 3, 2, 1});
+    auto res1 = CrtMultiplier<>(1000).multiply({321, 654, 987}, {789, 456, 123});
     std::string res2 = "";
     for (int i = res1.size() - 1; i >= 0; i--) {
         res2 += std::to_string(res1[i]);

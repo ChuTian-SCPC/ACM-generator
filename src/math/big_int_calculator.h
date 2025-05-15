@@ -19,11 +19,38 @@ namespace generator {
             using u64 = uint64_t;
         protected:
             bool _is_negative;
-            std::vector<i32> _data;
+            std::vector<u32> _data;
+
+            const static i32 NTT_THRESHOLD = 1000;
         public:
 
             BigIntCalculator() {
                 set_value(0);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            BigIntCalculator(T val) {
+                set_value(val);
+            }
+            
+            BigIntCalculator(const TYPE& other) : _data(other._data), _is_negative(other._is_negative) {}
+
+            BigIntCalculator& operator=(const TYPE& other) {
+                if (this != &other) {
+                    _data = other._data;
+                    _is_negative = other._is_negative;
+                }
+                return *this; 
+            }
+
+            BigIntCalculator(TYPE&& other) noexcept : _data(std::move(other._data)), _is_negative(other._is_negative) {}
+
+            BigIntCalculator& operator=(TYPE&& other) noexcept {
+                if (this!= &other) {
+                    _data = std::move(other._data);
+                    _is_negative = other._is_negative;
+                }
+                return *this; 
             }
 
             template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
@@ -47,16 +74,41 @@ namespace generator {
             size_t size() { return _data.size(); }
             size_t size() const { return _data.size(); }
 
-            // for test TEMPORARY
-            TYPE& add(const TYPE& other) {
-                return __add(other);
+            TYPE operator+(const TYPE& other) {
+                if ((_is_negative ^ other._is_negative) == 0) return TYPE::__add(static_cast<const TYPE&>(*this), other); // 同号
+                else if (_is_negative) return TYPE::__sub(other, static_cast<const TYPE&>(*this)); // 负数 + 正数
+                else return TYPE::__sub(static_cast<const TYPE&>(*this), other); // 正数 + 负数
             }
 
-            TYPE& mul(const TYPE& other) {
-               return __ntt_mul(other); 
+            TYPE operator-() {
+                if (__is_zero()) _is_negative = false;
+                else _is_negative = !_is_negative;
+                return static_cast<TYPE&>(*this);
             }
 
-            _GET_VALUE(std::vector<i32>, data)
+            TYPE operator-(const TYPE& other) {
+                if (_is_negative ^ other._is_negative) return TYPE::__add(static_cast<const TYPE&>(*this), other); // 异号
+                else if (_is_negative) return TYPE::__sub(other, static_cast<const TYPE&>(*this)); // 负数 - 负数
+                else return TYPE::__sub(static_cast<const TYPE&>(*this), other); // 正数 - 正数
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            TYPE operator*(const T& other) {
+                return (*this) * TYPE(other);
+            }
+
+            TYPE operator*(const TYPE& other) {
+                if (__is_zero() || other.__is_zero()) return TYPE();
+                TYPE result;
+                if (__one_size()) result = TYPE::__mul_int(other, _data[0]);
+                if (other.__one_size()) result = TYPE::__mul_int(static_cast<const TYPE&>(*this), other._data[0]);
+                if (this->size() < NTT_THRESHOLD || other.size() < NTT_THRESHOLD) result = TYPE::__simple_mul(static_cast<const TYPE&>(*this), other);
+                else result = TYPE::__ntt_mul(static_cast<const TYPE&>(*this), other);
+                result._is_negative = _is_negative ^ other._is_negative;
+                return result;
+            }
+
+            _GET_VALUE(std::vector<u32>, data)
             _GET_VALUE(bool, is_negative)
         protected:
             void __trim() {
@@ -64,190 +116,126 @@ namespace generator {
                 if (_data.size() == 1 && _data.back() == 0) _is_negative = false;
             }
 
-            TYPE& __add(const TYPE& other) {
-                if (size() < other.size()) _data.resize(other.size(), 0);
-                i64 add = 0;
-                for (size_t i = 0; i < other.size(); i++) {
-                    static_cast<TYPE*>(this)->__carry(add, _data[i], _data[i] + other._data[i]);
-                }
-                for (size_t i = other.size(); i < size(); i++) {
-                    static_cast<TYPE*>(this)->__carry(add, _data[i], _data[i]); 
-                }
-                if(add) _data.push_back(add);
-                __trim();
-                return static_cast<TYPE&>(*this);
+            bool __is_zero() {
+                return _data.size() == 1 && _data[0] == 0;
             }
 
-            // 需要保证*this >= other
-            TYPE& __sub(const TYPE& other) {
-                i64 add = 0; 
-                for (size_t i = 0; i < size(); i++) {
-                    static_cast<TYPE*>(this)->__borrow(add, _data[i], _data[i] - other._data[i]);
-                }
-                return static_cast<TYPE&>(*this);
+            bool __is_zero() const {
+                return _data.size() == 1 && _data[0] == 0;
             }
 
-            TYPE& __mul_int(u32 val)  {
+            bool __one_size() {
+                return _data.size() == 1;
+            }
+
+            bool __one_size() const {
+                return _data.size() == 1; 
+            }
+
+            // 值相加，保证符号相同
+            static TYPE __add(const TYPE& a, const TYPE& b) {
+                TYPE result;
+                result._is_negative = a._is_negative;
+                result._data.resize(std::max(a.size(), b.size()), 0); 
                 u64 add = 0;
-                for (size_t i = 0; i < size(); i++) {
-                    static_cast<TYPE*>(this)->__carry(add, _data[i], (u64)_data[i] * val);
+                for (size_t i = 0; i < result.size(); i++) {
+                    u64 sum = 0;
+                    if (i < a.size()) sum += a._data[i];
+                    if (i < b.size()) sum += b._data[i];
+                    result.__carry(add, result._data[i], sum);
                 }
-                i32 base = static_cast<TYPE*>(this)->__base();
+                if (add) result._data.push_back(add);
+                result.__trim();
+                return result;
+            }
+
+            // 值相减
+            static TYPE __sub(const TYPE& a, const TYPE& b) {
+                TYPE result;
+                result._data.resize(std::max(a.size(), b.size()), 0);
+                i64 borrow = 0;
+                for (size_t i = 0; i < result.size(); i++) {
+                    i64 diff = 0;
+                    if (i < a.size()) diff += a._data[i];
+                    if (i < b.size()) diff -= b._data[i];
+                    result.__borrow(borrow, result._data[i], diff); 
+                }
+                if (borrow) {
+                    result._is_negative = true;
+                    i64 add = 1;
+                    i32 base = result.__base();
+                    for (size_t i = 0; i < result.size(); i++) {
+                        result.__carry(add, result._data[i], base - result._data[i] - 1);
+                    }
+                }
+                result.__trim();
+                return result;
+            }
+
+            // 值相乘
+            static TYPE __mul_int(const TYPE& a, u32 b) {
+                TYPE result;
+                result._data.resize(a.size(), 0);
+                u64 add = 0;
+                for (size_t i = 0; i < result.size(); i++) {
+                    result.__carry(add, result._data[i], (u64)a._data[i] * b); 
+                }
+                i32 base = result.__base();
                 while (add) {
-                    _data.push_back(add % base);
+                    result._data.push_back(add % base);
                     add /= base;
                 }
-                __trim();
-                return static_cast<TYPE&>(*this);
+                result.__trim();
+                return result;
             }
-
-            TYPE& __simple_mul(const TYPE& other) {
-                size_t len_a = size();
-                size_t len_b = other.size();
-                std::vector<i32> result(len_a + len_b, 0);
+            
+            static TYPE __simple_mul(const TYPE& a, const TYPE& b) {
+                size_t len_a = a.size();
+                size_t len_b = b.size();
+                TYPE result;
+                result._data.resize(len_a + len_b, 0); 
                 for (size_t i = 0; i < len_a; i++) {
-                    i64 add = 0;
+                    u64 add = 0, va = a._data[i]; 
                     for (size_t j = 0; j < len_b; j++) {
-                        static_cast<TYPE*>(this)->__carry(add, result[i + j], (i64)_data[i] * other._data[j] + result[i + j]);
+                        result.__carry(add, result._data[i + j], va * (u64)b._data[j] + result._data[i + j]); 
                     }
                     for (size_t k = i + len_b; add; k++) {
-                        static_cast<TYPE*>(this)->__carry(add, result[k], add + result[k]);
+                        result.__carry(add, result._data[k], result._data[k]); 
                     }
                 }
-                _data = std::move(result);
-                return static_cast<TYPE&>(*this);
+                result.__trim();
+                return result;
             }
 
-            TYPE& __ntt_mul(const TYPE& other) {
-                const i32 base = static_cast<TYPE*>(this)->__base();
-                CrtMultiplier<i32, base> crt;
-                auto result = crt.multiply(_data, other._data);
-                _data = std::move(result);
-                return static_cast<TYPE&>(*this);
+            static TYPE __ntt_mul(const TYPE& a, const TYPE& b) {
+                TYPE result;
+                i32 base = a.__base();
+                CrtMultiplier<u32> crt(base);
+                auto data = crt.multiply(a._data, b._data);
+                result._data = std::move(data);
+                return result;
             }
 
-            // 左移digits位（相当于乘 base^k）
-            TYPE __shift_digits_left(size_t k) const {
-                if (_data.empty() || (_data.size() == 1 && _data[0] == 0)) return static_cast<const TYPE&>(*this);
-                TYPE res = static_cast<const TYPE&>(*this);
-                res._data.insert(res._data.begin(), k, 0);
-                return res;
-            }
-
-            // 右移digits位（相当于除 base^k）
-            TYPE __shift_digits_right(size_t k) const {
-                TYPE res = static_cast<const TYPE&>(*this);
-                if (k >= res._data.size()) {
-                    res._data = {0};
-                    res._is_negative = false;
-                } else {
-                    res._data.erase(res._data.begin(), res._data.begin() + k);
+            // -1 : a < b; 
+            // 0  : a == b; 
+            // 1  : a > b;
+            int __abs_compare(const TYPE& a, const TYPE& b) {
+                if (a.size() != b.size()) return a.size() < b.size() ? -1 : 1;
+                for (size_t i = a.size(); i-- > 0;) {
+                    if (a._data[i] != b._data[i]) return a._data[i] < b._data[i] ? -1 : 1;
                 }
-                return res;
+                return 0;
             }
 
-            TYPE operator<<(size_t bits) const {
-                size_t digit_bits = static_cast<const TYPE*>(this)->__digits();
-                size_t digits = bits / digit_bits;
-                size_t rem = bits % digit_bits;
-
-                TYPE res = __shift_digits_left(digits);
-                if (rem == 0) return res;
-
-                i32 base = static_cast<const TYPE*>(this)->__base();
-                u64 carry = 0;
-                for (size_t i = 0; i < res._data.size(); i++) {
-                    u64 val = ((u64)res._data[i] << rem) + carry;
-                    res._data[i] = val % base;
-                    carry = val / base;
-                }
-                if (carry) res._data.push_back(carry);
-                return res;
+            bool __equal(const TYPE& a, const TYPE& b) {
+               return a._is_negative == b._is_negative && __abs_compare(a, b) == 0; 
             }
 
-            TYPE operator>>(size_t bits) const {
-                size_t digit_bits = static_cast<const TYPE*>(this)->__digits();
-                size_t digits = bits / digit_bits;
-                size_t rem = bits % digit_bits;
-
-                TYPE res = __shift_digits_right(digits);
-                if (rem == 0) return res;
-
-                i32 base = static_cast<const TYPE*>(this)->__base();
-                u64 carry = 0;
-                for (size_t i = res._data.size(); i-- > 0;) {
-                    u64 val = ((u64)carry << digit_bits) + res._data[i];
-                    res._data[i] = val >> rem;
-                    carry = val & ((1ULL << rem) - 1);
-                }
-                res.__trim();
-                return res;
+            bool __less(const TYPE& a, const TYPE& b) {
+                if (a._is_negative != b._is_negative) return a._is_negative;
+                return a._is_negative? __abs_compare(a, b) > 0 : __abs_compare(a, b) < 0; 
             }
 
-            TYPE __inv(const TYPE& a) const {
-                if (a.size() == 1) {
-                    u64 inv = static_cast<u64>(1) << (static_cast<const TYPE*>(this)->__digits() * 2);
-                    return TYPE().set_value(inv / a._data[0]);
-                }
-
-                size_t half = a.size() / 2;
-                TYPE low = a.__shift_digits_right(half);
-                TYPE x = __inv(low);
-
-                TYPE ax = a * x * x;
-                size_t shift = 2 * half;
-                ax = ax.__shift_digits_right(shift);
-                x = x.__shift_digits_left(half);
-                x = x + x - ax;
-                x.__trim();
-                return x;
-            }
-
-            struct __divmod_result {
-                TYPE quot;
-                TYPE rem;
-            };
-
-            __divmod_result __div_mod(const TYPE& a_raw, const TYPE& b_raw) const {
-                TYPE a = a_raw, b = b_raw;
-                bool neg = a._is_negative != b._is_negative;
-                a._is_negative = b._is_negative = false;
-
-                if (a < b) return {{0}, a};
-
-                size_t shift = a.size() > b.size() * 2 ? a.size() - b.size() * 2 : 0;
-                size_t digits = static_cast<const TYPE*>(this)->__digits();
-                TYPE a_shifted = a << (shift * digits);
-                TYPE b_shifted = b << (shift * digits);
-
-                TYPE bi = __inv(b_shifted);
-                TYPE prod = b_shifted * bi;
-                if (prod >= (TYPE().set_value(1) << (2 * b_shifted.size() * digits))) {
-                    prod = prod - b_shifted;
-                    bi = bi - TYPE().set_value(1);
-                }
-
-                TYPE quot;
-                while (true) {
-                    TYPE c = (a_shifted * bi) >> (2 * b_shifted.size() * digits);
-                    if (c == TYPE().set_value(0)) break;
-                    TYPE tmp = b_shifted * c;
-                    if (tmp > a_shifted) break;
-                    a_shifted = a_shifted - tmp;
-                    quot = quot + c;
-                }
-
-                while (b_shifted <= a_shifted) {
-                    a_shifted = a_shifted - b_shifted;
-                    quot = quot + TYPE().set_value(1);
-                }
-
-                quot._is_negative = neg;
-                a_shifted._is_negative = a_raw._is_negative;
-
-                TYPE rem = shift ? a_shifted >> (shift * digits) : a_shifted;
-                return {quot, rem};
-            }
         };
     } // namespace math
 } // namespace generator

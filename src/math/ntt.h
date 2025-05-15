@@ -86,17 +86,19 @@ namespace generator {
             }
         };
         
-        template <typename T = long long, T BASE = 10, T MOD1 = 998244353, T G1 = 3, T MOD2 = 985661441, T G2 = 3>
+        template <typename T = long long,  T MOD1 = 998244353, T G1 = 3, T MOD2 = 985661441, T G2 = 3>
         class CrtMultiplier {
         private:
             // 预计算的CRT参数
             static constexpr T crt_mod = MOD1 * MOD2;
             static T m1_inv_m2; // MOD1在MOD2下的逆元
+            int _base;
             
             class NTT1 : public NTT<T, MOD1, G1> {};
             class NTT2 : public NTT<T, MOD2, G2> {};
         public:
-            static std::vector<T> multiply(const std::vector<T>& a, const std::vector<T>& b) {
+            CrtMultiplier(int base = 10) : _base(base) {}
+            std::vector<T> multiply(const std::vector<T>& a, const std::vector<T>& b) {
                 auto fa1 = NTT1::multiply(a, b);
                 auto fa2 = NTT2::multiply(a, b);
                 if (fa1.size() != fa2.size()) {
@@ -113,7 +115,7 @@ namespace generator {
             }
         private:
             // 初始化CRT参数
-            static void init_crt() {
+            void init_crt() {
                 if (m1_inv_m2 == 0) {
                     T x, y;
                     exgcd(MOD1, MOD2, x, y);
@@ -122,7 +124,7 @@ namespace generator {
             }
 
             // 扩展欧几里得算法
-            static void exgcd(T a, T b, T& x, T& y) {
+            void exgcd(T a, T b, T& x, T& y) {
                 if (b == 0) {
                     x = 1;
                     y = 0;
@@ -133,7 +135,7 @@ namespace generator {
             }
 
             // 中国剩余定理
-            static T crt(T r1, T r2) {
+            T crt(T r1, T r2) {
                 init_crt();
                 T diff = (r2 - r1) % MOD2;
                 if (diff < 0) diff += MOD2;
@@ -142,17 +144,17 @@ namespace generator {
             }
 
             // 规范化结果
-            static std::vector<T> normalize(std::vector<T>& num) {
+            std::vector<T> normalize(std::vector<T>& num) {
                 std::vector<T> res;
                 T carry = 0;
                 for (T x : num) {
                     x += carry;
-                    res.push_back(x % BASE);
-                    carry = x / BASE;
+                    res.push_back(x % _base);
+                    carry = x / _base;
                 }
                 while (carry > 0) {
-                    res.push_back(carry % BASE);
-                    carry /= BASE;
+                    res.push_back(carry % _base);
+                    carry /= _base; 
                 }
                 while (res.size() > 1 && res.back() == 0) {
                     res.pop_back();
@@ -160,8 +162,8 @@ namespace generator {
                 return res;
             }
         };
-        template <typename T, T BASE, T MOD1, T G1, T MOD2, T G2>
-        T CrtMultiplier<T, BASE, MOD1, G1, MOD2, G2>::m1_inv_m2 = 0;
+        template <typename T, T MOD1, T G1, T MOD2, T G2>
+        T CrtMultiplier<T, MOD1, G1, MOD2, G2>::m1_inv_m2 = 0;
     } // namespace math
 
 } // namespace generator
