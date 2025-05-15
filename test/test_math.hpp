@@ -111,11 +111,11 @@ TEST_CASE("test ntt", "[math][ntt]") {
 }
 
 bool crt_multiply_test() {
-    const long long l = 100; 
-    int n = 3;
+    const long long l = 1000000; 
+    int n = 100;
     std::vector<long long> a = rand_vector<long long>(1, n, [&](){return rand_int(l);});
     std::vector<long long> b = rand_vector<long long>(1, n, [&](){return rand_int(l);});
-    std::vector<long long> c = CrtMultiplier<long long>(l).multiply(a, b);
+    std::vector<long long> c = CrtMultiplier<long long>::multiply(a, b, l);
     std::vector<long long> d = brute_multiply(a, b, l);
     CHECK(c.size() == d.size());
     for (size_t i = 0; i < d.size(); i++) {
@@ -124,13 +124,43 @@ bool crt_multiply_test() {
     return true;
 }
 
-TEST_CASE("test crt", "[math][crt]") {
-    init_gen();
-    auto res1 = CrtMultiplier<>(1000).multiply({321, 654, 987}, {789, 456, 123});
+void crt_multiply_test_small() {
+    auto res1 = CrtMultiplier<>::multiply({321, 654, 987}, {789, 456, 123}, 1000);
     std::string res2 = "";
     for (int i = res1.size() - 1; i >= 0; i--) {
         res2 += std::to_string(res1[i]);
     }
-    CHECK(res2 == "121932631112635269");
+    CHECK(res2 == "121932631112635269");    
+}
+
+void crt_multiply_test_int() {
+    auto res1 = CrtMultiplier<int>::multiply({1234, 5}, {6789, 10}, 10000);
+    std::string res2 = "";
+    for (int i = res1.size() - 1; i >= 0; i--) {
+        res2 += std::to_string(res1[i]);
+    }
+    CHECK(res2 == "5471227626");
+}
+
+void crt_square_test() {
+    const long long l = 1000000; 
+    int n = 100;
+    std::vector<long long> a = rand_vector<long long>(1, n, [&](){return rand_int(l);});
+    std::vector<long long> b = CrtMultiplier<long long>::multiply(a, a, l);
+    std::vector<long long> c = CrtMultiplier<long long>::square(a, l);
+    std::vector<long long> d = brute_multiply(a, a, l);
+    CHECK(b.size() == d.size());
+    CHECK(c.size() == d.size());
+    for (size_t i = 0; i < d.size(); i++) {
+        CHECK(b[i] == d[i]);
+        CHECK(c[i] == d[i]);
+    }
+}
+
+TEST_CASE("test crt", "[math][crt]") {
+    init_gen();
+    crt_multiply_test_small();
+    crt_multiply_test_int();
+    crt_square_test();
     loop_check([&]() { return crt_multiply_test();}, 10);
 }

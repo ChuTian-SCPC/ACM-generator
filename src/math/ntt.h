@@ -101,13 +101,12 @@ namespace generator {
             // 预计算的CRT参数
             static constexpr i64 crt_mod = (i64)MOD1 * (i64)MOD2;
             static i64 m1_inv_m2; // MOD1在MOD2下的逆元
-            int _base;
             
             class NTT1 : public NTT<T, MOD1, G1> {};
             class NTT2 : public NTT<T, MOD2, G2> {};
         public:
-            CrtMultiplier(int base = 10) : _base(base) {}
-            std::vector<T> multiply(const std::vector<T>& a, const std::vector<T>& b) {
+            CrtMultiplier() = default;
+            static std::vector<T> multiply(const std::vector<T>& a, const std::vector<T>& b, int base = 10) {
                 auto fa1 = NTT1::multiply(a, b);
                 auto fa2 = NTT2::multiply(a, b);
                 if (fa1.size() != fa2.size()) {
@@ -120,10 +119,10 @@ namespace generator {
                 }
                 
                 // 处理进位并规范化
-                return normalize(res);
+                return normalize(res, base);
             }
 
-            std::vector<T> square(const std::vector<T>& a) {
+            static std::vector<T> square(const std::vector<T>& a, int base = 10) {
                 auto fa1 = NTT1::square(a);
                 auto fa2 = NTT2::square(a);
                 if (fa1.size()!= fa2.size()) {
@@ -135,11 +134,11 @@ namespace generator {
                     res[i] = crt(fa1[i], fa2[i]);
                 }
                 // 处理进位并规范化
-                return normalize(res); 
+                return normalize(res, base); 
             }
         private:
             // 初始化CRT参数
-            void init_crt() {
+            static void init_crt() {
                 if (m1_inv_m2 == 0) {
                     i64 x, y;
                     exgcd(MOD1, MOD2, x, y);
@@ -148,7 +147,7 @@ namespace generator {
             }
 
             // 扩展欧几里得算法
-            void exgcd(i64 a, i64 b, i64& x, i64& y) {
+            static void exgcd(i64 a, i64 b, i64& x, i64& y) {
                 if (b == 0) {
                     x = 1;
                     y = 0;
@@ -159,7 +158,7 @@ namespace generator {
             }
 
             // 中国剩余定理
-            i64 crt(T r1, T r2) {
+            static i64 crt(T r1, T r2) {
                 init_crt();
                 i64 diff = (r2 - r1) % MOD2;
                 if (diff < 0) diff += MOD2;
@@ -168,17 +167,17 @@ namespace generator {
             }
 
             // 规范化结果
-            std::vector<T> normalize(std::vector<i64>& num) {
+            static std::vector<T> normalize(std::vector<i64>& num, int base) {
                 std::vector<T> res;
                 i64 carry = 0;
                 for (i64 x : num) {
                     x += carry;
-                    res.push_back(x % _base);
-                    carry = x / _base;
+                    res.push_back(x % base);
+                    carry = x / base;
                 }
                 while (carry > 0) {
-                    res.push_back(carry % _base);
-                    carry /= _base; 
+                    res.push_back(carry % base);
+                    carry /= base; 
                 }
                 while (res.size() > 1 && res.back() == 0) {
                     res.pop_back();

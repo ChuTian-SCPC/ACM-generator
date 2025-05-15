@@ -63,16 +63,16 @@ namespace generator {
             }
         protected:
             template <typename T1, typename T2, typename T3>
-            void __carry(T1& add, T2& base, T3 new_val) {
+            void __carry(T1& add, T2& basic_val, T3 new_val) {
                 add += (T1)new_val;
-                base = add % (T1)_base;
+                basic_val = add % (T1)_base;
                 add /= (T1)_base;
             } 
 
             template <typename T1, typename T2, typename T3>
-            void __borrow(T1& add, T2& base, T3 new_val) {
+            void __borrow(T1& add, T2& basic_val, T3 new_val) {
                add += (T1)new_val - (T1)_base + 1;
-               base = add % (T1)_base + (T1)_base - 1;
+               basic_val = add % (T1)_base + (T1)_base - 1;
                add /= (T1)_base; 
             }
 

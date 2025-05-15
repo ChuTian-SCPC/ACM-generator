@@ -264,8 +264,7 @@ namespace generator {
             static TYPE __ntt_mul(const TYPE& a, const TYPE& b) {
                 TYPE result;
                 i32 base = a.__base();
-                CrtMultiplier<u32> crt(base);
-                auto data = crt.multiply(a._data, b._data);
+                auto data = CrtMultiplier<u32>::multiply(a._data, b._data, base);
                 result._data = std::move(data);
                 return result;
             }
@@ -274,8 +273,7 @@ namespace generator {
                 if (a.__is_zero()) return TYPE();
                 TYPE result;
                 i32 base = a.__base();
-                CrtMultiplier<u32> crt(base);
-                auto data = crt.square(a._data); 
+                auto data = CrtMultiplier<u32>::square(a._data, base); 
                 result._data = std::move(data);
                 result._is_negative = false;
                 return result;
