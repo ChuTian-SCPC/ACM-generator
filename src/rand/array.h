@@ -235,10 +235,10 @@ namespace generator {
             __judge_vector_upper_bound(size, "vector");
             _msg::OutStream vector_stream(false);
             _msg::_defl.swap(vector_stream);    
-            std::vector<T> v;
+            std::vector<T> v(size);
             for(int i = 0; i < size; i++){
                 T x = func();
-                v.emplace_back(x);
+                v[i] = x;
             }
             _msg::_defl.swap(vector_stream);
             return v;
