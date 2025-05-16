@@ -106,7 +106,7 @@ namespace generator {
             class NTT2 : public NTT<T, MOD2, G2> {};
         public:
             CrtMultiplier() = default;
-            static std::vector<T> multiply(const std::vector<T>& a, const std::vector<T>& b, int base = 10) {
+            static std::vector<T> multiply(const std::vector<T>& a, const std::vector<T>& b, i64 base = 10) {
                 auto fa1 = NTT1::multiply(a, b);
                 auto fa2 = NTT2::multiply(a, b);
                 if (fa1.size() != fa2.size()) {
@@ -122,7 +122,7 @@ namespace generator {
                 return normalize(res, base);
             }
 
-            static std::vector<T> square(const std::vector<T>& a, int base = 10) {
+            static std::vector<T> square(const std::vector<T>& a, i64 base = 10) {
                 auto fa1 = NTT1::square(a);
                 auto fa2 = NTT2::square(a);
                 if (fa1.size()!= fa2.size()) {
@@ -167,7 +167,7 @@ namespace generator {
             }
 
             // 规范化结果
-            static std::vector<T> normalize(std::vector<i64>& num, int base) {
+            static std::vector<T> normalize(std::vector<i64>& num, i64 base) {
                 std::vector<T> res;
                 i64 carry = 0;
                 for (i64 x : num) {

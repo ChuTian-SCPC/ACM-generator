@@ -75,10 +75,11 @@ namespace generator {
             size_t size() const { return _data.size(); }
 
             TYPE operator+() const {
-                return static_cast<TYPE&>(*this);
+                TYPE result(static_cast<const TYPE&>(*this));
+                return result;
             }
 
-            TYPE operator+(const TYPE& other) {
+            TYPE operator+(const TYPE& other) const {
                 if ((_is_negative ^ other._is_negative) == 0) return TYPE::__add(static_cast<const TYPE&>(*this), other); // 同号
                 else if (_is_negative) return TYPE::__sub(other, static_cast<const TYPE&>(*this)); // 负数 + 正数
                 else return TYPE::__sub(static_cast<const TYPE&>(*this), other); // 正数 + 负数
@@ -96,12 +97,13 @@ namespace generator {
             }
 
             TYPE operator-() {
-                if (__is_zero()) _is_negative = false;
-                else _is_negative = !_is_negative;
-                return static_cast<TYPE&>(*this);
+                TYPE result(static_cast<const TYPE&>(*this));
+                if (result.__is_zero()) result._is_negative = false;
+                else result._is_negative = !result._is_negative;
+                return result;
             }
 
-            TYPE operator-(const TYPE& other) {
+            TYPE operator-(const TYPE& other) const {
                 if (_is_negative ^ other._is_negative) return TYPE::__add(static_cast<const TYPE&>(*this), other); // 异号
                 else if (_is_negative) return TYPE::__sub(other, static_cast<const TYPE&>(*this)); // 负数 - 负数
                 else return TYPE::__sub(static_cast<const TYPE&>(*this), other); // 正数 - 正数
@@ -119,11 +121,11 @@ namespace generator {
             }
 
             template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-            TYPE operator*(const T& other) {
+            TYPE operator*(const T& other) const {
                 return (*this) * TYPE(other);
             }
 
-            TYPE operator*(const TYPE& other) {
+            TYPE operator*(const TYPE& other) const {
                 if (__is_zero() || other.__is_zero()) return TYPE();
                 if (this == &other) return TYPE::__ntt_square(other);
                 TYPE result;
@@ -134,6 +136,9 @@ namespace generator {
                 result._is_negative = _is_negative ^ other._is_negative;
                 return result;
             }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            friend TYPE operator*(const T& a, const TYPE& b) { return b * a; }
 
             template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
             TYPE pow(T val) {
@@ -151,6 +156,96 @@ namespace generator {
                     base = base * base;
                     val >>= 1;
                 }
+                return result;
+            }
+
+            bool operator==(const TYPE& other) const {
+                return TYPE::__equal(static_cast<const TYPE&>(*this), other);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            bool operator==(const T& other) const {
+                return *this == TYPE(other); 
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            friend bool operator==(const T& a, const TYPE& b) { 
+                return b == a; 
+            }
+
+            bool operator!=(const TYPE& other) const {
+                return !operator==(other);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            bool operator!=(const T& other) const {
+                return *this != TYPE(other);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            friend bool operator!=(const T& a, const TYPE& b) {
+                return b != a;
+            }
+
+            bool operator<(const TYPE& other) const {
+                return TYPE::__less(static_cast<const TYPE&>(*this), other);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            bool operator<(const T& other) const {
+                return *this < TYPE(other);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            friend bool operator<(const T& a, const TYPE& b) {
+                return b > a;
+            }
+
+            bool operator<=(const TYPE& other) const {
+                return operator<(other) || operator==(other); 
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            bool operator<=(const T& other) const {
+                return *this <= TYPE(other);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            friend bool operator<=(const T& a, const TYPE& b) {
+                return b >= a;
+            }
+
+            bool operator>(const TYPE& other) const {
+                return !operator<=(other);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            bool operator>(const T& other) const {
+                return *this > TYPE(other);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            friend bool operator>(const T& a, const TYPE& b) {
+                return b < a;
+            }
+
+            bool operator>=(const TYPE& other) const {
+                return !operator<(other);  
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            bool operator>=(const T& other) const {
+                return *this >= TYPE(other);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            friend bool operator>=(const T& a, const TYPE& b) {
+                return b <= a;
+            }
+
+            static TYPE abs(const TYPE& a) {
+                TYPE result(a);
+                result._is_negative = false;
                 return result;
             }
 
@@ -282,7 +377,7 @@ namespace generator {
             // -1 : a < b; 
             // 0  : a == b; 
             // 1  : a > b;
-            int __abs_compare(const TYPE& a, const TYPE& b) {
+            static int __abs_compare(const TYPE& a, const TYPE& b) {
                 if (a.size() != b.size()) return a.size() < b.size() ? -1 : 1;
                 for (size_t i = a.size(); i-- > 0;) {
                     if (a._data[i] != b._data[i]) return a._data[i] < b._data[i] ? -1 : 1;
@@ -290,13 +385,31 @@ namespace generator {
                 return 0;
             }
 
-            bool __equal(const TYPE& a, const TYPE& b) {
+            static bool __equal(const TYPE& a, const TYPE& b) {
                return a._is_negative == b._is_negative && __abs_compare(a, b) == 0; 
             }
 
-            bool __less(const TYPE& a, const TYPE& b) {
+            static bool __less(const TYPE& a, const TYPE& b) {
                 if (a._is_negative != b._is_negative) return a._is_negative;
                 return a._is_negative? __abs_compare(a, b) > 0 : __abs_compare(a, b) < 0; 
+            }
+
+            static i64 __radix_pow(i32 b) {
+                static std::unordered_map<i32, std::vector<i64>> radix_pow;
+                int radix = static_cast<const TYPE*>(nullptr)->__radix();
+                if (radix_pow.find(radix) == radix_pow.end()) {
+                    radix_pow[radix] = std::vector<i64>({1}); 
+                }
+                auto &v = radix_pow[radix];
+                if (v.size() <= b) {
+                    i64 base = v.back();
+                    v.resize(b + 1);
+                    for (size_t i = v.size(); i <= b; i++) {
+                        base *= radix;
+                        v[i] = base;
+                    }
+                }
+                return v[b];
             }
 
         };

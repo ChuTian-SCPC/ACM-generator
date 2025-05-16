@@ -164,3 +164,52 @@ TEST_CASE("test crt", "[math][crt]") {
     crt_square_test();
     loop_check([&]() { return crt_multiply_test();}, 10);
 }
+
+TEST_CASE("test big int compare", "[math][BigIntBase][compare]") {
+    init_gen();
+    BigIntBase a(0);
+    BigIntBase b(0);
+    BigIntBase c(1);
+    BigIntBase d(-1);
+    long long x = 1LL << 60;
+    BigIntBase e(x);
+    BigIntBase f(x + 1);
+    BigIntBase g(x - 1);
+    BigIntBase h(-x);
+
+    CHECK(a == b);
+    CHECK(a <= b);
+    CHECK(a >= b);
+
+    CHECK(a == 0);
+    CHECK(a == 0LL);
+    CHECK(0 == a);
+
+    CHECK(a < c);
+    CHECK(a <= c);
+    CHECK(a != c);
+
+    CHECK(a > d);
+    CHECK(a >= d);
+    CHECK(a != d);
+
+    // 确保不是用abs compare
+    CHECK(c != d);
+    CHECK(c > d);
+
+    CHECK(e < f);
+    CHECK(e <= f);
+    CHECK(e!= f);
+    CHECK(e == x);
+    CHECK(x == e);
+
+    CHECK(e > g);
+    CHECK(e >= g);
+    CHECK(e!= g);
+
+    CHECK(f > g);
+
+    CHECK(e != h);
+    CHECK(e == -h);
+    CHECK(-e == h);
+}
