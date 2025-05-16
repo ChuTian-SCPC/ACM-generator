@@ -17,11 +17,19 @@ namespace generator {
             using i64 = int64_t;
             using u32 = uint32_t;
             using u64 = uint64_t;
+
+            struct DivResult {
+                TYPE quotient; // 商
+                TYPE remainder; // 余数 
+
+                DivResult() : quotient(0), remainder(0) {}
+                DivResult(TYPE q, TYPE r) : quotient(q), remainder(r) {}
+                TYPE first() { return quotient; }
+                TYPE second() { return remainder; }
+            };
         protected:
             bool _is_negative;
             std::vector<u32> _data;
-
-            const static i32 NTT_THRESHOLD = 1000;
         public:
 
             BigIntCalculator() {
@@ -85,6 +93,26 @@ namespace generator {
                 else return TYPE::__sub(static_cast<const TYPE&>(*this), other); // 正数 + 负数
             }
 
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            TYPE operator+(const T& a) const {
+                return (*this) + TYPE(a);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            friend TYPE operator+(const T& a, const TYPE& b) { 
+                return b + a; 
+            }
+
+            TYPE operator+=(const TYPE& other) {
+                *this = *this + other;
+                return static_cast<TYPE&>(*this); 
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            TYPE operator+=(const T& a) {
+                return operator+=(TYPE(a));
+            }
+
             TYPE operator++() {
                *this = *this + 1;
                return static_cast<TYPE&>(*this); 
@@ -96,7 +124,7 @@ namespace generator {
                 return result; 
             }
 
-            TYPE operator-() {
+            TYPE operator-() const {
                 TYPE result(static_cast<const TYPE&>(*this));
                 if (result.__is_zero()) result._is_negative = false;
                 else result._is_negative = !result._is_negative;
@@ -107,6 +135,26 @@ namespace generator {
                 if (_is_negative ^ other._is_negative) return TYPE::__add(static_cast<const TYPE&>(*this), other); // 异号
                 else if (_is_negative) return TYPE::__sub(other, static_cast<const TYPE&>(*this)); // 负数 - 负数
                 else return TYPE::__sub(static_cast<const TYPE&>(*this), other); // 正数 - 正数
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            TYPE operator-(const T& a) const {
+                return (*this) - TYPE(a);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            friend TYPE operator-(const T& a, const TYPE& b) {
+                return TYPE(a) - b;
+            }
+
+            TYPE operator-=(const TYPE& other) {
+                *this = *this - other;
+                return static_cast<TYPE&>(*this); 
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            TYPE operator-=(const T& a) {
+                return operator-=(TYPE(a)); 
             }
 
             TYPE operator--() {
@@ -131,32 +179,119 @@ namespace generator {
                 TYPE result;
                 if (__one_size()) result = TYPE::__mul_int(other, _data[0]);
                 if (other.__one_size()) result = TYPE::__mul_int(static_cast<const TYPE&>(*this), other._data[0]);
-                if (this->size() < NTT_THRESHOLD || other.size() < NTT_THRESHOLD) result = TYPE::__simple_mul(static_cast<const TYPE&>(*this), other);
+                if (this->size() + other.size() < _setting::ntt_threshold) result = TYPE::__simple_mul(static_cast<const TYPE&>(*this), other);
                 else result = TYPE::__ntt_mul(static_cast<const TYPE&>(*this), other);
                 result._is_negative = _is_negative ^ other._is_negative;
                 return result;
             }
 
             template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-            friend TYPE operator*(const T& a, const TYPE& b) { return b * a; }
+            friend TYPE operator*(const T& a, const TYPE& b) { 
+                return b * a; 
+            }
+
+            TYPE operator*=(const TYPE& other) {
+                *this = *this * other;
+                return static_cast<TYPE&>(*this); 
+            }
 
             template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-            TYPE pow(T val) {
-                if (val < 0) {
-                    if (__is_zero()) _msg::__error_msg(_msg::_defl, "Zero cannot be raised to a negative power.");
-                    else if (__is_one()) return TYPE(1);
+            TYPE operator*=(const T& a) {
+                return operator*=(TYPE(a));
+            }
+
+            DivResult div_mod(const TYPE& other) const {
+                if (this == &other) return DivResult{TYPE(1), TYPE(0)};
+                if (other.__one_size()) {
+                    DivResult result = TYPE::__div_int(static_cast<const TYPE&>(*this), (u32)other._data[0]);
+                    if (other._is_negative) result.quotient._is_negative = !result.quotient._is_negative;
+                    return result;
+                }
+                if (size() + other.size() < _setting::fast_div_threshold) return TYPE::__simple_div(static_cast<const TYPE&>(*this), other);
+                else return TYPE::__fast_div(static_cast<const TYPE&>(*this), other);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            DivResult div_mod(const T& other) const {
+                return div_mod(TYPE(other));
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            TYPE operator/(const T& other) {
+                return div_mod(other).first();
+            }
+
+            TYPE operator/(const TYPE& other) {
+                return div_mod(other).first(); 
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            friend TYPE operator/(const T& a, const TYPE& b) { 
+                return TYPE(a) / b; 
+            }
+
+            TYPE operator/=(const TYPE& other) {
+                *this = *this / other;
+                return static_cast<TYPE&>(*this);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            TYPE operator/=(const T& a) {
+                return operator/=(TYPE(a));
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            TYPE operator%(const T& other) {
+                return div_mod(other).second();
+            }
+
+            TYPE operator%(const TYPE& other) {
+                return div_mod(other).second();  
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            friend TYPE operator%(const T& a, const TYPE& b) {
+                return TYPE(a) % b;
+            }
+
+            TYPE operator%=(const TYPE& other) {
+                *this = *this % other;
+                return static_cast<TYPE&>(*this); 
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            TYPE operator%=(const T& a) {
+                return operator%=(TYPE(a));
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            static TYPE pow(const TYPE& a, T b) {
+                if (b < 0) {
+                    if (a.__is_zero()) _msg::__error_msg(_msg::_defl, "Zero cannot be raised to a negative power.");
+                    else if (a.__is_one()) return TYPE(1);
                     else return TYPE(0);
                 }
-                if (val == 0) return TYPE(1);
-                if (val == 1) return TYPE(static_cast<const TYPE&>(*this));
+                if (b == 0) return TYPE(1);
+                if (b == 1) return TYPE(a);
                 TYPE result(1);
-                TYPE base(static_cast<const TYPE&>(*this));
-                while (val) {
-                    if (val & 1) result = result * base;
+                TYPE base(a);
+                while (b) {
+                    if (b & 1) result = result * base;
                     base = base * base;
-                    val >>= 1;
+                    b >>= 1;
                 }
                 return result;
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            static TYPE pow(T a, T b) {
+                return pow(TYPE(a), b);
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            TYPE& pow(T b) {
+                *this = TYPE::pow(*this, b);
+                return static_cast<TYPE&>(*this);
             }
 
             bool operator==(const TYPE& other) const {
@@ -374,6 +509,174 @@ namespace generator {
                 return result;
             }
 
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            static int __log_pow2(T x) {
+                int n = 0;
+                while(x >>= 1) n++;
+                return n;
+            }
+
+            static TYPE __left_shift(const TYPE& a, i32 shift) {
+                if (shift < 0) _msg::__error_msg(_msg::_defl, "Shift value cannot be negative.");
+                if (shift == 0) return TYPE(a);
+                int d = a.__digits();
+                int sum = shift / d;
+                int res = shift % d;
+                TYPE result;
+                result._is_negative = a._is_negative;
+                result._data.resize(sum, 0);
+                TYPE b(a);
+                b = TYPE::__mul_int(a, TYPE::__radix_pow(a, res));
+                result._data.insert(result._data.end(), b._data.begin(), b._data.end());
+                result.__trim();
+                return result;
+            }
+
+            static TYPE __left_shift_bits(const TYPE& a, i32 shift) {
+                if (shift < 0) _msg::__error_msg(_msg::_defl, "Shift value cannot be negative.");
+                if (shift == 0) return TYPE(a);
+                int radix = a.__radix();
+                if (radix == 2) return TYPE::__left_shift(a, shift);
+                if (radix & (radix - 1) == 0) { // 2的幂次
+                    int log_radix = __log_pow2(radix);
+                    TYPE result = TYPE::__left_shift(a, shift / log_radix);
+                    return result * TYPE::pow(2, shift % log_radix);
+                }
+                else {
+                    TYPE m = TYPE::pow(2, shift);
+                    TYPE result(a);
+                    return result * m;
+                }
+            }
+
+            static TYPE __right_shift(const TYPE& a, i32 shift) {
+                if (shift < 0) _msg::__error_msg(_msg::_defl, "Shift value cannot be negative.");
+                if (shift == 0) return TYPE(a);
+                if (shift > a.size() * a.__digits()) return TYPE(0);
+                int d = a.__digits();
+                int sum = shift / d;
+                int res = shift % d;
+                TYPE result;
+                result._is_negative = a._is_negative;
+                result._data.insert(result._data.begin(), a._data.begin() + sum, a._data.end());
+                result = TYPE::__div_int(result, TYPE::__radix_pow(a, res)).first();
+                result.__trim();
+                return result;
+            }
+
+            static TYPE __right_shift_bits(const TYPE& a, i32 shift) {
+                if (shift < 0) _msg::__error_msg(_msg::_defl, "Shift value cannot be negative.");
+                if (shift == 0) return TYPE(a);
+                int radix = a.__radix();
+                if (radix == 2) return TYPE::__right_shift(a, shift);
+                if (radix & (radix - 1) == 0) { // 2的幂次
+                    int log_radix = __log_pow2(radix);
+                    TYPE result = TYPE::__right_shift(a, shift / log_radix);
+                    return result / TYPE::pow(2, shift % log_radix);
+                }
+                else {
+                    TYPE m = TYPE::pow(2, shift);
+                    TYPE result(a);
+                    return result / m;
+                } 
+            }
+
+            static DivResult __div_int(const TYPE& a, u32 b) {
+                if (b == 0) _msg::__error_msg(_msg::_defl, "Division by zero.");
+                if (b == 1) return DivResult(TYPE(a), TYPE(0));
+                if (a.__is_zero()) return DivResult(TYPE(0), TYPE(0));
+                TYPE q; // 商
+                u64 r = 0; // 余数
+                q._data.resize(a.size(), 0);
+                u64 base = (u64)a.__base();
+                for (int i = a.size() - 1; i >= 0; i--) {
+                    r = r * base + a._data[i];
+                    q._data[i] = r / b;
+                    r %= b;
+                }
+                q.__trim();
+                q._is_negative = a._is_negative;
+                TYPE res(r);
+                res._is_negative = a._is_negative;
+                return DivResult(q, res);
+            }
+
+            static DivResult __simple_div(const TYPE& a, const TYPE& b) {
+                if (b.__is_zero()) _msg::__error_msg(_msg::_defl, "Division by zero.");
+                if (b.__is_one()) {
+                    if (b._is_negative) return DivResult(TYPE(-a), TYPE(0));
+                    else return DivResult(TYPE(a), TYPE(0));
+                }
+                if (a.__is_zero()) return DivResult(TYPE(0), TYPE(0));
+                if (__abs_compare(a, b) < 0) return DivResult(TYPE(0), a);
+                TYPE q, r; // 商和余数
+                TYPE xa = TYPE::abs(a);
+                TYPE xb = TYPE::abs(b);
+                TYPE p(1); // 幂次
+                while (xa >= xb) {
+                    xb = TYPE::__mul_int(xb, 2);
+                    p = TYPE::__mul_int(p, 2);
+                }
+                while (p >= 1) {
+                    if (xa >= xb) {
+                        xa -= xb;
+                        q += p;
+                    }
+                    xb = TYPE::__div_int(xb, 2).first();
+                    p = TYPE::__div_int(p, 2).first();
+                }
+                q._is_negative = a._is_negative ^ b._is_negative;
+                q.__trim();
+                r = a - q * b;
+                return DivResult(q, r);
+            }
+
+            static TYPE __newton_inv(const TYPE& num, i32 n) {
+                if (num == 0) _msg::__error_msg(_msg::_defl, "Division by zero.");
+                if (n - num.size() <= _setting::newton_threshold) {
+                    TYPE sum = TYPE::__left_shift(TYPE(1), n);
+                    return TYPE::__simple_div(sum, num).first();
+                }
+
+                i32 k = (n - num.size() + 2) >> 1;
+                i32 k2 = k > num.size() ? 0 : num.size() - k;
+                TYPE x = TYPE::__right_shift(num, k2);
+                i32 n2 = k + x.size();
+                TYPE y = __newton_inv(x, n2);
+                TYPE a = y + y;
+                TYPE b = num * TYPE::__ntt_square(y);
+                return TYPE::__left_shift(a, n - n2 - k2) - TYPE::__right_shift(b, (2 * (n2 + k2) - n)) - 1;
+            }
+
+            static DivResult __fast_div(const TYPE &a, const TYPE &b) {
+                if (b.__is_zero()) _msg::__error_msg(_msg::_defl, "Division by zero.");
+                if (b.__is_one()) {
+                    if (b._is_negative) return DivResult(TYPE(-a), TYPE(0));
+                    else return DivResult(TYPE(a), TYPE(0));
+                }
+                if (a.__is_zero()) return DivResult(TYPE(0), TYPE(0));
+                if (__abs_compare(a, b) < 0) return DivResult(TYPE(0), a);              
+                TYPE xa = TYPE::abs(a);
+                TYPE xb = TYPE::abs(b);
+                i32 k = xa.size() - xb.size() + 2;
+                i32 k2 = k > xb.size() ? 0 : xb.size() - k;
+                TYPE adj = TYPE::__right_shift(xb, k2);
+                if (k2 != 0) adj++;
+                i32 n2 = k + adj.size();
+                TYPE inv = __newton_inv(adj, n2);
+                TYPE q = TYPE::__left_shift(xa * inv, n2 + k2);
+                TYPE r = xa - q * xb;
+                while (r >= xb) {
+                    q++;
+                    r -= xb;
+                }
+                q._is_negative = a._is_negative ^ b._is_negative;
+                r._is_negative = a._is_negative;
+                q.__trim();
+                r.__trim();
+                return DivResult(q, r);
+            }
+
             // -1 : a < b; 
             // 0  : a == b; 
             // 1  : a > b;
@@ -394,17 +697,18 @@ namespace generator {
                 return a._is_negative? __abs_compare(a, b) > 0 : __abs_compare(a, b) < 0; 
             }
 
-            static i64 __radix_pow(i32 b) {
+            static i64 __radix_pow(const TYPE& a, i32 b) {
                 static std::unordered_map<i32, std::vector<i64>> radix_pow;
-                int radix = static_cast<const TYPE*>(nullptr)->__radix();
+                int radix = a.__radix();
                 if (radix_pow.find(radix) == radix_pow.end()) {
-                    radix_pow[radix] = std::vector<i64>({1}); 
+                    radix_pow.insert({radix, std::vector<i64>({1})}); 
                 }
                 auto &v = radix_pow[radix];
+                int os = v.size();
                 if (v.size() <= b) {
                     i64 base = v.back();
                     v.resize(b + 1);
-                    for (size_t i = v.size(); i <= b; i++) {
+                    for (size_t i = os; i <= b; i++) {
                         base *= radix;
                         v[i] = base;
                     }

@@ -117,9 +117,9 @@ bool crt_multiply_test() {
     std::vector<long long> b = rand_vector<long long>(1, n, [&](){return rand_int(l);});
     std::vector<long long> c = CrtMultiplier<long long>::multiply(a, b, l);
     std::vector<long long> d = brute_multiply(a, b, l);
-    CHECK(c.size() == d.size());
+    if(c.size() != d.size()) return false;
     for (size_t i = 0; i < d.size(); i++) {
-        CHECK(c[i] == d[i]);
+        if(c[i] != d[i]) return false;
     }
     return true;
 }
@@ -188,6 +188,7 @@ TEST_CASE("test big int compare", "[math][BigIntBase][compare]") {
     CHECK(a == -0);
     CHECK(-a == 0);
     CHECK(-a == -0);
+    CHECK(+a == -a);
 
     CHECK(a < c);
     CHECK(a <= c);
@@ -200,6 +201,11 @@ TEST_CASE("test big int compare", "[math][BigIntBase][compare]") {
     // 确保不是用abs compare
     CHECK(c != d);
     CHECK(c > d);
+
+    CHECK(+d == d);
+    CHECK(-d == c);
+    CHECK(d == -c);
+    CHECK(-d == +c);
 
     CHECK(e < f);
     CHECK(e <= f);
@@ -216,4 +222,39 @@ TEST_CASE("test big int compare", "[math][BigIntBase][compare]") {
     CHECK(e != h);
     CHECK(e == -h);
     CHECK(-e == h);
+}
+
+void big_int_div_mod_test_small() {
+    BigIntBase a(7);
+    BigIntBase b(3);
+    auto c = a / b;
+    CHECK(c == 2);
+    auto d = a % b;
+    CHECK(d == 1);    
+}
+
+void big_int_div_mod_test_simple_fast_small() {
+    long long a = 1LL << 60;
+    long long b = rand_int(-a, a);
+    long long c = rand_int(-a, a);
+
+    while (c == 0) c = rand_int(-a, a);
+
+    // 使用simple_div
+    fast_div_threshold = 1000;
+    auto d = BigIntBase(b).div_mod(BigIntBase(c));
+    CHECK(d.first() == b / c);
+    CHECK(d.second() == b % c);
+
+    // 使用fast_div
+    fast_div_threshold = 0;
+    auto e = BigIntBase(b).div_mod(BigIntBase(c));
+    CHECK(e.first() == b / c);
+    CHECK(e.second() == b % c);
+}
+
+TEST_CASE("test big int div mod", "[math][BigIntBase][div_mod]") {
+    init_gen();
+    big_int_div_mod_test_small();
+    loop_check([&]() { big_int_div_mod_test_simple_fast_small(); return true;}, 10);
 }
