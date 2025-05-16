@@ -182,6 +182,36 @@ TEST_CASE("rand FlowerChain", "[rand_graph][rand_graph-tree][FlowerChain]") {
     CHECK(f);
 }
 
+TEST_CASE("rand 4 type flower chain", "[rand_graph][rand_graph-tree][FlowerChain]") {
+    init_gen();
+    
+    unweight::FlowerChain t1(10);
+    t1.gen();
+    CHECK(t1.node_count() == 10);
+    CHECK(t1.edges().size() == 9);
+    CHECK(is_tree(t1));
+
+    edge_weight::FlowerChain<int> t2(10);
+    t2.set_edges_weight_function(int_weight);
+    t2.gen();
+    for (auto& e : t2.edges()) CHECK((e.w() >= 1 && e.w() <= 100));
+    CHECK(is_tree(t2));
+
+    node_weight::FlowerChain<int> t3(10);
+    t3.set_nodes_weight_function(int_weight);
+    t3.gen();
+    for (auto& n : t3.nodes_weight()) CHECK((n.w() >= 1 && n.w() <= 100));
+    CHECK(is_tree(t3));
+
+    both_weight::FlowerChain<int, int> t4(10);
+    t4.set_edges_weight_function(int_weight);
+    t4.set_nodes_weight_function(int_weight);
+    t4.gen();
+    for (auto& e : t4.edges()) CHECK((e.w() >= 1 && e.w() <= 100));
+    for (auto& n : t4.nodes_weight()) CHECK((n.w() >= 1 && n.w() <= 100));
+    CHECK(is_tree(t4));
+}
+
 bool height_tree_check(int n) {
     unweight::HeightTree t(n);
     t.set_root(rand_int(1, n));
