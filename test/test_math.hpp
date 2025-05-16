@@ -258,3 +258,19 @@ TEST_CASE("test big int div mod", "[math][BigIntBase][div_mod]") {
     big_int_div_mod_test_small();
     loop_check([&]() { big_int_div_mod_test_simple_fast_small(); return true;}, 10);
 }
+
+BigIntBase big_int_div_mod_test_benchmark() {
+    BigIntBase a;
+    auto& v = a.data_ref();
+    v = rand_vector<unsigned int>(900, [&](){return rand_int(10000);});
+    BigIntBase b(rand_int(3, 10000));
+    return a.div_mod(b).first();
+}
+
+TEST_CASE("ensure simple div won't cost too long", "[math][BigIntBase][div_mod][!benchmark]") {
+    init_gen();
+    BENCHMARK("big div small") {
+        return big_int_div_mod_test_benchmark();
+    };
+
+}
