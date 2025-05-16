@@ -181,9 +181,13 @@ TEST_CASE("test big int compare", "[math][BigIntBase][compare]") {
     CHECK(a <= b);
     CHECK(a >= b);
 
+    // 0和-0是相等的
     CHECK(a == 0);
     CHECK(a == 0LL);
     CHECK(0 == a);
+    CHECK(a == -0);
+    CHECK(-a == 0);
+    CHECK(-a == -0);
 
     CHECK(a < c);
     CHECK(a <= c);
