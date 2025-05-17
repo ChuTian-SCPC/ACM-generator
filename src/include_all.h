@@ -66,6 +66,12 @@
 #ifndef _SGPCET_BIG_INT_BASE_H_
 #include "math/big_int_base.h"
 #endif //!_SGPCET_BIG_INT_BASE_H_
+#ifndef _SGPCET_CHAR_SET_CHECK_H_
+#include "math/char_set_check.h"
+#endif //!_SGPCET_CHAR_SET_CHECK_H_
+#ifndef _SGPCET_BIG_INT_H_
+#include "math/big_int.h"
+#endif //!_SGPCET_BIG_INT_H_
 
 #ifndef _SGPCET_NUMBER_CONST_H_
 #include "rand/number_const.h"
