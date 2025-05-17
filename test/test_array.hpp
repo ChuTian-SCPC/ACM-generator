@@ -92,3 +92,28 @@ TEST_CASE("shuffle vector index", "[rand_array][shuffle_index]") {
     bool f = loop_check([]() { return shuffle_index_check(); }, 10);
     CHECK(f);
 }
+
+template <typename T>
+std::vector<T> rand_vector_origin(int size, std::function<T()> func) {
+    __judge_vector_lower_bound(size, "vector");
+    __judge_vector_upper_bound(size, "vector");
+    OutStream vector_stream(false);
+    _defl.swap(vector_stream);    
+    std::vector<T> v;
+    for(int i = 0; i < size; i++){
+        T x = func();
+        v.emplace_back(x);
+    }
+    _defl.swap(vector_stream);
+    return v;
+}
+
+TEST_CASE("rand vector speed up", "[rand_array][rand_vector][!benchmark]") {
+    init_gen();
+    BENCHMARK("rand vector origin") {
+        return rand_vector_origin<int>(10000000, [](){return rand_int(-1000000, 1000000);});
+    };
+    BENCHMARK("rand vector") {
+        return rand_vector<int>(10000000, [](){return rand_int(-1000000, 1000000);});
+    };
+}

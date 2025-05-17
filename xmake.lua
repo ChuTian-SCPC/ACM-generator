@@ -8,6 +8,8 @@ task("merge")
         -- 运行合并命令
         os.exec("xmake l cli.amalgamate -o . generator")
 
+        -- 测试使用
+        os.exec("xmake l cli.amalgamate generator")
         -- 读取生成的内容
         local content = io.readfile("generator.h")
 
@@ -66,11 +68,13 @@ task("validate_test")
     on_run(function ()
         os.exec("xmake build val_test_val")
         os.exec("xmake build val_test_test")
-        os.exec("./test/validate/test")
+        local val_exe = os.host() == "windows" and "val.exe" or "val"
+        local test_exe = os.host() == "windows" and "test.exe" or "test"
+        os.exec("./test/validate/" .. test_exe)
         os.rm("./test/validate/testcases")
         os.rm("./test/validate/validate")
-        os.rm("./test/validate/val")
-        os.rm("./test/validate/test")
+        os.rm("./test/validate/" .. val_exe)
+        os.rm("./test/validate/" .. test_exe)
     end)
     set_menu {
         description = "validate测试"
@@ -79,10 +83,28 @@ task("validate_test")
 task("run_test")
     on_run(function()
         import("core.base.task")
+        import("core.base.option")
+        
         task.run("build", {target = "tests"})
-        os.exec("xmake run tests")
-        os.exec("xmake validate_test")
+        
+        local tags = option.get("tags")
+        local test_cmd = "xmake run tests"
+        
+        if tags then
+            test_cmd = test_cmd .. " " .. tags
+        end
+        
+        os.exec(test_cmd)
+        
+        local do_validate = option.get("validate-test")
+        if do_validate then
+            os.exec("xmake validate_test")
+        end
     end)
     set_menu {
-        description = "测试"
+        options = {
+            {"t", "tags", "kv", nil, "Catch2标签过滤（如 [tag1][tag2]）"},
+            {"V", "validate-test", "k", nil, "validate测试"}
+        },
+        description = "运行测试"
     }

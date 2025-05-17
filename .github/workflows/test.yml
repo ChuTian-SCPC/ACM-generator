@@ -24,4 +24,4 @@ jobs:
     - name: Run Xmake tests
       run: |
         xmake f -y
-        xmake run_test
+        xmake run_test -V
