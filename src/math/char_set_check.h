@@ -38,9 +38,9 @@ namespace generator {
 
             static void enable_size(int base) {
                 int size = _setting::BigNumberSetting::labels().size();
-                if (size > base) {
+                if (size < base) {
                     _msg::__fail_msg(_msg::_defl, tools::string_format(
-                        "BigNumberSetting can't represent numbers in up to base %d, but require is %d.", size, base));
+                        "BigNumberSetting can only represent numbers in up to base %d, but require is %d.", size, base));
                 }
             }
 
