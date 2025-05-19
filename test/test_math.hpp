@@ -166,6 +166,17 @@ TEST_CASE("test crt", "[math][crt]") {
     loop_check([&]() { return crt_multiply_test();}, 10);
 }
 
+TEST_CASE("crt benchmark", "[math][crt][!benchmark]") {
+    init_gen();
+    const long long l = 1000000; 
+    int n = 1000000;
+    std::vector<long long> a = rand_vector<long long>(n, [&](){return rand_int(l);});
+    std::vector<long long> b = rand_vector<long long>(n, [&](){return rand_int(l);});
+    BENCHMARK("crt multiply") {
+        return CrtMultiplier<>::multiply(a, b, l);
+    };
+}
+
 TEST_CASE("test big int compare", "[math][BigIntBase][compare]") {
     init_gen();
     BigIntBase a(0);
@@ -276,7 +287,7 @@ TEST_CASE("ensure simple div won't cost too long", "[math][BigIntBase][div_mod][
 
 }
 
-TEST_CASE("test big int read", "[math][BigIntBase][read][!benchmark]") {
+TEST_CASE("big int read benchmark", "[math][BigIntBase][read][!benchmark]") {
     // 确保读长数字的速度
     init_gen();
     BENCHMARK("big int hex read") {
@@ -291,6 +302,21 @@ TEST_CASE("test big int read", "[math][BigIntBase][read][!benchmark]") {
         std::string s = rand_string(100000, CharType::Number);
         big_int_parse_prefix = false;
         a.from_str(s);
+        return a;
+    };
+
+    BENCHMARK("big int hex read base 2") {
+        BigIntHexNS::BigIntHex a;
+        std::string s = rand_string(100000, CharType::ZeroOne);
+        a.from_str(s, 2);
+        return a;
+    };
+    // too slow, why???
+    BENCHMARK("big int read base 2") {
+        BigInt a;
+        std::string s = rand_string(100000, CharType::ZeroOne);
+        big_int_parse_prefix = false;
+        a.from_str(s, 2);
         return a;
     };
 }

@@ -140,9 +140,10 @@ namespace generator {
             BigInt __from_string(const std::string& s, int start, int end, int base, int limit) {
                 if (end - start < limit) {
                     i64 num = 0;
+                    auto& mp = _setting::BigNumberSetting::labels_map();
                     for (int i = start; i < end; i++) {
                         num *= base;
-                        int v = _setting::BigNumberSetting::labels_map()[std::string(1, s[i])];
+                        int v = mp[std::string(1, s[i])];
                         if (v >= base) {
                             _msg::__fail_msg(_msg::_defl, tools::string_format("string with invalid number %d can't be read.", v));
                         }
@@ -166,8 +167,9 @@ namespace generator {
                 int bit = __digits();
                 int p = 0;
                 int j = 0;
+                auto& mp = _setting::BigNumberSetting::labels_map();
                 for (int i = 0; i < n; i++) {
-                    int v = _setting::BigNumberSetting::labels_map()[std::string(1, s[i])];
+                    int v = mp[std::string(1, s[i])];
                     if (v >= base) {
                         _msg::__fail_msg(_msg::_defl, tools::string_format("string with invalid number %d can't be read.", v));
                     }
