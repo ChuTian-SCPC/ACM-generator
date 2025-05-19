@@ -1,5 +1,6 @@
 #pragma once
 #include "test_basic.hpp"
+#include "algorithm/bigint_hex.h"
 using namespace generator::all;
 
 TEST_CASE("test big number setting", "[math][big_number][setting]") {
@@ -273,4 +274,23 @@ TEST_CASE("ensure simple div won't cost too long", "[math][BigIntBase][div_mod][
         return big_int_div_mod_test_benchmark();
     };
 
+}
+
+TEST_CASE("test big int read", "[math][BigIntBase][read][!benchmark]") {
+    // 确保读长数字的速度
+    init_gen();
+    BENCHMARK("big int hex read") {
+        BigIntHexNS::BigIntHex a;
+        std::string s = rand_string(100000, CharType::Number);
+        a.from_str(s);
+        return a;
+    };
+    // too slow, why?
+    BENCHMARK("big int read") {
+        BigInt a;
+        std::string s = rand_string(100000, CharType::Number);
+        big_int_parse_prefix = false;
+        a.from_str(s);
+        return a;
+    };
 }

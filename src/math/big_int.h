@@ -80,7 +80,7 @@ namespace generator {
                 _from_str_function = [](BigInt& val, const std::string& s) { val.__default_from_str(s); }; 
             }
 
-            void from_string(const std::string& s, int base = -1) {
+            void from_str(const std::string& s, int base = -1) {
                 _in_out_base = base;
                 _from_str_function(*this, s);
             }
@@ -226,7 +226,7 @@ namespace generator {
             void __default_input(std::istream& is) {
                 std::string s;
                 is >> s;
-                from_string(s, _in_out_base);
+                from_str(s, _in_out_base);
             }
 
             template <typename T1, typename T2, typename T3>
