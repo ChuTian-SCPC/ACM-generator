@@ -516,6 +516,10 @@ namespace generator {
                 return n;
             }
 
+            static bool __is_pow2(i32 x) {
+                return x && ((x & (x - 1)) == 0);
+            }
+
             static TYPE __left_shift(const TYPE& a, i32 shift) {
                 if (shift < 0) _msg::__error_msg(_msg::_defl, "Shift value cannot be negative.");
                 if (shift == 0) return TYPE(a);
@@ -537,7 +541,7 @@ namespace generator {
                 if (shift == 0) return TYPE(a);
                 int radix = a.__radix();
                 if (radix == 2) return TYPE::__left_shift(a, shift);
-                if (radix & (radix - 1) == 0) { // 2的幂次
+                if (__is_pow2(radix)) { // 2的幂次
                     int log_radix = __log_pow2(radix);
                     TYPE result = TYPE::__left_shift(a, shift / log_radix);
                     return result * TYPE::pow(2, shift % log_radix);
@@ -569,7 +573,7 @@ namespace generator {
                 if (shift == 0) return TYPE(a);
                 int radix = a.__radix();
                 if (radix == 2) return TYPE::__right_shift(a, shift);
-                if (radix & (radix - 1) == 0) { // 2的幂次
+                if (__is_pow2(radix)) { // 2的幂次
                     int log_radix = __log_pow2(radix);
                     TYPE result = TYPE::__right_shift(a, shift / log_radix);
                     return result / TYPE::pow(2, shift % log_radix);

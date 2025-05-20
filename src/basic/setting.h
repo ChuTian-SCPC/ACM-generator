@@ -147,6 +147,8 @@ namespace generator {
     int fast_div_threshold = 1000;
     int newton_threshold = 4;
     bool big_int_parse_prefix = true; // 0, 0b, 0x
+    bool big_int_valid_digits = false;
+    bool big_int_cache_pow = true;
 
     namespace {
       struct BigNumberSettingInitializer {

@@ -292,14 +292,13 @@ TEST_CASE("big int read benchmark", "[math][BigIntBase][read][!benchmark]") {
     init_gen();
     BENCHMARK("big int hex read") {
         BigIntHexNS::BigIntHex a;
-        std::string s = rand_string(100000, CharType::Number);
+        std::string s = rand_string(1000000, CharType::Number);
         a.from_str(s);
         return a;
     };
-    // too slow, why?
     BENCHMARK("big int read") {
         BigInt a;
-        std::string s = rand_string(100000, CharType::Number);
+        std::string s = rand_string(1000000, CharType::Number);
         big_int_parse_prefix = false;
         a.from_str(s);
         return a;
@@ -307,14 +306,13 @@ TEST_CASE("big int read benchmark", "[math][BigIntBase][read][!benchmark]") {
 
     BENCHMARK("big int hex read base 2") {
         BigIntHexNS::BigIntHex a;
-        std::string s = rand_string(100000, CharType::ZeroOne);
+        std::string s = rand_string(1000000, CharType::ZeroOne);
         a.from_str(s, 2);
         return a;
     };
-    // too slow, why???
     BENCHMARK("big int read base 2") {
         BigInt a;
-        std::string s = rand_string(100000, CharType::ZeroOne);
+        std::string s = rand_string(1000000, CharType::ZeroOne);
         big_int_parse_prefix = false;
         a.from_str(s, 2);
         return a;

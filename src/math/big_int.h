@@ -137,24 +137,67 @@ namespace generator {
                 _setting::CharSetCheck::enable_size(_in_out_base == -1 ? 10 : _in_out_base);
             }
 
+            static BigInt __get_base_pow(int base, int p) {
+                if (!_setting::big_int_cache_pow) return BigInt::pow(base, p);
+                static int origin_base = -1;
+                static std::vector<BigInt> base_pow;
+                if (origin_base != base) {
+                    origin_base = base;
+                    base_pow.clear();
+                    base_pow.emplace_back(1);
+                }
+                if (base_pow.size() > p && base_pow[p] != 0) return base_pow[p];
+                else if (base_pow.size() <= p ) base_pow.resize(p + 1);
+                BigInt result(1);
+                BigInt a(base);
+                int b = p;
+                int add = 1;
+                int sum = 0;
+                while (b) {
+                    if (b & 1) {
+                        result = result * base;
+                        sum |= add;
+                        base_pow[sum] = result;
+                    }
+                    base = base * base;
+                    b >>= 1;
+                    add <<= 1;
+                    if (add <= _setting::vector_limit && add >= base_pow.size()) base_pow.resize(add + 1);
+                    base_pow[add] = base;
+                }
+
+                base_pow[p] = BigInt::pow(base, p);
+                return base_pow[p];
+            }
+
             BigInt __from_string(const std::string& s, int start, int end, int base, int limit) {
                 if (end - start < limit) {
                     i64 num = 0;
                     auto& mp = _setting::BigNumberSetting::labels_map();
                     for (int i = start; i < end; i++) {
                         num *= base;
-                        int v = mp[std::string(1, s[i])];
-                        if (v >= base) {
-                            _msg::__fail_msg(_msg::_defl, tools::string_format("string with invalid number %d can't be read.", v));
+                        int v;
+                        if (_setting::big_int_valid_digits) {
+                            auto it = mp.find(std::string(1, s[i]));
+                            if (it == mp.end()) {
+                                _msg::__fail_msg(_msg::_defl, tools::string_format("string with invalid label %c can't be read.", s[i]));
+                            }
+                            v = it->second;
+                            if (v >= base) {
+                                _msg::__fail_msg(_msg::_defl, tools::string_format("string with invalid number %d can't be read.", v));
+                            }
                         }
+                        else v = mp[std::string(1, s[i])];
                         num += v;
                     }
-                    return BigInt(num);
+                    auto res =  BigInt(num);
+                    return res;
                 }                    
                 int mid = (start + end) / 2;
                 BigInt high = __from_string(s, start, mid, base, limit);
                 BigInt low = __from_string(s, mid, end, base, limit);
-                return high * BigInt::pow(base, end - mid) + low;
+                auto res = high * __get_base_pow(base, end - mid) + low;
+                return res;
             }
 
             void __from_string(BigInt& val, const std::string& s, int start, int end, int base, int limit) {
@@ -165,24 +208,33 @@ namespace generator {
                 int t = __calculate_pow2(base);
                 int n = s.size();
                 int bit = __digits();
+                u64 add = 0;
                 int p = 0;
-                int j = 0;
+                int j = 0;  
                 auto& mp = _setting::BigNumberSetting::labels_map();
-                for (int i = 0; i < n; i++) {
-                    int v = mp[std::string(1, s[i])];
-                    if (v >= base) {
-                        _msg::__fail_msg(_msg::_defl, tools::string_format("string with invalid number %d can't be read.", v));
+                _data.resize(n * t / bit);
+                for (int i = n - 1; i >= 0; i--) {
+                    u64 v;
+                    if (_setting::big_int_valid_digits) {
+                        auto it = mp.find(std::string(1, s[i]));
+                        if (it == mp.end()) {
+                            _msg::__fail_msg(_msg::_defl, tools::string_format("string with invalid label %c can't be read.", s[i]));
+                        }
+                        v = it->second;
+                        if (v >= base) {
+                            _msg::__fail_msg(_msg::_defl, tools::string_format("string with invalid number %d can't be read.", v));
+                        }
                     }
-                    int add = (v & ((1 << (bit - p)) - 1)) << p;
-                    int res = v >> (bit - p);
-                    val._data[j] += add;
+                    else v = mp[std::string(1, s[i])];
+                    add += (v << p);
                     p += t;
                     if (p >= bit) {
-                       p %= bit;
-                       j++;
-                       val._data[j] += res; 
+                        _data.emplace_back(add & COMPRESS_MASK);
+                        p -= bit;
+                        add >>= bit;
                     }
                 }
+                if (add) _data.emplace_back(add);
             }
 
             void __default_from_str(const std::string& s) {
@@ -199,7 +251,7 @@ namespace generator {
                 _data.clear();
                 int actual_base = _in_out_base == -1 ? 10 : _in_out_base;
                 if (s.empty()) _msg::__fail_msg(_msg::_defl, "empty string can't be read.");
-                if (actual_base&(actual_base - 1) == 0) __from_string_pow2(*this, s, actual_base);
+                if (BigInt::__is_pow2(actual_base)) __from_string_pow2(*this, s, actual_base);
                 else {
                     int limit = __calculate_limit(actual_base);
                     __from_string(*this, s, 0, s.size(), actual_base, limit);
