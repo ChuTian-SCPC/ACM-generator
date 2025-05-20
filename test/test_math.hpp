@@ -287,6 +287,34 @@ TEST_CASE("ensure simple div won't cost too long", "[math][BigIntBase][div_mod][
 
 }
 
+// 或许能更好
+/*
+...............................................................................
+
+benchmark name                       samples       iterations    est run time
+                                     mean          low mean      high mean
+                                     std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+big int hex read                               100             1     49.9574 s 
+                                        446.124 ms    445.546 ms    446.711 ms 
+                                         2.9824 ms    2.61583 ms    3.55491 ms
+
+big int read                                   100             1     1.96702 m 
+                                        878.197 ms    877.206 ms    879.555 ms 
+                                        5.88353 ms    4.42958 ms    8.32475 ms
+
+big int hex read base 2                        100             1     422.43 ms 
+                                        4.33383 ms    4.29033 ms    4.38676 ms 
+                                        245.242 us    208.479 us    314.036 us
+
+big int read base 2                            100             1     2.61083 s 
+                                        22.8572 ms    22.7697 ms    22.9613 ms 
+                                        484.212 us    402.501 us    618.216 us
+
+
+===============================================================================
+*/
+
 TEST_CASE("big int read benchmark", "[math][BigIntBase][read][!benchmark]") {
     // 确保读长数字的速度
     init_gen();
