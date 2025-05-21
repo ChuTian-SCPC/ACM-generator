@@ -83,6 +83,12 @@ namespace generator {
             i32 __base() const { return _base; }
             i32 __radix() const { return _radix; }
             i32 __digits() const { return _digits; }
+
+            void __copy_status(const BigIntBase& other) {
+                _digits = other._digits;
+                _radix = other._radix;
+                _base = other._base;
+            }
         };
     } // namespace math
 } // namespace generator

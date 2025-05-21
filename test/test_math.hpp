@@ -1,5 +1,6 @@
 #pragma once
 #include "test_basic.hpp"
+#include "algorithm/BigInteger.hpp"
 using namespace generator::all;
 
 TEST_CASE("test big number setting", "[math][big_number][setting]") {
@@ -62,6 +63,9 @@ TEST_CASE("test big number setting", "[math][big_number][setting]") {
     BigNumberSetting::set_labels(11, "A");
     bool same = BigNumberSetting::has_empty_or_same_label();
     CHECK(same == true);
+
+    // 恢复默认
+    BigNumberSetting::init_labels();
 }
 
 std::vector<long long> brute_multiply(const std::vector<long long>& a, const std::vector<long long>& b, long long MOD = 998244353) {
@@ -311,4 +315,23 @@ TEST_CASE("test from to string with base pow 2 specail", "[math][BigIntBase][fro
     std::string ans = "527502446336747651216";
     std::string s1 = a.to_str(8);
     CHECK(s1 == ans);
+    TwilightDream::BigInteger::BigInteger b(s, 10);
+    std::string s2 = b.ToString(8);
+    CHECK(s2 == ans);
+}
+
+TEST_CASE("test big int from to string", "[math][BigIntBase][from_str][to_str]") {
+    init_gen();
+    std::string s = rand_string(100000, Number);
+    freopen("test.txt", "w", stdout);
+    std::cout << s << std::endl;
+    fclose(stdout);
+    BigInt a;
+    big_int_parse_prefix = false;
+    a.from_str(s);
+    TwilightDream::BigInteger::BigInteger b(s, 10);
+    auto s1 = a.to_str(10);
+    auto s2 = b.ToString(10);
+    CHECK(s1 == s2);
+
 }

@@ -461,6 +461,8 @@ namespace generator {
             i32 __base() const { return COMPRESS_MOD; }
             i32 __radix() const { return 2; }
             i32 __digits() const { return COMPRESS_BIT; }
+
+            void __copy_status(const BigInt&) {}
         };
     } // namespace math
 } // namespace generator
