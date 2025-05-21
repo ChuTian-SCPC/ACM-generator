@@ -387,6 +387,7 @@ namespace generator {
             _SET_GET_VALUE(std::vector<u32>, data)
             _SET_GET_VALUE(bool, is_negative)
         protected:
+
             void __trim() {
                 while (_data.size() > 1 && _data.back() == 0) _data.pop_back();
                 if (_data.size() == 1 && _data.back() == 0) _is_negative = false;

@@ -61,6 +61,10 @@ namespace generator {
                 _base = radix;
                 for (_digits = 1; _base * radix <= MAX_BASE; _digits++, _base *= radix);
             }
+
+            i32 digits() const {
+                return _digits;
+            }
         protected:
             template <typename T1, typename T2, typename T3>
             void __carry(T1& add, T2& basic_val, T3 new_val) {

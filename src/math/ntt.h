@@ -160,7 +160,7 @@ namespace generator {
             // 中国剩余定理
             static i64 crt(T r1, T r2) {
                 init_crt();
-                i64 diff = (r2 - r1) % MOD2;
+                i64 diff = ((i64)r2 - (i64)r1) % MOD2;
                 if (diff < 0) diff += MOD2;
                 i64 k = (diff * m1_inv_m2) % MOD2;
                 return (r1 + k * MOD1) % crt_mod;

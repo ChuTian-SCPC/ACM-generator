@@ -1,6 +1,5 @@
 #pragma once
 #include "test_basic.hpp"
-#include "algorithm/bigint_hex.h"
 using namespace generator::all;
 
 TEST_CASE("test big number setting", "[math][big_number][setting]") {
@@ -141,6 +140,23 @@ void crt_multiply_test_int() {
         res2 += std::to_string(res1[i]);
     }
     CHECK(res2 == "5471227626");
+
+    // debug for 10^8 * 10^8 = 10^16
+    BigInt a(100000000);
+    BigInt b = a * a; // equal to CrtMultiplier<usigned int>::square
+    auto v = a.data();
+    std::vector<long long> vl;
+    for (size_t i = 0; i < v.size(); i++) {
+        vl.push_back(v[i]); 
+    }
+    auto x = CrtMultiplier<>::square(vl, 1 << 25);
+    BigInt c;
+    auto& d = c.data_ref();
+    d.resize(x.size());
+    for (size_t i = 0; i < x.size(); i++) {
+        d[i] = x[i];
+    }
+    CHECK(b == c);
 }
 
 void crt_square_test() {
@@ -287,62 +303,12 @@ TEST_CASE("ensure simple div won't cost too long", "[math][BigIntBase][div_mod][
 
 }
 
-// 或许能更好
-/*
-...............................................................................
-
-benchmark name                       samples       iterations    est run time
-                                     mean          low mean      high mean
-                                     std dev       low std dev   high std dev
--------------------------------------------------------------------------------
-big int hex read                               100             1     49.9574 s 
-                                        446.124 ms    445.546 ms    446.711 ms 
-                                         2.9824 ms    2.61583 ms    3.55491 ms
-
-big int read                                   100             1     1.96702 m 
-                                        878.197 ms    877.206 ms    879.555 ms 
-                                        5.88353 ms    4.42958 ms    8.32475 ms
-
-big int hex read base 2                        100             1     422.43 ms 
-                                        4.33383 ms    4.29033 ms    4.38676 ms 
-                                        245.242 us    208.479 us    314.036 us
-
-big int read base 2                            100             1     2.61083 s 
-                                        22.8572 ms    22.7697 ms    22.9613 ms 
-                                        484.212 us    402.501 us    618.216 us
-
-
-===============================================================================
-*/
-
-TEST_CASE("big int read benchmark", "[math][BigIntBase][read][!benchmark]") {
-    // 确保读长数字的速度
+TEST_CASE("test from to string with base pow 2 specail", "[math][BigIntBase][from_str][to_str]") {
     init_gen();
-    BENCHMARK("big int hex read") {
-        BigIntHexNS::BigIntHex a;
-        std::string s = rand_string(1000000, CharType::Number);
-        a.from_str(s);
-        return a;
-    };
-    BENCHMARK("big int read") {
-        BigInt a;
-        std::string s = rand_string(1000000, CharType::Number);
-        big_int_parse_prefix = false;
-        a.from_str(s);
-        return a;
-    };
-
-    BENCHMARK("big int hex read base 2") {
-        BigIntHexNS::BigIntHex a;
-        std::string s = rand_string(1000000, CharType::ZeroOne);
-        a.from_str(s, 2);
-        return a;
-    };
-    BENCHMARK("big int read base 2") {
-        BigInt a;
-        std::string s = rand_string(1000000, CharType::ZeroOne);
-        big_int_parse_prefix = false;
-        a.from_str(s, 2);
-        return a;
-    };
+    std::string s = "6190288290015302286";
+    BigInt a;
+    a.from_str(s);
+    std::string ans = "527502446336747651216";
+    std::string s1 = a.to_str(8);
+    CHECK(s1 == ans);
 }
