@@ -320,18 +320,24 @@ TEST_CASE("test from to string with base pow 2 specail", "[math][BigIntBase][fro
     CHECK(s2 == ans);
 }
 
-// TEST_CASE("test big int from to string", "[math][BigIntBase][from_str][to_str]") {
-//     init_gen();
-//     std::string s = rand_string(100000, Number);
-//     freopen("test.txt", "w", stdout);
-//     std::cout << s << std::endl;
-//     fclose(stdout);
-//     BigInt a;
-//     big_int_parse_prefix = false;
-//     a.from_str(s);
-//     TwilightDream::BigInteger::BigInteger b(s, 10);
-//     auto s1 = a.to_str(10);
-//     auto s2 = b.ToString(10);
-//     CHECK(s1 == s2);
+TEST_CASE("test big int from to string", "[math][BigIntBase][from_str][to_str]") {
+    init_gen();
+    // std::string s = rand_string(72500, Number);
+    freopen("test.txt", "r", stdin);
+    BigInt a;
+    big_int_parse_prefix = false;
+    a.from_str(s);
+    TwilightDream::BigInteger::BigInteger b(s, 10);
+    auto s1 = a.to_str(2);
+    auto s2 = b.ToString(2);
+    std::string s3;
 
-// }
+
+    // std::cin >> s3;
+    // std::cerr << s1.size() << " " << s3.size() << std::endl; 
+    // for (int i = 0; i < s1.size(); i++) {
+    //     if (s1[i] != s3[i]) {
+    //         std::cerr << i << " " << s1[i] << " " << s3[i] << std::endl; 
+    //     } 
+    // }
+}
