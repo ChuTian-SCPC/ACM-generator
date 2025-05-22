@@ -442,3 +442,61 @@ TEST_CASE("test big int from to string benchmark", "[math][BigIntBase][from_str]
         return a.ToString(2);
     };
 }
+
+TEST_CASE("test big int from string with prefix", "[math][BigIntBase][from_str][prefix]") {
+    init_gen();
+
+    // 16进制
+    std::string s1 = "0xFF";
+    BigInt a1(s1);
+    std::string s1_10 = a1.to_str(10);
+    CHECK(s1_10 == "255");
+    
+    // 8进制
+    std::string s2 = "077";
+    BigInt a2(s2);
+    std::string s2_10 = a2.to_str(10);
+    CHECK(s2_10 == "63");
+
+    // 单独的0不是8进制
+    std::string s3 = "0";
+    BigInt a3(s3);
+    std::string s3_10 = a3.to_str(10);
+    CHECK(s3_10 == "0");
+
+    // -0也不是8进制
+    std::string s4 = "-0";
+    BigInt a4(s4);
+    std::string s4_10 = a4.to_str(10);
+    CHECK(s4_10 == "0");
+
+    // 2进制
+    std::string s5 = "0b10101";
+    BigInt a5(s5);
+    std::string s5_10 = a5.to_str(10);
+    CHECK(s5_10 == "21");
+
+    // 多个负号
+    std::string s6 = "--123";
+    BigInt a6(s6);
+    std::string s6_10 = a6.to_str(10);
+    CHECK(s6_10 == "123");
+
+    // 负16进制
+    std::string s7 = "-0xFF";
+    BigInt a7(s7);
+    std::string s7_10 = a7.to_str(10);
+    CHECK(s7_10 == "-255");
+
+    // 负8进制
+    std::string s8 = "-077";
+    BigInt a8(s8);
+    std::string s8_10 = a8.to_str(10);
+    CHECK(s8_10 == "-63");
+
+    // 负2进制
+    std::string s9 = "-0b10101";
+    BigInt a9(s9);
+    std::string s9_10 = a9.to_str(10);
+    CHECK(s9_10 == "-21");
+}

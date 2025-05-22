@@ -54,6 +54,14 @@ namespace generator {
                 set_output_default();
             }
 
+            BigInt(const std::string& s, int base = -1) : _in_out_base(base) {
+                set_from_str_default();
+                set_input_default();
+                set_to_str_default();
+                set_output_default();
+                from_str(s, base);
+            }
+
             BigInt(const BigInt& other) : 
                 BigIntCalculator<BigInt>(other), 
                 _from_str_function(other._from_str_function), 
@@ -128,7 +136,7 @@ namespace generator {
                 _to_str_function = [](const BigInt& num, int base) { return num.__default_to_str(base); };
             }
 
-            std::string to_str(int base = 10) const {
+            std::string to_str(int base = -1) const {
                 return _to_str_function(*this, base);
             }
 
@@ -177,13 +185,6 @@ namespace generator {
                 return p;
             }
 
-            void __judge_base() const {
-                if (_in_out_base == 0 || _in_out_base == 1 || _in_out_base < -1) {
-                    _msg::__fail_msg(_msg::_defl, "base can't be 0 or 1 or negative.");
-                }
-                _setting::CharSetCheck::enable_size(_in_out_base == -1 ? 10 : _in_out_base);
-            }
-
             static BigInt __get_base_pow(int base, int p) {
                 if (!_setting::big_int_cache_pow) return BigInt::pow(base, p);
                 static int origin_base = -1;
@@ -226,6 +227,8 @@ namespace generator {
                     for (int i = start; i < end; i++) {
                         num *= base;
                         int v = mp[std::string(1, s[i])];
+                        if (v >= base) _msg::__fail_msg(_msg::_defl, 
+                            tools::string_format("string with out base character %c can't be read.", s[i]));
                         num += v;
                     }
                     auto res = BigInt(num);
@@ -242,15 +245,17 @@ namespace generator {
                 val.data_ref() = std::move(__from_string(s, start, end, base, limit).data());
             }
 
-            void __from_string_pow2(BigInt& val, const std::string& s, int base) {
+            void __from_string_pow2(BigInt& val, const std::string& s, int start, int base) {
                 int t = __calculate_pow2(base);
                 int n = s.size();
                 int bit = __digits();
                 u64 add = 0;
                 int p = 0;
                 auto& mp = _setting::BigNumberSetting::labels_map();
-                for (int i = n - 1; i >= 0; i--) {
+                for (int i = n - 1; i >= start; i--) {
                     u64 v = mp[std::string(1, s[i])];
+                        if (v >= base) _msg::__fail_msg(_msg::_defl, 
+                            tools::string_format("string with out base character %c can't be read.", s[i]));
                     add += (v << p);
                     p += t;
                     if (p >= bit) {
@@ -263,23 +268,24 @@ namespace generator {
             }
 
             void __default_from_str(const std::string& s) {
-                __judge_base();
                 _setting::CharSetCheck::enable_default_read();
                 int p = __parse_negative(s);
+                int actual_base = _in_out_base == -1 ? 10 : _in_out_base;
                 if (_setting::big_int_parse_prefix) {
                     int b = b = __parse_base(s, p);
-                    if (b != -1 && _in_out_base != -1 && _in_out_base!= b) {
+                    if (b != -1 && _in_out_base != -1 && _in_out_base != b) {
                         _msg::__fail_msg(_msg::_defl, "base is not match.");
-                    }                    
+                    }
+                    if (b!= -1) actual_base = b;         
                 }
 
-                _data.clear();
-                int actual_base = _in_out_base == -1 ? 10 : _in_out_base;
+                _data.clear();     
+                _setting::CharSetCheck::enable_base(actual_base);
                 if (s.empty()) _msg::__fail_msg(_msg::_defl, "empty string can't be read.");
-                if (BigInt::__is_pow2(actual_base)) __from_string_pow2(*this, s, actual_base);
+                if (BigInt::__is_pow2(actual_base)) __from_string_pow2(*this, s, p, actual_base);
                 else {
                     int limit = __calculate_limit(actual_base);
-                    __from_string(*this, s, 0, s.size(), actual_base, limit);
+                    __from_string(*this, s, p, s.size(), actual_base, limit);
                 }
             }
 
@@ -406,13 +412,14 @@ namespace generator {
             }
 
             std::string __default_to_str(int base) const {
-                __judge_base();
-                _setting::CharSetCheck::enable_size(base);
+                int out_base;
+                if (base == -1) out_base = _in_out_base == -1 ? 10 : _in_out_base;
+                else out_base = base;
+                _setting::CharSetCheck::enable_base(out_base);
                 _setting::CharSetCheck::enable_default_write();
-                if (base <= 1) _msg::__fail_msg(_msg::_defl, "base can't be less than or equal to 1.");
                 if (__is_zero()) return "0";
-                if (BigInt::__is_pow2(base)) return __to_string_pow2(base);
-                else return __to_string(base);
+                if (BigInt::__is_pow2(out_base)) return __to_string_pow2(out_base);
+                else return __to_string(out_base);
             }
 
             void __default_output(std::ostream& os) const {

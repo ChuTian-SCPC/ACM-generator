@@ -36,7 +36,10 @@ namespace generator {
                 }
             }
 
-            static void enable_size(int base) {
+            static void enable_base(int base) {
+                if (base <= 1) {
+                    _msg::__fail_msg(_msg::_defl, "base must greater or equal to 2, but found %d.", base);
+                }
                 int size = _setting::BigNumberSetting::labels().size();
                 if (size < base) {
                     _msg::__fail_msg(_msg::_defl, tools::string_format(
