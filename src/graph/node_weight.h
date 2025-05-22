@@ -140,6 +140,24 @@ namespace generator {
 
             template <typename NodeType>
             using FlowerChain = basic::FlowerChain<NodeType, void>;
+
+            template <typename NodeType>
+            using DegreeTree = basic::DegreeTree<NodeType, void>;
+
+            template <typename NodeType>
+            using DegreeTreeGen = basic::DegreeTreeGen<NodeType, void>;
+
+            template <typename NodeType>
+            using SonTree = basic::SonTree<NodeType, void>;
+
+            template <typename NodeType>
+            using SonTreeGen = basic::SonTreeGen<NodeType, void>;
+
+            template <typename NodeType>
+            using StartReachableGraph = basic::StartReachableGraph<NodeType, void>;
+
+            template <typename NodeType>
+            using StartReachableGraphGen = basic::StartReachableGraphGen<NodeType, void>;
         } // namespace node_weight
     } // namespace rand_graph
 } // namespace generator

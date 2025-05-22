@@ -179,8 +179,8 @@ namespace generator {
                     _CONTEXT_GET(node_count)
                     Tree<void, void> tree(node_count, 0);
                     tree.gen();
-                    std::vector <_Edge<void>> edge = tree.edges();
-                    for (auto e: edge) __add_edge(e.u(), e.v());
+                    std::vector <_Edge<void>>& edge = tree.edges_ref();
+                    for (auto& e: edge) __add_edge(e.u(), e.v());
                 }
 
                 virtual void __generate_graph() {
