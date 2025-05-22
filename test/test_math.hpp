@@ -320,24 +320,125 @@ TEST_CASE("test from to string with base pow 2 specail", "[math][BigIntBase][fro
     CHECK(s2 == ans);
 }
 
-TEST_CASE("test big int from to string", "[math][BigIntBase][from_str][to_str]") {
+TEST_CASE("test big int from to string (2 -> 2)", "[math][BigIntBase][from_str][to_str][2_2]") {
     init_gen();
-    // std::string s = rand_string(72500, Number);
-    freopen("test.txt", "r", stdin);
+    std::string s = rand_string(1000000, ZeroOne);
+    BigInt a;
+    big_int_parse_prefix = false;
+    a.from_str(s, 2);
+    TwilightDream::BigInteger::BigInteger b(s, 2);
+    auto s1 = a.to_str(2);
+    auto s2 = b.ToString(2);
+    CHECK(s1 == s2);        
+}
+
+TEST_CASE("test big int from to string (2 -> 10)", "[math][BigIntBase][from_str][to_str][2_10]") {
+    init_gen();
+    std::string s = rand_string(1000000, ZeroOne);
+    BigInt a;
+    big_int_parse_prefix = false;
+    a.from_str(s, 2);
+    TwilightDream::BigInteger::BigInteger b(s, 2);
+    auto s1 = a.to_str(10);
+    auto s2 = b.ToString(10);
+    CHECK(s1 == s2);        
+}
+
+TEST_CASE("test big int from to string (10 -> 10)", "[math][BigIntBase][from_str][to_str][10_10]") {
+    init_gen();
+    std::string s = rand_string(100000, Number);
     BigInt a;
     big_int_parse_prefix = false;
     a.from_str(s);
-    TwilightDream::BigInteger::BigInteger b(s, 10);
+    TwilightDream::BigInteger::BigInteger b(s);
+    auto s1 = a.to_str(10);
+    auto s2 = b.ToString(10);
+    CHECK(s1 == s2);        
+}
+
+TEST_CASE("test big int from to string (10 -> 2)", "[math][BigIntBase][from_str][to_str][10_2]") {
+    init_gen();
+    std::string s = rand_string(100000, Number);
+    BigInt a;
+    big_int_parse_prefix = false;
+    a.from_str(s);
+    TwilightDream::BigInteger::BigInteger b(s);
     auto s1 = a.to_str(2);
     auto s2 = b.ToString(2);
-    std::string s3;
+    CHECK(s1 == s2);        
+}
 
+TEST_CASE("test big int from to string (any -> any)", "[math][BigIntBase][from_str][to_str][any_any]") {
+    init_gen();
+    std::string st = "0";
+    auto& labels = BigNumberSetting::labels();
+    for (int i = 2; i <= 36 ; i++) {
+        st += labels[i - 1];
+        std::string s = rand_string(1000, st);
+        BigInt a;
+        big_int_parse_prefix = false;
+        a.from_str(s, i);
+        TwilightDream::BigInteger::BigInteger b(s, i);
+        for (int j = 2; j <= 36; j++) {
+            auto s1 = a.to_str(j);
+            auto s2 = b.ToString(j);
+            CHECK(s1 == s2);
+        }
+    } 
+}
 
-    // std::cin >> s3;
-    // std::cerr << s1.size() << " " << s3.size() << std::endl; 
-    // for (int i = 0; i < s1.size(); i++) {
-    //     if (s1[i] != s3[i]) {
-    //         std::cerr << i << " " << s1[i] << " " << s3[i] << std::endl; 
-    //     } 
-    // }
+TEST_CASE("test big int from to string benchmark", "[math][BigIntBase][from_str][to_str][!benchmark]") {
+    init_gen();
+    big_int_parse_prefix = false;
+    BENCHMARK("big int from str base 10") {
+        std::string s = rand_string(1000, Number);
+        BigInt a;
+        a.from_str(s);
+        return a;
+    };
+
+    BENCHMARK("big int from str base 10 compare") {
+        std::string s = rand_string(10000, Number);
+        TwilightDream::BigInteger::BigInteger a(s);
+        return a;
+    };
+
+    BENCHMARK("big int from str base 2") {
+        std::string s = rand_string(10000, ZeroOne);
+        BigInt a;
+        a.from_str(s, 2);
+        return a; 
+    };
+
+    BENCHMARK("big int from str base 2 compare") {
+        std::string s = rand_string(10000, ZeroOne);
+        TwilightDream::BigInteger::BigInteger a(s, 2);
+        return a; 
+    };
+
+    BENCHMARK("big int to str base 10") {
+        std::string s = rand_string(10000, Number);
+        BigInt a;
+        a.from_str(s);
+        return a.to_str(10);
+    };
+
+    BENCHMARK("big int to str base 10 compare") {
+        std::string s = rand_string(10000, Number);
+        TwilightDream::BigInteger::BigInteger a(s);
+        return a.ToString(10);
+    };
+
+    BENCHMARK("big int to str base 2") {
+        std::string s = rand_string(10000, Number);
+        BigInt a;
+        a.from_str(s);
+        return a.to_str(2);
+    };
+
+    BENCHMARK("big int to str base 2 compare") {
+        std::string s = rand_string(10000, Number);
+        TwilightDream::BigInteger::BigInteger a(s);
+        return a.ToString(2);
+    };
 }

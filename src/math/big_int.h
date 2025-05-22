@@ -13,7 +13,7 @@ namespace generator {
         class BigInt : public BigIntCalculator<BigInt> {
         public:
             friend class BigIntCalculator<BigInt>;
-            const static u32 COMPRESS_BIT = 25;
+            const static u32 COMPRESS_BIT = 20;
             constexpr static u32 COMPRESS_MOD = 1 << COMPRESS_BIT;
             constexpr static u32 COMPRESS_MASK = COMPRESS_MOD - 1;
             using FromStrFunction = std::function<void(BigInt&, const std::string&)>;
@@ -228,7 +228,7 @@ namespace generator {
                         int v = mp[std::string(1, s[i])];
                         num += v;
                     }
-                    auto res =  BigInt(num);
+                    auto res = BigInt(num);
                     return res;
                 }                    
                 int mid = (start + end) / 2;
@@ -462,7 +462,9 @@ namespace generator {
             i32 __radix() const { return 2; }
             i32 __digits() const { return COMPRESS_BIT; }
 
-            void __copy_status(const BigInt&) {}
+            void __copy_status(const BigInt& other) {
+                _in_out_base =  other._in_out_base;
+            }
         };
     } // namespace math
 } // namespace generator

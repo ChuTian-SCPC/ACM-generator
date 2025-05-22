@@ -267,6 +267,10 @@ namespace generator {
                 return operator%=(TYPE(a));
             }
 
+            explicit operator bool() const {
+                return !__is_zero();
+            }
+
             template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
             static TYPE pow(const TYPE& a, T b) {
                 TYPE result(a);
@@ -308,7 +312,10 @@ namespace generator {
 
             template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
             bool operator==(const T& other) const {
-                return *this == TYPE(other); 
+                TYPE r;
+                r.__copy_status(static_cast<const TYPE&>(*this));
+                r.set_value(other);
+                return *this == r; 
             }
 
             template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
@@ -322,7 +329,10 @@ namespace generator {
 
             template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
             bool operator!=(const T& other) const {
-                return *this != TYPE(other);
+                TYPE r;
+                r.__copy_status(static_cast<const TYPE&>(*this));
+                r.set_value(other);
+                return *this != r;
             }
 
             template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
