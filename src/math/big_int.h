@@ -102,6 +102,22 @@ namespace generator {
                 return *this;
             }
 
+            BigInt& operator=(const std::string& str) {
+                from_str(str, _in_out_base);
+                return *this;
+            }
+
+            BigInt& operator=(const char* str) {
+                from_str(str, _in_out_base);
+                return *this;
+            }
+
+            template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+            BigInt& operator=(T val) {
+                set_value(val);
+                return *this;
+            }
+
             void set_from_str(FromStrFunction from_str_function) {
                 _from_str_function = from_str_function; 
             }
@@ -276,7 +292,10 @@ namespace generator {
                     if (b != -1 && _in_out_base != -1 && _in_out_base != b) {
                         _msg::__fail_msg(_msg::_defl, "base is not match.");
                     }
-                    if (b != -1) actual_base = b;         
+                    if (b != -1) {
+                        actual_base = b;
+                        _in_out_base = b;
+                    }   
                 }
 
                 _data.clear();     
