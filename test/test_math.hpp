@@ -153,7 +153,7 @@ void crt_multiply_test_int() {
     for (size_t i = 0; i < v.size(); i++) {
         vl.push_back(v[i]); 
     }
-    auto x = CrtMultiplier<>::square(vl, 1 << 25);
+    auto x = CrtMultiplier<>::square(vl, 1 << 20);
     BigInt c;
     auto& d = c.data_ref();
     d.resize(x.size());
