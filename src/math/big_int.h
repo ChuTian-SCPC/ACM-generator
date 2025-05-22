@@ -228,7 +228,7 @@ namespace generator {
                         num *= base;
                         int v = mp[std::string(1, s[i])];
                         if (v >= base) _msg::__fail_msg(_msg::_defl, 
-                            tools::string_format("string with out base character %c can't be read.", s[i]));
+                            tools::string_format("string with out base(%d) character %c(%d) can't be read.", base, s[i], v));
                         num += v;
                     }
                     auto res = BigInt(num);
@@ -255,7 +255,7 @@ namespace generator {
                 for (int i = n - 1; i >= start; i--) {
                     u64 v = mp[std::string(1, s[i])];
                         if (v >= base) _msg::__fail_msg(_msg::_defl, 
-                            tools::string_format("string with out base character %c can't be read.", s[i]));
+                            tools::string_format("string with out base(%d) character %c(%d) can't be read.", base, s[i], v));
                     add += (v << p);
                     p += t;
                     if (p >= bit) {
@@ -272,11 +272,11 @@ namespace generator {
                 int p = __parse_negative(s);
                 int actual_base = _in_out_base == -1 ? 10 : _in_out_base;
                 if (_setting::big_int_parse_prefix) {
-                    int b = b = __parse_base(s, p);
+                    int b = __parse_base(s, p);
                     if (b != -1 && _in_out_base != -1 && _in_out_base != b) {
                         _msg::__fail_msg(_msg::_defl, "base is not match.");
                     }
-                    if (b!= -1) actual_base = b;         
+                    if (b != -1) actual_base = b;         
                 }
 
                 _data.clear();     

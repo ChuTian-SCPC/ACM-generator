@@ -307,7 +307,7 @@ TEST_CASE("ensure simple div won't cost too long", "[math][BigIntBase][div_mod][
 
 }
 
-TEST_CASE("test from to string with base pow 2 specail", "[math][BigIntBase][from_str][to_str]") {
+TEST_CASE("test from to string with base pow 2 specail", "[math][BigInt][from_str][to_str]") {
     init_gen();
     std::string s = "6190288290015302286";
     BigInt a;
@@ -320,7 +320,7 @@ TEST_CASE("test from to string with base pow 2 specail", "[math][BigIntBase][fro
     CHECK(s2 == ans);
 }
 
-TEST_CASE("test big int from to string (2 -> 2)", "[math][BigIntBase][from_str][to_str][2_2]") {
+TEST_CASE("test big int from to string (2 -> 2)", "[math][BigInt][from_str][to_str][2_2]") {
     init_gen();
     std::string s = rand_string(1000000, ZeroOne);
     BigInt a;
@@ -332,7 +332,7 @@ TEST_CASE("test big int from to string (2 -> 2)", "[math][BigIntBase][from_str][
     CHECK(s1 == s2);        
 }
 
-TEST_CASE("test big int from to string (2 -> 10)", "[math][BigIntBase][from_str][to_str][2_10]") {
+TEST_CASE("test big int from to string (2 -> 10)", "[math][BigInt][from_str][to_str][2_10]") {
     init_gen();
     std::string s = rand_string(1000000, ZeroOne);
     BigInt a;
@@ -344,7 +344,7 @@ TEST_CASE("test big int from to string (2 -> 10)", "[math][BigIntBase][from_str]
     CHECK(s1 == s2);        
 }
 
-TEST_CASE("test big int from to string (10 -> 10)", "[math][BigIntBase][from_str][to_str][10_10]") {
+TEST_CASE("test big int from to string (10 -> 10)", "[math][BigInt][from_str][to_str][10_10]") {
     init_gen();
     std::string s = rand_string(100000, Number);
     BigInt a;
@@ -356,7 +356,7 @@ TEST_CASE("test big int from to string (10 -> 10)", "[math][BigIntBase][from_str
     CHECK(s1 == s2);        
 }
 
-TEST_CASE("test big int from to string (10 -> 2)", "[math][BigIntBase][from_str][to_str][10_2]") {
+TEST_CASE("test big int from to string (10 -> 2)", "[math][BigInt][from_str][to_str][10_2]") {
     init_gen();
     std::string s = rand_string(100000, Number);
     BigInt a;
@@ -368,7 +368,7 @@ TEST_CASE("test big int from to string (10 -> 2)", "[math][BigIntBase][from_str]
     CHECK(s1 == s2);        
 }
 
-TEST_CASE("test big int from to string (any -> any)", "[math][BigIntBase][from_str][to_str][any_any]") {
+TEST_CASE("test big int from to string (any -> any)", "[math][BigInt][from_str][to_str][any_any]") {
     init_gen();
     std::string st = "0";
     auto& labels = BigNumberSetting::labels();
@@ -387,7 +387,7 @@ TEST_CASE("test big int from to string (any -> any)", "[math][BigIntBase][from_s
     } 
 }
 
-TEST_CASE("test big int from to string benchmark", "[math][BigIntBase][from_str][to_str][!benchmark]") {
+TEST_CASE("test big int from to string benchmark", "[math][BigInt][from_str][to_str][!benchmark]") {
     init_gen();
     big_int_parse_prefix = false;
     BENCHMARK("big int from str base 10") {
@@ -443,9 +443,9 @@ TEST_CASE("test big int from to string benchmark", "[math][BigIntBase][from_str]
     };
 }
 
-TEST_CASE("test big int from string with prefix", "[math][BigIntBase][from_str][prefix]") {
+TEST_CASE("test big int from string with prefix", "[math][BigInt][from_str][prefix]") {
     init_gen();
-
+    big_int_parse_prefix = true;
     // 16进制
     std::string s1 = "0xFF";
     BigInt a1(s1);
@@ -482,19 +482,19 @@ TEST_CASE("test big int from string with prefix", "[math][BigIntBase][from_str][
     std::string s6_10 = a6.to_str(10);
     CHECK(s6_10 == "123");
 
-    // 负16进制
+    // 负的16进制
     std::string s7 = "-0xFF";
     BigInt a7(s7);
     std::string s7_10 = a7.to_str(10);
     CHECK(s7_10 == "-255");
 
-    // 负8进制
+    // 负的8进制
     std::string s8 = "-077";
     BigInt a8(s8);
     std::string s8_10 = a8.to_str(10);
     CHECK(s8_10 == "-63");
 
-    // 负2进制
+    // 负的2进制
     std::string s9 = "-0b10101";
     BigInt a9(s9);
     std::string s9_10 = a9.to_str(10);
