@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   call-check-header:
-    uses: ./amalgamate_debug.yml
+    uses: ./.github/workflows/amalgamate_debug.yml
     with:
       file: generator.h
       command: xmake merge
