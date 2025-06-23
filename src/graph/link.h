@@ -121,11 +121,24 @@ namespace generator {
                 }
 
                 void __init_source(_GenGraph<NodeType, EdgeType>& source) {
-                    if (source.edge_count() != (int)source.edges_ref().size()) source.gen();
+                    if (!__is_generated(source)) source.gen();
                 }
 
                 void __init_source(_GenTree<NodeType, EdgeType>& source) {
-                    if (source.node_count() - 1 != (int)source.edges_ref().size()) source.gen();
+                    if (!__is_generated(source)) source.gen();
+                }
+                
+                template<template<typename, typename> class TG, typename T = NodeType, _NotHasT<T> = 0>
+                bool __is_generated(TG<NodeType, EdgeType>& source) {
+                    if (source.node_count() - 1 != (int)source.edges_ref().size()) return false;
+                    return true;
+                }
+
+                template<template<typename, typename> class TG, typename T = NodeType, _HasT<T> = 0>
+                bool __is_generated(TG<NodeType, EdgeType>& source) {
+                    if (source.node_count() - 1 != (int)source.edges_ref().size()) return false;
+                    if (source.node_count() != (int)source.nodes_weight_ref().size()) return false;
+                    return true;
                 }
 
                 template<template<typename, typename> class TG>
