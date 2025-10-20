@@ -1,0 +1,42 @@
+name: Check Header Consistency
+
+on:
+  workflow_call:
+    inputs:
+      file:
+        required: true
+        type: string
+      command:
+        default: xmake merge
+        type: string
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Xmake
+        run: bash <(curl -fsSL https://xmake.io/shget.text)
+
+      - name: Generate Header
+        run: ${{ inputs.command }}
+
+      - name: Validate Consistency
+        run: |
+          sed 's/\r//' "${{ inputs.file }}" | sed '/^\/\/ Time: /d' > local_clean.h
+          git show HEAD:${{ inputs.file }} | sed 's/\r//' | sed '/^\/\/ Time: /d' > head_clean.h
+
+          if ! diff -u head_clean.h local_clean.h; then
+            echo "::error::${{ inputs.file }} is not up to date. Please run '${{ inputs.command }}' and commit the result."
+            exit 1
+          fi
+
+      - name: Upload diff context (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: header-diff
+          path: |
+            local_clean.h
+            head_clean.h

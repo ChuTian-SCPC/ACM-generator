@@ -64,6 +64,7 @@ namespace generator {
         }
         
         void __close_output_file_to_console() {
+            fflush(stdout);
             if (original_stdout != -1) {
                 dup2(original_stdout, fileno(stdout));  // 恢复 stdout
                 close(original_stdout);
@@ -72,6 +73,7 @@ namespace generator {
         }
         
         void __close_error_file_to_console() {
+            fflush(stderr);
             if (original_stderr != -1) {
                 dup2(original_stderr, fileno(stderr));  // 恢复 stderr
                 close(original_stderr);

@@ -383,7 +383,7 @@ namespace generator {
             if (range * q < lower || lower < q) _msg::__fail_msg(_msg::_defl,
                 tools::string_format("lower must in range [%d, %lld], but found %lld.", q, range, lower));
             __judge_range(lower, upper);
-            if (range * q < upper || upper < d) _msg::__fail_msg(_msg::_defl,
+            if (range * q < upper || upper < q) _msg::__fail_msg(_msg::_defl,
                 tools::string_format("upper must in range [%d, %lld], but found %lld.", q, range, upper));
             T sum = rand_numeric::rand_int(lower, upper);
             auto ranges = rand_sum(q, sum, 0, range);

@@ -322,6 +322,21 @@ TEST_CASE("link test", "[rand_graph][Link][TreeLink]") {
     CHECK(check_edges(exp_edges, l.edges()));
 }
 
+TEST_CASE("link test for issue-27", "[rand_graph][Link][TreeLink][Issue27]") {
+    auto f = []() { return rand_int(1, 10);};
+    node_weight::FlowerChain<int> t(10);
+    t.set_chain_size(1);
+    t.set_nodes_weight_function(f);
+    t.gen();
+    CHECK(true);
+
+    node_weight::FlowerChain<int> t2(10);
+    t2.set_chain_size(9);
+    t2.set_nodes_weight_function(f);
+    t2.gen();
+    CHECK(true);
+}
+
 bool start_reachable_check(int n, int m) {
     unweight::StartReachableGraph g(n, m, 0);
     g.set_start(rand_int(1, n));
