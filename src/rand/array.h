@@ -380,10 +380,11 @@ namespace generator {
             __judge_vector_lower_bound(q, "vector");
             __judge_vector_upper_bound(q, "vector");
             long long range = to - from + 1;
-            if (range * q < lower) _msg::__fail_msg(_msg::_defl,
-                tools::string_format("range (%lld - %lld + 1 = %lld) * query %d must greater than or equal to lower limit %lld.", to, from, range, q, lower));
-            if (lower > upper) _msg::__fail_msg(_msg::_defl,
-                tools::string_format("lower limit %lld must less than or equal to upper limit %lld.", lower, upper));
+            if (range * q < lower || lower < q) _msg::__fail_msg(_msg::_defl,
+                tools::string_format("lower must in range [%d, %lld], but found %lld.", q, range, lower));
+            __judge_range(lower, upper);
+            if (range * q < upper || upper < d) _msg::__fail_msg(_msg::_defl,
+                tools::string_format("upper must in range [%d, %lld], but found %lld.", q, range, upper));
             T sum = rand_numeric::rand_int(lower, upper);
             auto ranges = rand_sum(q, sum, 0, range);
             std::vector<std::pair<T, T>> res(q);
