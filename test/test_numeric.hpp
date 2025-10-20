@@ -111,3 +111,21 @@ TEST_CASE("rand by probility", "[rand_numeric][rand_prob]") {
         CHECK(doubleCompare(p, q, 0.01)); // 1%的误差
     }
 }
+
+TEST_CASE("rand range", "[rand_numeric][rand_range]") {
+    init_gen();
+    bool f1 = loop_check([]() {
+        auto x = rand_range(1, 100);
+        return x.first >= 1 && x.first <= 100 && x.second >= 1 && x.second <= 100 && x.first <= x.second;
+    }, 100);
+    CHECK(f1);
+    
+    auto x1 = rand_range(1, 1);
+    CHECK((x1.first == 1 && x1.second == 1));
+
+    bool f2 = loop_check([]() {
+        auto x = rand_range(1, 1e9);
+        return x.first >= 1 && x.first <= (int)1e9 && x.second >= 1 && x.second <= (int)1e9 && x.first <= x.second;
+    }, 100);
+    CHECK(f2);
+}

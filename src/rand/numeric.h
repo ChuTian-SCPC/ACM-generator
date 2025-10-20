@@ -449,6 +449,25 @@ namespace generator {
             return *(elements.begin() + pos);
         }
 
+        template<typename T = long long>
+        typename std::enable_if<std::is_integral<T>::value, std::pair<T, T>>::type
+        rand_range(T from, T to) {
+            T l = rand_int<T>(from, to);
+            T r = rand_int<T>(from, to);
+            if (l > r) std::swap(l, r);
+            return std::make_pair(l, r);
+        }
+
+        template <typename R = long long, typename T = long long, typename U = long long>
+        typename std::enable_if<
+            std::is_integral<R>::value &&
+            std::is_convertible<T, R>::value && 
+            std::is_convertible<U, R>::value, std::pair<R, R>>::type
+        rand_range(T from, U to) {
+            R from_r = __change_to_value<T, R>(from, "from");
+            R to_r = __change_to_value<U, R>(to, "to");
+            return rand_range<R>(from_r, to_r);
+        }
     } // namespace rand_numeric
 } // namespace generator
 

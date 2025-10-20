@@ -117,3 +117,51 @@ TEST_CASE("rand vector speed up", "[rand_array][rand_vector][!benchmark]") {
         return rand_vector<int>(10000000, [](){return rand_int(-1000000, 1000000);});
     };
 }
+
+TEST_CASE("rand range query", "[rand_array][rand_range][rand_range_query]") {
+    init_gen();
+    OutStream vector_stream(false);
+    _defl.swap(vector_stream); 
+    bool f1 = loop_check([]() {
+        auto x = rand_range_query(10, 1, 100);
+        for (auto p : x) {
+            if (p.first < 1 || p.first > 100 || p.second < 1 || p.second > 100 || p.first > p.second) return false;
+        }
+        return true;
+    }, 100);
+    CHECK(f1);
+
+    bool f2 = loop_check([]() {
+        auto x = rand_range_query(10, 1, 100, 100, 100);
+        int sum = 0;
+        for (auto p : x) {
+            if (p.first < 1 || p.first > 100 || p.second < 1 || p.second > 100 || p.first > p.second) return false;
+            sum += p.second - p.first + 1;
+        }
+        return sum == 100;
+    }, 100);
+    CHECK(f2);
+
+    bool f3 = loop_check([]() {
+        auto x = rand_range_query(10, 1, 100, 100);
+        int sum = 0;
+        for (auto p : x) {
+            if (p.first < 1 || p.first > 100 || p.second < 1 || p.second > 100 || p.first > p.second) return false;
+            sum += p.second - p.first + 1;
+        }
+        return sum >= 100;
+    }, 100);
+    CHECK(f3);
+
+    bool f4 = loop_check([]() {
+        auto x = rand_range_query(100000, 1, 1e6, 1e9);
+        long long sum = 0;
+        for (auto p : x) {
+            if (p.first < 1 || p.first > (int)1e6 || p.second < 1 || p.second > (int)1e6 || p.first > p.second) return false;
+            sum += p.second - p.first + 1;
+        }
+        return sum >= (int)1e9;
+    }, 10);
+    CHECK(f4);
+    _defl.swap(vector_stream);
+}
