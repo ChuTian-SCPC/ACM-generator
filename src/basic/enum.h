@@ -145,6 +145,17 @@ namespace generator {
       ONLINE_FRONT,
       ON_SEGMENT
     };
+
+    enum VectorOrder {
+      Ascending,  // 递增
+      Descending, // 递减
+      Random
+    };
+
+    enum VectorUniqueness {
+      Distinct, // 不重复
+      Duplicate // 允许重复
+    };
   } // namespace _enum
 } // namespace generator
 

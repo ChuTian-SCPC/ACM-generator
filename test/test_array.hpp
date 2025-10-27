@@ -165,3 +165,64 @@ TEST_CASE("rand range query", "[rand_array][rand_range][rand_range_query]") {
     CHECK(f4);
     _defl.swap(vector_stream);
 }
+
+TEST_CASE("rand int vector ordered and distinct", "[rand_array][rand_vector][VectorOrder][VectorUniqueness]") {
+    init_gen();
+    bool f1 = loop_check([]() {
+        int l = rand_int(100, 200);
+        auto x = rand_vector(100, 1, l, VectorOrder::Ascending, VectorUniqueness::Distinct);
+        std::vector<int> y(l + 1, 0);
+        for (int i = 0; i < 100; i++) {
+            y[x[i]]++;
+            if (y[x[i]] > 1) return false;
+            if (i > 0 && x[i] <= x[i - 1]) return false;
+        }
+        return true;
+    }, 10);
+    CHECK(f1);
+
+    bool f2 = loop_check([]() {
+        int l = rand_int(100, 200);
+        auto x = rand_vector(100, 1, l, VectorOrder::Descending, VectorUniqueness::Distinct);
+        std::vector<int> y(l + 1, 0);
+        for (int i = 0; i < 100; i++) {
+            y[x[i]]++;
+            if (y[x[i]] > 1) return false;
+            if (i > 0 && x[i] >= x[i - 1]) return false;
+        }
+        return true;
+    }, 10);
+    CHECK(f2);
+
+    bool f3 = loop_check([]() {
+        int l = rand_int(100, 200);
+        auto x = rand_vector(100, 1, l, VectorOrder::Ascending);
+        for (int i = 0; i < 100; i++) {
+            if (i > 0 && x[i] < x[i - 1]) return false;
+        }
+        return true;
+    }, 10);
+    CHECK(f3);
+
+    bool f4 = loop_check([]() {
+        int l = rand_int(100, 200);
+        auto x = rand_vector(100, 1, l, VectorOrder::Descending);
+        for (int i = 0; i < 100; i++) {
+            if (i > 0 && x[i] > x[i - 1]) return false;
+        }
+        return true;
+    }, 10);
+    CHECK(f4);
+
+    bool f5 = loop_check([]() {
+        int l = rand_int(100, 200);
+        auto x = rand_vector(100, 1, l, VectorOrder::Random, VectorUniqueness::Distinct);
+        std::vector<int> y(l + 1, 0);
+        for (int i = 0; i < 100; i++) {
+            y[x[i]]++;
+            if (y[x[i]] > 1) return false;
+        }
+        return true;
+    }, 10);
+    CHECK(f5);
+}
