@@ -76,6 +76,8 @@ namespace generator {
         template <typename T = long long>
         typename std::enable_if<std::is_integral<T>::value, std::pair<T, T>>::type
         __format_to_int_range(std::string s) {
+            static std::unordered_map<std::string, std::pair<T, T>> range_cache;
+            if(range_cache.find(s) != range_cache.end()) return range_cache[s];
             size_t open = s.find_first_of("[(");
             size_t close = s.find_first_of(")]");
             size_t comma = s.find(',');
@@ -88,10 +90,13 @@ namespace generator {
             if (s[close] == ')') right--;
             _msg::__warn_msg(_msg::_defl, tools::string_format("translate format \"%s\" into range [%s, %s], please check.",
                 s.c_str(), std::to_string(left).c_str(), std::to_string(right).c_str()));
-            return std::make_pair(left, right);
+            range_cache[s] = std::make_pair(left, right);
+            return range_cache[s];
         }
 
         int __number_accuracy(const std::string& s) {
+            static std::unordered_map<std::string, int> accuracy_cache;
+            if(accuracy_cache.find(s) != accuracy_cache.end()) return accuracy_cache[s];
             int digit = 1;
             bool is_decimal_part = false;
             bool is_scientific_part = false;
@@ -109,12 +114,15 @@ namespace generator {
                 int scientific_length = std::stoi(scientific_part);
                 digit -= scientific_length;
             }
-            return digit;
+            accuracy_cache[s] = digit;
+            return accuracy_cache[s];
         }
         
         template <typename T = double>
         typename std::enable_if<std::is_floating_point<T>::value, std::pair<T, T>>::type
         __format_to_double_range(std::string s) {
+            static std::unordered_map<std::string, std::pair<T, T>> range_cache;
+            if(range_cache.find(s) != range_cache.end()) return range_cache[s];
             int accuracy = 1;
             size_t open = s.find_first_of("[(");
             size_t close = s.find_first_of(")]");
@@ -133,7 +141,8 @@ namespace generator {
             if(s[close] == ']') right += eps2;
             _msg::__warn_msg(_msg::_defl, tools::string_format("translate format \"%s\" into range [%.*f, %.*f), the accuracy is 10^{-%d}, please check.",
                 s.c_str(), accuracy, left, accuracy, right, accuracy - 1));
-            return std::make_pair(left, right);
+            range_cache[s] = std::make_pair(left, right);
+            return range_cache[s];
         }
 
         template<typename T>
@@ -146,6 +155,58 @@ namespace generator {
         typename std::enable_if<std::is_floating_point<T>::value, std::pair<T, T>>::type
         __format_to_range(std::string s) {
             return __format_to_double_range<T>(s);
+        }
+
+        template <typename T, typename R>
+        typename std::enable_if<std::is_same<T, R>::value, R>::type
+        __change_to_int(T value, std::string) {
+            return value;
+        }
+
+        template <typename T, typename R>
+        typename std::enable_if<!std::is_same<T, R>::value, R>::type
+        __change_to_int(T value, std::string name) {
+            static std::unordered_map<T, R> cache;
+            if(cache.find(value) != cache.end()) return cache[value];
+            R result = static_cast<R>(value);
+            std::string value_s = std::to_string(value);
+            std::string result_s = std::to_string(result);
+            _msg::__warn_msg(_msg::_defl, tools::string_format("change %s number : %s -> %s, please check.",
+                name.c_str(), value_s.c_str(), result_s.c_str()));
+            cache[value] = result;
+            return result;
+        }
+
+        template <typename T, typename R>
+        typename std::enable_if<std::is_same<T, R>::value, R>::type
+        __change_to_double(T value, std::string){
+            return value;
+        }
+
+        template <typename T, typename R>
+        typename std::enable_if<!std::is_same<T, R>::value, R>::type
+        __change_to_double(T value, std::string name){
+            static std::unordered_map<T, R> cache;
+            if(cache.find(value) != cache.end()) return cache[value];
+            R result = static_cast<R>(value);
+            std::string value_s = std::to_string(value);
+            std::string result_s = std::to_string(result);
+            _msg::__warn_msg(_msg::_defl,  tools::string_format("change %s number : %s -> %s, please check.",
+                name.c_str(), value_s.c_str(), result_s.c_str()));
+            cache[value] = result;
+            return result;
+        }
+
+        template <typename T, typename R>
+        typename std::enable_if<std::is_integral<R>::value, R>::type
+        __change_to_value(T value, std::string name) {
+            return __change_to_int<T, R>(value, name);
+        }
+    
+        template <typename T, typename R>
+        typename std::enable_if<std::is_floating_point<R>::value, R>::type
+        __change_to_value(T value, std::string name) {
+            return __change_to_double<T, R>(value, name);
         }
 
     } // namespace rand_numeric

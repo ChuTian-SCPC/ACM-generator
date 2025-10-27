@@ -239,14 +239,11 @@ namespace generator {
         std::vector<T> rand_vector(int size, std::function<T()> func) {
             __judge_vector_lower_bound(size, "vector");
             __judge_vector_upper_bound(size, "vector");
-            _msg::OutStream vector_stream(false);
-            _msg::_defl.swap(vector_stream);    
             std::vector<T> v(size);
             for(int i = 0; i < size; i++){
                 T x = func();
                 v[i] = x;
             }
-            _msg::_defl.swap(vector_stream);
             return v;
         }
 

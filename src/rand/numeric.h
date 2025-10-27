@@ -89,23 +89,6 @@ namespace generator {
             else return (unsigned long)__rand_int_impl<unsigned int>(from, to);
         }
 
-        template <typename T, typename R>
-        typename std::enable_if<std::is_same<T, R>::value, R>::type
-        __change_to_int(T value, std::string) {
-            return value;
-        }
-
-        template <typename T, typename R>
-        typename std::enable_if<!std::is_same<T, R>::value, R>::type
-        __change_to_int(T value, std::string name) {
-            R result = static_cast<T>(value);
-            std::string value_s = std::to_string(value);
-            std::string result_s = std::to_string(result);
-            _msg::__warn_msg(_msg::_defl, tools::string_format("change %s number : %s -> %s, please check.",
-                name.c_str(), value_s.c_str(), result_s.c_str()));
-            return result;
-        }
-
         template <typename T = int>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_int(T n){
@@ -254,23 +237,6 @@ namespace generator {
             return __rand_even_impl<T>(range.first,range.second);
         }
 
-        template <typename T, typename R>
-        typename std::enable_if<std::is_same<T, R>::value, R>::type
-        __change_to_double(T value, std::string){
-            return value;
-        }
-
-        template <typename T, typename R>
-        typename std::enable_if<!std::is_same<T, R>::value, R>::type
-        __change_to_double(T value, std::string name){
-            R result = static_cast<R>(value);
-            std::string value_s = std::to_string(value);
-            std::string result_s = std::to_string(result);
-            _msg::__warn_msg(_msg::_defl,  tools::string_format("change %s number : %s -> %s, please check.",
-                name.c_str(), value_s.c_str(), result_s.c_str()));
-            return result;
-        }
-
         double rand_real() {
             double x = rnd.next();
             return x;
@@ -315,18 +281,6 @@ namespace generator {
             std::pair<T, T> range = __format_to_double_range(format);
             double x = rnd.next(range.first, range.second);
             return x;
-        }
-
-        template <typename T, typename R>
-        typename std::enable_if<std::is_integral<R>::value, R>::type
-        __change_to_value(T value, std::string name) {
-            return __change_to_int<T, R>(value, name);
-        }
-    
-        template <typename T, typename R>
-        typename std::enable_if<std::is_floating_point<R>::value, R>::type
-        __change_to_value(T value, std::string name) {
-            return __change_to_double<T, R>(value, name);
         }
 
         template <typename T>
