@@ -10,6 +10,33 @@
 
 namespace generator {
     namespace rand_numeric {
+        // 检查R是否可以包含T的所有值
+        template<typename T, typename R>
+        struct is_range_contained {
+        private:
+            static constexpr bool check_integral_range() {
+                if (std::is_same<T, R>::value) return true;
+                
+                if (std::is_signed<T>::value && std::is_unsigned<R>::value) {
+                    return std::numeric_limits<R>::max() >= std::numeric_limits<T>::max() &&
+                        std::numeric_limits<T>::min() >= 0; 
+                }
+                
+                if (std::is_unsigned<T>::value && std::is_signed<R>::value) {
+                    return std::numeric_limits<R>::max() >= std::numeric_limits<T>::max();
+                }
+                
+                return std::numeric_limits<R>::min() <= std::numeric_limits<T>::min() &&
+                    std::numeric_limits<R>::max() >= std::numeric_limits<T>::max();
+            }
+            
+        public:
+            static constexpr bool value = 
+                std::is_integral<T>::value &&
+                std::is_integral<R>::value &&
+                check_integral_range();
+        };
+
         template<typename T>
         T __string_to_value(const std::string& s) {
             _msg::__error_msg(_msg::_defl, "Unsupported type.");
@@ -158,13 +185,13 @@ namespace generator {
         }
 
         template <typename T, typename R>
-        typename std::enable_if<std::is_same<T, R>::value, R>::type
+        typename std::enable_if<is_range_contained<T, R>::value, R>::type
         __change_to_int(T value, std::string) {
-            return value;
+            return static_cast<R>(value);
         }
 
         template <typename T, typename R>
-        typename std::enable_if<!std::is_same<T, R>::value, R>::type
+        typename std::enable_if<!is_range_contained<T, R>::value, R>::type
         __change_to_int(T value, std::string name) {
             static std::unordered_map<T, R> cache;
             if(cache.find(value) != cache.end()) return cache[value];

@@ -129,3 +129,19 @@ TEST_CASE("rand range", "[rand_numeric][rand_range]") {
     }, 100);
     CHECK(f2);
 }
+
+TEST_CASE("range contain", "[rand_numeric][is_range_contained]") {
+    init_gen();
+    CHECK((is_range_contained<int, int>::value == true));
+    CHECK((is_range_contained<long long, int>::value == false));
+    CHECK((is_range_contained<int, long long>::value == true));
+    CHECK((is_range_contained<unsigned int, int>::value == false));
+    CHECK((is_range_contained<int, unsigned int>::value == false));
+    CHECK((is_range_contained<unsigned int, long long>::value == true));
+    CHECK((is_range_contained<unsigned int, unsigned long long>::value == true));
+    CHECK((is_range_contained<unsigned long long, unsigned int>::value == false));
+    CHECK((is_range_contained<unsigned long long, long long>::value == false));
+    CHECK((is_range_contained<long long, unsigned long long>::value == false));
+    CHECK((is_range_contained<int, unsigned long long>::value == false));
+    CHECK((is_range_contained<double, int>::value == false));
+}
