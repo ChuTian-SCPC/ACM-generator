@@ -90,7 +90,6 @@ namespace generator {
                     Tree<NodeType, EdgeType> tree;
                     __reset_nodes_weight_function(tree);
                     __reset_edges_weight_function(tree);
-                    tree.set_log_change(false);
                     for (int tree_size : _CONTEXT_V(trees_size)) {
                         tree.set_node_count(tree_size);
                         tree.gen();
