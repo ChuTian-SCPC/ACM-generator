@@ -12,7 +12,7 @@ namespace generator {
     namespace rand_numeric {
         // 检查R是否可以包含T的所有值
         template<typename T, typename R>
-        struct is_range_contained {
+        struct IsRangeContained {
         private:
             static constexpr bool check_integral_range() {
                 if (std::is_same<T, R>::value) return true;
@@ -185,13 +185,13 @@ namespace generator {
         }
 
         template <typename T, typename R>
-        typename std::enable_if<is_range_contained<T, R>::value, R>::type
+        typename std::enable_if<IsRangeContained<T, R>::value, R>::type
         __change_to_int(T value, std::string) {
             return static_cast<R>(value);
         }
 
         template <typename T, typename R>
-        typename std::enable_if<!is_range_contained<T, R>::value, R>::type
+        typename std::enable_if<!IsRangeContained<T, R>::value, R>::type
         __change_to_int(T value, std::string name) {
             static std::unordered_map<T, R> cache;
             if(cache.find(value) != cache.end()) return cache[value];

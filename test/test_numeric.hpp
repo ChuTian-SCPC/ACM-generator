@@ -130,18 +130,18 @@ TEST_CASE("rand range", "[rand_numeric][rand_range]") {
     CHECK(f2);
 }
 
-TEST_CASE("range contain", "[rand_numeric][is_range_contained]") {
+TEST_CASE("range contain", "[rand_numeric][IsRangeContained]") {
     init_gen();
-    CHECK((is_range_contained<int, int>::value == true));
-    CHECK((is_range_contained<long long, int>::value == false));
-    CHECK((is_range_contained<int, long long>::value == true));
-    CHECK((is_range_contained<unsigned int, int>::value == false));
-    CHECK((is_range_contained<int, unsigned int>::value == false));
-    CHECK((is_range_contained<unsigned int, long long>::value == true));
-    CHECK((is_range_contained<unsigned int, unsigned long long>::value == true));
-    CHECK((is_range_contained<unsigned long long, unsigned int>::value == false));
-    CHECK((is_range_contained<unsigned long long, long long>::value == false));
-    CHECK((is_range_contained<long long, unsigned long long>::value == false));
-    CHECK((is_range_contained<int, unsigned long long>::value == false));
-    CHECK((is_range_contained<double, int>::value == false));
+    CHECK((IsRangeContained<int, int>::value == true));
+    CHECK((IsRangeContained<long long, int>::value == false));
+    CHECK((IsRangeContained<int, long long>::value == true));
+    CHECK((IsRangeContained<unsigned int, int>::value == false));
+    CHECK((IsRangeContained<int, unsigned int>::value == false));
+    CHECK((IsRangeContained<unsigned int, long long>::value == true));
+    CHECK((IsRangeContained<unsigned int, unsigned long long>::value == true));
+    CHECK((IsRangeContained<unsigned long long, unsigned int>::value == false));
+    CHECK((IsRangeContained<unsigned long long, long long>::value == false));
+    CHECK((IsRangeContained<long long, unsigned long long>::value == false));
+    CHECK((IsRangeContained<int, unsigned long long>::value == false));
+    CHECK((IsRangeContained<double, int>::value == false));
 }
