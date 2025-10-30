@@ -1,5 +1,6 @@
 #pragma once
 #include "test_basic.hpp"
+#include "algorithm/origin_algorithm.h"
 using namespace generator::all;
 
 TEST_CASE("numeric format", "[rand_numeric][format]") {
@@ -144,4 +145,32 @@ TEST_CASE("range contain", "[rand_numeric][IsRangeContained]") {
     CHECK((IsRangeContained<long long, unsigned long long>::value == false));
     CHECK((IsRangeContained<int, unsigned long long>::value == false));
     CHECK((IsRangeContained<double, int>::value == false));
+}
+
+TEST_CASE("rand prob benchmark", "[rand_numeric][rand_prob][!benchmark]") {
+    init_gen();
+    std::map<int, int> m;
+    int sum = 0;
+    for (int i = 0; i < 1000; i++) m[i] = rand_int(1, 100);
+
+    int rand_time = 100;
+
+    BENCHMARK("rand_prob origin") {
+        for (int i = 0; i < rand_time; i++) {
+            int c = _origin::rand_prob(m);
+        }
+    };
+
+    BENCHMARK("rand_prob basic") {
+        for (int i = 0; i < rand_time; i++) {
+            int c = rand_prob(m);
+        }
+    };
+
+    BENCHMARK("rand_prob with prob table") {
+        ProbTable<int> prob(m);
+        for (int i = 0; i < rand_time; i++) {
+            int c = rand_prob(prob);
+        }
+    };
 }
