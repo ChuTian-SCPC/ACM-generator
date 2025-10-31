@@ -22,36 +22,6 @@ namespace generator {
                 BipartiteGraphGen(Context& graph) : BasicGraphGen<BipartiteGraph, NodeType, EdgeType>(graph) {}
             
             protected:
-                void __rand_left() {
-                    _CONTEXT_GET_REF(left)
-                    _CONTEXT_GET_REF(right)
-                    if (left >= 0) return;
-                    _CONTEXT_GET(node_count)
-                    _CONTEXT_GET(edge_count)
-                    int l = 0, r = node_count / 2, limit;
-                    if (!_CONTEXT_V(multiply_edge)) {
-                        long long max_limit = (long long)r * (long long)(node_count - r);
-                        if (edge_count > max_limit) {
-                            _msg::__fail_msg(_msg::_defl,
-                                tools::string_format("edges_count must less than or equal to %lld, but found %d.",
-                                max_limit, edge_count));
-                        }
-                        while (l <= r) {
-                            int mid = (l + r) / 2;
-                            long long max_edge_count = (long long)mid * (long long)(node_count - mid);
-                            if (max_edge_count < edge_count) {
-                                l = mid + 1;
-                            } else {
-                                limit = r;
-                                r = mid - 1;
-                            }
-                        }
-                    } else {
-                        limit = 1;
-                    }
-                    left = rnd.next(limit, node_count - limit);
-                    right = node_count - left;
-                }   
 
                 void __remark_node_indices_by_part(std::vector<int>& part) {
                     int index = _CONTEXT_V(begin_node);
@@ -77,7 +47,7 @@ namespace generator {
                 }
 
                 virtual void __self_init() override {
-                    __rand_left();
+                    this->_context.rand_left();
                     _CONTEXT_GET(node_count)
                     _CONTEXT_GET_REF(left)
                     _CONTEXT_GET_REF(right)
@@ -113,26 +83,6 @@ namespace generator {
                             tools::string_format("but found %d", right));
                     }
                 }
-
-                virtual void __judge_upper_limit() override {
-                    _CONTEXT_GET(node_count)
-                    _CONTEXT_GET(edge_count)
-                    if (!_CONTEXT_V(multiply_edge)) {
-                        long long limit = (long long)_CONTEXT_V(left) * (long long)_CONTEXT_V(right);
-                        if (limit < edge_count) {
-                            _msg::__fail_msg(_msg::_defl,
-                                tools::string_format("number of edges must less than or equal to %lld, but found %d.",
-                                limit, edge_count));
-                        }
-                    }
-                    else {
-                        if (node_count == 1 && edge_count > 0) {
-                            _msg::__fail_msg(_msg::_defl, 
-                                tools::string_format("number of edges must equal to 0, but found %d.",
-                                edge_count));
-                        }
-                    }
-                }  
 
                 virtual _Edge<EdgeType> __rand_edge() override{
                     int u, v;
@@ -287,8 +237,54 @@ namespace generator {
                 _DISABLE_SELF_LOOP
                 _DISABLE_DIRECTION
                 _OUTPUT_FUNCTION_SETTING(_Self)
+
+                virtual long long max_edge_count() override {
+                    if (this->_node_count == 0) return 0;
+                    if (this->_multiply_edge) return this->_node_count == 1 ? 0 : _setting::edge_count_inf;
+                    if (_left < 0 || _right < 0) {
+                        long long n = this->_node_count;
+                        return __count_edge_by_left(n / 2);
+                    } else {
+                        return __count_edge_by_left(_left);
+                    }
+                }
+
+                virtual void rand_edge_count(long long from = _setting::auto_edge_limit, long long to = _setting::auto_edge_limit) override {
+                    _GenGraph<NodeType, EdgeType>::rand_edge_count(from, to); 
+                    if (_left < 0) rand_left();
+                }
+
+                void rand_left() {
+                    int n = this->_node_count;
+                    int l = 0, r = n / 2, limit = -1;
+                    if (this->_multiply_edge) {
+                        limit = n == 1 ? 0 : 1;
+                    } else {
+                        while (l <= r) {
+                            int mid = (l + r) / 2;
+                            long long max_edge_count = __count_edge_by_left(mid);
+                            if (max_edge_count < this->_edge_count) {
+                                l = mid + 1;
+                            } else {
+                                limit = r;
+                                r = mid - 1;
+                            }
+                        }
+                    }
+                    if (limit == -1) {
+                        _msg::__fail_msg(_msg::_defl,
+                            tools::string_format("can not find a left part size which can has a edge_count equal to %d.", this->_edge_count));
+                    }                    
+                    _left = rand_numeric::rand_int(limit, n - limit);
+                    _right = n - _left;
+                }
+
             protected:
                 _DEFAULT_GRAPH_GEN_FUNC(BipartiteGraph)
+
+                long long __count_edge_by_left(long long left) {
+                    return left * (this->_node_count - left);
+                }
 
                 virtual void __format_output_node(std::vector<int>& first_line) const override {
                     if (this->_output_node_count) {

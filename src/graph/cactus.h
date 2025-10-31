@@ -23,17 +23,6 @@ namespace generator {
                     _rank = rnd.perm(_CONTEXT_V(node_count));
                 }
 
-                virtual void __judge_upper_limit() override {
-                    _CONTEXT_GET(node_count)
-                    _CONTEXT_GET(edge_count)
-                    int limit = node_count - 1 + (node_count - 1) / 2;
-                    if (edge_count > limit) {
-                        _msg::__fail_msg(_msg::_defl,
-                            tools::string_format("edge_count must less than or equal to %d, but found %d.",
-                            limit, edge_count));
-                    }
-                }
-
                 template<typename T = EdgeType, _HasT<T> = 0>
                 CycleGraph<void, EdgeType> __get_cycle_graph(int size) {
                     CycleGraph<void, EdgeType> cycle(size, 0, _CONTEXT_V(edges_weight_function));
@@ -149,6 +138,11 @@ namespace generator {
                 _DISABLE_SELF_LOOP
                 _DISABLE_MULTIPLY_EDGE
                 _OUTPUT_FUNCTION_SETTING(_Self)
+
+                virtual long long max_edge_count() override {
+                    long long n = this->_node_count;
+                    return n - 1 + (n - 1) / 2;
+                }
             protected:
                 _DEFAULT_GRAPH_GEN_FUNC(Cactus)
             };   

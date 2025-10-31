@@ -20,14 +20,18 @@ namespace generator {
             
             protected:
                 virtual void __self_init() override {
-                    __init_edge_count();
+                    this->_context.rand_edge_count();
                 }
 
-                void __init_edge_count() {
-                    _CONTEXT_GET_REF(edge_count)
+                virtual void __judge_self_limit() override {
                     _CONTEXT_GET(node_count)
-                    edge_count = 2 * node_count - 2;
-                }
+                    _CONTEXT_GET(edge_count)
+                    if (2 * node_count - 2 != edge_count) {
+                        _msg::__fail_msg(_msg::_defl, 
+                            "edge_count must equal to 2 * node_count - 2, ",
+                            tools::string_format("but found node_count = %d, edge_count = %d.", node_count, edge_count));
+                    }
+                }    
 
                 virtual void __judge_lower_limit() override {
                     _CONTEXT_GET(node_count)
@@ -99,6 +103,14 @@ namespace generator {
                 _DISABLE_SELF_LOOP
                 _DISABLE_EDGE_COUNT
                 _OUTPUT_FUNCTION_SETTING(_Self)
+
+                virtual long long min_edge_count() override {
+                    return 2 * this->_node_count - 2;
+                }
+
+                virtual long long max_edge_count() override {
+                    return 2 * this->_node_count - 2;
+                }
 
             protected:
                 _DEFAULT_GRAPH_GEN_FUNC(WheelGraph)

@@ -41,38 +41,25 @@ namespace generator {
                 }
 
                 virtual void __judge_upper_limit() {
-                    _CONTEXT_GET(node_count)
+                    auto upper = this->_context.max_edge_count();
                     _CONTEXT_GET(edge_count)
-                    if (!_CONTEXT_V(multiply_edge)) {  
-                        long long limit = (long long) node_count * (long long) (node_count - 1) / 2;
-                        if (_CONTEXT_V(direction)) limit *= 2;
-                        if (_CONTEXT_V(self_loop)) limit += node_count;
-                        if (edge_count > limit) {
-                            _msg::__fail_msg(_msg::_defl, 
-                                tools::string_format("edge_count must less than or equal to %lld, but found %d.",
-                                limit, edge_count));
-                        }
-                    }
-                    else {               
-                        if (node_count == 1 && !_CONTEXT_V(self_loop) && edge_count > 0) {
-                            _msg::__fail_msg(_msg::_defl, 
-                                tools::string_format("edge_count must equal to 0, but found %d.",
-                                edge_count));
-                        }
-
-                    }                        
+                    if (upper != _setting::edge_count_inf && edge_count > upper) {
+                        _msg::__fail_msg(_msg::_defl, 
+                            tools::string_format("edge_count must less than or equal to %lld, but found %d.",
+                            upper, edge_count));
+                    }                     
                 }
 
                 virtual void __judge_lower_limit() {
-                    _CONTEXT_GET(node_count)
+                    auto lower = this->_context.min_edge_count();
                     _CONTEXT_GET(edge_count)
                     if (edge_count < 0) {
                         _msg::__fail_msg(_msg::_defl, "edge_count must be a non-negative integer.");
                     }
-                    if (_CONTEXT_V(connect) && edge_count < node_count - 1) {
+                    if (lower != _setting::edge_count_inf && edge_count < lower) {
                         _msg::__fail_msg(_msg::_defl, 
-                            tools::string_format("edge_count must greater than or equal to %d, but found %d.", 
-                            node_count - 1, edge_count));
+                            tools::string_format("edge_count must greater than or equal to %lld, but found %d.",
+                            lower, edge_count));
                     }
                 }
 

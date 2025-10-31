@@ -10,6 +10,9 @@
 #ifndef _SGPCET_LOGGER_H_
 #include "log/logger.h"
 #endif // !_SGPCET_NODE_H_
+#ifndef _SGPCET_NUMERIC_H_
+#include "rand/numeric.h"
+#endif // !_SGPCET_NUMERIC_H_
 
 namespace generator {
     namespace rand_graph {
@@ -24,12 +27,14 @@ namespace generator {
                 bool _swap_node;// true means output `father son` or `son father` by random
 
                 std::vector<int> _node_indices;
+                bool _node_indices_changed;
             public:
                 _BasicTreeGraph(int node_count, int begin_node, bool output_node_count, bool swap_node):
                     _node_count(node_count),
                     _begin_node(begin_node),
                     _output_node_count(output_node_count),
-                    _swap_node(swap_node)
+                    _swap_node(swap_node),
+                    _node_indices_changed(false)
                 {
                     __init_node_indices();
                 }
@@ -38,8 +43,12 @@ namespace generator {
 
                 void set_node_count(int node_count) { 
                     if (node_count != _node_count) {
+                        if (_node_indices_changed) {
+                            _msg::__warn_msg(_msg::_defl, 
+                                tools::string_format("using default `node_indices` for `node_count` changed (%d -> %d).",
+                                _node_count, node_count));                            
+                        }
                         _node_count = node_count; 
-                        _msg::__warn_msg(_msg::_defl, "using default `node_indices` for `node_count` changed.");
                         __init_node_indices();               
                     }             
                 }
@@ -47,8 +56,13 @@ namespace generator {
 
                 void set_begin_node(int begin_node) { 
                     if (begin_node != _begin_node) {
+                        if (_node_indices_changed) {
+                            _msg::__warn_msg(_msg::_defl, 
+                                tools::string_format("using default `node_indices` for `begin_node` changed (%d -> %d).",
+                                _begin_node, begin_node));                            
+                        }
+
                         _begin_node = begin_node;
-                        _msg::__warn_msg(_msg::_defl, "using default `node_indices` for `begin_node` changed.");
                         __init_node_indices();                 
                     }                 
                 }
@@ -64,6 +78,7 @@ namespace generator {
                             _node_count, node_indices.size()));
                         return;
                     }
+                    _node_indices_changed = true;
                     _node_indices = node_indices;
                 }         
                 void set_node_indices(int index, int number) {
@@ -74,6 +89,7 @@ namespace generator {
                         return;
                     }
                     if (_node_indices.size() != _node_count) __init_node_indices();
+                    _node_indices_changed = true;
                     _node_indices[index - 1] = number;
                 }
                 _GET_VALUE(std::vector<int>, node_indices)
@@ -84,6 +100,7 @@ namespace generator {
                     for (int i = 0 ; i < _node_count; i++) {
                         _node_indices.emplace_back(i + _begin_node);
                     }
+                    _node_indices_changed = false;
                 }
             };
             
@@ -178,6 +195,42 @@ namespace generator {
                 _SET_GET_VALUE(bool, connect)
                 _SET_GET_VALUE(bool, output_edge_count)
 
+                virtual long long max_edge_count() {
+                    if (this->_node_count == 0) return 0;
+                    long long sum = 0;
+                    if (this->_multiply_edge) {
+                        if (this->_node_count == 1 && !this->_self_loop) return 0;
+                        return _setting::edge_count_inf;
+                    } else {
+                        long long n = (long long)this->_node_count;
+                        sum += n * (n - 1) / 2;
+                        if (this->_direction) sum *= 2;
+                        if (this->_self_loop) sum += n;
+                        return sum;
+                    }
+                };
+
+                virtual long long min_edge_count() {
+                    if (this->_node_count == 0) return 0;
+                    return this->_connect ? this->_node_count - 1 : 0;
+                };
+
+                virtual void rand_edge_count(long long from = _setting::auto_edge_limit, long long to = _setting::auto_edge_limit) {
+                    auto p = __edge_from_to_limit(from, to);
+                    _edge_count = rand_numeric::rand_int(p.first, p.second); 
+                }
+            protected:
+                std::pair<long long, long long> __edge_from_to_limit(long long from, long long to) {
+                    long long l = min_edge_count();
+                    long long r = max_edge_count();
+                    long long limit = _setting::edge_limit;
+                    if (r > limit || r == _setting::edge_count_inf) {
+                        r = limit;
+                    }                    
+                    if (from != _setting::auto_edge_limit) l = std::max(l, from);
+                    if (to != _setting::auto_edge_limit) r = std::min(r, to);
+                    return std::make_pair(l, r);
+                }
             };
 
         } // namespace basic

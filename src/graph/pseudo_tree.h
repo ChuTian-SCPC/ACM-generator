@@ -21,19 +21,13 @@ namespace generator {
             
             protected:
                 virtual void __self_init() override {
-                    __init_edge_count();
+                    this->_context.rand_edge_count();
                     _CONTEXT_GET(node_count)
                     _CONTEXT_GET_REF(cycle)
                     _rank = rnd.perm(node_count, 0);
                     if (cycle == -1) {
                         cycle = rnd.next(3, node_count);
                     }
-                }
-
-                void __init_edge_count() {
-                    _CONTEXT_GET_REF(edge_count)
-                    _CONTEXT_GET(node_count)
-                    edge_count = node_count;
                 }
 
                 virtual void __judge_self_limit() override {
@@ -161,6 +155,15 @@ namespace generator {
                 _DISABLE_SELF_LOOP
                 _DISABLE_MULTIPLY_EDGE
                 _OUTPUT_FUNCTION_SETTING(_Self)
+
+                virtual long long min_edge_count() override {
+                    return this->_node_count;
+                }
+
+                virtual long long max_edge_count() override {
+                    return this->_node_count;
+                }
+
             protected:
                 _DEFAULT_GRAPH_GEN_FUNC(PseudoTree)
             }; 
