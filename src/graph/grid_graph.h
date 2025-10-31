@@ -35,7 +35,7 @@ namespace generator {
                 }
 
                 virtual void __self_init() override {
-                    this->_context.rand_row();
+                    if (_row <= 0) this->_context.rand_row();
                     _CONTEXT_GET(node_count)
                     _rank = rnd.perm(node_count, 0);
                 }
@@ -185,24 +185,22 @@ namespace generator {
 
                 void rand_row() {
                     int n = this->_node_count;
-                    if (_row == -1) {
-                        if (this->_multiply_edge) _row = rand_numeric::rand_int(1, n);
-                        else {
-                            std::vector<long long> counts;
-                            long long max_edge = __max_edge_count(counts);
-                            max_edge = std::min(max_edge, (long long)_setting::edge_limit);
-                            if (this->_edge_count > max_edge) {
-                                _msg::__warn_msg(_msg::_defl,
-                                    tools::string_format("edge_count is large than the maximum possible, use upper edges limit %lld.",
-                                    max_edge));
-                                this->_edge_count = max_edge;
-                            }
-                            std::vector<int> possible;
-                            for (int i = 1; i < n; i++) {
-                                if (counts[i] >= this->_edge_count) possible.push_back(i);
-                            }
-                            _row = rnd.any(possible);
+                    if (this->_multiply_edge) _row = rand_numeric::rand_int(1, n);
+                    else {
+                        std::vector<long long> counts;
+                        long long max_edge = __max_edge_count(counts);
+                        max_edge = std::min(max_edge, (long long)_setting::edge_limit);
+                        if (this->_edge_count > max_edge) {
+                            _msg::__warn_msg(_msg::_defl,
+                                tools::string_format("edge_count is large than the maximum possible, use upper edges limit %lld.",
+                                max_edge));
+                            this->_edge_count = max_edge;
                         }
+                        std::vector<int> possible;
+                        for (int i = 1; i < n; i++) {
+                            if (counts[i] >= this->_edge_count) possible.push_back(i);
+                        }
+                        _row = rnd.any(possible);
                     }
                     _column = __count_column(_row);
                 }
