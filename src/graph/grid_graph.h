@@ -35,7 +35,8 @@ namespace generator {
                 }
 
                 virtual void __self_init() override {
-                    if (_row <= 0) this->_context.rand_row();
+                    _CONTEXT_GET(row)
+                    if (row <= 0) this->_context.rand_row();
                     _CONTEXT_GET(node_count)
                     _rank = rnd.perm(node_count, 0);
                 }
