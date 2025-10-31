@@ -166,7 +166,7 @@ namespace generator {
 
                 virtual long long max_edge_count() override {
                     if (this->_node_count == 0) return 0;
-                    if (this->_multiply_edge) return this->_node_count == 1 ? 0 : _setting::edge_count_inf;
+                    if (this->_multiply_edge) return this->_node_count == 1 ? 0 : _setting::_edge_count_inf;
                     if (_row <= 0 || _column <= 0) {
                         long long max_edge = 0;
                         for (int i = 1; i < this->_node_count; i++) {
@@ -178,7 +178,7 @@ namespace generator {
                     }
                 }
 
-                virtual void rand_edge_count(long long from = _setting::auto_edge_limit, long long to = _setting::auto_edge_limit) override {
+                virtual void rand_edge_count(long long from = _setting::_auto_edge_limit, long long to = _setting::_auto_edge_limit) override {
                     _GenGraph<NodeType, EdgeType>::rand_edge_count(from, to); 
                     if (_row <= 0) rand_row();
                 }

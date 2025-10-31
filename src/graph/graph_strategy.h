@@ -43,7 +43,7 @@ namespace generator {
                 virtual void __judge_upper_limit() {
                     auto upper = this->_context.max_edge_count();
                     _CONTEXT_GET(edge_count)
-                    if (upper != _setting::edge_count_inf && edge_count > upper) {
+                    if (upper != _setting::_edge_count_inf && edge_count > upper) {
                         _msg::__fail_msg(_msg::_defl, 
                             tools::string_format("edge_count must less than or equal to %lld, but found %d.",
                             upper, edge_count));
@@ -56,7 +56,7 @@ namespace generator {
                     if (edge_count < 0) {
                         _msg::__fail_msg(_msg::_defl, "edge_count must be a non-negative integer.");
                     }
-                    if (lower != _setting::edge_count_inf && edge_count < lower) {
+                    if (lower != _setting::_edge_count_inf && edge_count < lower) {
                         _msg::__fail_msg(_msg::_defl, 
                             tools::string_format("edge_count must greater than or equal to %lld, but found %d.",
                             lower, edge_count));
