@@ -226,3 +226,14 @@ TEST_CASE("rand int vector ordered and distinct", "[rand_array][rand_vector][Vec
     }, 10);
     CHECK(f5);
 }
+
+TEST_CASE("rand bracket seq uniform random", "[rand_bracket_seq][uniform_random][!benchmark]") {
+    init_gen();
+    // not uniform random anymore
+    std::map<std::string, int> origin_times;
+    int n = 8, t = 100000;
+    for (int i = 0; i < t; i++)
+		origin_times[rand_bracket_seq(n)]++;
+	for (auto& p : origin_times)
+		std::cout << p.first << ": " << ((double)p.second / t) << std::endl;
+}

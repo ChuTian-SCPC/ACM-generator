@@ -345,6 +345,7 @@ namespace generator {
             res += close[pos];
         }
         
+        // TODO : refactor from https://www.luogu.com.cn/article/f3xefa5v
         std::string rand_bracket_seq(int len, std::string brackets = "()") {
             __judge_vector_lower_bound(len, "string");
             __judge_vector_upper_bound(len, "string");
