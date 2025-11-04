@@ -231,9 +231,13 @@ TEST_CASE("rand bracket seq uniform random", "[rand_bracket_seq][uniform_random]
     init_gen();
     // not uniform random anymore
     std::map<std::string, int> origin_times;
-    int n = 8, t = 100000;
+    int n = 8, t = 1400000;
     for (int i = 0; i < t; i++)
-		origin_times[rand_bracket_seq(n)]++;
-	for (auto& p : origin_times)
-		std::cout << p.first << ": " << ((double)p.second / t) << std::endl;
+		origin_times[_origin::rand_bracket_seq(n)]++;
+
+    std::map<std::string, int> new_times;
+    for (int i = 0; i < t; i++)
+		new_times[rand_bracket_seq(n)]++;
+	for (auto& p : new_times)
+        printf("%s: %7d %7d\n", p.first.c_str(), origin_times[p.first], p.second);
 }
