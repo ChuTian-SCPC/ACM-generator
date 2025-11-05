@@ -18,6 +18,8 @@ namespace generator {
     int edge_limit = 10000000;
     long long _edge_count_inf = -1;
     long long _auto_edge_limit = -2;
+
+    long long _limit_inf = -1;
     
     int time_limit_inf = -1; 
     int test_case_limit = 1000;

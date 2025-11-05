@@ -477,7 +477,7 @@ namespace generator {
             R lower_r = rand_numeric::__change_to_value<F, R>(lower, "lower");
             return rand_range_query<R>(q, from_r, to_r, lower_r);
         }
-        
+       
     } // namespace rand_array
 } // namespace generator
 
