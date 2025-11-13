@@ -19,7 +19,7 @@ namespace generator {
     long long _edge_count_inf = -1;
     long long _auto_edge_limit = -2;
 
-    long long _limit_inf = -1;
+    long long _count_range_inf = -1;
     
     int time_limit_inf = -1; 
     int test_case_limit = 1000;

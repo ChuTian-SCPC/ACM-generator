@@ -34,6 +34,16 @@ namespace generator {
             }
         }
 
+        void __judge_count_range(long long from, long long to) {
+            if (from == _setting::_count_range_inf) _msg::__fail_msg(_msg::_defl, "from can't be inf");
+            if (from < 0) _msg::__fail_msg(_msg::_defl, tools::string_format("from can't be less than 0, but found %lld.", from));
+            if (to != _setting::_count_range_inf && from > to) {
+                _msg::__fail_msg(_msg::_defl, 
+                    tools::string_format("invalid range [%s, %s], to can't less than from.",
+                    std::to_string(from).c_str(), std::to_string(to).c_str()));
+            }
+        }
+
         std::string rand_string(int n, _enum::CharType type = _enum::LowerLetter) {
             __judge_vector_lower_bound(n, "string");
             __judge_vector_upper_bound(n, "string");
@@ -277,6 +287,79 @@ namespace generator {
             R to_r = rand_numeric::__change_to_int<U, R>(to, "to");
             return rand_vector<R>(size, from_r, to_r, order, uniqueness);
         }
+
+        template<typename T>
+        class CountRange {
+        private:
+            T _value;
+            long long _from, _to;
+        public:
+            CountRange(T value, long long from = 0LL, long long to = _setting::_count_range_inf) : _value(value), _from(from), _to(to) {}
+
+            _SET_GET_VALUE(T, value)
+            _SET_GET_VALUE(long long, from)
+            _SET_GET_VALUE(long long, to)
+
+            void set_range(long long from, long long to) {
+                _from = from;
+                _to = to;
+            }
+
+            void set_range(std::string s) {
+                auto p = rand_numeric::__format_to_int_range<long long>(s);
+                set_range(p.first, p.second);
+            }
+
+        };
+
+        template <typename T>
+        std::vector<T> rand_vector(int size, std::vector<CountRange<T>> limits) {
+            __judge_vector_lower_bound(size, "vector");
+            __judge_vector_upper_bound(size, "vector");
+            long long lower_bound = 0;
+            long long upper_bound = 0;
+            std::vector<int> result;
+            std::vector<std::pair<T, long long>> vars;
+            for (auto& p : limits) {
+                long long from = p.from();
+                long long to = p.to();
+                T value = p.value();
+                __judge_count_range(from, to);
+                lower_bound += from;
+                if (upper_bound != _setting::_count_range_inf) {
+                    if (to != _setting::_count_range_inf) upper_bound += to;
+                    else upper_bound = _setting::_count_range_inf;
+                }
+                if (lower_bound > size) {
+                    _msg::__fail_msg(_msg::_defl, 
+                        tools::string_format("sum of count range from must less than or equal to vector size %d, but found %lld.", size, lower_bound));
+                }
+                for(int i = 0; i < from; i++){
+                    result.push_back(value);
+                }
+                if (to == _setting::_count_range_inf) vars.emplace_back(value, _setting::_count_range_inf);
+                else if (to - from > 0) vars.emplace_back(value, to - from);
+            }
+            if (upper_bound != _setting::_count_range_inf && upper_bound < size) {
+                _msg::__fail_msg(_msg::_defl, 
+                    tools::string_format("sum of count range to must greater than or equal to vector size %d, but found %lld.", size, upper_bound));
+            }
+            int n = vars.size();
+            int sum = size - lower_bound;
+            while(sum--) {
+                int x = rand_numeric::rand_int(n);
+                result.push_back(vars[x].first);
+                if (vars[x].second != _setting::_count_range_inf) {
+                    vars[x].second--;
+                    if (vars[x].second == 0) {
+                        std::swap(vars[x], vars[n - 1]);
+                        n--;
+                    }
+                }
+            }
+            shuffle(result.begin(), result.end());
+            return result;   
+        }
        
         template<typename Iter>
         std::vector<int> shuffle_index(Iter begin, Iter end, int offset = 0) {
@@ -477,7 +560,7 @@ namespace generator {
             R lower_r = rand_numeric::__change_to_value<F, R>(lower, "lower");
             return rand_range_query<R>(q, from_r, to_r, lower_r);
         }
-       
+
     } // namespace rand_array
 } // namespace generator
 
