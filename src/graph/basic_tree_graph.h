@@ -200,7 +200,7 @@ namespace generator {
                     long long sum = 0;
                     if (this->_multiply_edge) {
                         if (this->_node_count == 1 && !this->_self_loop) return 0;
-                        return _setting::_edge_count_inf;
+                        return _setting::edge_count_inf;
                     } else {
                         long long n = (long long)this->_node_count;
                         sum += n * (n - 1) / 2;
@@ -215,7 +215,7 @@ namespace generator {
                     return this->_connect ? this->_node_count - 1 : 0;
                 };
 
-                virtual void rand_edge_count(long long from = _setting::_auto_edge_limit, long long to = _setting::_auto_edge_limit) {
+                virtual void rand_edge_count(long long from = _setting::auto_edge_limit, long long to = _setting::auto_edge_limit) {
                     auto p = __edge_from_to_limit(from, to);
                     _edge_count = rand_numeric::rand_int(p.first, p.second); 
                 }
@@ -224,11 +224,11 @@ namespace generator {
                     long long l = min_edge_count();
                     long long r = max_edge_count();
                     long long limit = _setting::edge_limit;
-                    if (r > limit || r == _setting::_edge_count_inf) {
+                    if (r > limit || r == _setting::edge_count_inf) {
                         r = limit;
                     }                    
-                    if (from != _setting::_auto_edge_limit) l = std::max(l, from);
-                    if (to != _setting::_auto_edge_limit) r = std::min(r, to);
+                    if (from != _setting::auto_edge_limit) l = std::max(l, from);
+                    if (to != _setting::auto_edge_limit) r = std::min(r, to);
                     return std::make_pair(l, r);
                 }
             };

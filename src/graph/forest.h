@@ -142,7 +142,7 @@ namespace generator {
                     return this->_node_count - 1;
                 }
 
-                virtual void rand_edge_count(long long from = _setting::_auto_edge_limit, long long to = _setting::_auto_edge_limit) override {
+                virtual void rand_edge_count(long long from = _setting::auto_edge_limit, long long to = _setting::auto_edge_limit) override {
                     if (!_trees_size.empty()) __reset_node_edge_count();
                     else {
                         _GenGraph<NodeType, EdgeType>::rand_edge_count(from, to);

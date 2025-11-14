@@ -35,9 +35,9 @@ namespace generator {
         }
 
         void __judge_count_range(long long from, long long to) {
-            if (from == _setting::_count_range_inf) _msg::__fail_msg(_msg::_defl, "from can't be inf");
+            if (from == _setting::count_range_inf) _msg::__fail_msg(_msg::_defl, "from can't be inf");
             if (from < 0) _msg::__fail_msg(_msg::_defl, tools::string_format("from can't be less than 0, but found %lld.", from));
-            if (to != _setting::_count_range_inf && from > to) {
+            if (to != _setting::count_range_inf && from > to) {
                 _msg::__fail_msg(_msg::_defl, 
                     tools::string_format("invalid range [%s, %s], to can't less than from.",
                     std::to_string(from).c_str(), std::to_string(to).c_str()));
@@ -294,7 +294,7 @@ namespace generator {
             T _value;
             long long _from, _to;
         public:
-            CountRange(T value, long long from = 0LL, long long to = _setting::_count_range_inf) : _value(value), _from(from), _to(to) {}
+            CountRange(T value, long long from = 0LL, long long to = _setting::count_range_inf) : _value(value), _from(from), _to(to) {}
 
             _SET_GET_VALUE(T, value)
             _SET_GET_VALUE(long long, from)
@@ -326,9 +326,9 @@ namespace generator {
                 T value = p.value();
                 __judge_count_range(from, to);
                 lower_bound += from;
-                if (upper_bound != _setting::_count_range_inf) {
-                    if (to != _setting::_count_range_inf) upper_bound += to;
-                    else upper_bound = _setting::_count_range_inf;
+                if (upper_bound != _setting::count_range_inf) {
+                    if (to != _setting::count_range_inf) upper_bound += to;
+                    else upper_bound = _setting::count_range_inf;
                 }
                 if (lower_bound > size) {
                     _msg::__fail_msg(_msg::_defl, 
@@ -337,10 +337,10 @@ namespace generator {
                 for(int i = 0; i < from; i++){
                     result.push_back(value);
                 }
-                if (to == _setting::_count_range_inf) vars.emplace_back(value, _setting::_count_range_inf);
+                if (to == _setting::count_range_inf) vars.emplace_back(value, _setting::count_range_inf);
                 else if (to - from > 0) vars.emplace_back(value, to - from);
             }
-            if (upper_bound != _setting::_count_range_inf && upper_bound < size) {
+            if (upper_bound != _setting::count_range_inf && upper_bound < size) {
                 _msg::__fail_msg(_msg::_defl, 
                     tools::string_format("sum of count range to must greater than or equal to vector size %d, but found %lld.", size, upper_bound));
             }
@@ -349,7 +349,7 @@ namespace generator {
             while(sum--) {
                 int x = rand_numeric::rand_int(n);
                 result.push_back(vars[x].first);
-                if (vars[x].second != _setting::_count_range_inf) {
+                if (vars[x].second != _setting::count_range_inf) {
                     vars[x].second--;
                     if (vars[x].second == 0) {
                         std::swap(vars[x], vars[n - 1]);

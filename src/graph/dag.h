@@ -98,7 +98,7 @@ namespace generator {
 
                 virtual long long max_edge_count() override {
                     if (this->_multiply_edge) {
-                        return this->_node_count == 1 ? 0 : _setting::_edge_count_inf;
+                        return this->_node_count == 1 ? 0 : _setting::edge_count_inf;
                     } else {
                         long long n = this->_node_count;
                         return n * (n - 1) / 2;
