@@ -241,3 +241,28 @@ TEST_CASE("rand bracket seq uniform random", "[rand_bracket_seq][uniform_random]
 	for (auto& p : new_times)
         printf("%s: %7d %7d\n", p.first.c_str(), origin_times[p.first], p.second);
 }
+
+TEST_CASE("rand vector use CountRange", "[rand_vector][CountRange]") {
+    init_gen();
+    bool f = loop_check([]() {
+        int sum = 0;
+        std::vector<CountRange<int>> r;
+        int n = rand_int(10, 100);
+        for (int i = 0; i < n; i++) {
+            int p = rand_int(1, 100);
+            r.emplace_back(i, p, p);
+            sum += p;
+        }
+        auto v = rand_vector(sum, r);
+        std::vector<int> count(n, 0);
+        for (int i = 0; i < sum; i++) {
+            if (v[i] < 0 || v[i] >= n) return false;
+            count[v[i]]++;
+        }
+        for (int i = 0; i < n; i++) {
+            if (count[i] != r[i].from() || count[i] != r[i].to()) return false;
+        }
+        return true;
+    }, 10);
+    CHECK(f);
+}
