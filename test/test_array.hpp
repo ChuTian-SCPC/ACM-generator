@@ -266,3 +266,17 @@ TEST_CASE("rand vector use CountRange", "[rand_vector][CountRange]") {
     }, 10);
     CHECK(f);
 }
+
+TEST_CASE("rand vector by index", "[rand_vector][rand_vector_by_index]") {
+    init_gen();
+    bool f = loop_check([]() {
+        int n = rand_int(100, 1000);
+        auto v = rand_vector_by_index<int>(n, [](int i){ return rand_int(i + 1); });
+        for (int i = 0; i < n; i++) {
+            if (v[i] < 0 || v[i] > i) return false;
+        }
+        return true;
+    }, 10);
+    CHECK(f);
+
+}
