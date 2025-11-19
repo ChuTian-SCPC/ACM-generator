@@ -109,8 +109,8 @@ namespace generator {
             std::is_convertible<T, R>::value && 
             std::is_convertible<U, R>::value, R>::type
         rand_int(T from, U to){
-            R from_r = __change_to_int<T, R>(from, "from");
-            R to_r = __change_to_int<U, R>(to, "to");
+            R from_r = tools::__change_to_int<T, R>(from, "from");
+            R to_r = tools::__change_to_int<U, R>(to, "to");
             R x = __rand_int_impl<R>(from_r, to_r);
             return x;
         }
@@ -118,7 +118,7 @@ namespace generator {
         template <typename T = long long>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_int(std::string format) {
-            std::pair<T, T> range = __format_to_int_range<T>(format);
+            std::pair<T, T> range = tools::__format_to_int_range<T>(format);
             T x = __rand_int_impl<T>(range.first, range.second);
             return x;
         }
@@ -168,15 +168,15 @@ namespace generator {
             std::is_convertible<T, R>::value && 
             std::is_convertible<U, R>::value, R>::type
         rand_odd(T from, U to){
-            R from_r = __change_to_int<T, R>(from, "from");
-            R to_r = __change_to_int<U, R>(to, "to");
+            R from_r = tools::__change_to_int<T, R>(from, "from");
+            R to_r = tools::__change_to_int<U, R>(to, "to");
             return __rand_odd_impl<R>(from_r, to_r);
         }
 
         template <typename T = long long>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_odd(std::string format) {
-            std::pair<T, T> range = __format_to_int_range(format);
+            std::pair<T, T> range = tools::__format_to_int_range<T>(format);
             return __rand_odd_impl<T>(range.first,range.second);
         }
 
@@ -225,15 +225,15 @@ namespace generator {
             std::is_convertible<T, R>::value && 
             std::is_convertible<U, R>::value, R>::type
         rand_even(T from, U to){
-            R from_r = __change_to_int<T, R>(from, "from");
-            R to_r = __change_to_int<U, R>(to, "to");
+            R from_r = tools::__change_to_int<T, R>(from, "from");
+            R to_r = tools::__change_to_int<U, R>(to, "to");
             return __rand_even_impl<R>(from_r, to_r);
         }
 
         template <typename T = long long>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_even(std::string format) {
-            std::pair<T, T> range = __format_to_int_range(format);
+            std::pair<T, T> range = tools::__format_to_int_range<T>(format);
             return __rand_even_impl<T>(range.first,range.second);
         }
 
@@ -247,7 +247,7 @@ namespace generator {
             std::is_floating_point<R>::value &&
             std::is_convertible<T, double>::value, R>::type
         rand_real(T n) {
-            double n_d = __change_to_double<T, double>(n, "to");
+            double n_d = tools::__change_to_double<T, double>(n, "to");
             double x = rnd.next(n_d);
             return x;
         }
@@ -257,8 +257,8 @@ namespace generator {
             std::is_floating_point<R>::value &&
             std::is_convertible<T, double>::value, R>::type
         rand_real(T from, T to) {
-            double from_d = __change_to_double<T, double>(from, "from");
-            double to_d = __change_to_double<T, double>(to, "to");
+            double from_d = tools::__change_to_double<T, double>(from, "from");
+            double to_d = tools::__change_to_double<T, double>(to, "to");
             double x = rnd.next(from_d, to_d);
             return x;
         }
@@ -269,8 +269,8 @@ namespace generator {
             std::is_convertible<T, double>::value &&
             std::is_convertible<U, double>::value, R>::type
         rand_real(T from, U to) {
-            double from_d = __change_to_double<T, double>(from, "from");
-            double to_d = __change_to_double<U, double>(to, "to");
+            double from_d = tools::__change_to_double<T, double>(from, "from");
+            double to_d = tools::__change_to_double<U, double>(to, "to");
             double x = rnd.next(from_d, to_d);
             return x;
         }
@@ -278,7 +278,7 @@ namespace generator {
         template <typename T = double>
         typename std::enable_if<std::is_floating_point<T>::value, T>::type
         rand_real(std::string format) {
-            std::pair<T, T> range = __format_to_double_range(format);
+            std::pair<T, T> range = tools::__format_to_double_range<T>(format);
             double x = rnd.next(range.first, range.second);
             return x;
         }
@@ -344,8 +344,8 @@ namespace generator {
             std::is_convertible<T, R>::value &&
             std::is_convertible<U, R>::value, R>::type
         rand_abs(T from, U to) {
-            R from_r = __change_to_value<T, R>(from, "from");
-            R to_r = __change_to_value<U, R>(to, "to");
+            R from_r = tools::__change_to_value<T, R>(from, "from");
+            R to_r = tools::__change_to_value<U, R>(to, "to");
             R x = __rand_value<R>(from_r, to_r);
             return rand_bool() ? x : -x;
         }
@@ -486,8 +486,8 @@ namespace generator {
             std::is_convertible<T, R>::value && 
             std::is_convertible<U, R>::value, std::pair<R, R>>::type
         rand_range(T from, U to) {
-            R from_r = __change_to_value<T, R>(from, "from");
-            R to_r = __change_to_value<U, R>(to, "to");
+            R from_r = tools::__change_to_value<T, R>(from, "from");
+            R to_r = tools::__change_to_value<U, R>(to, "to");
             return rand_range<R>(from_r, to_r);
         }
     } // namespace rand_numeric

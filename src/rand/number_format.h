@@ -9,7 +9,7 @@
 #endif // !_SGPCET_LOGGER_H_
 
 namespace generator {
-    namespace rand_numeric {
+    namespace tools {
         // 检查R是否可以包含T的所有值
         template<typename T, typename R>
         struct IsRangeContained {

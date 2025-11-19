@@ -238,9 +238,9 @@ namespace generator {
         rand_sum(int size, S sum, T from, U to) {
             __judge_vector_lower_bound(size, "vector");
             __judge_vector_upper_bound(size, "vector");
-            R sum_r = rand_numeric::__change_to_int<S, R>(sum, "sum");
-            R from_r = rand_numeric::__change_to_int<T, R>(from, "from");
-            R to_r = rand_numeric::__change_to_int<U, R>(to, "to");
+            R sum_r = tools::__change_to_int<S, R>(sum, "sum");
+            R from_r = tools::__change_to_int<T, R>(from, "from");
+            R to_r = tools::__change_to_int<U, R>(to, "to");
             __judge_range(from_r, to_r);
             return rand_sum<R>(size, sum_r, from_r, to_r);
         }
@@ -283,8 +283,8 @@ namespace generator {
             std::is_convertible<T, R>::value && 
             std::is_convertible<U, R>::value, std::vector<R> >::type
         rand_vector(int size, T from, U to, _enum::VectorOrder order = _enum::VectorOrder::Random, _enum::VectorUniqueness uniqueness = _enum::VectorUniqueness::Duplicate) {
-            R from_r = rand_numeric::__change_to_int<T, R>(from, "from");
-            R to_r = rand_numeric::__change_to_int<U, R>(to, "to");
+            R from_r = tools::__change_to_int<T, R>(from, "from");
+            R to_r = tools::__change_to_int<U, R>(to, "to");
             return rand_vector<R>(size, from_r, to_r, order, uniqueness);
         }
 
@@ -306,7 +306,7 @@ namespace generator {
             }
 
             void set_range(std::string s) {
-                auto p = rand_numeric::__format_to_int_range<long long>(s);
+                auto p = tools::__format_to_int_range<long long>(s);
                 set_range(p.first, p.second);
             }
 
@@ -542,8 +542,8 @@ namespace generator {
             std::is_convertible<T, R>::value && 
             std::is_convertible<U, R>::value, std::vector<std::pair<R, R>>>::type
         rand_range_query(int q, T from, U to) {
-            R from_r = rand_numeric::__change_to_value<T, R>(from, "from");
-            R to_r = rand_numeric::__change_to_value<U, R>(to, "to");
+            R from_r = tools::__change_to_value<T, R>(from, "from");
+            R to_r = tools::__change_to_value<U, R>(to, "to");
             return rand_range_query<R>(q, from_r, to_r);
         }
 
@@ -555,10 +555,10 @@ namespace generator {
             std::is_convertible<F, R>::value &&
             std::is_convertible<S, R>::value, std::vector<std::pair<R, R>>>::type
         rand_range_query(int q, T from, U to, F lower, S upper) {
-            R from_r = rand_numeric::__change_to_value<T, R>(from, "from");
-            R to_r = rand_numeric::__change_to_value<U, R>(to, "to");
-            R lower_r = rand_numeric::__change_to_value<F, R>(lower, "lower");
-            R upper_r = rand_numeric::__change_to_value<S, R>(upper, "upper");
+            R from_r = tools::__change_to_value<T, R>(from, "from");
+            R to_r = tools::__change_to_value<U, R>(to, "to");
+            R lower_r = tools::__change_to_value<F, R>(lower, "lower");
+            R upper_r = tools::__change_to_value<S, R>(upper, "upper");
             return rand_range_query<R>(q, from_r, to_r, lower_r, upper_r);
         }
 
@@ -576,9 +576,9 @@ namespace generator {
             std::is_convertible<U, R>::value &&
             std::is_convertible<F, R>::value , std::vector<std::pair<R, R>>>::type
         rand_range_query(int q, T from, U to, F lower) {
-            R from_r = rand_numeric::__change_to_value<T, R>(from, "from");
-            R to_r = rand_numeric::__change_to_value<U, R>(to, "to");
-            R lower_r = rand_numeric::__change_to_value<F, R>(lower, "lower");
+            R from_r = tools::__change_to_value<T, R>(from, "from");
+            R to_r = tools::__change_to_value<U, R>(to, "to");
+            R lower_r = tools::__change_to_value<F, R>(lower, "lower");
             return rand_range_query<R>(q, from_r, to_r, lower_r);
         }
 
