@@ -32,6 +32,9 @@
 #ifndef _SGPCET_PATH_H_
 #include "io/path.h"
 #endif // !_SGPCET_PATH_H_
+#ifndef _SGPCET_FILE_H_
+#include "io/file.h"
+#endif // !_SGPCET_FILE_H_
 #ifndef _SGPCET_COMMAND_PATH_H_
 #include "io/command_path.h"
 #endif // !_SGPCET_COMMAND_PATH_H_
