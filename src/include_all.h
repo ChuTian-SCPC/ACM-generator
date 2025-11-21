@@ -88,6 +88,9 @@
 #ifndef _SGPCET_ARRAY_H_
 #include "rand/array.h"
 #endif // !_SGPCET_ARRAY_H_
+#ifndef _SGPCET_DISTRIBUTION_H_
+#include "rand/distribution.h"
+#endif // !_SGPCET_DISTRIBUTION_H_
 
 #ifndef _SGPCET_EDGE_H_
 #include "graph/edge.h"

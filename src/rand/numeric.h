@@ -237,7 +237,11 @@ namespace generator {
             return __rand_even_impl<T>(range.first,range.second);
         }
 
-        double rand_real() {
+        template <typename R = double, typename T = double>
+        typename std::enable_if<
+            std::is_floating_point<R>::value &&
+            std::is_convertible<T, double>::value, R>::type
+        rand_real() {
             double x = rnd.next();
             return x;
         }
