@@ -39,6 +39,23 @@ namespace generator {
                 return mean_ + stddev_ * z0;
             }
         };
+
+        template<typename T, typename = typename std::enable_if<std::is_floating_point<T>::value, T>::type>
+        class LogNormalDistribution {
+        private:
+            T mu_, sigma_;
+            NormalDistribution<T> normal_dist_;
+            
+        public:
+            explicit LogNormalDistribution(T mu = 0, T sigma = 1) 
+                : mu_(mu), sigma_(sigma), normal_dist_(mu, sigma) {}
+            
+            T rand() {
+                T u = normal_dist_.rand();
+                while (u < 0) u = normal_dist_.rand();
+                return std::exp(u);
+            }
+        };
     }
 }
 
