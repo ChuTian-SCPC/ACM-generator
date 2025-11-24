@@ -51,9 +51,7 @@ namespace generator {
                 : mu_(mu), sigma_(sigma), normal_dist_(mu, sigma) {}
             
             T rand() {
-                T u = normal_dist_.rand();
-                while (u < 0) u = normal_dist_.rand();
-                return std::exp(u);
+                return std::exp(normal_dist_.rand());
             }
         };
     }
