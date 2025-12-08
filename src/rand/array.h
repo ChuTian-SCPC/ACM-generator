@@ -379,7 +379,7 @@ namespace generator {
             __judge_vector_lower_bound(to, "vector");
             __judge_vector_upper_bound(from, "vector");
             int size = rnd.next(from, to);
-            return rand_vector(size, func);
+            return rand_vector_by_index<T>(size, func);
         }
        
         template<typename Iter>
