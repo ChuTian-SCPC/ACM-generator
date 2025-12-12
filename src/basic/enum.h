@@ -70,7 +70,15 @@ namespace generator {
     }
     
     bool __is_run_error(_JudgeState state) {
-      return state == _JudgeState::_UNKNOWN || state == _JudgeState::_ERROR;
+      return state == _JudgeState::_ERROR;
+    }
+
+    bool __is_unknown(_JudgeState state) {
+      return state == _JudgeState::_UNKNOWN;
+    }
+
+    bool __is_consider_state(_JudgeState state) {
+      return !__is_unknown(state) && !__is_run_error(state);
     }
 
     enum _End{
@@ -81,6 +89,7 @@ namespace generator {
       _LOGC,
       _EXE,
       _VAL,
+      _CHECK_RESULT,
       _MAX_END  
     };
 
@@ -90,12 +99,6 @@ namespace generator {
       _VALIDATOR,
       _RESULT,
       _OTHER  
-    };
-
-    enum _Stage {
-      _INPUT,
-      _OUTPUT,
-      _VALID 
     };
 
     enum Checker{

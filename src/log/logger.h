@@ -194,6 +194,11 @@ namespace generator {
       void __endl(OutStream& out, int count = 1) {
         for (int i = 1; i <= count; i++) out.println();
       }
+
+      template <typename... Args>
+      void __flash_msg(OutStream& out, Args... args) {
+        out.print("\r", args...);
+      }
       
       OutStream _defl; // default_log
     } // namespace _msg
