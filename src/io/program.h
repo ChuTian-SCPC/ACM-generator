@@ -136,7 +136,7 @@ namespace generator {
             __run_program(T1 input_file, T2 output_file, T3 error_file, int time_limit, _enum::_FuncProgramType func_type) {
                 if (!__check_program_valid()) return {_setting::_error_return, -1};
                 Path input = Path(input_file);
-                if (!input.__file_exist()) {
+                if (!input.__empty() && !input.__file_exist()) {
                     _msg::__error_msg(_msg::_defl, tools::string_format("Fail to open input file %s.", input.cname()));
                     return {_setting::_error_return, -1};
                 }

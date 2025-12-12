@@ -51,6 +51,7 @@ namespace generator {
       }
 
       void __ensure_file_exist() {
+        if (__empty()) return;
         __file_exist();
       }
       
