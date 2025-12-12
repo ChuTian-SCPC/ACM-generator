@@ -19,8 +19,6 @@ TEST_CASE("validate for linux", "[validate][linux]") {
 #endif
     for (int i = 1; i <= 5; i++) {
         Path log = __path_join(folder, __end_with(i, _VAL));
-        log.__ensure_file_exist();
-        std::cout << log.cname() << std::endl;
         Path input = __input_file_path(__path_join(__current_path(), "testcases"), i);
         ReturnState state = val.__run_program(input, _default_path, log, time_limit_inf, _VALIDATOR);
         if (i <= 3) CHECK(!__is_success(state.exit_code));

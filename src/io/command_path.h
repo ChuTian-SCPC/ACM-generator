@@ -53,9 +53,9 @@ namespace generator {
             virtual int __run_child_program(Path input, Path output, Path error, _enum::_FuncProgramType type) override {
                 std::string command = __command();
                 if (_enable_default_args) {
-                   if (!input.__empty()) command = tools::string_join(" ", command, "<", input.full_path());
-                   if (!output.__empty()) command = tools::string_join(" ", command, ">", output.full_path());
-                   if (!error.__empty()) command = tools::string_join(" ", command, "2>", error.full_path());
+                   if (!input.__empty()) command = tools::string_join(" ", command, "<", input);
+                   if (!output.__empty()) command = tools::string_join(" ", command, ">", output);
+                   if (!error.__empty()) command = tools::string_join(" ", command, "2>", error);
                 }
                 int code = std::system(command.c_str());
                 return code;
