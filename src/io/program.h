@@ -84,7 +84,7 @@ namespace generator {
                 pid_t pid = fork();         
                 if (pid == 0) {
                     __set_default_args();
-                    int exit_code = __run_child_program(program, input_file, output_file, error_file, func_type);
+                    int exit_code = __run_child_program(input_file, output_file, error_file, func_type);
                     __close_files(input_file, output_file, error_file);
                     _exit(exit_code == 0 ? 0 : -1);
                 } 
