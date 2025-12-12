@@ -49,6 +49,10 @@ namespace generator {
         std::ifstream file(_path.c_str());
         return file.is_open();
       }
+
+      void __ensure_file_exist() {
+        __file_exist();
+      }
       
       bool __directory_exists() {
         #ifdef ON_WINDOWS

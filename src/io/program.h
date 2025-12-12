@@ -135,7 +135,16 @@ namespace generator {
                 IsPathConstructible<T3>::value, ReturnState>::type
             __run_program(T1 input_file, T2 output_file, T3 error_file, int time_limit, _enum::_FuncProgramType func_type) {
                 if (!__check_program_valid()) return {_setting::_error_return, -1};
-                return __run_child_process_program(Path(input_file), Path(output_file), Path(error_file), time_limit, func_type);
+                Path input = Path(input_file);
+                if (!input.__file_exist()) {
+                    _msg::__error_msg(_msg::_defl, tools::string_format("Fail to open input file %s.", input.cname()));
+                    return {_setting::_error_return, -1};
+                }
+                Path output = Path(output_file);
+                output.__ensure_file_exist();
+                Path error = Path(error_file);
+                error.__ensure_file_exist();
+                return __run_child_process_program(input, output, error, time_limit, func_type);
             }
 
             virtual _Program* __clone() = 0;
