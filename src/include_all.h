@@ -68,6 +68,9 @@
 #ifndef _SGPCET_HACK_H_
 #include "io/hack.h"
 #endif // !_SGPCET_HACK_H_
+#ifndef _SGPCET_WORKFLOW_H_
+#include "io/workflow.h"
+#endif // !_SGPCET_WORKFLOW_H_
 
 #ifndef _SGPCET_NTT_H_
 #include "math/ntt.h"

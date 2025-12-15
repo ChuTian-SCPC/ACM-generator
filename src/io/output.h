@@ -9,8 +9,9 @@ namespace generator {
     namespace io {
         class _Output : public _Reporter {
         protected:
+            using TestResults = std::map<int, ReturnState>;
             _Program* _std;
-            std::map<int, ReturnState> _states;
+            TestResults _states;
             bool _cover_exist;
             int _time_limit;
         public:
@@ -26,6 +27,7 @@ namespace generator {
             }
 
             _GET_VALUE(_Program*, std);
+            _GET_VALUE(TestResults, states);
             _SET_GET_VALUE(bool, cover_exist);
             _SET_GET_VALUE(int, time_limit);
 

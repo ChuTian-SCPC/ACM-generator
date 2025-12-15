@@ -9,8 +9,9 @@ namespace generator {
     namespace io {
         class _Input : public _Reporter {
         protected:
+            using TestResults = std::map<int, ReturnState>;
             std::map<int, _Program*> _gens;
-            std::map<int, ReturnState> _states;
+            TestResults _states;
         public:
 
             ~_Input() {
@@ -18,6 +19,8 @@ namespace generator {
                     delete gen.second;
                 }
             }
+
+            _GET_VALUE(TestResults, states);
             
             template<typename T>
             void __add_input(int id, T&& gen) {

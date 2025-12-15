@@ -22,6 +22,7 @@ namespace generator {
     long long count_range_inf = -1;
     
     int time_limit_inf = -1; 
+    int _time_limit_auto = -2;
     int test_case_limit = 1000;
 
   #ifdef ON_WINDOWS
@@ -48,6 +49,7 @@ namespace generator {
     std::string compare_folder = "cmp";
     std::string hack_folder = "hack";
     std::string validate_folder = "validate";
+    std::string _empty_program_name = "";
 
     std::string input_suffix = ".in";
     std::string output_suffix = ".out";

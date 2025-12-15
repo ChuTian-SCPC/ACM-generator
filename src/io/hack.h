@@ -69,11 +69,6 @@ namespace generator {
                 if (_compare != nullptr) delete _compare;
             }
 
-            _GET_VALUE(_Checker, checker);
-            _GET_VALUE(_Program*, generator);
-            _GET_VALUE(_Program*, std);
-            _GET_VALUE(_Program*, compare);
-            _GET_VALUE(_Program*, validator);
             _SET_GET_VALUE(int, time_limit);
             _SET_GET_VALUE(int, max_try);
             _SET_GET_VALUE(bool, stop_when_wrong);
@@ -187,6 +182,7 @@ namespace generator {
             void __copy_uncorrect_case() {
                 if (!_copy_wrong_to_testcase) return;
                 __create_directories(__testcases_folder());
+                _move_path.clear();
                 int next_input = 1;
                 for (int i = 0; i < std::min(_max_try, _try_count); i++) {
                     if (!__is_user_uncorrect(_states[i].first)) continue;

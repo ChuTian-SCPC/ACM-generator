@@ -9,8 +9,9 @@ namespace generator {
     namespace io {
         class _Validate : public _Reporter {
         protected:
+            using TestResults = std::map<int, ReturnState>;
             _Program* _validator;
-            std::map<int, ReturnState> _states;
+            TestResults _states;
             bool _default_judge;
             std::string _case_name;
         public:
@@ -25,6 +26,7 @@ namespace generator {
             }
 
             _GET_VALUE(_Program*, validator);
+            _GET_VALUE(TestResults, states); 
             _SET_GET_VALUE(bool, default_judge);
             _SET_GET_VALUE(std::string, case_name);
 
