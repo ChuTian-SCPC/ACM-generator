@@ -12,7 +12,10 @@ namespace generator {
             using TestResults = std::map<int, ReturnState>;
             std::map<int, _Program*> _gens;
             TestResults _states;
+            int _time_limit;
         public:
+
+            _Input() : _Reporter(), _time_limit(_setting::time_limit_inf) {}
 
             ~_Input() {
                 for (auto& gen : _gens) {
@@ -21,6 +24,7 @@ namespace generator {
             }
 
             _GET_VALUE(TestResults, states);
+            _SET_GET_VALUE(int, time_limit);
             
             template<typename T>
             void __add_input(int id, T&& gen) {
@@ -56,7 +60,7 @@ namespace generator {
                     Path input = __testcase_input_file_path(gen.first);
                     _msg::__flash_msg(_msg::_defl, "Generator(Inputs) : ", __ratio_msg(id, _gens.size()));
                     id++;
-                    _states[gen.first] = gen.second->__run_program(_setting::_default_path, input, _setting::_default_path, _setting::time_limit_inf, _enum::_FuncProgramType::_GENERATOR);
+                    _states[gen.first] = gen.second->__run_program(_setting::_default_path, input, _setting::_default_path, _time_limit, _enum::_FuncProgramType::_GENERATOR);
                 }
                 _msg::__endl(_msg::_defl);
             }

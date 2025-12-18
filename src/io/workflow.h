@@ -38,10 +38,9 @@ namespace generator {
 
             Time _time_limit;
             Time _time_limit_for_std;
-            Time _time_limit_for_generate;
-            Time _time_limit_for_check;
-            Time _time_limit_for_validate;
-            bool _limit_std_runtime;
+            Time _time_limit_for_generator;
+            Time _time_limit_for_checker;
+            Time _time_limit_for_validator;
 
             bool _delete_fail_testcase;
 
@@ -60,6 +59,7 @@ namespace generator {
             // log
             bool _detail_report_on_console;
             bool _detail_report_on_file;
+            _msg::OutStream _file;
         public:
             
         };

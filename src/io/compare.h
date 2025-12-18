@@ -17,13 +17,14 @@ namespace generator {
             using TestResult = std::pair<_enum::_JudgeState, int>;
             _Checker _checker;
             int _time_limit;
+            int _time_limit_for_checker;
             std::map<Name, _Program*> _name;
             std::map<Name, std::set<int>> _test_cases;
             std::map<TestCase, TestResult> _results;
         public:
             
             template<typename T>
-            _Compare(T&& checker, int time_limit) : _checker(std::forward<T>(checker)), _time_limit(time_limit) {}
+            _Compare(T&& checker, int time_limit) : _checker(std::forward<T>(checker)), _time_limit(time_limit), _time_limit_for_checker(_setting::time_limit_inf) {}
 
             template<typename T>
             void __set_checker(T&& checker) {
@@ -101,6 +102,7 @@ namespace generator {
             }
 
             void __comapre() {
+                _checker.set_time_limit(_time_limit_for_checker);
                 _results.clear();
                 for (auto& name : _name) {
                     for (auto& case_id : _test_cases[name.first]) 

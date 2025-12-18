@@ -42,8 +42,8 @@ namespace generator {
             bool _enable_default_args;
             std::string _name;
         public:
-            _Program() : _args(""), _enable_default_args(true), _name("") {}
-            _Program(std::string args) : _args(args), _enable_default_args(false), _name("") {}
+            _Program() : _args(""), _enable_default_args(true), _name(_setting::_empty_program_name) {}
+            _Program(std::string args) : _args(args), _enable_default_args(false), _name(_setting::_empty_program_name) {}
             _Program(const _Program& other) : _args(other._args), _enable_default_args(other._enable_default_args), _name(other._name) {}
             _Program& operator=(const _Program& other) {
                 if (this != &other) {
@@ -149,6 +149,7 @@ namespace generator {
 
             virtual _Program* __clone() = 0;
             virtual _Program* __clone(const std::string& args) = 0;
+            virtual std::string __default_name() = 0;
 
             _SET_GET_VALUE(std::string, args)
             template <typename...Args>
@@ -157,7 +158,12 @@ namespace generator {
             }         
             void clear_args() { _args.clear(); }
             _SET_GET_VALUE(bool, enable_default_args)
-            _SET_GET_VALUE(std::string, name)
+
+            void set_name(const std::string& name) { _name = name; }
+            std::string name() {
+                if (_name == _setting::_empty_program_name) _name = __default_name();
+                return _name;
+            }
         };
 
     } // namespace io

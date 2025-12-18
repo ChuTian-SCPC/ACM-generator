@@ -14,8 +14,9 @@ namespace generator {
             TestResults _states;
             bool _default_judge;
             std::string _case_name;
+            int _time_limit;
         public:
-            _Validate() : _Reporter(), _validator(nullptr), _default_judge(true), _case_name(_setting::testcase_folder) {}
+            _Validate() : _Reporter(), _validator(nullptr), _default_judge(true), _case_name(_setting::testcase_folder), _time_limit(_setting::time_limit_inf) {}
 
             template<typename T>
             _Validate(T&& validator, const std::string& case_name = _setting::testcase_folder, bool default_judge = true) : _Reporter(), _validator(nullptr), _default_judge(default_judge), _case_name(case_name) {
@@ -29,6 +30,7 @@ namespace generator {
             _GET_VALUE(TestResults, states); 
             _SET_GET_VALUE(bool, default_judge);
             _SET_GET_VALUE(std::string, case_name);
+            _SET_GET_VALUE(int, time_limit);
 
             template<typename T>
             void __set_validator(T&& validator) {
@@ -60,7 +62,7 @@ namespace generator {
                     Path input = __input_file_path(__path_join(__current_path(), _case_name), it.first);
                     _msg::__flash_msg(_msg::_defl, "Validate : ", __ratio_msg(id, _states.size()));
                     id++;
-                    it.second = _validator->__run_program(input, _setting::_default_path, log, _setting::time_limit_inf, _enum::_VALIDATOR);
+                    it.second = _validator->__run_program(input, _setting::_default_path, log, _time_limit, _enum::_VALIDATOR);
                 }
                 _msg::__endl(_msg::_defl);
             }

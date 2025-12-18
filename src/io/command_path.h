@@ -30,16 +30,12 @@ namespace generator {
             }
 
             template<typename T, typename = typename std::enable_if<IsPathConstructible<T>::value>::type>
-            CommandPath(T&& s) : _path(std::forward<T>(s)), _Program() {
-                _name = __default_name();
-            }
+            CommandPath(T&& s) : _path(std::forward<T>(s)), _Program() {}
             template<typename T, typename = typename std::enable_if<IsPathConstructible<T>::value>::type>
-            CommandPath(T&& s, std::string args) : _path(std::forward<T>(s)), _Program(args) {
-                _name = __default_name();
-            }
+            CommandPath(T&& s, std::string args) : _path(std::forward<T>(s)), _Program(args) {}
 
         protected:
-            std::string __default_name() {
+            virtual std::string __default_name() override {
                 return _path.__file_name();
             }
             virtual void __close_files(Path input, Path output, Path error) override {

@@ -18,11 +18,12 @@ namespace generator {
             Path _ans_output;
             Path _testlib_output;
             _enum::_JudgeState _result;
+            int _time_limit;
         public:
-            _Checker() : _checker(nullptr), _result(_enum::_JudgeState::_UNKNOWN) {}
+            _Checker() : _checker(nullptr), _result(_enum::_JudgeState::_UNKNOWN), _time_limit(_setting::time_limit_inf) {}
 
             template<typename T>
-            _Checker(T&& checker) : _checker(nullptr), _result(_enum::_JudgeState::_UNKNOWN) {
+            _Checker(T&& checker) : _checker(nullptr), _result(_enum::_JudgeState::_UNKNOWN), _time_limit(_setting::time_limit_inf) {
                 __set_checker(std::forward<T>(checker));
             }
 
@@ -36,6 +37,7 @@ namespace generator {
             _SET_GET_VALUE(Path, ans_output);
             _SET_GET_VALUE(Path, testlib_output);
             _SET_GET_VALUE(_enum::_JudgeState, result);
+            _SET_GET_VALUE(int, time_limit);
 
             void __change_case(Path input, Path std_output, Path ans_output, Path testlib_output) {
                 _input = input;
@@ -58,7 +60,7 @@ namespace generator {
                     p = _checker->__clone(tools::string_join(" ", _input, _ans_output, _std_output));
                 else 
                     p = _checker->__clone();
-                ReturnState res = p->__run_program(_setting::_default_path, _setting::_default_path, _testlib_output, _setting::time_limit_inf, _enum::_FuncProgramType::_CHECKER);
+                ReturnState res = p->__run_program(_setting::_default_path, _setting::_default_path, _testlib_output, _time_limit, _enum::_FuncProgramType::_CHECKER);
                 if (__is_error(res.exit_code)) {
                     _result = _enum::_JudgeState::_ERROR;
                     return;

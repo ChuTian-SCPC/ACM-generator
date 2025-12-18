@@ -35,17 +35,13 @@ namespace generator {
             }
 
             template<typename T, typename = typename std::enable_if<IsFunctionConvertible<T>::value>::type>
-            CommandFunc(T&& func) : _func(std::forward<T>(func)), _Program() {
-                _name = __default_name();
-            }
+            CommandFunc(T&& func) : _func(std::forward<T>(func)), _Program() {}
             template<typename T, typename = typename std::enable_if<IsFunctionConvertible<T>::value>::type>
-            CommandFunc(T&& func, std::string args) : _func(std::forward<T>(func)), _Program(args) {
-                _name = __default_name();
-            }
+            CommandFunc(T&& func, std::string args) : _func(std::forward<T>(func)), _Program(args) {}
 
 
         protected:
-            std::string __default_name() {
+            virtual std::string __default_name() override {
                 std::string name = "function" + std::to_string(_setting::_function_count);
                 _setting::_function_count++;
                 return name;
