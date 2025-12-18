@@ -19,10 +19,11 @@ namespace generator {
             int _time_limit;
             int _time_limit_for_checker;
             std::map<Name, _Program*> _name;
-            std::map<Name, std::set<int>> _test_cases;
+            std::map<Name, std::set<int>> _testcases;
             std::map<TestCase, TestResult> _results;
         public:
-            
+            _Compare() : _checker(), _time_limit(_setting::time_limit_inf), _time_limit_for_checker(_setting::time_limit_inf) {}    
+
             template<typename T>
             _Compare(T&& checker, int time_limit) : _checker(std::forward<T>(checker)), _time_limit(time_limit), _time_limit_for_checker(_setting::time_limit_inf) {}
 
@@ -30,6 +31,9 @@ namespace generator {
             void __set_checker(T&& checker) {
                 _checker.__set_checker(std::forward<T>(checker));
             }
+
+            _SET_GET_VALUE(int, time_limit)
+            _SET_GET_VALUE(int, time_limit_for_checker)
 
             ~_Compare() {
                 for (auto& name : _name) {
@@ -45,7 +49,7 @@ namespace generator {
                 else delete p;
                 for (auto& case_id : cases) {
                     if (__testcase_input_file_exists(case_id) && __testcase_output_file_exists(case_id))
-                        _test_cases[name].insert(case_id);
+                        _testcases[name].insert(case_id);
                 }
             }
 
@@ -71,10 +75,10 @@ namespace generator {
                 Path ans_folder = __path_join(__compare_folder(), name);
                 __create_directories(ans_folder);
                 int count = 1;
-                int sum = _test_cases[name].size();
+                int sum = _testcases[name].size();
                 _Program* p = _name[name];
                 if (!p->__check_program_valid())  return;
-                for (auto& case_id : _test_cases[name]) {
+                for (auto& case_id : _testcases[name]) {
                     TestCase test_case(name, case_id);
                     TestResult& result = _results[test_case];
                     _msg::__flash_msg(_msg::_defl, tools::string_format("Compare program %s : ", name.c_str()), __ratio_msg(count, sum));
@@ -102,10 +106,11 @@ namespace generator {
             }
 
             void __comapre() {
+                if (_testcases.empty()) return;
                 _checker.set_time_limit(_time_limit_for_checker);
                 _results.clear();
                 for (auto& name : _name) {
-                    for (auto& case_id : _test_cases[name.first]) 
+                    for (auto& case_id : _testcases[name.first]) 
                         _results[{name.first, case_id}] = {_enum::_JudgeState::_UNKNOWN, 0};
                     __run_case(name.first);
                 }
@@ -113,7 +118,7 @@ namespace generator {
 
             int __get_total_success(Name name) {
                 int total = 0;
-                for (auto& case_id : _test_cases[name]) {
+                for (auto& case_id : _testcases[name]) {
                     TestCase test_case(name, case_id);
                     auto result = _results[test_case].first;
                     if (_enum::__is_consider_state(result)) total++;
@@ -123,7 +128,7 @@ namespace generator {
 
             TestResult __get_test_result(Name name) {
                 TestResult total = {_enum::_JudgeState::_UNKNOWN, 0};
-                for (auto& case_id : _test_cases[name]) {
+                for (auto& case_id : _testcases[name]) {
                     TestCase test_case(name, case_id);
                     auto result = _results[test_case].first;
                     auto time = _results[test_case].second;
@@ -161,7 +166,7 @@ namespace generator {
                     Name name = testcase.first;
                     TestResult result = __get_test_result(name);
                     int success = __get_total_success(name);
-                    int sum = _test_cases[name].size();
+                    int sum = _testcases[name].size();
                     table.add_cell(0, count, name);
                     table.add_cell(1, count, __ratio_msg(success, sum));
                     __push_state(table, 2, count, result.first);
@@ -177,7 +182,7 @@ namespace generator {
                 table.add_cell(0, 0, "Case \\ Name");
                 std::set<int> all_case_ids;
                 for (auto& testcase : _name) {
-                    for (auto& case_id : _test_cases[testcase.first]) {
+                    for (auto& case_id : _testcases[testcase.first]) {
                         all_case_ids.insert(case_id);
                     }
                 }
@@ -210,6 +215,7 @@ namespace generator {
                 }
                 table.draw();
             }
+
         };
 
         void __add_compare_program(_Compare& , int , int ) {

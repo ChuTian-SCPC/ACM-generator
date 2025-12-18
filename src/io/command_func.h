@@ -42,8 +42,8 @@ namespace generator {
 
         protected:
             virtual std::string __default_name() override {
-                std::string name = "function" + std::to_string(_setting::_function_count);
                 _setting::_function_count++;
+                std::string name = "function" + std::to_string(_setting::_function_count);
                 return name;
             }
 

@@ -120,6 +120,10 @@ namespace generator {
             std::map<int, std::set<Name>> _testcases;
 
         public:
+            _Hack() : _checker(), _generator(nullptr), _std(nullptr), _validator(nullptr),
+                _time_limit(_setting::time_limit_inf), _time_limit_for_std(_setting::time_limit_inf),
+                _time_limit_for_generator(_setting::time_limit_inf), _time_limit_for_checker(_setting::time_limit_inf),
+                _time_limit_for_validator(_setting::time_limit_inf), _copy_wrong_to_testcase(false), _delete_correct(false) {}
 
             template<typename T1, typename T2, typename T3>
             _Hack(T1&& generator, T2&& std, T3&& checker,
@@ -372,6 +376,7 @@ namespace generator {
             }
 
             void __hack() {
+                if (_testcases.empty()) return;
                 __prepare_comparers();
                 _checker.set_time_limit(_time_limit_for_checker);
                 __create_directories(__hack_folder());
