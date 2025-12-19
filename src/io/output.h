@@ -57,7 +57,7 @@ namespace generator {
                 for (auto& it : _states) {
                     Path input = __testcase_input_file_path(it.first);
                     Path output = __testcase_output_file_path(it.first);
-                    _msg::__flash_msg(_msg::_defl, "Generator(Outputs) : ", __ratio_msg(id, _states.size()));
+                    _msg::__flash_msg(_msg::_defl, "Generate(Outputs) : ", __ratio_msg(id, _states.size()));
                     id++;
                     it.second = _std->__run_program(input, output, _setting::_default_path, _time_limit, _enum::_FuncProgramType::_RESULT);
                 }

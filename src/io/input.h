@@ -58,7 +58,7 @@ namespace generator {
                 int id = 1;
                 for (auto& gen : _gens) {
                     Path input = __testcase_input_file_path(gen.first);
-                    _msg::__flash_msg(_msg::_defl, "Generator(Inputs) : ", __ratio_msg(id, _gens.size()));
+                    _msg::__flash_msg(_msg::_defl, "Generate(Inputs) : ", __ratio_msg(id, _gens.size()));
                     id++;
                     _states[gen.first] = gen.second->__run_program(_setting::_default_path, input, _setting::_default_path, _time_limit, _enum::_FuncProgramType::_GENERATOR);
                 }
@@ -83,6 +83,14 @@ namespace generator {
                 }
                 if (error_files.empty()) __all_pass(out);
                 else __meets_error_files(out, error_files);
+            }
+
+            bool __empty() {
+                return _gens.empty();
+            }
+
+            int __size() {
+                return _gens.size();
             }
         }; 
 

@@ -150,6 +150,7 @@ namespace generator {
             virtual _Program* __clone() = 0;
             virtual _Program* __clone(const std::string& args) = 0;
             virtual std::string __default_name() = 0;
+            virtual std::string __path_or_func() = 0;
 
             _SET_GET_VALUE(std::string, args)
             template <typename...Args>

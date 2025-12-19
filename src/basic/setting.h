@@ -19,6 +19,8 @@ namespace generator {
     long long edge_count_inf = -1;
     long long auto_edge_limit = -2;
 
+    int _auto_int = -2;
+
     long long count_range_inf = -1;
     
     int time_limit_inf = -1; 

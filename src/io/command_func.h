@@ -97,6 +97,10 @@ namespace generator {
                 return program;
             }
 
+            virtual std::string __path_or_func() override {
+                return "function";
+            }
+
         };
 
         

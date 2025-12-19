@@ -100,6 +100,8 @@ namespace generator {
             bool _copy_wrong_to_testcase;
             bool _delete_correct;
 
+            int _sub_folder_index;
+
             enum class State {
                 UNKNOWN,
                 SKIP,
@@ -136,7 +138,8 @@ namespace generator {
                 _time_limit_for_checker(_setting::time_limit_inf),
                 _time_limit_for_validator(_setting::time_limit_inf),
                 _copy_wrong_to_testcase(copy_wrong_to_testcase),
-                _delete_correct(delete_correct) {
+                _delete_correct(delete_correct),
+                _sub_folder_index(_setting::_auto_int) {
                     __set_generator(std::forward<T1>(generator));
                     __set_std(std::forward<T2>(std));
                 }
@@ -153,6 +156,12 @@ namespace generator {
             _SET_GET_VALUE(int, time_limit_for_validator);
             _SET_GET_VALUE(bool, copy_wrong_to_testcase);
             _SET_GET_VALUE(bool, delete_correct);
+            _SET_GET_VALUE(int, sub_folder_index);
+
+            template<typename T>
+            void __set_checker(T&& checker) {
+                _checker.__set_checker(std::forward<T>(checker));
+            }
 
             template<typename T>
             void __set_generator(T&& generator) {
@@ -193,8 +202,13 @@ namespace generator {
                 _validator = __result_program(validator);
             }
 
+            Path __case_hack_folder() {
+                if (_sub_folder_index == _setting::_auto_int) return __hack_folder();
+                return __path_join(__hack_folder(), std::to_string(_sub_folder_index));
+            }
+
             State __generate(int index) {
-                Path input = __path_join(__hack_folder(), __end_with(index, _enum::_IN));
+                Path input = __path_join(__case_hack_folder(), __end_with(index, _enum::_IN));
                 _Program* gen = __generator_program(_generator, index, true);
                 ReturnState result = gen->__run_program(_setting::_default_path, input, _setting::_default_path, _time_limit_for_generator, _enum::_FuncProgramType::_GENERATOR);
                 delete gen;
@@ -204,16 +218,16 @@ namespace generator {
 
             State __validate(int index) {
                 if (_validator == nullptr) return State::UNKNOWN;
-                Path input = __path_join(__hack_folder(), __end_with(index, _enum::_IN));
-                Path log = __path_join(__hack_folder(), __end_with(index, _enum::_VAL));
+                Path input = __path_join(__case_hack_folder(), __end_with(index, _enum::_IN));
+                Path log = __path_join(__case_hack_folder(), __end_with(index, _enum::_VAL));
                 ReturnState result = _validator->__run_program(input, _setting::_default_path, _setting::_default_path, _time_limit_for_validator, _enum::_FuncProgramType::_VALIDATOR);
                 if (!__is_success(result.exit_code)) return State::VAL_FAIL;
                 return State::UNKNOWN;
             }
 
             State __run_std(int index) {
-                Path input = __path_join(__hack_folder(), __end_with(index, _enum::_IN));
-                Path output = __path_join(__hack_folder(), __end_with(index, _enum::_OUT));
+                Path input = __path_join(__case_hack_folder(), __end_with(index, _enum::_IN));
+                Path output = __path_join(__case_hack_folder(), __end_with(index, _enum::_OUT));
                 ReturnState result = _std->__run_program(input, output, _setting::_default_path, _time_limit_for_std, _enum::_FuncProgramType::_RESULT);
                 if (!__is_success(result.exit_code)) return State::STD_RE;
                 if (__time_limit_exceed(result.time, _time_limit)) return State::STD_TLE;
@@ -270,8 +284,8 @@ namespace generator {
             }
 
             TestResult __run_user(const Name& name, int index) {
-                Path input = __path_join(__hack_folder(), __end_with(index, _enum::_IN));
-                Path user = __path_join(__hack_folder(), name, __end_with(index, _enum::_ANS));
+                Path input = __path_join(__case_hack_folder(), __end_with(index, _enum::_IN));
+                Path user = __path_join(__case_hack_folder(), name, __end_with(index, _enum::_ANS));
                 ReturnState result = _comparers[name]._program->__run_program(input, user, _setting::_default_path, _time_limit, _enum::_FuncProgramType::_RESULT);
                 if (!__is_success(result.exit_code)) return {State::RE, 0};
                 if (__time_limit_exceed(result.time, _time_limit)) return {State::TLE, result.time};
@@ -279,10 +293,10 @@ namespace generator {
             }
 
             State __check(const Name& name, int index) {
-                Path input = __path_join(__hack_folder(), __end_with(index, _enum::_IN));
-                Path output = __path_join(__hack_folder(), __end_with(index, _enum::_OUT));
-                Path user = __path_join(__hack_folder(), name, __end_with(index, _enum::_ANS));
-                Path check_log = __path_join(__hack_folder(), name, __end_with(index, _enum::_CHECK_RESULT));
+                Path input = __path_join(__case_hack_folder(), __end_with(index, _enum::_IN));
+                Path output = __path_join(__case_hack_folder(), __end_with(index, _enum::_OUT));
+                Path user = __path_join(__case_hack_folder(), name, __end_with(index, _enum::_ANS));
+                Path check_log = __path_join(__case_hack_folder(), name, __end_with(index, _enum::_CHECK_RESULT));
                 _checker.__change_case(input, output, user, check_log);
                 _checker.__check_result();
                 _enum::_JudgeState result = _checker.result();
@@ -337,8 +351,8 @@ namespace generator {
                         if (should_copy) break;
                     }
                     if (!should_copy) continue;
-                    Path input = __path_join(__hack_folder(), __end_with(index, _enum::_IN));
-                    Path output = __path_join(__hack_folder(), __end_with(index, _enum::_OUT));
+                    Path input = __path_join(__case_hack_folder(), __end_with(index, _enum::_IN));
+                    Path output = __path_join(__case_hack_folder(), __end_with(index, _enum::_OUT));
                     next_input = __find_next_not_exist_inputs(next_input);
                     if (next_input == -1) {
                         _msg::__warn_msg(_msg::_defl, tools::string_format("Testcases are over the test_case_limit(%d).", _setting::test_case_limit));
@@ -358,8 +372,8 @@ namespace generator {
                 for (auto& name : _testcases[index]) {
                     State& state = _states[TestCase(name, index)].first;
                     if (__is_user_correct(state)) {
-                        Path user = __path_join(__hack_folder(), name, __end_with(index, _enum::_ANS));
-                        Path check_log = __path_join(__hack_folder(), name, __end_with(index, _enum::_CHECK_RESULT));
+                        Path user = __path_join(__case_hack_folder(), name, __end_with(index, _enum::_ANS));
+                        Path check_log = __path_join(__case_hack_folder(), name, __end_with(index, _enum::_CHECK_RESULT));
                         user.__delete_file();
                         check_log.__delete_file(); 
                     } else {
@@ -367,19 +381,19 @@ namespace generator {
                     }
                 }
                 if (!all_correct) return;
-                Path input = __path_join(__hack_folder(), __end_with(index, _enum::_IN));
-                Path output = __path_join(__hack_folder(), __end_with(index, _enum::_OUT));
-                Path val_log = __path_join(__hack_folder(), __end_with(index, _enum::_VAL));
+                Path input = __path_join(__case_hack_folder(), __end_with(index, _enum::_IN));
+                Path output = __path_join(__case_hack_folder(), __end_with(index, _enum::_OUT));
+                Path val_log = __path_join(__case_hack_folder(), __end_with(index, _enum::_VAL));
                 input.__delete_file();
                 output.__delete_file();
                 val_log.__delete_file();
             }
 
             void __hack() {
-                if (_testcases.empty()) return;
                 __prepare_comparers();
+                if (_testcases.empty()) return;
                 _checker.set_time_limit(_time_limit_for_checker);
-                __create_directories(__hack_folder());
+                __create_directories(__case_hack_folder());
                 int count = 1;
                 int sum = _testcases.size();
                 for (auto it = _testcases.begin(); it != _testcases.end();) {
@@ -399,7 +413,7 @@ namespace generator {
                     if (state == State::UNKNOWN) state = __validate(index);
                     if (state == State::UNKNOWN) state = __run_std(index);
                     for (auto& name : it->second) {
-                        __create_directories(__path_join(__hack_folder(), name));
+                        __create_directories(__path_join(__case_hack_folder(), name));
                         TestCase testcase(name, index);
                         if (_states.find(testcase) == _states.end()) continue;
                         if (__should_skip(name, index)) {
@@ -438,7 +452,7 @@ namespace generator {
                     out.print(tools::string_format("Hack %s : ", name.c_str()));
                     if (fail == 0 && program_error == 0) __all_pass(out);
                     else {
-                        out.print(_success_msg, " : ", __ratio_msg(fail, sum, ", "));
+                        out.print(_fail_msg, " : ", __ratio_msg(fail, sum, ", "));
                         out.println(_error_msg, " : ", __ratio_msg(program_error, sum));         
                     }
                 }
@@ -464,7 +478,7 @@ namespace generator {
                     case State::TLE: return _tle_msg;
                     case State::STD_TLE: return _msg::_ColorMsg("std TLE", _enum::Color::Yellow);
                     case State::STD_RE: return _msg::_ColorMsg("std RE", _enum::Color::Red);
-                    case State::GEN_FAIL: return _msg::_ColorMsg("gen ERROR", _enum::Color::Red);
+                    case State::GEN_FAIL: return _msg::_ColorMsg("generate ERROR", _enum::Color::Red);
                     case State::VAL_FAIL: return _msg::_ColorMsg("validate ERROR", _enum::Color::Red);
                     case State::CHECK_FAIL: return _msg::_ColorMsg("check ERROR", _enum::Color::Red);
                     default: return _msg::_ColorMsg("UNKNOWN", _enum::Color::Red);
@@ -506,6 +520,13 @@ namespace generator {
                     case_count++;
                 }
                 table.draw();
+            }
+
+            bool __empty() {
+                return _comparers.empty();
+            }
+             int __size() {
+                return _comparers.size();
             }
         };
 

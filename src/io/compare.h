@@ -105,7 +105,7 @@ namespace generator {
                 _msg::__endl(_msg::_defl);
             }
 
-            void __comapre() {
+            void __compare() {
                 if (_testcases.empty()) return;
                 _checker.set_time_limit(_time_limit_for_checker);
                 _results.clear();
@@ -216,6 +216,12 @@ namespace generator {
                 table.draw();
             }
 
+            bool __empty() {
+                return _name.empty();
+            }
+                int __size() {
+                return _name.size();
+            }
         };
 
         void __add_compare_program(_Compare& , int , int ) {
@@ -245,7 +251,7 @@ namespace generator {
         compare(int start, int end, int time_limit, T&& checker, Args... args) {
             _Compare compare(std::forward<T>(checker), time_limit);
             __add_compare_program(compare, start, end, args...);
-            compare.__comapre();
+            compare.__compare();
             compare.__detail_summary(_msg::_defl);
         }
 
@@ -254,7 +260,7 @@ namespace generator {
         compare(int time_limit, T&& checker, Args... args) {
             _Compare compare(std::forward<T>(checker), time_limit);
             __add_compare_program(compare, args...);
-            compare.__comapre();
+            compare.__compare();
             compare.__detail_summary(_msg::_defl);
         }
     } // namespace io

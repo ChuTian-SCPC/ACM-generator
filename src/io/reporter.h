@@ -19,7 +19,7 @@ namespace generator {
             static _msg::_ColorMsg _success_msg;
             static _msg::_ColorMsg _fail_msg;
             static _msg::_ColorMsg _error_msg;
-        public:
+        protected:
             _msg::_ColorMsg __state_msg(_enum::_JudgeState state, bool consider_tle) {
                 if (_enum::__is_run_error(state)) return _run_error_msg;
                 if (consider_tle && _enum::__has_tle(state)) return _tle_msg;

@@ -45,6 +45,10 @@ namespace generator {
                 IsFunctionConvertible<T>::value;
         };
 
+        template<bool...> struct BoolPack;
+        template<bool... Args> 
+        using ArgsAllTrue = std::is_same<BoolPack<Args..., true>, BoolPack<true, Args...>>;
+
         void __ensure_file_folder(Path file) {
             __create_directories(file.__folder_path());
         }                           

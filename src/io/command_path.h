@@ -163,6 +163,10 @@ namespace generator {
                 return program;
             }
             
+            virtual std::string __path_or_func() override {
+                return _path.full_path().path();
+            }
+
         };
     } // namespace io
 } // namespace generator
