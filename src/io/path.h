@@ -47,7 +47,9 @@ namespace generator {
       bool __empty() { return _path.empty(); }
       bool __file_exist() {
         std::ifstream file(_path.c_str());
-        return file.is_open();
+        bool result = file.is_open();
+        if (result) file.close();
+        return result;
       }
 
       void __ensure_file_exist() {

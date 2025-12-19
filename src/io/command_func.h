@@ -48,7 +48,9 @@ namespace generator {
             }
 
             virtual void __close_files(Path input, Path output, Path error) override {
-                return;
+                if (!input.__empty()) __close_input_file_to_console();
+                if (!output.__empty()) __close_output_file_to_console();
+                if (!error.__empty()) __close_error_file_to_console();
             }
 
             virtual int __run_child_program(Path input, Path output, Path error, _enum::_FuncProgramType type) override {

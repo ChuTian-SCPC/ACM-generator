@@ -39,9 +39,7 @@ namespace generator {
                 return _path.__file_name();
             }
             virtual void __close_files(Path input, Path output, Path error) override {
-                if (!input.__empty()) __close_input_file_to_console();
-                if (!output.__empty()) __close_output_file_to_console();
-                if (!error.__empty()) __close_error_file_to_console();
+                return;
             }
 
             std::string __command() { return tools::string_join(" ", _path.full_path(), _args);}
