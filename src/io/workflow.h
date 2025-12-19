@@ -395,7 +395,8 @@ namespace generator {
                 _msg::__info_msg(out, tools::string_format("  Compare Programs Count : %d", _compares.size()));
                 _msg::__info_msg(out, "  Time Limit:");
                 _msg::__info_msg(out, tools::string_format("    std       : %s", __time_format(_time_limit_for_std).c_str()));
-                _msg::__info_msg(out, tools::string_format("    compare   : %s", __time_format(__time_limit_extend(_time_limit)).c_str()));
+                _msg::__info_msg(out, tools::string_format("    compare   : %s / %s", 
+                    __time_format(_time_limit).c_str(), __time_format(__time_limit_extend(_time_limit)).c_str()));
                 _msg::__info_msg(out, tools::string_format("    hack user : %s", __time_format(_time_limit).c_str()));
                 _msg::__info_msg(out, tools::string_format("    generator : %s", __time_format(_time_limit_for_generator).c_str()));
                 _msg::__info_msg(out, tools::string_format("    validator : %s", __time_format(_time_limit_for_validator).c_str()));
