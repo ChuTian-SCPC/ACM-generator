@@ -220,7 +220,7 @@ namespace generator {
                 if (_validator == nullptr) return State::UNKNOWN;
                 Path input = __path_join(__case_hack_folder(), __end_with(index, _enum::_IN));
                 Path log = __path_join(__case_hack_folder(), __end_with(index, _enum::_VAL));
-                ReturnState result = _validator->__run_program(input, _setting::_default_path, _setting::_default_path, _time_limit_for_validator, _enum::_FuncProgramType::_VALIDATOR);
+                ReturnState result = _validator->__run_program(input, _setting::_default_path, log, _time_limit_for_validator, _enum::_FuncProgramType::_VALIDATOR);
                 if (!__is_success(result.exit_code)) return State::VAL_FAIL;
                 return State::UNKNOWN;
             }
@@ -487,6 +487,9 @@ namespace generator {
 
             void __detail_summary(_msg::OutStream& out) {
                 _Table table(out);
+                _msg::__info_msg(out, tools::string_format("Generator Name : %s", _generator->name().c_str()));
+                if (_sub_folder_index != _setting::_auto_int)
+                    _msg::__info_msg(out, tools::string_format("Sub Folder Index : %d", _sub_folder_index));
                 table.add_cell(0, 0, "Hack Case Id");
                 std::map<Name, int> table_indices;
                 int row = 1;
