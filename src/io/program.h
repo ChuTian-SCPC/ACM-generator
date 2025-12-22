@@ -144,7 +144,8 @@ namespace generator {
                 output.__ensure_file_exist();
                 Path error = Path(error_file);
                 error.__ensure_file_exist();
-                return __run_child_process_program(input, output, error, time_limit, func_type);
+                int run_time_limit = time_limit == _setting::time_limit_inf ? _setting::time_limit_inf : time_limit + _setting::_extra_run_time;
+                return __run_child_process_program(input, output, error, run_time_limit, func_type);
             }
 
             virtual _Program* __clone() = 0;

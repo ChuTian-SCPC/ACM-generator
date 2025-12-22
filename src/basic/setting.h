@@ -26,6 +26,7 @@ namespace generator {
     int time_limit_inf = -1; 
     int _time_limit_auto = -2;
     int test_case_limit = 1000;
+    int _extra_run_time = 100;
 
   #ifdef ON_WINDOWS
     char _path_split = '\\';

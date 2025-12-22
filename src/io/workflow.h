@@ -81,7 +81,7 @@ namespace generator {
             Workflow(int time_limit = _setting::time_limit_inf) :
                 _Reporter(),
                 _std(_setting::_empty_program_name),
-                _checker("lcmp"),
+                _checker(""),
                 _validator(_setting::_empty_program_name),
                 _input(),
                 _time_limit(time_limit),
@@ -98,7 +98,7 @@ namespace generator {
                 _file(Path("./summary.log"))
             {
                 init_gen();
-                __init_checkers();
+                set_checker(_enum::Checker::lcmp);
             }
             
             ~Workflow() {
@@ -270,12 +270,6 @@ namespace generator {
                 return p;
             }
 
-            void __init_checkers() {
-                for (int i = _enum::Checker::lcmp; i < _enum::Checker::MaxChecker; i++) {
-                    __add_program((_enum::Checker)i);
-                }
-            }
-
             _Program* __find_program_by_name(const Name& name) {
                 if (_programs.find(name) == _programs.end()) return nullptr;
                 return _programs[name];
@@ -286,8 +280,8 @@ namespace generator {
             __find_program(T&& index) {
                 _Program* p = __find_program_by_name(checker_name[index]);
                 if (p != nullptr) return p;
-                __init_checkers();
-                return __find_program_by_name(checker_name[index]);
+                p = __checker_program(std::forward<T>(index));
+                return __add_program(p);
             }
 
             template<typename T>
@@ -416,6 +410,7 @@ namespace generator {
             void __begin_summary_report() {
                 __begin_summary_report(_msg::_defl, _detail_report_on_console, true);
                 __begin_summary_report(_file, _detail_report_on_file, false);
+                _msg::__endl(_file);
             }
 
             void __info_msg(const std::string& msg) {
@@ -453,6 +448,7 @@ namespace generator {
                 _msg::__info_msg(_file, "Generate(Inputs) :");
                 if (_detail_report_on_file) _input.__detail_summary(_file);
                 else _input.__short_summary(_file);
+                _msg::__endl(_file);
                 auto states = _input.states();
                 for (auto& s : states) {
                     if (!__is_success(s.second.exit_code)) _states[s.first] = State::GEN_FAIL;
@@ -477,6 +473,7 @@ namespace generator {
                 _msg::__info_msg(_file, "Validate :");
                 if (_detail_report_on_file) validator.__detail_summary(_file);
                 else validator.__short_summary(_file);
+                _msg::__endl(_file);
                 auto states = validator.states();
                 for (auto& s : states) {
                     if (!__is_success(s.second.exit_code)) _states[s.first] = State::VAL_FAIL;
@@ -497,6 +494,7 @@ namespace generator {
                 _msg::__info_msg(_file, "Generate(Outputs) :");
                 if (_detail_report_on_file) output.__detail_summary(_file);
                 else output.__short_summary(_file);
+                _msg::__endl(_file);
                 auto states = output.states();
                 for (auto& s : states) {
                     if (!__is_success(s.second.exit_code)) _states[s.first] = State::STD_RE;
@@ -530,6 +528,8 @@ namespace generator {
                     hack.set_time_limit_for_std(_time_limit_for_std);
                     hack.__set_checker(__find_program(_checker));
                     hack.set_time_limit_for_checker(_time_limit_for_checker);
+                    hack.__set_validator(__find_program(_validator));
+                    hack.set_time_limit_for_validator(_time_limit_for_validator);
                     if (_validator != _setting::_empty_program_name) {
                         hack.__set_validator(__find_program(_validator));
                         hack.set_time_limit_for_validator(_time_limit_for_validator);
@@ -544,11 +544,11 @@ namespace generator {
                     else hack.__short_summary(_file);
                     count++;
                 }         
+                _msg::__endl(_file);
             }
 
             void __compare() {
                 if (_compares.empty()) return;
-                _msg::__info_msg(_file, "Compare :");
                 _Compare compare;
                 compare.set_time_limit(_time_limit);
                 compare.__set_checker(__find_program(_checker));
@@ -562,8 +562,10 @@ namespace generator {
                 compare.__compare();
                 if (_detail_report_on_console) compare.__detail_summary(_msg::_defl);
                 else compare.__short_summary(_msg::_defl);
+                _msg::__info_msg(_file, "Compare :");
                 if (_detail_report_on_file) compare.__detail_summary(_file);
                 else compare.__short_summary(_file);
+                _msg::__endl(_file);
             }
 
         };

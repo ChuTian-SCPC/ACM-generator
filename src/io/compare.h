@@ -158,7 +158,6 @@ namespace generator {
             }
 
             void __short_summary(_msg::OutStream& out) {
-                _msg::__info_msg(out, "Total Result : ");
                 _Table table(out);
                 table.add_titles({"Program Name", "Run Success", "State", "RunTime"});
                 int count = 1;
@@ -177,7 +176,6 @@ namespace generator {
             }
 
             void __detail_summary(_msg::OutStream& out) {
-                _msg::__info_msg(out, "Total Result : ");
                 _Table table(out);
                 table.add_cell(0, 0, "Case \\ Name");
                 std::set<int> all_case_ids;
