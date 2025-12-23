@@ -100,7 +100,7 @@ namespace generator {
             bool _copy_wrong_to_testcase;
             bool _delete_correct;
 
-            int _sub_folder_index;
+            std::string _sub_folder_name;
 
             enum class State {
                 UNKNOWN,
@@ -139,7 +139,7 @@ namespace generator {
                 _time_limit_for_validator(_setting::time_limit_inf),
                 _copy_wrong_to_testcase(copy_wrong_to_testcase),
                 _delete_correct(delete_correct),
-                _sub_folder_index(_setting::_auto_int) {
+                _sub_folder_name(_setting::_empty_program_name) {
                     __set_generator(std::forward<T1>(generator));
                     __set_std(std::forward<T2>(std));
                 }
@@ -149,6 +149,10 @@ namespace generator {
                 if (_std != nullptr) delete _std;
             }
 
+            _GET_VALUE(_Checker, checker);
+            _GET_VALUE(_Program*, generator);
+            _GET_VALUE(_Program*, std);
+            _GET_VALUE(_Program*, validator);
             _SET_GET_VALUE(int, time_limit);
             _SET_GET_VALUE(int, time_limit_for_std);
             _SET_GET_VALUE(int, time_limit_for_generator);
@@ -156,7 +160,7 @@ namespace generator {
             _SET_GET_VALUE(int, time_limit_for_validator);
             _SET_GET_VALUE(bool, copy_wrong_to_testcase);
             _SET_GET_VALUE(bool, delete_correct);
-            _SET_GET_VALUE(int, sub_folder_index);
+            _SET_GET_VALUE(std::string, sub_folder_name);
 
             template<typename T>
             void __set_checker(T&& checker) {
@@ -203,8 +207,8 @@ namespace generator {
             }
 
             Path __case_hack_folder() {
-                if (_sub_folder_index == _setting::_auto_int) return __hack_folder();
-                return __path_join(__hack_folder(), std::to_string(_sub_folder_index));
+                if (_sub_folder_name == _setting::_empty_program_name) return __hack_folder();
+                return __path_join(__hack_folder(), _sub_folder_name);
             }
 
             State __generate(int index) {
@@ -488,8 +492,6 @@ namespace generator {
             void __detail_summary(_msg::OutStream& out) {
                 _Table table(out);
                 _msg::__info_msg(out, tools::string_format("Generator Name : %s", _generator->name().c_str()));
-                if (_sub_folder_index != _setting::_auto_int)
-                    _msg::__info_msg(out, tools::string_format("Sub Folder Index : %d", _sub_folder_index));
                 table.add_cell(0, 0, "Hack Case Id");
                 std::map<Name, int> table_indices;
                 int row = 1;

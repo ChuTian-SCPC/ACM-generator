@@ -536,7 +536,7 @@ namespace generator {
                     }
                     hack.set_copy_wrong_to_testcase(_copy_wrong_to_testcase);
                     hack.set_delete_correct(_delete_correct);
-                    hack.set_sub_folder_index(count);
+                    hack.set_sub_folder_name(hack.generator()->name());
                     hack.__hack();
                     if (_detail_report_on_console) hack.__detail_summary(_msg::_defl);
                     else hack.__short_summary(_msg::_defl);
