@@ -135,7 +135,7 @@ namespace generator {
           }
           
           bool __enable_log_same() {
-            return _log_same || _setting::same_log_for_class;
+            return _log_same;
           }
           
           template <typename... Args>

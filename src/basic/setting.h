@@ -59,8 +59,6 @@ namespace generator {
     
     int _function_count = 0;
     
-    bool same_log_for_class = false;
-    
     std::string _first_generator_argv = "generator";
     std::string _first_checker_argv = "checker";
     std::string _first_validator_argv = "validator";
