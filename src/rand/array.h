@@ -473,7 +473,7 @@ namespace generator {
                         int l = j - i - 1;
                         std::rotate(arr.begin() + i + 1, arr.begin() + j + 1, arr.begin() + end);
                         std::copy_backward(arr.begin() + end - l - 1, arr.begin() + end - 1, arr.begin() + end);
-                        std::transform(arr.begin() + end - l, arr.begin() + end, arr.begin() + end - l, std::logical_not());
+                        std::transform(arr.begin() + end - l, arr.begin() + end, arr.begin() + end - l, [](bool x) { return !x; });
                         arr[i] = 0; 
                         arr[end - l - 1] = 1;
                         start = i + 1; 

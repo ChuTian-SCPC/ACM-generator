@@ -166,6 +166,58 @@ namespace generator {
                 if (_name == _setting::_empty_program_name) _name = __default_name();
                 return _name;
             }
+
+            std::string get_argv_without_redirection() {
+                std::string argv = "";
+                int i = 0;
+                while (i < _args.size()) {
+                    __skip_spaces(_args, i);    
+                    if (i >= _args.size()) break;
+
+                    if (_args[i] == '2' && i + 1 < _args.size() && _args[i + 1] == '>') {
+                        i += 2;
+                        __skip_spaces(_args, i);
+                        __parse_token(_args, i); 
+                        continue;
+                    }
+
+                    if (_args[i] == '<' || _args[i] == '>') {
+                        i++;
+                        __skip_spaces(_args, i);
+                        __parse_token(_args, i); 
+                        continue;
+                    }
+
+                    std::string token = __parse_token(_args, i);
+                   argv += token + " ";
+                }
+                return argv;
+            }
+
+        protected:
+            void __skip_spaces(const std::string& s, int& i) {
+                while (i < s.size() && std::isspace(s[i])) i++;
+            }
+
+            std::string __parse_token(const std::string& s, int& i) {
+                std::string token;
+                char quote = 0;
+
+                while (i < s.size()) {
+                    char c = s[i];
+
+                    if (quote) {
+                        if (c == quote) quote = 0; 
+                        else token += c;
+                    } else {
+                        if (c == '\'' || c == '"') quote = c; 
+                        else if (std::isspace(c)) break;
+                        else token += c;
+                    }
+                    i++;
+                }
+                return token;
+            }
         };
 
     } // namespace io

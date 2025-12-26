@@ -493,8 +493,9 @@ namespace generator {
                 _Table table(out);
                 _msg::__info_msg(out, tools::string_format("Generator Name : %s", _generator->name().c_str()));
                 table.add_cell(0, 0, "Hack Case Id");
+                table.add_cell(1, 0, "Seed");
                 std::map<Name, int> table_indices;
-                int row = 1;
+                int row = 2;
                 for (auto& comparer : _comparers) {
                     Name name = comparer.first;
                     table.add_cell(row, 0, name);
@@ -506,6 +507,9 @@ namespace generator {
                 for (auto& testcase : _testcases) {
                     int index = testcase.first;
                     table.add_cell(0, case_count, std::to_string(index));
+                    _Program* gen = __generator_program(_generator, index, true);
+                    table.add_cell(1, case_count, gen->get_argv_without_redirection());
+                    delete gen;
                     for(auto& program : _comparers) {
                         Name name = program.first;
                         int table_index = table_indices[name];

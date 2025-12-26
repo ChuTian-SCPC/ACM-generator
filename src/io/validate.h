@@ -78,14 +78,14 @@ namespace generator {
             }
 
             _msg::_ColorMsg __state_msg(ReturnState state) {
-                if (!__is_success(state.exit_code)) return _run_error_msg;
+                if (!__is_success(state.exit_code)) return _fail_msg;
                 if (__time_limit_exceed(state.time, _time_limit)) return _tle_msg;
                 return _success_msg;
             }
 
             void __detail_summary(_msg::OutStream& out) {
                 _Table table(out);
-                table.add_titles({"Case ID", "State", "Time Used"});
+                table.add_titles({"Case ID", "State", "RunTime"});
                 int count = 0;
                 for (auto& state: _states) {
                     count++;

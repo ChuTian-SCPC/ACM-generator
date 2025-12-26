@@ -85,7 +85,7 @@ namespace generator {
 
             void __detail_summary(_msg::OutStream& out) {
                 _Table table(out);
-                table.add_titles({"Case ID", "State", "Time Used"});
+                table.add_titles({"Case ID", "State", "RunTime"});
                 int count = 0;
                 for (auto& state: _states) {
                     count++;

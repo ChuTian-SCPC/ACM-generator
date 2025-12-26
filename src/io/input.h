@@ -83,14 +83,16 @@ namespace generator {
 
             void __detail_summary(_msg::OutStream& out) {
                 _Table table(out);
-                table.add_titles({"Case ID", "State", "Time Used"});
+                table.add_titles({"Case ID", "Generator Name", "Seed", "State", "RunTime"});
                 int count = 0;
                 for (auto& state: _states) {
                     count++;
                     table.add_cell(0, count, std::to_string(state.first));
-                    table.add_cell(1, count, __state_msg(state.second));
+                    table.add_cell(1, count, _gens[state.first]->name());
+                    table.add_cell(2, count, _gens[state.first]->get_argv_without_redirection());
+                    table.add_cell(3, count, __state_msg(state.second));
                     if (!__is_success(state.second.exit_code)) continue;
-                    table.add_cell(2, count, tools::string_format(" %dms", state.second.time));
+                    table.add_cell(4, count, tools::string_format(" %dms", state.second.time));
                 }
                 table.draw();
             }
