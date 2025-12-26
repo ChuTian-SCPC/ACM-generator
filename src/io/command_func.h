@@ -15,6 +15,7 @@ namespace generator {
         class CommandFunc : public _Program {
         private:
             std::function<void()> _func;
+            static int _function_count;
         public:
             CommandFunc() : _func(nullptr), _Program() {}
             CommandFunc(CommandFunc&& other) noexcept : _func(other._func), _Program(std::move(other)) {}
@@ -42,8 +43,8 @@ namespace generator {
 
         protected:
             virtual std::string __default_name() override {
-                _setting::_function_count++;
-                std::string name = "function" + std::to_string(_setting::_function_count);
+                _function_count++;
+                std::string name = "function" + std::to_string(_function_count);
                 return name;
             }
 
@@ -105,7 +106,8 @@ namespace generator {
 
         };
 
-        
+        int CommandFunc::_function_count = 0;
+
     } // namespace io
     
 } // namespace generator

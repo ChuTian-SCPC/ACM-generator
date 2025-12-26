@@ -57,8 +57,6 @@ namespace generator {
     std::string input_suffix = ".in";
     std::string output_suffix = ".out";
     
-    int _function_count = 0;
-    
     std::string _first_generator_argv = "generator";
     std::string _first_checker_argv = "checker";
     std::string _first_validator_argv = "validator";
