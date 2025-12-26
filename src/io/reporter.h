@@ -58,12 +58,24 @@ namespace generator {
             }
 
             void __meets_error(_msg::OutStream& out) {
-                out.println("Meets ", _error_msg, " in :");
+                out.print("Meets ", _error_msg, " in :");
+            }
+
+            void __meets_error_endl(_msg::OutStream& out) {
+                __meets_error(out);
+                _msg::__endl(out);
             }
 
             void __meets_error_files(_msg::OutStream& out, std::vector<Path>& files) {
-                __meets_error(out);
+                __meets_error_endl(out);
                 __show_files(out, files);
+            }
+
+            void __meets_error_files(_msg::OutStream& out, std::vector<int>& files, int total) {
+                __pass_ratio_msg(out, total - files.size(), total);
+                std::string file = join(files, ", ");
+                __meets_error(out);
+                out.println(tools::string_format(" {%s}", file.c_str()));
             }
 
             void __run_time_msg(_msg::OutStream& out, int time_used) {
