@@ -68,24 +68,33 @@ namespace generator {
             }
 
             void __short_summary(_msg::OutStream& out) {
-                int passed = 0;
+                std::vector<int> error_files;
                 for (auto& state : _states) {
-                    if (__is_success(state.second.exit_code))
-                        passed++;
+                    if (!__is_success(state.second.exit_code) || __time_limit_exceed(state.second.time, _time_limit))
+                        error_files.push_back(state.first);
                 }
-                if (passed == _states.size()) __all_pass(out);
-                else __pass_ratio_msg(out, passed, _states.size());
+                if (error_files.empty()) __all_pass(out);
+                else __meets_error_files(out, error_files, _states.size());
+            }
+
+            _msg::_ColorMsg __state_msg(ReturnState state) {
+                if (!__is_success(state.exit_code)) return _run_error_msg;
+                if (__time_limit_exceed(state.time, _time_limit)) return _tle_msg;
+                return _success_msg;
             }
 
             void __detail_summary(_msg::OutStream& out) {
-                std::vector<Path> error_files;
-                Path folder = __validate_folder(_case_name);
-                for (auto& state : _states) {
-                    if (!__is_success(state.second.exit_code))
-                        error_files.push_back(__input_file_path(__path_join(__current_path(), _case_name), state.first));
+                _Table table(out);
+                table.add_titles({"Case ID", "State", "Time Used"});
+                int count = 0;
+                for (auto& state: _states) {
+                    count++;
+                    table.add_cell(0, count, std::to_string(state.first));
+                    table.add_cell(1, count, __state_msg(state.second));
+                    if (!__is_success(state.second.exit_code)) continue;
+                    table.add_cell(2, count, tools::string_format(" %dms", state.second.time));
                 }
-                if (error_files.empty()) __all_pass(out);
-                else __meets_error_files(out, error_files);
+                table.draw();
             }
         };
 
