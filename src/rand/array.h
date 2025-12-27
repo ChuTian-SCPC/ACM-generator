@@ -94,7 +94,7 @@ namespace generator {
             return v;
         }
 
-        template<typename T>
+        template<typename T = long long>
         typename std::enable_if<std::is_integral<T>::value , std::vector<T> >::type
         rand_sum(int size,T sum) {
             __judge_vector_lower_bound(size, "vector");
@@ -103,7 +103,7 @@ namespace generator {
             return v;
         }
 
-        template<typename T>
+        template<typename T = long long>
         typename std::enable_if<std::is_integral<T>::value , std::vector<T> >::type
         rand_sum(int size,T sum,T min_part) {
             __judge_vector_lower_bound(size, "vector");
@@ -171,13 +171,13 @@ namespace generator {
             return false;
         }
         
-        template<typename T>
+        template<typename T = long long>
         typename std::enable_if<std::is_integral<T>::value , std::vector<T> >::type
         rand_sum(int size, T sum, T from, T to) {
             __judge_vector_lower_bound(size, "vector");
             __judge_vector_upper_bound(size, "vector");
             __judge_range(from, to);
-            if(size * from > sum || size * to < sum){
+            if((long long)size * from > sum || (long long)size * to < sum){
                 _msg::__fail_msg(_msg::_defl,
                     tools::string_format("sum of the vector is in range [%lld, %lld], but need sum = %s.",
                     (long long)from * size, (long long)to * size, std::to_string(sum).c_str()));
