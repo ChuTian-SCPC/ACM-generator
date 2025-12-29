@@ -356,7 +356,7 @@ namespace generator {
                 if (name == _setting::_empty_program_name) 
                     _msg::__info_msg(out, tools::string_format("  No %s", stage_name.c_str()));
                 else 
-                    _msg::__info_msg(out, tools::string_format("  %s name%*s : %s", stage_name.c_str(), 19 - stage_name.size(), "", name.c_str()));
+                    _msg::__info_msg(out, tools::string_format("  %s name%*s : %s", stage_name.c_str(), 17 - stage_name.size(), "", name.c_str()));
             }
 
             std::string __bool_format(bool b) {
