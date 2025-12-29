@@ -70,7 +70,7 @@ namespace generator {
             void __short_summary(_msg::OutStream& out) {
                 std::vector<int> error_files;
                 for (auto& state : _states) {
-                    if (!__is_success(state.second.exit_code) || __time_limit_exceed(state.second.time, _time_limit))
+                    if (__is_wa_or_tle(state.second, _time_limit))
                         error_files.push_back(state.first);
                 }
                 if (error_files.empty()) __all_pass(out);
@@ -84,39 +84,32 @@ namespace generator {
             }
 
             void __detail_summary(_msg::OutStream& out) {
-                _Table table(out);
-                int fail_count = 0;
+                int error_count = 0;
+                std::vector<Path> fail_files;
                 for (auto& state : _states) {
-                    if (!__is_success(state.second.exit_code))
-                        fail_count++;
+                    if (__is_wa_or_tle(state.second, _time_limit))
+                        fail_files.push_back(__input_file_path(__path_join(__current_path(), _case_name), state.first));
+                    if (!__is_success(state.second.exit_code)) error_count++;
                 }
+                _Table table(out);
                 table.add_titles({"Case ID", "State", "RunTime"});
-                if (fail_count) table.add_cell(3, 0, "Fail Message");
+                if (error_count) table.add_cell(3, 0, "Fail Message");
                 int count = 0;
+                Path folder = __validate_folder(_case_name);
                 for (auto& state: _states) {
+                    Path log = __path_join(folder, __end_with(state.first, _enum::_VAL));
                     count++;
                     table.add_cell(0, count, std::to_string(state.first));
                     table.add_cell(1, count, __state_msg(state.second));
                     if (!__is_success(state.second.exit_code)) 
-                        table.add_cell(3, count, __get_fail_message(state.first));
+                        table.add_cell(3, count, __get_fail_message(log));
                     else 
                         table.add_cell(2, count, tools::string_format(" %dms", state.second.time));
                 }
                 table.draw();
-            }
-
-            std::string __get_fail_message(int id) {
-                Path folder = __validate_folder(_case_name);
-                Path log = __path_join(folder, __end_with(id, _enum::_VAL));
-                std::ifstream val_stream(log.path());
-                std::string line;
-                std::string result = "";
-                while(val_stream >> line){
-                    result += line;
-                    result += " ";
+                if (!fail_files.empty()) {
+                    __meets_error_files(out, fail_files);
                 }
-                val_stream.close();
-                return result;
             }
         };
 

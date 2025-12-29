@@ -356,7 +356,7 @@ namespace generator {
                 if (name == _setting::_empty_program_name) 
                     _msg::__info_msg(out, tools::string_format("  No %s", stage_name.c_str()));
                 else 
-                    _msg::__info_msg(out, tools::string_format("  %s name : %s", stage_name.c_str(), name.c_str()));
+                    _msg::__info_msg(out, tools::string_format("  %s name%*s : %s", stage_name.c_str(), 19 - stage_name.size(), "", name.c_str()));
             }
 
             std::string __bool_format(bool b) {
@@ -366,7 +366,7 @@ namespace generator {
             void __begin_summary_report(_msg::OutStream& out, bool detail, bool console) {
                 if (!detail) {
                     if (console) _msg::__info_msg(out, "Start Workflow :");
-                    _msg::__info_msg(out, tools::string_format("  Programs Count : %d", _programs.size()));
+                    _msg::__info_msg(out, tools::string_format("  Programs Count       : %d", _programs.size()));
                 }
                 else {
                     _Table table(out);
@@ -382,10 +382,10 @@ namespace generator {
                     __report_program(out, _checker, "Checker");
                     __report_program(out, _validator, "Validator");                    
                 }
-                _msg::__info_msg(out, tools::string_format("  Test Cases Count : %d", _input.__size()));
+                _msg::__info_msg(out, tools::string_format("  Test Cases Count       : %d", _input.__size()));
                 int hack_size = 0;
                 for (auto& h : _hacks) hack_size += h.second.__size();  
-                _msg::__info_msg(out, tools::string_format("  Hack Programs Count : %d", hack_size));
+                _msg::__info_msg(out, tools::string_format("  Hack Programs Count    : %d", hack_size));
                 _msg::__info_msg(out, tools::string_format("  Compare Programs Count : %d", _compares.size()));
                 _msg::__info_msg(out, "  Time Limit:");
                 _msg::__info_msg(out, tools::string_format("    std       : %s", __time_format(_time_limit_for_std).c_str()));

@@ -98,7 +98,8 @@ namespace generator {
                         _checker.__change_case(input, output, answer, check_result);
                         _checker.__check_result();
                         _enum::_JudgeState check_result = _checker.result();
-                        if (_enum::__is_run_error(check_result)) result.first = check_result;
+                        if (_enum::__is_run_error(check_result) || _enum::__is_checker_tle(check_result)) 
+                            result.first = check_result;
                         else result.first |= check_result;
                     }
                 }
@@ -191,6 +192,8 @@ namespace generator {
                 }
                 table.add_cell(0, column, "Total");
                 int row = 1;
+                bool has_wa = false;
+                bool has_error = false;
                 for (auto& testcase : _name) {
                     Name name = testcase.first;
                     TestResult total_result = __get_test_result(name);
@@ -204,12 +207,44 @@ namespace generator {
                             TestResult result = _results[test_case];
                             __push_state(table, row, len, result.first);
                             __push_time(table, row, len, result, " ");
+                            if (_enum::__has_wa(result.first)) has_wa = true;
+                            if (result.first != _enum::_JudgeState::_AC) has_error = true;
                         }
                         len++;
                     }
                     __push_state(table, row, len, total_result.first);
                     __push_time(table, row, len, total_result, " ");
                     row++;
+                }
+                table.draw();
+                if (has_error) __draw_error_case_table(out, has_wa);
+            }
+
+            void __draw_error_case_table(_msg::OutStream& out, bool has_wa) {
+                _msg::__info_msg(out, "Error Cases:");
+                _Table table(out);
+                table.add_titles({"Program Name & Case ID", "State"});
+                if (has_wa) {
+                    table.add_cell(2, 0, "Answer");
+                    table.add_cell(3, 0, "Checker Message");
+                }
+                int count = 1;
+                for (auto& testcase : _results) {
+                    auto& result = testcase.second;
+                    auto& name = testcase.first.first;
+                    auto& id = testcase.first.second;
+                    if (result.first != _enum::_JudgeState::_AC) {
+                        table.add_cell(0, count, tools::string_format("%s %d", name.c_str(), id));
+                        __push_state(table, 1, count, result.first);
+                        __push_time(table, 1, count, result, " ");
+                        Path answer = __path_join(__compare_folder(), name, __end_with(id, _enum::_ANS));
+                        if (_enum::__has_wa(result.first)) {
+                            Path check_result = __path_join(__compare_folder(), name, __end_with(id, _enum::_CHECK_RESULT));
+                            table.add_cell(2, count, tools::string_format("%s ", answer.path().c_str()));
+                            table.add_cell(3, count, __get_fail_message(check_result));
+                        }
+                        count++;
+                    }         
                 }
                 table.draw();
             }

@@ -65,6 +65,10 @@ namespace generator {
                     _result = _enum::_JudgeState::_ERROR;
                     return;
                 }
+                if (__time_limit_exceed(res.time, _time_limit)) {
+                    _result = _enum::_JudgeState::_CHECKER_TLE;
+                    return;
+                }
                 std::ifstream checker_stream(_testlib_output.path());
                 std::string line;
                 while(checker_stream >> line){

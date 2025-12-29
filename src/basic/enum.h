@@ -25,6 +25,7 @@ namespace generator {
       _TLE = 4,
       _TLE_AC = 5,
       _TLE_WA = 6,
+      _CHECKER_TLE,
       _JUDGE_STATE_MAX
     };
 
@@ -73,6 +74,10 @@ namespace generator {
       return state == _JudgeState::_ERROR;
     }
 
+    bool __is_checker_tle(_JudgeState state) {
+      return state == _JudgeState::_CHECKER_TLE;
+    }
+
     bool __is_unknown(_JudgeState state) {
       return state == _JudgeState::_UNKNOWN;
     }
@@ -90,6 +95,7 @@ namespace generator {
       _EXE,
       _VAL,
       _CHECK_RESULT,
+      _GEN_LOG,
       _MAX_END  
     };
 

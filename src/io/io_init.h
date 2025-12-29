@@ -57,6 +57,14 @@ namespace generator {
             return __path_join(__current_path(), _setting::testcase_folder);
         }
 
+        Path __generate_log_folder(const Path& folder) {
+            return __path_join(folder, _setting::generate_log_folder);
+        }
+
+        Path __generate_log_folder() {
+            return __generate_log_folder(__current_path());
+        }
+
         std::string _file_end[_enum::_MAX_END] = {
             _setting::input_suffix,
             _setting::output_suffix,
@@ -65,7 +73,8 @@ namespace generator {
             ".logc",
             ".exe",
             ".val",
-            ".check"
+            ".check",
+            ".glog"
         };
 
         void __check_input_output_suffix() {

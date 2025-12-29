@@ -68,7 +68,7 @@ namespace generator {
                 std::vector<int> error_files;
                 int run_time = 0;
                 for (auto& state : _states) {
-                    if (!__is_success(state.second.exit_code) || __time_limit_exceed(state.second.time, _time_limit))
+                    if (__is_wa_or_tle(state.second, _time_limit))
                         error_files.push_back(state.first);
                     run_time = std::max(run_time, state.second.time);
                 }
@@ -84,6 +84,11 @@ namespace generator {
             }
 
             void __detail_summary(_msg::OutStream& out) {
+                std::vector<Path> fail_files;
+                for (auto& state : _states) {
+                    if (__is_wa_or_tle(state.second, _time_limit))
+                        fail_files.push_back(__testcase_output_file_path(state.first));
+                }
                 _Table table(out);
                 table.add_titles({"Case ID", "State", "RunTime"});
                 int count = 0;
@@ -95,6 +100,9 @@ namespace generator {
                     table.add_cell(2, count, tools::string_format(" %dms", state.second.time));
                 }
                 table.draw();
+                if (!fail_files.empty()) {
+                    __meets_error_files(out, fail_files);
+                }
             }
         };
 

@@ -54,13 +54,15 @@ namespace generator {
 
             void __run() {
                 __create_directories(__testcases_folder());
+                __create_directories(__generate_log_folder());
                 _states.clear();
                 int id = 1;
                 for (auto& gen : _gens) {
                     Path input = __testcase_input_file_path(gen.first);
+                    Path log = __path_join(__generate_log_folder(), __end_with(gen.first, _enum::_End::_GEN_LOG));
                     _msg::__flash_msg(_msg::_defl, "Generate(Inputs) : ", __ratio_msg(id, _gens.size()));
                     id++;
-                    _states[gen.first] = gen.second->__run_program(_setting::_default_path, input, _setting::_default_path, _time_limit, _enum::_FuncProgramType::_GENERATOR);
+                    _states[gen.first] = gen.second->__run_program(_setting::_default_path, input, log, _time_limit, _enum::_FuncProgramType::_GENERATOR);
                 }
                 _msg::__endl(_msg::_defl);
             }
@@ -68,7 +70,7 @@ namespace generator {
             void __short_summary(_msg::OutStream& out) {
                 std::vector<int> error_files;
                 for (auto& state : _states) {
-                    if (!__is_success(state.second.exit_code) || __time_limit_exceed(state.second.time, _time_limit))
+                    if (__is_wa_or_tle(state.second, _time_limit))
                         error_files.push_back(state.first);
                 }
                 if (error_files.empty()) __all_pass(out);
@@ -82,19 +84,34 @@ namespace generator {
             }
 
             void __detail_summary(_msg::OutStream& out) {
+                int error_count = 0;
+                std::vector<Path> fail_files;
+                for (auto& state : _states) {
+                    if (__is_wa_or_tle(state.second, _time_limit))
+                        fail_files.push_back(__testcase_input_file_path(state.first));
+                    if (!__is_success(state.second.exit_code)) error_count++;
+                }
                 _Table table(out);
                 table.add_titles({"Case ID", "Generator Name", "Seed", "State", "RunTime"});
+                if (error_count) table.add_cell(5, 0, "Fail Message");
+
                 int count = 0;
                 for (auto& state: _states) {
                     count++;
+                    Path log = __path_join(__generate_log_folder(), __end_with(state.first, _enum::_End::_GEN_LOG));
                     table.add_cell(0, count, std::to_string(state.first));
                     table.add_cell(1, count, _gens[state.first]->name());
                     table.add_cell(2, count, _gens[state.first]->get_argv_without_redirection());
                     table.add_cell(3, count, __state_msg(state.second));
-                    if (!__is_success(state.second.exit_code)) continue;
-                    table.add_cell(4, count, tools::string_format(" %dms", state.second.time));
+                    if (__is_success(state.second.exit_code)) 
+                        table.add_cell(4, count, tools::string_format(" %dms", state.second.time));
+                    else
+                        table.add_cell(5, count, __get_fail_message(log));
                 }
                 table.draw();
+                if (!fail_files.empty()) {
+                    __meets_error_files(out, fail_files);
+                }
             }
 
             bool __empty() {
