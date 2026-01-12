@@ -2,7 +2,7 @@
     <h1>Generator</h1>
 </div>
 
-[![version](https://img.shields.io/badge/version-v0.9.0_beta-blue)](https://github.com/ChuTian-SCPC/problem_tool)
+[![version](https://img.shields.io/badge/version-v0.10.0_beta-blue)](https://github.com/ChuTian-SCPC/problem_tool)
 [![license](https://img.shields.io/badge/license-MIT-green)](https://github.com/ChuTian-SCPC/problem_tool/blob/main/LICENSE)
 
 [使用文档](https://chutian-scpc.github.io/generator-docs)
