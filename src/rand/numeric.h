@@ -89,23 +89,6 @@ namespace generator {
             else return (unsigned long)__rand_int_impl<unsigned int>(from, to);
         }
 
-        template <typename T, typename R>
-        typename std::enable_if<std::is_same<T, R>::value, R>::type
-        __change_to_int(T value, std::string) {
-            return value;
-        }
-
-        template <typename T, typename R>
-        typename std::enable_if<!std::is_same<T, R>::value, R>::type
-        __change_to_int(T value, std::string name) {
-            R result = static_cast<T>(value);
-            std::string value_s = std::to_string(value);
-            std::string result_s = std::to_string(result);
-            _msg::__warn_msg(_msg::_defl, tools::string_format("change %s number : %s -> %s, please check.",
-                name.c_str(), value_s.c_str(), result_s.c_str()));
-            return result;
-        }
-
         template <typename T = int>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_int(T n){
@@ -126,8 +109,8 @@ namespace generator {
             std::is_convertible<T, R>::value && 
             std::is_convertible<U, R>::value, R>::type
         rand_int(T from, U to){
-            R from_r = __change_to_int<T, R>(from, "from");
-            R to_r = __change_to_int<U, R>(to, "to");
+            R from_r = tools::__change_to_int<T, R>(from, "from");
+            R to_r = tools::__change_to_int<U, R>(to, "to");
             R x = __rand_int_impl<R>(from_r, to_r);
             return x;
         }
@@ -135,7 +118,7 @@ namespace generator {
         template <typename T = long long>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_int(std::string format) {
-            std::pair<T, T> range = __format_to_int_range<T>(format);
+            std::pair<T, T> range = tools::__format_to_int_range<T>(format);
             T x = __rand_int_impl<T>(range.first, range.second);
             return x;
         }
@@ -185,15 +168,15 @@ namespace generator {
             std::is_convertible<T, R>::value && 
             std::is_convertible<U, R>::value, R>::type
         rand_odd(T from, U to){
-            R from_r = __change_to_int<T, R>(from, "from");
-            R to_r = __change_to_int<U, R>(to, "to");
+            R from_r = tools::__change_to_int<T, R>(from, "from");
+            R to_r = tools::__change_to_int<U, R>(to, "to");
             return __rand_odd_impl<R>(from_r, to_r);
         }
 
         template <typename T = long long>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_odd(std::string format) {
-            std::pair<T, T> range = __format_to_int_range(format);
+            std::pair<T, T> range = tools::__format_to_int_range<T>(format);
             return __rand_odd_impl<T>(range.first,range.second);
         }
 
@@ -242,36 +225,23 @@ namespace generator {
             std::is_convertible<T, R>::value && 
             std::is_convertible<U, R>::value, R>::type
         rand_even(T from, U to){
-            R from_r = __change_to_int<T, R>(from, "from");
-            R to_r = __change_to_int<U, R>(to, "to");
+            R from_r = tools::__change_to_int<T, R>(from, "from");
+            R to_r = tools::__change_to_int<U, R>(to, "to");
             return __rand_even_impl<R>(from_r, to_r);
         }
 
         template <typename T = long long>
         typename std::enable_if<std::is_integral<T>::value, T>::type
         rand_even(std::string format) {
-            std::pair<T, T> range = __format_to_int_range(format);
+            std::pair<T, T> range = tools::__format_to_int_range<T>(format);
             return __rand_even_impl<T>(range.first,range.second);
         }
 
-        template <typename T, typename R>
-        typename std::enable_if<std::is_same<T, R>::value, R>::type
-        __change_to_double(T value, std::string){
-            return value;
-        }
-
-        template <typename T, typename R>
-        typename std::enable_if<!std::is_same<T, R>::value, R>::type
-        __change_to_double(T value, std::string name){
-            R result = static_cast<R>(value);
-            std::string value_s = std::to_string(value);
-            std::string result_s = std::to_string(result);
-            _msg::__warn_msg(_msg::_defl,  tools::string_format("change %s number : %s -> %s, please check.",
-                name.c_str(), value_s.c_str(), result_s.c_str()));
-            return result;
-        }
-
-        double rand_real() {
+        template <typename R = double, typename T = double>
+        typename std::enable_if<
+            std::is_floating_point<R>::value &&
+            std::is_convertible<T, double>::value, R>::type
+        rand_real() {
             double x = rnd.next();
             return x;
         }
@@ -281,7 +251,7 @@ namespace generator {
             std::is_floating_point<R>::value &&
             std::is_convertible<T, double>::value, R>::type
         rand_real(T n) {
-            double n_d = __change_to_double<T, double>(n, "to");
+            double n_d = tools::__change_to_double<T, double>(n, "to");
             double x = rnd.next(n_d);
             return x;
         }
@@ -291,8 +261,8 @@ namespace generator {
             std::is_floating_point<R>::value &&
             std::is_convertible<T, double>::value, R>::type
         rand_real(T from, T to) {
-            double from_d = __change_to_double<T, double>(from, "from");
-            double to_d = __change_to_double<T, double>(to, "to");
+            double from_d = tools::__change_to_double<T, double>(from, "from");
+            double to_d = tools::__change_to_double<T, double>(to, "to");
             double x = rnd.next(from_d, to_d);
             return x;
         }
@@ -303,8 +273,8 @@ namespace generator {
             std::is_convertible<T, double>::value &&
             std::is_convertible<U, double>::value, R>::type
         rand_real(T from, U to) {
-            double from_d = __change_to_double<T, double>(from, "from");
-            double to_d = __change_to_double<U, double>(to, "to");
+            double from_d = tools::__change_to_double<T, double>(from, "from");
+            double to_d = tools::__change_to_double<U, double>(to, "to");
             double x = rnd.next(from_d, to_d);
             return x;
         }
@@ -312,21 +282,9 @@ namespace generator {
         template <typename T = double>
         typename std::enable_if<std::is_floating_point<T>::value, T>::type
         rand_real(std::string format) {
-            std::pair<T, T> range = __format_to_double_range(format);
+            std::pair<T, T> range = tools::__format_to_double_range<T>(format);
             double x = rnd.next(range.first, range.second);
             return x;
-        }
-
-        template <typename T, typename R>
-        typename std::enable_if<std::is_integral<R>::value, R>::type
-        __change_to_value(T value, std::string name) {
-            return __change_to_int<T, R>(value, name);
-        }
-    
-        template <typename T, typename R>
-        typename std::enable_if<std::is_floating_point<R>::value, R>::type
-        __change_to_value(T value, std::string name) {
-            return __change_to_double<T, R>(value, name);
         }
 
         template <typename T>
@@ -390,8 +348,8 @@ namespace generator {
             std::is_convertible<T, R>::value &&
             std::is_convertible<U, R>::value, R>::type
         rand_abs(T from, U to) {
-            R from_r = __change_to_value<T, R>(from, "from");
-            R to_r = __change_to_value<U, R>(to, "to");
+            R from_r = tools::__change_to_value<T, R>(from, "from");
+            R to_r = tools::__change_to_value<U, R>(to, "to");
             R x = __rand_value<R>(from_r, to_r);
             return rand_bool() ? x : -x;
         }
@@ -416,6 +374,87 @@ namespace generator {
             return s.c_str()[0];
         }
 
+        template<typename KeyType>
+        class ProbTable {
+        private:
+            std::vector<KeyType> _elements;
+            std::vector<unsigned long long> _probs;
+        public:
+            ProbTable() = default;
+
+            template <typename Con>
+            ProbTable(const Con& map) {
+                __add(map);
+            }
+
+            template<typename ValueType>
+            ProbTable(KeyType key, ValueType value) {
+                __add(key, value);
+            }
+
+            template<typename Con>
+            void add(const Con& map) {
+                __add(map);
+            }
+
+            template<typename ValueType>
+            void add(const KeyType& key, ValueType value) {
+                __add(key, value);
+            }
+
+            KeyType rand() const {
+                if (_probs.empty()) {
+                    _msg::__fail_msg(_msg::_defl, "can't generator a value from an empty ProbTable.");
+                }
+                unsigned long long sum = _probs.back();
+                if (sum == 0) {
+                    _msg::__fail_msg(_msg::_defl, "sum of the values must greater than 0, but found 0.");
+                }
+                long long p = rand_int(1ULL, sum);
+                auto pos = lower_bound(_probs.begin(), _probs.end(), p) - _probs.begin();
+                return *(_elements.begin() + pos);
+            }
+
+            void clear() {
+                _elements.clear();
+                _probs.clear();
+            }
+        private:
+            template <typename Con>
+            typename std::enable_if<
+                (std::is_same<Con, std::map<typename Con::key_type, typename Con::mapped_type>>::value ||
+                std::is_same<Con, std::unordered_map<typename Con::key_type, typename Con::mapped_type>>::value) &&
+                std::is_convertible<typename Con::mapped_type, unsigned long long>::value &&
+                std::is_convertible<typename Con::key_type, KeyType>::value,
+                void
+            >::type 
+            __add(const Con& map) {
+                using ValueType = typename Con::mapped_type;
+                for (auto iter : map) {
+                    __add(iter.first, iter.second);
+                }
+            }
+
+            template <typename ValueType>
+            typename std::enable_if<std::is_constructible<ValueType, unsigned long long>::value, void>::type
+            __add(const KeyType& key, ValueType value) {
+                unsigned long long sum = _probs.empty() ? 0ULL : _probs.back();
+                if (value < 0) {
+                    _msg::__warn_msg(_msg::_defl, "value can't less than 0, but found (key : ", key,
+                        ", value : ", value, "). Ignore this element.");
+                } else {
+                    _elements.emplace_back(key);
+                    sum += static_cast<unsigned long long>(value);
+                    _probs.emplace_back(sum);
+                }
+                if (_elements.size() > _setting::vector_limit) {
+                    _msg::__fail_msg(_msg::_defl, 
+                        tools::string_format("the size of the ProbTable must less than %d(_setting::vector_limit), but found %d.",
+                            _setting::vector_limit, _elements.size()));
+                }
+            }
+        };
+
         template <typename Con>
         typename std::enable_if<
                 (std::is_same<Con, std::map<typename Con::key_type, typename Con::mapped_type>>::value ||
@@ -427,28 +466,34 @@ namespace generator {
         {
             using KeyType = typename Con::key_type;
             using ValueType = typename Con::mapped_type;
-            std::vector<KeyType> elements;
-            std::vector<ValueType> probs;
-            long long sum = 0;
-            for(auto iter:map){
-                elements.emplace_back(iter.first);
-                ValueType value = iter.second;
-                if (value < 0) {
-                    _msg::__fail_msg(_msg::_defl, "value can't less than 0, but found (key : ", iter.first,
-                        ", value : ", iter.second, ").");
-                }
-                sum += value;
-                probs.emplace_back(sum);
-            }
-            if (sum <= 0) {
-                _msg::__fail_msg(_msg::_defl, 
-                    tools::string_format("sum of the values must greater than 0, but found %lld.", sum));
-            }
-            long long p = rand_int(1LL,sum);
-            auto pos = lower_bound(probs.begin(),probs.end(),p) - probs.begin();
-            return *(elements.begin() + pos);
+            ProbTable<KeyType> prob(map);
+            return prob.rand();
         }
 
+        template<typename KeyType>
+        KeyType rand_prob(const ProbTable<KeyType>& prob) {
+            return prob.rand();
+        }
+
+        template<typename T = long long>
+        typename std::enable_if<std::is_integral<T>::value, std::pair<T, T>>::type
+        rand_range(T from, T to) {
+            T l = rand_int<T>(from, to);
+            T r = rand_int<T>(from, to);
+            if (l > r) std::swap(l, r);
+            return std::make_pair(l, r);
+        }
+
+        template <typename R = long long, typename T = long long, typename U = long long>
+        typename std::enable_if<
+            std::is_integral<R>::value &&
+            std::is_convertible<T, R>::value && 
+            std::is_convertible<U, R>::value, std::pair<R, R>>::type
+        rand_range(T from, U to) {
+            R from_r = tools::__change_to_value<T, R>(from, "from");
+            R to_r = tools::__change_to_value<U, R>(to, "to");
+            return rand_range<R>(from_r, to_r);
+        }
     } // namespace rand_numeric
 } // namespace generator
 

@@ -30,6 +30,14 @@ namespace generator {
           if (this != &other) _path = std::move(other._path);
           return *this;
       }
+      Path& operator=(const Path& other) {
+          if (this != &other) _path = other._path;
+          return *this;
+      }
+      Path& operator=(const std::string& s) {
+          _path = s;
+          return *this;
+      }
       
       _SET_GET_VALUE(std::string, path)
       void set_path(const char* path) { _path = std::string(path); }
@@ -39,7 +47,14 @@ namespace generator {
       bool __empty() { return _path.empty(); }
       bool __file_exist() {
         std::ifstream file(_path.c_str());
-        return file.is_open();
+        bool result = file.is_open();
+        if (result) file.close();
+        return result;
+      }
+
+      void __ensure_file_exist() {
+        if (__empty()) return;
+        __file_exist();
       }
       
       bool __directory_exists() {
@@ -187,11 +202,12 @@ namespace generator {
     typename std::enable_if<IsPathConstructible<T1>::value && IsPathConstructible<T2>::value, void>::type
     __copy_file(T1 source, T2 destination) {
     #ifdef ON_WINDOWS
-        std::string command = tools::string_join(" ", "copy", source, destination);
+        CopyFile(Path(source).cname(), Path(destination).cname(), true);
     #else
         std::string command = tools::string_join(" ", "cp", source, destination);
-    #endif
         std::system(command.c_str());
+    #endif
+        
     }
 
   } // namespace io

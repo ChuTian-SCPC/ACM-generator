@@ -20,26 +20,6 @@ namespace generator {
                 DAGGen(Context& graph) : BasicGraphGen<DAG, NodeType, EdgeType>(graph) {}
             
             protected:
-                virtual void __judge_upper_limit() override {
-                    _CONTEXT_GET(node_count)
-                    _CONTEXT_GET(edge_count)
-                    if (!_CONTEXT_V(multiply_edge)) {  
-                        long long limit = (long long) node_count * (long long) (node_count - 1) / 2;
-                        if (edge_count > limit) {
-                            _msg::__fail_msg(_msg::_defl, 
-                                tools::string_format("edge_count must less than or equal to %lld, but found %d.",
-                                limit, edge_count));
-                        }
-                    }
-                    else {               
-                        if (node_count == 1 && edge_count > 0) {
-                            _msg::__fail_msg(_msg::_defl, 
-                                tools::string_format("edge_count must equal to 0, but found %d.",
-                                edge_count));
-                        }
-
-                    }                        
-                }
 
                 virtual void __self_init() override{
                     _rank = rnd.perm(_CONTEXT_V(node_count), 0);
@@ -115,6 +95,15 @@ namespace generator {
                 _DISABLE_SELF_LOOP
                 _DISABLE_DIRECTION
                 _OUTPUT_FUNCTION_SETTING(_Self)
+
+                virtual long long max_edge_count() override {
+                    if (this->_multiply_edge) {
+                        return this->_node_count == 1 ? 0 : _setting::edge_count_inf;
+                    } else {
+                        long long n = this->_node_count;
+                        return n * (n - 1) / 2;
+                    }                   
+                }
             protected:
                 _DEFAULT_GRAPH_GEN_FUNC(DAG)
             };   

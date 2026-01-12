@@ -32,6 +32,12 @@
 #ifndef _SGPCET_PATH_H_
 #include "io/path.h"
 #endif // !_SGPCET_PATH_H_
+#ifndef _SGPCET_FILE_H_
+#include "io/file.h"
+#endif // !_SGPCET_FILE_H_
+#ifndef _SGPCET_PROGRAM_H_
+#include "io/program.h"
+#endif // !_SGPCET_PROGRAM_H_
 #ifndef _SGPCET_COMMAND_PATH_H_
 #include "io/command_path.h"
 #endif // !_SGPCET_COMMAND_PATH_H_
@@ -41,21 +47,30 @@
 #ifndef _SGPCET_IO_INIT_H_
 #include "io/io_init.h"
 #endif // !_SGPCET_IO_INIT_H_
-#ifndef _SGPCET_PROGRAM_H_
-#include "io/program.h"
-#endif // !_SGPCET_PROGRAM_H_
-#ifndef _SGPCET_IO_REPORTER_H_
-#include "io/io_reporter.h"
-#endif // !_SGPCET_IO_REPORTER_H_
-#ifndef _SGPCET_INPUTS_OUTPUTS_H_
-#include "io/inputs_outputs.h"
-#endif // !_SGPCET_INPUTS_OUTPUTS_H_
-#ifndef _SGPCET_COMPARE_HACK_H_
-#include "io/compare_hack.h"
-#endif // !_SGPCET_COMPARE_HACK_H_
+#ifndef _SGPCET_REPORTER_H_
+#include "io/reporter.h"
+#endif // !_SGPCET_REPORTER_H_
+#ifndef _SGPCET_INPUT_H_
+#include "io/input.h"
+#endif // !_SGPCET_INPUT_H_
+#ifndef _SGPCET_OUTPUT_H_
+#include "io/output.h" 
+#endif // !_SGPCET_OUTPUT_H_
 #ifndef _SGPCET_VALIDATE_H_
 #include "io/validate.h"
 #endif // !_SGPCET_VALIDATE_H_
+#ifndef _SGPCET_CHECKER_H_
+#include "io/checker.h"
+#endif // !_SGPCET_CHECKER_H_
+#ifndef _SGPCET_COMPARE_H_
+#include "io/compare.h"
+#endif // !_SGPCET_COMPARE_H_
+#ifndef _SGPCET_HACK_H_
+#include "io/hack.h"
+#endif // !_SGPCET_HACK_H_
+#ifndef _SGPCET_WORKFLOW_H_
+#include "io/workflow.h"
+#endif // !_SGPCET_WORKFLOW_H_
 
 #ifndef _SGPCET_NUMBER_CONST_H_
 #include "rand/number_const.h"
@@ -69,6 +84,9 @@
 #ifndef _SGPCET_ARRAY_H_
 #include "rand/array.h"
 #endif // !_SGPCET_ARRAY_H_
+#ifndef _SGPCET_DISTRIBUTION_H_
+#include "rand/distribution.h"
+#endif // !_SGPCET_DISTRIBUTION_H_
 
 #ifndef _SGPCET_EDGE_H_
 #include "graph/edge.h"

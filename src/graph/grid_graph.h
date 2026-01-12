@@ -20,34 +20,6 @@ namespace generator {
                 GridGraphGen(Context& graph) : BasicGraphGen<GridGraph, NodeType, EdgeType>(graph) {}
             
             protected:
-                long long __count_edge_count(int row, int column) {
-                    long long xl = (long long) row;
-                    long long yl = (long long) column;
-                    long long sum = xl * (yl - 1) + yl * (xl - 1) - 2 * (xl * yl - _CONTEXT_V(node_count));
-                    if (_CONTEXT_V(direction)) sum *= 2;
-                    return sum;
-                }
-
-                virtual void __judge_upper_limit() override {
-                    long long limit = 0;
-                    _CONTEXT_GET(node_count)
-                    _CONTEXT_GET(edge_count)
-                    if (!_CONTEXT_V(multiply_edge)) {
-                        limit = __count_edge_count(_CONTEXT_V(row), _CONTEXT_V(column));
-                        if (edge_count > limit) {
-                            _msg::__fail_msg(_msg::_defl, 
-                                tools::string_format("edge_count must less than or equal to %lld, but found %d.",
-                                limit, edge_count));
-                        }
-                    }
-                    else {
-                        if (node_count == 1 && edge_count > 0) {
-                            _msg::__fail_msg(_msg::_defl, 
-                                tools::string_format("edge_count must equal to 0, but found %d.",
-                                edge_count));
-                        }
-                    }
-                }
 
                 virtual void __judge_self_limit() override {
                     _CONTEXT_GET(row)
@@ -62,44 +34,11 @@ namespace generator {
                     }
                 }
 
-                void __rand_row() {
-                    _CONTEXT_GET(node_count)
-                    _CONTEXT_GET_REF(edge_count)
-                    _CONTEXT_GET_REF(row)
-                    _CONTEXT_GET_REF(column)
-                    if (row == -1) {
-                        if (!_CONTEXT_V(multiply_edge)) {
-                            std::pair<long long, int> max = {0, 0};
-                            std::vector<int> possible;                
-                            for (int i = 1; i <= node_count; i++) {
-                                int x = i, y = (node_count + i - 1) / i;
-                                long long w = __count_edge_count(x, y);
-                                if (w > max.first) max = {w, i};
-                                if (w >= edge_count) possible.push_back(i);
-                            }
-                            if (possible.size() == 0) {
-                                edge_count = std::min((long long)_setting::edge_limit, max.first);
-                                _msg::__warn_msg(_msg::_defl,
-                                    tools::string_format("edge_count is large than the maximum possible, use upper edges limit %d.",
-                                    edge_count));
-                                row = max.second;
-                            } else {
-                                row = rnd.any(possible);
-                            }
-                        } else {
-                            row = rnd.next(1, node_count);
-                        }                        
-                    }
-                    if (row == 0) _msg::__fail_msg(_msg::_defl, "row can't be 0.");
-                    column = (node_count + row - 1) / row;
-                }
-
                 virtual void __self_init() override {
-                    _CONTEXT_GET(node_count)
                     _CONTEXT_GET(row)
-                    _CONTEXT_GET_REF(column)
+                    if (row <= 0) this->_context.rand_row();
+                    _CONTEXT_GET(node_count)
                     _rank = rnd.perm(node_count, 0);
-                    __rand_row();
                 }
 
                 virtual void __generate_connect() override {
@@ -225,8 +164,73 @@ namespace generator {
 
                 _DISABLE_SELF_LOOP
                 _OUTPUT_FUNCTION_SETTING(_Self)
+
+                virtual long long max_edge_count() override {
+                    if (this->_node_count == 0) return 0;
+                    if (this->_multiply_edge) return this->_node_count == 1 ? 0 : _setting::edge_count_inf;
+                    if (_row <= 0 || _column <= 0) {
+                        long long max_edge = 0;
+                        for (int i = 1; i < this->_node_count; i++) {
+                            max_edge = std::max(max_edge, __count_edge_count(i, __count_column(i)));
+                        }
+                        return max_edge;
+                    } else {
+                        return __count_edge_count(_row, _column);
+                    }
+                }
+
+                virtual void rand_edge_count(long long from = _setting::auto_edge_limit, long long to = _setting::auto_edge_limit) override {
+                    _GenGraph<NodeType, EdgeType>::rand_edge_count(from, to); 
+                    if (_row <= 0) rand_row();
+                }
+
+                void rand_row() {
+                    int n = this->_node_count;
+                    if (this->_multiply_edge) _row = rand_numeric::rand_int(1, n);
+                    else {
+                        std::vector<long long> counts;
+                        long long max_edge = __max_edge_count(counts);
+                        max_edge = std::min(max_edge, (long long)_setting::edge_limit);
+                        if (this->_edge_count > max_edge) {
+                            _msg::__warn_msg(_msg::_defl,
+                                tools::string_format("edge_count is large than the maximum possible, use upper edges limit %lld.",
+                                max_edge));
+                            this->_edge_count = max_edge;
+                        }
+                        std::vector<int> possible;
+                        for (int i = 1; i < n; i++) {
+                            if (counts[i] >= this->_edge_count) possible.push_back(i);
+                        }
+                        _row = rnd.any(possible);
+                    }
+                    _column = __count_column(_row);
+                }
+
             protected:
                 _DEFAULT_GRAPH_GEN_FUNC(GridGraph)
+
+                long long __max_edge_count(std::vector<long long>& counts) {
+                    long long max_edge = 0;
+                    counts.resize(this->_node_count);
+                    for (int i = 1; i < this->_node_count; i++) {
+                        counts[i] = __count_edge_count(i, __count_column(i));
+                        max_edge = std::max(max_edge, counts[i]);
+                    }
+                    return max_edge;
+                }
+
+                int __count_column(int row) {
+                    if (row == 0) _msg::__error_msg(_msg::_defl, "row can't be 0.");
+                    return (this->_node_count + row - 1) / row;
+                }
+
+                long long __count_edge_count(int row, int column) {
+                    long long xl = row;
+                    long long yl = column;
+                    long long sum = xl * (yl - 1) + yl * (xl - 1) - 2 * (xl * yl - this->_node_count);
+                    if (this->_direction) sum *= 2;
+                    return sum;
+                }
             };   
         } // namespace basic
     } // namespace rand_graph

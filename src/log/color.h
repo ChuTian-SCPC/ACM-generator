@@ -112,6 +112,8 @@ namespace generator {
           os << __color_reset;
           return os;
         }
+
+        int size() { return msg_.size(); }
       };
       
       _ColorMsg _warn("WARN", _enum::Color::Yellow);

@@ -37,6 +37,22 @@ namespace generator {
         FMT_TO_RESULT(format, format, _format);
         return _format;
     }
+
+    std::chrono::steady_clock::time_point now() { return std::chrono::steady_clock::now(); }
+
+    long long duration_us(std::chrono::steady_clock::time_point& start) {
+        auto end = now();
+        long long d = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        start = now();
+        return d;
+    }
+
+    long long duration_ms(std::chrono::steady_clock::time_point& start) {
+        auto end = now();
+        long long d = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        start = now();
+        return d;
+    }
     
   } // namespace tools
 } // namespace generator

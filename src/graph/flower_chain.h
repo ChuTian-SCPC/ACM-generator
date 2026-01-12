@@ -74,8 +74,6 @@ namespace generator {
                     __reset_edges_weight_function(flower);
                     __reset_nodes_weight_function(chain);
                     __reset_edges_weight_function(chain);
-                    flower.set_log_change(false);
-                    chain.set_log_change(false);
                     _link.set_target(this->_context);
                     if (flower_size != 0) {
                         _link.add_source(flower);

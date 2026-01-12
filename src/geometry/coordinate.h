@@ -81,7 +81,7 @@ namespace generator {
             }
 
             void set_x_limit(std::string format) {
-                auto range = rand_numeric::__format_to_range<T>(format);
+                auto range = tools::__format_to_range<T>(format);
                 _x_left_limit = range.first;
                 _x_right_limit = range.second;
             }
@@ -92,7 +92,7 @@ namespace generator {
             }
 
             void set_y_limit(std::string format) {
-                auto range = rand_numeric::__format_to_range<T>(format);
+                auto range = tools::__format_to_range<T>(format);
                 _y_left_limit = range.first;
                 _y_right_limit = range.second; 
             }

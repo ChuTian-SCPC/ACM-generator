@@ -20,13 +20,17 @@ namespace generator {
             
             protected:
                 virtual void __self_init() override {
-                    __init_edge_count();
+                    this->_context.rand_edge_count();
                 }
 
-                void __init_edge_count() {
-                    _CONTEXT_GET_REF(edge_count)
+                virtual void __judge_self_limit() override {
                     _CONTEXT_GET(node_count)
-                    edge_count = node_count;
+                    _CONTEXT_GET(edge_count)
+                    if (node_count != edge_count) {
+                        _msg::__fail_msg(_msg::_defl, 
+                            "edge_count must equal to node_count, ",
+                            tools::string_format("but found node_count = %d, edge_count = %d.", node_count, edge_count));
+                    }
                 }
 
                 virtual void __judge_lower_limit() override {
@@ -98,6 +102,14 @@ namespace generator {
                 _DISABLE_SELF_LOOP
                 _DISABLE_EDGE_COUNT
                 _OUTPUT_FUNCTION_SETTING(_Self)
+
+                virtual long long min_edge_count() override {
+                    return this->_node_count;
+                }
+
+                virtual long long max_edge_count() override {
+                    return this->_node_count;
+                }
 
             protected:
                 _DEFAULT_GRAPH_GEN_FUNC(CycleGraph)

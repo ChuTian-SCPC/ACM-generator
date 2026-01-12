@@ -1,15 +1,6 @@
 #ifndef _SGPCET_IO_INIT_H_
 #define _SGPCET_IO_INIT_H_
 
-#ifndef _SGPCET_COMMON_H_
-#include "basic/common.h"
-#endif // !_SGPCET_COMMON_H_
-#ifndef _SGPCET_ENUM_H_
-#include "basic/enum.h"
-#endif // !_SGPCET_ENUM_H_
-#ifndef _SGPCET_LOGGER_H_
-#include "log/logger.h"
-#endif // !_SGPCET_LOGGER_H_
 #ifndef _SGPCET_COMMAND_PATH_H_
 #include "command_path.h"
 #endif // !_SGPCET_COMMAND_PATH_H_
@@ -29,27 +20,34 @@ namespace generator {
         struct IsCommandFuncConstructible {
             static constexpr bool value = std::is_constructible<T, CommandFunc>::value;
         };
+
+        template<typename T>
+        struct IsCommandPath {
+            static constexpr bool value = std::is_same<T, CommandPath>::value;
+        };
+        
+        template<typename T>
+        struct IsCommandFunc {
+            static constexpr bool value = std::is_same<T, CommandFunc>::value;
+        }; 
         
         template<typename T>
         struct IsProgram {
-            static constexpr bool value = IsCommandPathConstructible<T>::value || IsCommandFuncConstructible<T>::value;
+            static constexpr bool value = std::is_base_of<_Program, T>::value;
         };
         
         template<typename T>
         struct IsProgramConstructible {
-            static constexpr bool value = IsProgram<T>::value || IsPathConstructible<T>::value || IsFunctionConvertible<T>::value;
-        };
-        
-        template<typename T>
-        struct _ProgramType {
-            using type = typename std::conditional<
-                IsCommandPathConstructible<T>::value || IsPathConstructible<T>::value,   
-                CommandPath,
-                CommandFunc >::type;
+            static constexpr bool value = 
+                IsCommandPathConstructible<T>::value || 
+                IsCommandFuncConstructible<T>::value || 
+                IsPathConstructible<T>::value || 
+                IsFunctionConvertible<T>::value;
         };
 
-        template<typename T>
-        using _ProgramTypeT = typename _ProgramType<T>::type;
+        template<bool...> struct BoolPack;
+        template<bool... Args> 
+        using ArgsAllTrue = std::is_same<BoolPack<Args..., true>, BoolPack<true, Args...>>;
 
         void __ensure_file_folder(Path file) {
             __create_directories(file.__folder_path());
@@ -59,6 +57,14 @@ namespace generator {
             return __path_join(__current_path(), _setting::testcase_folder);
         }
 
+        Path __generate_log_folder(const Path& folder) {
+            return __path_join(folder, _setting::generate_log_folder);
+        }
+
+        Path __generate_log_folder() {
+            return __generate_log_folder(__current_path());
+        }
+
         std::string _file_end[_enum::_MAX_END] = {
             _setting::input_suffix,
             _setting::output_suffix,
@@ -66,18 +72,28 @@ namespace generator {
             ".log",
             ".logc",
             ".exe",
-            ".val"
+            ".val",
+            ".check",
+            ".glog"
         };
 
+        void __check_input_output_suffix() {
+            if (_setting::input_suffix != _file_end[_enum::_IN]) _file_end[_enum::_IN] = _setting::input_suffix;
+            if (_setting::output_suffix != _file_end[_enum::_OUT]) _file_end[_enum::_OUT] = _setting::output_suffix;
+        }
+
         std::string __end_with(int x, _enum::_End end) {
+            __check_input_output_suffix();
             return std::to_string(x) + _file_end[end];
         }
         
         std::string __end_with(const char* text, _enum::_End end) {
+            __check_input_output_suffix();
             return std::string(text) + _file_end[end];
         }
         
         std::string __end_with(std::string text, _enum::_End end) {
+            __check_input_output_suffix();
             return text + _file_end[end];
         }
 
@@ -150,75 +166,53 @@ namespace generator {
         } 
 
         template<typename T>
-        typename std::enable_if<IsProgram<T>::value, T>::type
-        __generator_program(T program, int x, bool hack = false) {
-            if (program.enable_default_args()) {
-                if (hack) program.add_args(_setting::default_hack_stable_seed + std::to_string(x));
-                else program.add_args(_setting::default_stable_seed + std::to_string(x));
-            }
-            return program;
-        }
-        
-        template<typename T>
-        typename std::enable_if<IsFunctionConvertible<T>::value, CommandFunc>::type
-        __generator_program(T program, int x, bool hack = false) {
-            std::string args = "";
-            if (_setting::default_seed) {
-                if (hack) args = _setting::default_hack_stable_seed + std::to_string(x);
-                else args =  _setting::default_stable_seed + std::to_string(x);
-            }
-            return CommandFunc(program, args);
-        }
-        
-        template<typename T>
-        typename std::enable_if<IsPathConstructible<T>::value, CommandPath>::type
-        __generator_program(T program, int x, bool hack = false) {
-            std::string args = "";
-            if (_setting::default_seed) {
-                if (hack) args = _setting::default_hack_stable_seed + std::to_string(x);
-                else args =  _setting::default_stable_seed + std::to_string(x);
-            }
-            return CommandPath(program, args);
+        typename std::enable_if<IsProgram<T>::value, _Program*>::type
+        __program(T program) {
+            return program.__clone();
         }
 
         template<typename T>
-        typename std::enable_if<IsProgram<T>::value, T>::type
-        __result_program(T program) {
-            return program;
+        typename std::enable_if<IsProgram<T>::value, _Program*>::type
+        __program(T* program) {
+            return program->__clone();
         }
         
         template<typename T>
-        typename std::enable_if<IsFunctionConvertible<T>::value, CommandFunc>::type
-        __result_program(T program) {
-            return CommandFunc(program);
+        typename std::enable_if<IsFunctionConvertible<T>::value, _Program*>::type
+        __program(const T& program) {
+            return new CommandFunc(program);
         }
         
         template<typename T>
-        typename std::enable_if<IsPathConstructible<T>::value, CommandPath>::type
-        __result_program(T program) {
-            return CommandPath(program);
-        } 
+        typename std::enable_if<IsPathConstructible<T>::value, _Program*>::type
+        __program(const T& program) {
+            return new CommandPath(program);
+        }
+
+        template<typename T>
+        _Program* __generator_program(T&& program, int x, bool hack = false) {
+            _Program* p = __program(std::forward<T>(program));
+            if (p->enable_default_args()) {
+                if (hack) p->add_args(_setting::default_hack_stable_seed + std::to_string(x));
+                else p->add_args(_setting::default_stable_seed + std::to_string(x));
+            }
+            return p;
+        }
+
+        template<typename T>
+        _Program* __result_program(T&& program) {
+            return __program(std::forward<T>(program));
+        }
 
         template<typename T>
         struct IsDefaultChecker {
             static constexpr bool value = std::is_same<T, _enum::Checker>::value;
         };
-        
-        template<typename T>
-        struct IsCheckerConstructible {
-            static constexpr bool value = IsProgramConstructible<T>::value || IsDefaultChecker<T>::value;
-        };
-        
-        template<typename T>
-        struct _CheckerType {
-            using type = typename std::conditional<
-                IsCommandPathConstructible<T>::value || IsPathConstructible<T>::value ||IsDefaultChecker<T>::value,   
-                CommandPath,
-                CommandFunc >::type;
-        };
 
         template<typename T>
-        using _CheckerTypeT = typename _CheckerType<T>::type;
+        struct IsCheckerConstructible {
+            static constexpr bool value = IsDefaultChecker<T>::value || IsProgramConstructible<T>::value;
+        };
 
         std::string checker_name[_enum::MaxChecker] = {
           "lcmp",
@@ -240,15 +234,15 @@ namespace generator {
         }
 
         template<typename T>
-        typename std::enable_if<IsProgramConstructible<T>::value, _ProgramTypeT<T>>::type
-        __checker_porgram(T program) {
-            return __result_program(program);
+        typename std::enable_if<!IsDefaultChecker<T>::value, _Program*>::type
+        __checker_program(T&& program) {
+            return __program(std::forward<T>(program));
         }
 
         template<typename T>
-        typename std::enable_if<IsDefaultChecker<T>::value, CommandPath>::type
-        __checker_porgram(T program) {
-            CommandPath func(__get_default_checker_file(program));
+        typename std::enable_if<IsDefaultChecker<T>::value, _Program*>::type
+        __checker_program(T&& program) {
+            _Program* func = new CommandPath(__get_default_checker_file(program));
             return func;
         }
         
@@ -256,32 +250,28 @@ namespace generator {
             return __path_join(__current_path(), _setting::compare_folder);
         }
 
-        bool __is_time_limit_inf(int time_limit) {
-            return time_limit == _setting::time_limit_inf;
-        }
-
-        bool __time_limit_exceed(int time, int time_limit) {
-            return !__is_time_limit_inf(time_limit) && time > time_limit;
-        }
-
-        int __time_limit_extend(int time_Limit) {
-            if (__is_time_limit_inf(time_Limit)) return time_Limit;
-            return time_Limit * _setting::time_limit_over_ratio;
-        }
-
         Path __hack_folder() {
             return __path_join(__current_path(), _setting::hack_folder);
         }
 
         template<typename T>
-        typename std::enable_if<IsProgramConstructible<T>::value, _ProgramTypeT<T>>::type
-        __validator_program(T program) {
-            return __result_program(program);
+        _Program* __validator_program(T&& program) {
+            return __program(std::forward<T>(program));
         }
         
         Path __validate_folder(std::string case_name) {
             return __path_join(__current_path(), _setting::validate_folder, case_name);
         }
+
+        int _judge_result_priority[__state_index(_enum::_JudgeState::_JUDGE_STATE_MAX)] = {
+            0, // UNKNOWN
+            1, // AC
+            2, // WA
+            6, // RE
+            5, // TLE
+            3, // TLE AC
+            4  // TLE WA
+        };
 
     } // namespace generator
 } // namespace io

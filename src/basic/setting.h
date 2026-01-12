@@ -16,9 +16,17 @@ namespace generator {
     int vector_limit = 10000000; // 1e7
     int node_limit = 10000000;
     int edge_limit = 10000000;
+    long long edge_count_inf = -1;
+    long long auto_edge_limit = -2;
+
+    int _auto_int = -2;
+
+    long long count_range_inf = -1;
     
     int time_limit_inf = -1; 
+    int _time_limit_auto = -2;
     int test_case_limit = 1000;
+    int _extra_run_time = 100;
 
   #ifdef ON_WINDOWS
     char _path_split = '\\';
@@ -44,13 +52,11 @@ namespace generator {
     std::string compare_folder = "cmp";
     std::string hack_folder = "hack";
     std::string validate_folder = "validate";
+    std::string _empty_program_name = "";
+    std::string generate_log_folder = "gen_log";
 
     std::string input_suffix = ".in";
     std::string output_suffix = ".out";
-    
-    int _function_count = 0;
-    
-    bool same_log_for_class = false;
     
     std::string _first_generator_argv = "generator";
     std::string _first_checker_argv = "checker";
@@ -66,6 +72,9 @@ namespace generator {
     std::string default_hack_stable_seed = "hack";
 
     int _rand_sum_sum_limit = 1000000;
+
+    const double PI = 3.14159265358979323846;
+
   };// namespace _setting
   
 };// namespace generator

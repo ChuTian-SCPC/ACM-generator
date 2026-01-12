@@ -1,51 +1,133 @@
 #ifndef _SGPCET_VALIDATE_H_
 #define _SGPCET_VALIDATE_H_
 
-#ifndef _SGPCET_IO_REPORTER_H_
-#include "io_reporter.h"
-#endif // !_SGPCET_IO_REPORTER_H_
-#ifndef _SGPCET_PROGRAM_H_
-#include "program.h"
-#endif //!_SGPCET_PROGRAM_H_
+#ifndef _SGPCET_REPORTER_H_
+#include "reporter.h"
+#endif // _SGPCET_REPORTER_H_
 
 namespace generator {
     namespace io {
-        template<typename T>
-        typename std::enable_if<IsProgramConstructible<T>::value, void>::type
-        __validate_impl(const std::vector<int>& indices, T program, std::string case_name) {
-            _msg::__info_msg(_msg::_defl, _msg::_ColorMsg("Validate", _enum::Color::Green));
-            __check_program_valid(program);
-            std::unordered_map<int, bool> results;
-            _ProgramTypeT<T> validator = __validator_program(program);
-            Path folder = __validate_folder(case_name);
-            __create_directories(folder);
-            for (int i : indices) {
-                Path log = __path_join(folder, __end_with(i, _enum::_VAL));
-                Path input = __input_file_path(__path_join(__current_path(), case_name), i);
-                _msg::__info_msg(_msg::_defl, tools::string_format("Checking input validity : %s", input.cname()));
-                ReturnState state = __run_program(validator, input, _setting::_default_path, log, 
-                    _setting::time_limit_inf, _enum::_VALIDATOR);
-                _msg::_ColorMsg result_msg = __is_success(state.exit_code) ? _msg::_success : _msg::_fail;
-                _msg::__info_msg(_msg::_defl, "Result : ", result_msg);
-                results[i] = __is_success(state.exit_code);
+        class _Validate : public _Reporter {
+        protected:
+            using TestResults = std::map<int, ReturnState>;
+            _Program* _validator;
+            TestResults _states;
+            bool _default_judge;
+            std::string _case_name;
+            int _time_limit;
+        public:
+            _Validate() : _Reporter(), _validator(nullptr), _default_judge(true), _case_name(_setting::testcase_folder), _time_limit(_setting::time_limit_inf) {}
+
+            template<typename T>
+            _Validate(T&& validator, const std::string& case_name = _setting::testcase_folder, bool default_judge = true) : _Reporter(), _validator(nullptr), _default_judge(default_judge), _case_name(case_name) {
+                __set_validator(std::forward<T>(validator));
             }
-            __report_iov_summary_logs(results, _enum::_VALID);
-        }
+            ~_Validate() {
+                if (_validator) delete _validator;
+            }
+
+            _GET_VALUE(_Program*, validator);
+            _GET_VALUE(TestResults, states); 
+            _SET_GET_VALUE(bool, default_judge);
+            _SET_GET_VALUE(std::string, case_name);
+            _SET_GET_VALUE(int, time_limit);
+
+            template<typename T>
+            void __set_validator(T&& validator) {
+                if (_validator) delete _validator;
+                _validator = __result_program(std::forward<T>(validator));
+            }
+
+            void __add_validate(int id) {
+                if (!__testcase_input_file_exists(id)) return;
+                _default_judge = false;
+                _states[id] = ReturnState();
+            }
+
+            void __add_validate(int start, int end) {
+                for (int i = start; i <= end; i++) __add_validate(i);
+            }
+
+            void __run() {
+                _validator->__check_program_valid();
+                Path folder = __validate_folder(_case_name);
+                __create_directories(folder);
+                if (_default_judge) {
+                    for (auto& it : __get_all_inputs())
+                        _states[it] = ReturnState();
+                }
+                int id = 1;
+                for (auto& it : _states) {
+                    Path log = __path_join(folder, __end_with(it.first, _enum::_VAL));
+                    Path input = __input_file_path(__path_join(__current_path(), _case_name), it.first);
+                    _msg::__flash_msg(_msg::_defl, "Validate : ", __ratio_msg(id, _states.size()));
+                    id++;
+                    it.second = _validator->__run_program(input, _setting::_default_path, log, _time_limit, _enum::_VALIDATOR);
+                }
+                _msg::__endl(_msg::_defl);
+            }
+
+            void __short_summary(_msg::OutStream& out) {
+                std::vector<int> error_files;
+                for (auto& state : _states) {
+                    if (__is_wa_or_tle(state.second, _time_limit))
+                        error_files.push_back(state.first);
+                }
+                if (error_files.empty()) __all_pass(out);
+                else __meets_error_files(out, error_files, _states.size());
+            }
+
+            _msg::_ColorMsg __state_msg(ReturnState state) {
+                if (!__is_success(state.exit_code)) return _fail_msg;
+                if (__time_limit_exceed(state.time, _time_limit)) return _tle_msg;
+                return _success_msg;
+            }
+
+            void __detail_summary(_msg::OutStream& out) {
+                int error_count = 0;
+                std::vector<Path> fail_files;
+                for (auto& state : _states) {
+                    if (__is_wa_or_tle(state.second, _time_limit))
+                        fail_files.push_back(__input_file_path(__path_join(__current_path(), _case_name), state.first));
+                    if (!__is_success(state.second.exit_code)) error_count++;
+                }
+                _Table table(out);
+                table.add_titles({"Case ID", "State", "RunTime"});
+                if (error_count) table.add_cell(3, 0, "Fail Message");
+                int count = 0;
+                Path folder = __validate_folder(_case_name);
+                for (auto& state: _states) {
+                    Path log = __path_join(folder, __end_with(state.first, _enum::_VAL));
+                    count++;
+                    table.add_cell(0, count, std::to_string(state.first));
+                    table.add_cell(1, count, __state_msg(state.second));
+                    if (!__is_success(state.second.exit_code)) 
+                        table.add_cell(3, count, __get_fail_message(log));
+                    else 
+                        table.add_cell(2, count, tools::string_format(" %dms", state.second.time));
+                }
+                table.draw();
+                if (!fail_files.empty()) {
+                    __meets_error_files(out, fail_files);
+                }
+            }
+        };
 
         template<typename T>
         typename std::enable_if<IsProgramConstructible<T>::value, void>::type
         validate(int start, int end, T program, std::string case_name = _setting::testcase_folder) {
-            std::vector<int> indices;
-            Path folder = __path_join(__current_path(), case_name);
-            for(int i = start; i <= end; i++)
-                if (__input_file_exists(folder, i)) indices.emplace_back(i);
-            __validate_impl(indices, program, case_name);
+            _Validate validator(std::forward<T>(program), case_name);
+            validator.__add_validate(start, end);
+            validator.__run();
+            validator.__detail_summary(_msg::_defl);
         }
-        
+
         template<typename T>
         typename std::enable_if<IsProgramConstructible<T>::value, void>::type
         validate(T program, std::string case_name = _setting::testcase_folder) {
-            __validate_impl(__get_all_inputs(case_name), program, case_name);
+            _Validate validator(std::forward<T>(program), case_name);
+            validator.__run();
+            validator.__detail_summary(_msg::_defl);
         }
     } // namespace io
 } // namespace generator

@@ -53,15 +53,12 @@ namespace generator {
                 }
 
                 virtual void generate() override {
-                    _msg::OutStream graph_log(false);
-                    _msg::_defl.swap(graph_log);
                     this->__merge_source();
                     if (_CONTEXT_V(extra_edges_count)) this->_context.check_edges_weight_function();
                     this->__judge_limits();
                     this->__generate_graph(); 
                     _CONTEXT_GET_REF(edges)
                     shuffle(edges.begin(), edges.end());
-                    _msg::_defl.swap(graph_log);
                 };
             protected:
                 template<template<typename, typename> class TG, typename T = NodeType, _HasT<T> = 0>

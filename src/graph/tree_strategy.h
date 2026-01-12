@@ -31,16 +31,12 @@ namespace generator {
             class BasicTreeGen : public tools::_BasicGen<TreeType<NodeType, EdgeType>> {
             public:
                 BasicTreeGen(TreeType<NodeType, EdgeType>& context) : tools::_BasicGen<TreeType<NodeType, EdgeType>>(context) {}
-                virtual void generate() override {
-                    _CONTEXT_GET(log_change);
-                    _msg::OutStream tree_log(false);
-                    if (log_change) _msg::_defl.swap(tree_log);                        
+                virtual void generate() override {                      
                     __init();
                     __generate_tree(); 
                     __generate_nodes_weight();
                     _CONTEXT_GET_REF(edges)
                     shuffle(edges.begin(), edges.end());
-                    if (log_change) _msg::_defl.swap(tree_log);
                 };
             protected:
                 virtual void __generate_tree() {

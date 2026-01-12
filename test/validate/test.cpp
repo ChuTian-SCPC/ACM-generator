@@ -12,11 +12,15 @@ TEST_CASE("validate for linux", "[validate][linux]") {
     });
     Path folder = __validate_folder("testcases");
     __create_directories(folder);
+#ifdef ON_WINDOWS
+    CommandPath val(__path_join(__current_path(), "val.exe"));
+#else
     CommandPath val(__path_join(__current_path(), "val"));
+#endif
     for (int i = 1; i <= 5; i++) {
         Path log = __path_join(folder, __end_with(i, _VAL));
         Path input = __input_file_path(__path_join(__current_path(), "testcases"), i);
-        ReturnState state = __run_program(val, input, _default_path, log, time_limit_inf, _VALIDATOR);
+        ReturnState state = val.__run_program(input, _default_path, log, time_limit_inf, _VALIDATOR);
         if (i <= 3) CHECK(!__is_success(state.exit_code));
         else CHECK(__is_success(state.exit_code));
     }

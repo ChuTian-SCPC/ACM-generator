@@ -19,35 +19,6 @@ namespace generator {
                 using Context = Forest<NodeType, EdgeType>;
                 ForestGen(Context& tree) : BasicGraphGen<Forest, NodeType, EdgeType>(tree), _link() {}
             protected:
-                virtual void __judge_upper_limit() override {
-                    _CONTEXT_GET(edge_count)
-                    _CONTEXT_GET(node_count)
-                    if (edge_count > node_count - 1) {
-                        _msg::__fail_msg(_msg::_defl, tools::string_format("number of edges must less than %d.", node_count - 1));
-                    }
-                }
-
-                void __reset_node_edge_count() {
-                    _CONTEXT_GET(trees_size)
-                    _CONTEXT_GET(node_count)
-                    _CONTEXT_GET(edge_count)
-                    int count = 0;
-                    for (int tree_size : trees_size) {
-                        count += tree_size;
-                    }
-                    if (count != node_count) {
-                        _msg::__warn_msg(_msg::_defl, tools::string_format(
-                            "node_count will be changed because the sum of Trees' size %d is not equal to node count %d.",
-                            count, node_count));
-                        this->_context.set_node_count(count);
-                    }
-                    if (count - (int)trees_size.size() != edge_count) {
-                        _msg::__warn_msg(_msg::_defl, tools::string_format(
-                            "edge_count will be changed because the sum of Trees' edges %d is not equal to edge count %d.",
-                            count - (int)trees_size.size(), edge_count));
-                        this->_context.set_edge_count(count - trees_size.size());                       
-                    }
-                }
 
                 template<template<typename, typename> class TG, typename T = NodeType, _HasT<T> = 0>
                 void __reset_nodes_weight_function(TG<NodeType, EdgeType>& source) {
@@ -71,18 +42,8 @@ namespace generator {
                     return;
                 }
 
-                void __generate_trees_size() {
-                    _CONTEXT_GET_REF(trees_size)
-                    _CONTEXT_GET(node_count)
-                    _CONTEXT_GET(edge_count)
-                    int tree_count = node_count - edge_count;
-                    this->_context.set_trees_size(rand_array::rand_sum(tree_count, node_count, 1));
-                }
-
                 virtual void __self_init() override {
-                    if (_CONTEXT_V(trees_size).empty()) __generate_trees_size();
-                    __reset_node_edge_count();
-                    __init_connect();                    
+                    this->_context.rand_edge_count();                
                 }
 
                 virtual void __generate_graph() override {
@@ -90,21 +51,14 @@ namespace generator {
                     Tree<NodeType, EdgeType> tree;
                     __reset_nodes_weight_function(tree);
                     __reset_edges_weight_function(tree);
-                    tree.set_log_change(false);
                     for (int tree_size : _CONTEXT_V(trees_size)) {
                         tree.set_node_count(tree_size);
+                        tree.default_node_indices();
                         tree.gen();
                         _link.add_source(tree);
                     }
                     _link.gen();
                     __dump_result();
-                }
-
-                void __init_connect() {
-                    _CONTEXT_GET_REF(connect)
-                    _CONTEXT_GET(node_count)
-                    _CONTEXT_GET(edge_count)
-                    connect = edge_count == node_count - 1;
                 }
 
                 void __dump_result() {
@@ -171,6 +125,7 @@ namespace generator {
                 void set_trees_size(std::vector<int> trees_size) {
                     _trees_size.clear();
                     for (int tree_size : trees_size) add_tree_size(tree_size);
+                    __reset_node_edge_count();
                 }
 
                 _DISABLE_DIRECTION
@@ -178,9 +133,53 @@ namespace generator {
                 _DISABLE_SELF_LOOP
                 _DISABLE_CONNECT
                 _OUTPUT_FUNCTION_SETTING(_Self)
+
+                virtual long long min_edge_count() override {
+                    return 0;
+                }
+
+                virtual long long max_edge_count() override {
+                    return this->_node_count - 1;
+                }
+
+                virtual void rand_edge_count(long long from = _setting::auto_edge_limit, long long to = _setting::auto_edge_limit) override {
+                    if (!_trees_size.empty()) __reset_node_edge_count();
+                    else {
+                        _GenGraph<NodeType, EdgeType>::rand_edge_count(from, to);
+                        int tree_count = this->_node_count - this->_edge_count;
+                        set_trees_size(rand_array::rand_sum(tree_count, this->_node_count, 1));
+                    }
+                    __reset_connect();
+                }
             
             protected:
                 _DEFAULT_GRAPH_GEN_FUNC(Forest)
+
+                void __reset_connect() {
+                    this->_connect = this->_node_count - 1 == this->_edge_count;
+                }
+
+                void __reset_node_edge_count() {
+                    int n = this->_node_count;
+                    int m = this->_edge_count;
+                    int count = 0;
+                    for (int tree_size : _trees_size) {
+                        count += tree_size;
+                    }
+                    if (count != n) {
+                        _msg::__warn_msg(_msg::_defl, tools::string_format(
+                            "node_count will be changed because the sum of Trees' size %d is not equal to node count %d.",
+                            count, n));
+                        this->set_node_count(count);
+                    }
+                    int new_m = count - (int)_trees_size.size();
+                    if (new_m != m) {
+                        _msg::__warn_msg(_msg::_defl, tools::string_format(
+                            "edge_count will be changed because the sum of Trees' edges %d is not equal to edge count %d.",
+                            new_m, m));
+                        this->set_edge_count(new_m);                       
+                    }
+                }
             };
 
         } // namespace basic

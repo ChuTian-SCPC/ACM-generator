@@ -1,5 +1,6 @@
 #pragma once
 #include "test_basic.hpp"
+#include "algorithm/origin_algorithm.h"
 using namespace generator::all;
 
 TEST_CASE("numeric format", "[rand_numeric][format]") {
@@ -110,4 +111,66 @@ TEST_CASE("rand by probility", "[rand_numeric][rand_prob]") {
         double q = (double)m[i] / sum;
         CHECK(doubleCompare(p, q, 0.01)); // 1%的误差
     }
+}
+
+TEST_CASE("rand range", "[rand_numeric][rand_range]") {
+    init_gen();
+    bool f1 = loop_check([]() {
+        auto x = rand_range(1, 100);
+        return x.first >= 1 && x.first <= 100 && x.second >= 1 && x.second <= 100 && x.first <= x.second;
+    }, 100);
+    CHECK(f1);
+    
+    auto x1 = rand_range(1, 1);
+    CHECK((x1.first == 1 && x1.second == 1));
+
+    bool f2 = loop_check([]() {
+        auto x = rand_range(1, 1e9);
+        return x.first >= 1 && x.first <= (int)1e9 && x.second >= 1 && x.second <= (int)1e9 && x.first <= x.second;
+    }, 100);
+    CHECK(f2);
+}
+
+TEST_CASE("range contain", "[rand_numeric][IsRangeContained]") {
+    init_gen();
+    CHECK((IsRangeContained<int, int>::value == true));
+    CHECK((IsRangeContained<long long, int>::value == false));
+    CHECK((IsRangeContained<int, long long>::value == true));
+    CHECK((IsRangeContained<unsigned int, int>::value == false));
+    CHECK((IsRangeContained<int, unsigned int>::value == false));
+    CHECK((IsRangeContained<unsigned int, long long>::value == true));
+    CHECK((IsRangeContained<unsigned int, unsigned long long>::value == true));
+    CHECK((IsRangeContained<unsigned long long, unsigned int>::value == false));
+    CHECK((IsRangeContained<unsigned long long, long long>::value == false));
+    CHECK((IsRangeContained<long long, unsigned long long>::value == false));
+    CHECK((IsRangeContained<int, unsigned long long>::value == false));
+    CHECK((IsRangeContained<double, int>::value == false));
+}
+
+TEST_CASE("rand prob benchmark", "[rand_numeric][rand_prob][!benchmark]") {
+    init_gen();
+    std::map<int, int> m;
+    int sum = 0;
+    for (int i = 0; i < 1000; i++) m[i] = rand_int(1, 100);
+
+    int rand_time = 100;
+
+    BENCHMARK("rand_prob origin") {
+        for (int i = 0; i < rand_time; i++) {
+            int c = _origin::rand_prob(m);
+        }
+    };
+
+    BENCHMARK("rand_prob basic") {
+        for (int i = 0; i < rand_time; i++) {
+            int c = rand_prob(m);
+        }
+    };
+
+    BENCHMARK("rand_prob with prob table") {
+        ProbTable<int> prob(m);
+        for (int i = 0; i < rand_time; i++) {
+            int c = rand_prob(prob);
+        }
+    };
 }

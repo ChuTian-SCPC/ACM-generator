@@ -14,12 +14,9 @@ namespace generator {
         class BasicGeometryGen : public tools::_BasicGen<GeoType<T>> {
         public:
             BasicGeometryGen(GeoType<T>& context) : tools::_BasicGen<GeoType<T>>(context) {}
-            virtual void generate() override {
-                _msg::OutStream geometry_log(false);
-                _msg::_defl.swap(geometry_log);                        
+            virtual void generate() override {                       
                 __init();
                 __generate_geometry();
-                _msg::_defl.swap(geometry_log);
             };
         protected:
             virtual void __init() {

@@ -135,7 +135,7 @@ namespace generator {
           }
           
           bool __enable_log_same() {
-            return _log_same || _setting::same_log_for_class;
+            return _log_same;
           }
           
           template <typename... Args>
@@ -193,6 +193,11 @@ namespace generator {
 
       void __endl(OutStream& out, int count = 1) {
         for (int i = 1; i <= count; i++) out.println();
+      }
+
+      template <typename... Args>
+      void __flash_msg(OutStream& out, Args... args) {
+        out.print("\r", args...);
       }
       
       OutStream _defl; // default_log

@@ -141,6 +141,24 @@ namespace generator {
 
             template <typename NodeType, typename EdgeType>
             using FlowerChain = basic::FlowerChain<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using DegreeTree = basic::DegreeTree<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using DegreeTreeGen = basic::DegreeTreeGen<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using SonTree = basic::SonTree<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using SonTreeGen = basic::SonTreeGen<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using StartReachableGraph = basic::StartReachableGraph<NodeType, EdgeType>;
+
+            template <typename NodeType, typename EdgeType>
+            using StartReachableGraphGen = basic::StartReachableGraphGen<NodeType, EdgeType>;
         } // namespace both_weight
     } // namespace rand_graph
 } // namespace generator
