@@ -72,22 +72,6 @@
 #include "io/workflow.h"
 #endif // !_SGPCET_WORKFLOW_H_
 
-#ifndef _SGPCET_NTT_H_
-#include "math/ntt.h"
-#endif //!_SGPCET_NTT_H_
-#ifndef _SGPCET_BIG_INT_CALCULATOR_H_
-#include "math/big_int_calculator.h"
-#endif //!_SGPCET_BIG_INT_CALCULATOR_H_
-#ifndef _SGPCET_BIG_INT_BASE_H_
-#include "math/big_int_base.h"
-#endif //!_SGPCET_BIG_INT_BASE_H_
-#ifndef _SGPCET_CHAR_SET_CHECK_H_
-#include "math/char_set_check.h"
-#endif //!_SGPCET_CHAR_SET_CHECK_H_
-#ifndef _SGPCET_BIG_INT_H_
-#include "math/big_int.h"
-#endif //!_SGPCET_BIG_INT_H_
-
 #ifndef _SGPCET_NUMBER_CONST_H_
 #include "rand/number_const.h"
 #endif // !_SGPCET_NUMBER_CONST_H_
@@ -191,7 +175,6 @@ namespace generator {
     using namespace generator::_setting;
     using namespace generator::_enum;
     using namespace generator::io;
-    using namespace generator::math;
     using namespace generator::rand_numeric;
     using namespace generator::rand_array;
     using namespace generator::rand_graph;
