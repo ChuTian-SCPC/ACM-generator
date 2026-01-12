@@ -112,8 +112,11 @@ namespace generator {
                 STD_TLE,
                 STD_RE,
                 GEN_FAIL,
+                GEN_TLE,
                 VAL_FAIL,
-                CHECK_FAIL
+                VAL_TLE,
+                CHECK_FAIL,
+                CHECK_TLE
             };
             using TestResult = std::pair<State, int>;
             using TestCase = std::pair<Name, int>;
@@ -213,10 +216,12 @@ namespace generator {
 
             State __generate(int index) {
                 Path input = __path_join(__case_hack_folder(), __end_with(index, _enum::_IN));
+                Path log = __path_join(__case_hack_folder(), __end_with(index, _enum::_GEN_LOG));
                 _Program* gen = __generator_program(_generator, index, true);
-                ReturnState result = gen->__run_program(_setting::_default_path, input, _setting::_default_path, _time_limit_for_generator, _enum::_FuncProgramType::_GENERATOR);
+                ReturnState result = gen->__run_program(_setting::_default_path, input, log, _time_limit_for_generator, _enum::_FuncProgramType::_GENERATOR);
                 delete gen;
                 if (!__is_success(result.exit_code)) return State::GEN_FAIL;
+                if (__time_limit_exceed(result.time, _time_limit_for_generator)) return State::GEN_TLE;
                 return State::UNKNOWN;
             }
 
@@ -226,6 +231,7 @@ namespace generator {
                 Path log = __path_join(__case_hack_folder(), __end_with(index, _enum::_VAL));
                 ReturnState result = _validator->__run_program(input, _setting::_default_path, log, _time_limit_for_validator, _enum::_FuncProgramType::_VALIDATOR);
                 if (!__is_success(result.exit_code)) return State::VAL_FAIL;
+                if (__time_limit_exceed(result.time, _time_limit_for_validator)) return State::VAL_TLE;
                 return State::UNKNOWN;
             }
 
@@ -306,6 +312,7 @@ namespace generator {
                 _enum::_JudgeState result = _checker.result();
                 if (result == _enum::_JudgeState::_AC) return State::AC;
                 if (result == _enum::_JudgeState::_WA) return State::WA;
+                if (result == _enum::_JudgeState::_CHECKER_TLE) return State::CHECK_TLE;
                 return State::CHECK_FAIL;
             }
 
@@ -333,6 +340,11 @@ namespace generator {
                 return state == State::AC ||
                     state == State::WA ||
                     state == State::TLE;
+            }
+
+            bool __has_fail_message(State& state) {
+                return state == State::GEN_FAIL ||
+                    state == State::VAL_FAIL;
             }
 
             int __find_next_not_exist_inputs(int start) {
@@ -388,9 +400,11 @@ namespace generator {
                 Path input = __path_join(__case_hack_folder(), __end_with(index, _enum::_IN));
                 Path output = __path_join(__case_hack_folder(), __end_with(index, _enum::_OUT));
                 Path val_log = __path_join(__case_hack_folder(), __end_with(index, _enum::_VAL));
+                Path gen_log = __path_join(__case_hack_folder(), __end_with(index, _enum::_GEN_LOG));
                 input.__delete_file();
                 output.__delete_file();
                 val_log.__delete_file();
+                gen_log.__delete_file();
             }
 
             void __hack() {
@@ -483,16 +497,24 @@ namespace generator {
                     case State::STD_TLE: return _msg::_ColorMsg("std TLE", _enum::Color::Yellow);
                     case State::STD_RE: return _msg::_ColorMsg("std RE", _enum::Color::Red);
                     case State::GEN_FAIL: return _msg::_ColorMsg("generate ERROR", _enum::Color::Red);
+                    case State::GEN_TLE: return _msg::_ColorMsg("generate TLE", _enum::Color::Yellow);
+
                     case State::VAL_FAIL: return _msg::_ColorMsg("validate ERROR", _enum::Color::Red);
+                    case State::VAL_TLE: return _msg::_ColorMsg("validate TLE", _enum::Color::Yellow);
                     case State::CHECK_FAIL: return _msg::_ColorMsg("check ERROR", _enum::Color::Red);
+                    case State::CHECK_TLE: return _msg::_ColorMsg("check TLE", _enum::Color::Yellow);
                     default: return _msg::_ColorMsg("UNKNOWN", _enum::Color::Red);
                 }
             }
 
             void __detail_summary(_msg::OutStream& out) {
+                int fail_count = 0;
+                for (auto& state : _states) {
+                    if (__has_fail_message(state.second.first)) fail_count++;
+                }
                 _Table table(out);
                 _msg::__info_msg(out, tools::string_format("Generator Name : %s", _generator->name().c_str()));
-                table.add_cell(0, 0, "Hack Case Id");
+                table.add_cell(0, 0, "Hack Case ID");
                 table.add_cell(1, 0, "Seed");
                 std::map<Name, int> table_indices;
                 int row = 2;
@@ -502,7 +524,13 @@ namespace generator {
                     table_indices[name] = row;
                     row++;
                 }
-                if (_move_path.size() > 0) table.add_cell(row, 0, "Move Path");
+                int fail_row = row;
+                int move_row = row;
+                if (fail_count > 0) {
+                    table.add_cell(fail_row, 0, "Fail Message");
+                    move_row++;
+                }
+                if (_move_path.size() > 0) table.add_cell(move_row, 0, "Move Path");
                 int case_count = 1;
                 for (auto& testcase : _testcases) {
                     int index = testcase.first;
@@ -510,6 +538,7 @@ namespace generator {
                     _Program* gen = __generator_program(_generator, index, true);
                     table.add_cell(1, case_count, gen->get_argv_without_redirection());
                     delete gen;
+                    State fail_state = State::UNKNOWN;
                     for(auto& program : _comparers) {
                         Name name = program.first;
                         int table_index = table_indices[name];
@@ -521,10 +550,17 @@ namespace generator {
                         TestResult result = _states[case_index];
                         table.add_cell(table_index, case_count, __state_msg(result.first));
                         if (__has_runtime(result.first)) table.add_msg(table_index, case_count, tools::string_format(" %dms", result.second));
+                        if (__has_fail_message(result.first)) fail_state = result.first;
+                    }
+                    if (fail_state != State::UNKNOWN) {
+                        Path fail_path;
+                        if (fail_state == State::GEN_FAIL) fail_path = __path_join(__case_hack_folder(), __end_with(index, _enum::_GEN_LOG));
+                        else fail_path = __path_join(__case_hack_folder(), __end_with(index, _enum::_VAL));
+                        table.add_cell(fail_row, case_count, __get_fail_message(fail_path));
                     }
                     if (_move_path.size() > 0) {
                         if (_move_path.find(index) != _move_path.end())
-                            table.add_cell(row, case_count, __testcase_input_file_path(_move_path[index]).path());
+                            table.add_cell(move_row, case_count, __testcase_input_file_path(_move_path[index]).path());
                     }
                     case_count++;
                 }

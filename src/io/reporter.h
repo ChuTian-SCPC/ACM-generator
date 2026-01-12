@@ -25,6 +25,7 @@ namespace generator {
                 if (consider_tle && _enum::__has_tle(state)) return _tle_msg;
                 else if (_enum::__has_ac(state)) return _ac_msg;
                 else if (_enum::__has_wa(state)) return _wa_msg;
+                else if (_enum::__is_checker_tle(state)) return _msg::_ColorMsg("Checker TLE");
                 else return _empty_msg;
             }
 
@@ -80,6 +81,18 @@ namespace generator {
 
             void __run_time_msg(_msg::OutStream& out, int time_used) {
                 out.println(tools::string_format("Runtime = %dms", time_used));
+            }
+
+            std::string __get_fail_message(const Path& path) {
+                std::ifstream ss(path.path());
+                std::string line;
+                std::string result = "";
+                while(ss >> line){
+                    result += line;
+                    result += " ";
+                }
+                ss.close();
+                return result;
             }
 
         };

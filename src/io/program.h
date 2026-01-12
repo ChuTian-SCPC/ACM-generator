@@ -36,6 +36,10 @@ namespace generator {
             return time_Limit * _setting::time_limit_over_ratio;
         }
 
+        bool __is_wa_or_tle(ReturnState& state, int time_limit) {
+            return !__is_success(state.exit_code) || __time_limit_exceed(state.time, time_limit);
+        }
+
         class _Program {
         protected:
             std::string _args;

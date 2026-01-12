@@ -53,6 +53,7 @@ namespace generator {
     std::string hack_folder = "hack";
     std::string validate_folder = "validate";
     std::string _empty_program_name = "";
+    std::string generate_log_folder = "gen_log";
 
     std::string input_suffix = ".in";
     std::string output_suffix = ".out";
