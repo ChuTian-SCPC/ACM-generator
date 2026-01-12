@@ -4,5 +4,4 @@
 #include "test_tree.hpp"
 #include "test_graph.hpp"
 #include "test_geometry.hpp"
-#include "test_math.hpp"
 #include "test_distribution.hpp"
