@@ -38,6 +38,13 @@ namespace generator {
           _path = s;
           return *this;
       }
+
+      bool operator==(const Path& other) const { return _path == other._path; }
+      bool operator!=(const Path& other) const { return _path != other._path; }
+      bool operator<(const Path& other) const { return _path < other._path; }
+      bool operator>(const Path& other) const { return _path > other._path; }
+      bool operator<=(const Path& other) const { return _path <= other._path; }
+      bool operator>=(const Path& other) const { return _path >= other._path; }
       
       _SET_GET_VALUE(std::string, path)
       void set_path(const char* path) { _path = std::string(path); }

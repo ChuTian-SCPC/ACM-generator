@@ -19,7 +19,7 @@ namespace generator {
             _Validate() : _Reporter(), _validator(nullptr), _default_judge(true), _case_name(_setting::testcase_folder), _time_limit(_setting::time_limit_inf) {}
 
             template<typename T>
-            _Validate(T&& validator, const std::string& case_name = _setting::testcase_folder, bool default_judge = true) : _Reporter(), _validator(nullptr), _default_judge(default_judge), _case_name(case_name) {
+            _Validate(T&& validator, const std::string& case_name = _setting::testcase_folder, bool default_judge = true) : _Reporter(), _validator(nullptr), _default_judge(default_judge), _case_name(case_name), _time_limit(_setting::time_limit_inf) {
                 __set_validator(std::forward<T>(validator));
             }
             ~_Validate() {
@@ -102,7 +102,7 @@ namespace generator {
                     table.add_cell(0, count, std::to_string(state.first));
                     table.add_cell(1, count, __state_msg(state.second));
                     if (!__is_success(state.second.exit_code)) 
-                        table.add_cell(3, count, __get_fail_message(log));
+                        table.add_cell(3, count, __get_file_message(log));
                     else 
                         table.add_cell(2, count, tools::string_format(" %dms", state.second.time));
                 }

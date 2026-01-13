@@ -77,6 +77,18 @@ namespace generator {
             ".glog"
         };
 
+        Path __test_folder() {
+            return __path_join(__current_path(), _setting::test_folder);
+        }
+
+        Path __test_validator_folder() {
+            return __path_join(__test_folder(), _setting::test_validator_sub_folder);
+        }
+
+        Path __test_checker_folder() {
+            return __path_join(__test_folder(), _setting::test_checker_sub_folder);
+        }
+
         void __check_input_output_suffix() {
             if (_setting::input_suffix != _file_end[_enum::_IN]) _file_end[_enum::_IN] = _setting::input_suffix;
             if (_setting::output_suffix != _file_end[_enum::_OUT]) _file_end[_enum::_OUT] = _setting::output_suffix;

@@ -68,6 +68,12 @@
 #ifndef _SGPCET_HACK_H_
 #include "io/hack.h"
 #endif // !_SGPCET_HACK_H_
+#ifndef _SGPCET_TEST_VALIDATOR_H_
+#include "io/test_validator.h"
+#endif // !_SGPCET_TEST_VALIDATOR_H_
+#ifndef _SGPCET_TEST_CHECKER_H_
+#include "io/test_checker.h"
+#endif // !_SGPCET_TEST_CHECKER_H_
 #ifndef _SGPCET_WORKFLOW_H_
 #include "io/workflow.h"
 #endif // !_SGPCET_WORKFLOW_H_

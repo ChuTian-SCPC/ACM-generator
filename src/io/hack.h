@@ -556,7 +556,7 @@ namespace generator {
                         Path fail_path;
                         if (fail_state == State::GEN_FAIL) fail_path = __path_join(__case_hack_folder(), __end_with(index, _enum::_GEN_LOG));
                         else fail_path = __path_join(__case_hack_folder(), __end_with(index, _enum::_VAL));
-                        table.add_cell(fail_row, case_count, __get_fail_message(fail_path));
+                        table.add_cell(fail_row, case_count, __get_file_message(fail_path));
                     }
                     if (_move_path.size() > 0) {
                         if (_move_path.find(index) != _move_path.end())
