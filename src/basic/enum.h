@@ -26,6 +26,7 @@ namespace generator {
       _TLE_AC = 5,
       _TLE_WA = 6,
       _CHECKER_TLE,
+      _CHECKER_TLE,
       _JUDGE_STATE_MAX
     };
 
@@ -168,6 +169,17 @@ namespace generator {
       ONLINE_BACK,
       ONLINE_FRONT,
       ON_SEGMENT
+    };
+
+    enum VectorOrder {
+      Ascending,  // 递增
+      Descending, // 递减
+      Random
+    };
+
+    enum VectorUniqueness {
+      Distinct, // 不重复
+      Duplicate // 允许重复
     };
 
     enum VectorOrder {

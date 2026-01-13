@@ -38,6 +38,12 @@
 #ifndef _SGPCET_PROGRAM_H_
 #include "io/program.h"
 #endif // !_SGPCET_PROGRAM_H_
+#ifndef _SGPCET_FILE_H_
+#include "io/file.h"
+#endif // !_SGPCET_FILE_H_
+#ifndef _SGPCET_PROGRAM_H_
+#include "io/program.h"
+#endif // !_SGPCET_PROGRAM_H_
 #ifndef _SGPCET_COMMAND_PATH_H_
 #include "io/command_path.h"
 #endif // !_SGPCET_COMMAND_PATH_H_
