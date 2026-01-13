@@ -19,6 +19,8 @@ namespace generator {
             static _msg::_ColorMsg _success_msg;
             static _msg::_ColorMsg _fail_msg;
             static _msg::_ColorMsg _error_msg;
+            static _msg::_ColorMsg _unknown_msg;
+            static _msg::_ColorMsg _pass_msg;
         protected:
             _msg::_ColorMsg __state_msg(_enum::_JudgeState state, bool consider_tle) {
                 if (_enum::__is_run_error(state)) return _run_error_msg;
@@ -71,6 +73,12 @@ namespace generator {
                 __meets_error_endl(out);
                 __show_files(out, files);
             }
+            
+            void __meets_error_files(_msg::OutStream& out, std::vector<Path>& files, int total) {
+                __pass_ratio_msg(out, total - files.size(), total);
+                __meets_error_endl(out);
+                __show_files(out, files);
+            }
 
             void __meets_error_files(_msg::OutStream& out, std::vector<int>& files, int total) {
                 __pass_ratio_msg(out, total - files.size(), total);
@@ -83,7 +91,7 @@ namespace generator {
                 out.println(tools::string_format("Runtime = %dms", time_used));
             }
 
-            std::string __get_fail_message(const Path& path) {
+            std::string __get_file_message(const Path& path) {
                 std::ifstream ss(path.path());
                 std::string line;
                 std::string result = "";
@@ -106,6 +114,8 @@ namespace generator {
         _msg::_ColorMsg _Reporter::_success_msg = _msg::_ColorMsg("Success", _enum::Color::Green);
         _msg::_ColorMsg _Reporter::_fail_msg = _msg::_ColorMsg("Fail", _enum::Color::Red);
         _msg::_ColorMsg _Reporter::_error_msg = _msg::_ColorMsg("ERROR", _enum::Color::Red);
+        _msg::_ColorMsg _Reporter::_unknown_msg = _msg::_ColorMsg("UNKNOWN", _enum::Color::Red);
+        _msg::_ColorMsg _Reporter::_pass_msg = _msg::_ColorMsg("Pass", _enum::Color::Green);
 
         class _Table {
         protected:

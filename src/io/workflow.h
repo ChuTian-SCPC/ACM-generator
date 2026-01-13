@@ -19,6 +19,12 @@
 #ifndef _SGPCET_HACK_H_
 #include "hack.h"
 #endif // !_SGPCET_HACK_H_
+#ifndef _SGPCET_TEST_VALIDATOR_H_
+#include "test_validator.h"
+#endif // !_SGPCET_TEST_VALIDATOR_H_
+#ifndef _SGPCET_TEST_CHECKER_H_
+#include "test_checker.h"
+#endif // !_SGPCET_TEST_CHECKER_H_
 
 namespace generator {
     namespace io {
@@ -35,6 +41,8 @@ namespace generator {
             
             _Input _input;
             std::map<Name, _Hack> _hacks;
+            _TestChecker _test_checker;
+            _TestValidator _test_validator;
             struct _CompareCase {
                 int _start, _end;
                 _Program* _program;
@@ -54,6 +62,9 @@ namespace generator {
             Time _time_limit_for_validator;
 
             bool _delete_fail_testcase;
+
+            // input
+            bool _skip_generated;
 
             // output
             bool _cover_exist;
@@ -90,6 +101,7 @@ namespace generator {
                 _time_limit_for_checker(_setting::time_limit_inf),
                 _time_limit_for_validator(_setting::time_limit_inf),
                 _delete_fail_testcase(true),
+                _skip_generated(false),
                 _cover_exist(true),
                 _copy_wrong_to_testcase(true),
                 _delete_correct(true),
@@ -116,6 +128,7 @@ namespace generator {
             _SET_GET_VALUE(Time, time_limit_for_checker)
             _SET_GET_VALUE(Time, time_limit_for_validator)
             _SET_GET_VALUE(bool, delete_fail_testcase)
+            _SET_GET_VALUE(bool, skip_generated)
             _SET_GET_VALUE(bool, cover_exist)
             _SET_GET_VALUE(bool, copy_wrong_to_testcase)
             _SET_GET_VALUE(bool, delete_correct)
@@ -210,6 +223,8 @@ namespace generator {
             void run() {
                 __begin_summary_report();
                 if (!__check_requires()) return;
+                if (!__test_checker()) return;
+                if (!__test_validator()) return;
                 __generate_inputs();
                 __validate();
                 __generate_outputs();
@@ -217,6 +232,16 @@ namespace generator {
                 __hack();
                 __compare();
                 _msg::__info_msg(_msg::_defl, tools::string_format("Report is in file %s", Path(_file.path()).full_path().cname()));
+            }
+
+            template<typename T>
+            void test_validator(T&& path, _enum::ExpectedResult result = _enum::ExpectedResult::Any) {
+                _test_validator.__add_testcase(std::forward<T>(path), result);
+            }
+
+            template<typename T1, typename T2, typename T3>
+            void test_checker(T1&& input, T2&& output, T3&& answer, _enum::ExpectedResult result = _enum::ExpectedResult::Any) {
+                _test_checker.__add_testcase(std::forward<T1>(input), std::forward<T2>(output), std::forward<T3>(answer), result);
             }
 
         protected:
@@ -398,6 +423,7 @@ namespace generator {
                 if (detail) {
                     _msg::__info_msg(out, "  Setting :");
                     _msg::__info_msg(out, tools::string_format("    delete fail testcase          : %s", __bool_format(_delete_fail_testcase).c_str()));
+                    _msg::__info_msg(out, tools::string_format("    (input) skip generated        : %s", __bool_format(_skip_generated).c_str()));
                     _msg::__info_msg(out, tools::string_format("    (output) cover exist          : %s", __bool_format(_cover_exist).c_str()));
                     _msg::__info_msg(out, tools::string_format("    (hack) copy wrong to testcase : %s", __bool_format(_copy_wrong_to_testcase).c_str()));
                     _msg::__info_msg(out, tools::string_format("    (hack) delete correct         : %s", __bool_format(_delete_correct).c_str()));
@@ -441,6 +467,7 @@ namespace generator {
             }
 
             void __generate_inputs() {
+                _input.set_skip_generated(_skip_generated);
                 _input.set_time_limit(_time_limit_for_generator);
                 _input.__run();
                 if (_detail_report_on_console) _input.__detail_summary(_msg::_defl);
@@ -566,6 +593,36 @@ namespace generator {
                 if (_detail_report_on_file) compare.__detail_summary(_file);
                 else compare.__short_summary(_file);
                 _msg::__endl(_file);
+            }
+
+            bool __test_validator() {
+                if(_test_validator.__empty()) return true;
+                if (_validator == _setting::_empty_program_name) _msg::__fail_msg(_msg::_defl, "No Validator");
+                _test_validator.__set_validator(__find_program(_validator));
+                _test_validator.set_time_limit(_time_limit_for_validator);
+                _test_validator.__run();
+                if (_detail_report_on_console) _test_validator.__detail_summary(_msg::_defl);
+                else _test_validator.__short_summary(_msg::_defl);
+                _msg::__info_msg(_file, "Test Validator :");
+                if (_detail_report_on_file) _test_validator.__detail_summary(_file);
+                else _test_validator.__short_summary(_file);
+                _msg::__endl(_file);
+                return _test_validator.__is_all_pass();
+            }
+
+            bool __test_checker() {
+                if(_test_checker.__empty()) return true;
+                if (_checker == _setting::_empty_program_name) _msg::__fail_msg(_msg::_defl, "No Checker");
+                _test_checker.__set_checker(__find_program(_checker));
+                _test_checker.set_time_limit(_time_limit_for_checker);
+                _test_checker.__run();
+                if (_detail_report_on_console) _test_checker.__detail_summary(_msg::_defl);
+                else _test_checker.__short_summary(_msg::_defl);
+                _msg::__info_msg(_file, "Test Checker :");
+                if (_detail_report_on_file) _test_checker.__detail_summary(_file);
+                else _test_checker.__short_summary(_file);
+                _msg::__endl(_file);
+                return _test_checker.__is_all_pass();
             }
 
         };

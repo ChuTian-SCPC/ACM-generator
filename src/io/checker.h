@@ -53,6 +53,8 @@ namespace generator {
             }
 
             void __check_result() {
+                if (_checker == nullptr) _msg::__fail_msg(_msg::_defl, "No checker");
+                _checker->__check_program_valid();
                 _result = _enum::_JudgeState::_UNKNOWN;
                 std::string testlib_output_content = "";
                 _Program* p;

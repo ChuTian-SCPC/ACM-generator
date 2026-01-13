@@ -50,8 +50,16 @@ namespace generator {
         return lhs;
     }
 
+    bool __is_ac(_JudgeState state) {
+      return state == _JudgeState::_AC;
+    }
+
     bool __has_ac(_JudgeState state) {
       return state == _JudgeState::_AC || state == _JudgeState::_TLE_AC;
+    }
+
+    bool __is_wa(_JudgeState state) {
+      return state == _JudgeState::_WA;
     }
 
     bool __has_wa(_JudgeState state) {
@@ -105,6 +113,13 @@ namespace generator {
       _VALIDATOR,
       _RESULT,
       _OTHER  
+    };
+
+    enum class ExpectedResult {
+      Pass,
+      Fail,
+      TLE,
+      Any
     };
 
     enum Checker{

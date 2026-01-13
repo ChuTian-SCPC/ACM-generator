@@ -13,9 +13,10 @@ namespace generator {
             std::map<int, _Program*> _gens;
             TestResults _states;
             int _time_limit;
+            bool _skip_generated;
         public:
 
-            _Input() : _Reporter(), _time_limit(_setting::time_limit_inf) {}
+            _Input() : _Reporter(), _time_limit(_setting::time_limit_inf), _skip_generated(false) {}
 
             ~_Input() {
                 for (auto& gen : _gens) {
@@ -25,6 +26,7 @@ namespace generator {
 
             _GET_VALUE(TestResults, states);
             _SET_GET_VALUE(int, time_limit);
+            _SET_GET_VALUE(bool, skip_generated);
             
             template<typename T>
             void __add_input(int id, T&& gen) {
@@ -59,6 +61,7 @@ namespace generator {
                 int id = 1;
                 for (auto& gen : _gens) {
                     Path input = __testcase_input_file_path(gen.first);
+                    if (_skip_generated && input.__file_exist()) continue;
                     Path log = __path_join(__generate_log_folder(), __end_with(gen.first, _enum::_End::_GEN_LOG));
                     _msg::__flash_msg(_msg::_defl, "Generate(Inputs) : ", __ratio_msg(id, _gens.size()));
                     id++;
@@ -106,7 +109,7 @@ namespace generator {
                     if (__is_success(state.second.exit_code)) 
                         table.add_cell(4, count, tools::string_format(" %dms", state.second.time));
                     else
-                        table.add_cell(5, count, __get_fail_message(log));
+                        table.add_cell(5, count, __get_file_message(log));
                 }
                 table.draw();
                 if (!fail_files.empty()) {

@@ -241,7 +241,7 @@ namespace generator {
                         if (_enum::__has_wa(result.first)) {
                             Path check_result = __path_join(__compare_folder(), name, __end_with(id, _enum::_CHECK_RESULT));
                             table.add_cell(2, count, tools::string_format("%s ", answer.path().c_str()));
-                            table.add_cell(3, count, __get_fail_message(check_result));
+                            table.add_cell(3, count, __get_file_message(check_result));
                         }
                         count++;
                     }         

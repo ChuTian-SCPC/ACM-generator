@@ -54,6 +54,9 @@ namespace generator {
     std::string validate_folder = "validate";
     std::string _empty_program_name = "";
     std::string generate_log_folder = "gen_log";
+    std::string test_folder = "test";
+    std::string test_validator_sub_folder = "validator";
+    std::string test_checker_sub_folder = "checker";
 
     std::string input_suffix = ".in";
     std::string output_suffix = ".out";
