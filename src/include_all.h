@@ -29,6 +29,10 @@
 #include "basic/gen_strategy.h"
 #endif // !_SGPCET_GEN_STRATEGY_H_
 
+#ifndef _SGPCET_VAL_INIT_H_
+#include "validator/val_init.h"
+#endif // !_SGPCET_VAL_INIT_H_
+
 #ifndef _SGPCET_PATH_H_
 #include "io/path.h"
 #endif // !_SGPCET_PATH_H_
@@ -185,6 +189,7 @@ namespace generator {
     using namespace generator::rand_array;
     using namespace generator::rand_graph;
     using namespace generator::rand_geometry;
+    using namespace generator::validate;
   } // namespace all
 } // namespace generator
 

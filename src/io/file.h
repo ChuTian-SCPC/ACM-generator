@@ -13,6 +13,9 @@
 #ifndef _SGPCET_PATH_H_
 #include "path.h"
 #endif // !_SGPCET_PATH_H_
+#ifndef _SGPCET_VAL_INIT_H_
+#include "validator/val_init.h"
+#endif // !_SGPCET_VAL_INIT_H_
 
 namespace generator {
     namespace io {
@@ -159,10 +162,12 @@ namespace generator {
         
         void init_validator(int argc,char* argv[]) {
             registerValidation(argc, argv);
+            validate::_ValidateAutoReadEof _auto_read_eof;
         }
 
         void init_validator() {
             registerValidation();
+            validate::_ValidateAutoReadEof _auto_read_eof;
         }
 
         void __set_validator_args(std::string args) {
