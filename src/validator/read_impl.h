@@ -111,11 +111,79 @@ namespace generator {
             return result;
         }
 
+        template<typename T, typename Param>
+        T read(const Param& p) {
+            _msg::__fail_msg(_msg::_defl, "invaild reader");
+        }
+
+        struct _SplitLimit {
+            std::string split;
+            bool read_split;
+            bool multi_line;
+        };
+
         template<typename T>
-        struct VarLimits {
+        struct VarLimits : public _SplitLimit {
             bool has_limits;
             T min, max;
         };
+
+        template<typename T, typename Param>
+        int read(const VarLimits<int>& p) {
+            std::string result = read_word(p.split, p.read_split, p.multi_line);
+            long long num = stringToLongLong(result);
+            if (num < std::numeric_limits<T>::min() || num > std::numeric_limits<T>::max()) {
+                _msg::__fail_pe_msg(_msg::_defl, tools::string_format("number %lld out of integer range", num));
+            }
+            if (p.has_limits) {
+                if (num < p.min || num > p.max) {
+                    _msg::__fail_pe_msg(_msg::_defl, tools::string_format("number %lld out of range [%d, %d]", num, p.min, p.max));
+                }
+            }
+            return (int)num;
+        }
+
+        template<typename T, typename Param>
+        long long read(const VarLimits<long long>& p) {
+            std::string result = read_word(p.split, p.read_split, p.multi_line);
+            long long num = stringToLongLong(result);
+            if (p.has_limits) {
+                if (num < p.min || num > p.max) {
+                    _msg::__fail_pe_msg(_msg::_defl, tools::string_format("number %lld out of range [%lld, %lld]", num, p.min, p.max));
+                }
+            }
+            return num;
+        }
+
+        template<typename T, typename Param>
+        unsigned int read(const VarLimits<unsigned int>& p) {
+            std::string result = read_word(p.split, p.read_split, p.multi_line);
+            long long num = stringToLongLong(result);
+            if (num < std::numeric_limits<T>::min() || num > std::numeric_limits<T>::max()) {
+                _msg::__fail_pe_msg(_msg::_defl, tools::string_format("number %lld out of unsigned integer range", num));
+            }
+            if (p.has_limits) {
+                if (num < p.min || num > p.max) {
+                    _msg::__fail_pe_msg(_msg::_defl, tools::string_format("number %lld out of range [%u, %u]", num, p.min, p.max));
+                }
+            }
+            return (unsigned int)num;
+        }
+
+        template<typename T, typename Param>
+        unsigned long long read(const VarLimits<unsigned long long>& p) {
+            std::string result = read_word(p.split, p.read_split, p.multi_line);
+            unsigned long long num = stringToUnsignedLongLong(result);
+            if (num < std::numeric_limits<T>::min() || num > std::numeric_limits<T>::max()) {
+                _msg::__fail_pe_msg(_msg::_defl, tools::string_format("number %lld out of unsigned long long range", num));
+            }
+            if (p.has_limits) {
+                if (num < p.min || num > p.max) {
+                    _msg::__fail_pe_msg(_msg::_defl, tools::string_format("number %lld out of range [%llu, %llu]", num, p.min, p.max));
+                }
+            }
+            return (unsigned long long)num;
+        }
 
         struct CharLimits {
             enum LimitType {
@@ -126,55 +194,6 @@ namespace generator {
             char required_char;
             char min_char, max_char;
         };
-
-        struct StringLimits {
-            bool enable_whitespace; // readToken or readLine
-            bool has_pattern;
-            std::string pattern;
-        };
-
-        template<typename T, typename Param>
-        T read(const Param& p) {
-            _msg::__fail_msg(_msg::_defl, "invaild reader");
-        }
-
-        template<typename T>
-        int read(const VarLimits<int>& p) {
-            if (p.has_limits) return inf.readInt(p.min, p.max);
-            else return inf.readInt();
-        }
-
-        template<typename T>
-        unsigned int read(const VarLimits<unsigned int>& p) {
-            // testlib has no readUnsignedInt,
-            // so we read long and cast it to unsigned int.
-            if (p.has_limits) return (unsigned int)inf.readLong((long long)p.min, (long long)p.max);
-            else return (unsigned int)inf.readLong();
-        }
-
-        template<typename T>
-        long long read(const VarLimits<long long>& p) {
-            if (p.has_limits) return inf.readLong(p.min, p.max);
-            else return inf.readLong();
-        }
-
-        template<typename T>
-        unsigned long long read(const VarLimits<unsigned long long>& p) {
-            if (p.has_limits) return inf.readUnsignedLong(p.min, p.max);
-            else return inf.readUnsignedLong();
-        }
-
-        template<typename T>
-        double read(const VarLimits<double>& p) {
-            if (p.has_limits) return inf.readDouble(p.min, p.max);
-            else return inf.readDouble();
-        }
-
-        template<typename T>
-        float read(const VarLimits<float>& p) {
-            if (p.has_limits) return (float)inf.readDouble(p.min, p.max);
-            else return (float)inf.readDouble();
-        }
 
         template<typename T>
         char read(const CharLimits& p) {
@@ -190,28 +209,46 @@ namespace generator {
             }
         }
 
-        template<typename T>
-        std::string read(const StringLimits& p) {
-            if (p.enable_whitespace) {
-                if (p.has_pattern) return inf.readToken(p.pattern);
-                else return inf.readToken();
-            } else {
-                if (p.has_pattern) return inf.readLine(p.pattern);
-                else return inf.readLine();
-            }
-        }
+        // template<typename T>
+        // double read(const VarLimits<double>& p) {
+        //     if (p.has_limits) return inf.readDouble(p.min, p.max);
+        //     else return inf.readDouble();
+        // }
 
-        struct VectorBaseLimit {
-            bool has_limits;
-            int size;
-            std::string split;
-            bool end_extra_split;
-        };
+        // template<typename T>
+        // float read(const VarLimits<float>& p) {
+        //     if (p.has_limits) return (float)inf.readDouble(p.min, p.max);
+        //     else return (float)inf.readDouble();
+        // }
 
-        template<typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-        struct VectorLimits : public VectorBaseLimit {
+        // struct StringLimits : public _SplitLimit {
+        //     bool has_pattern;
+        //     std::string pattern;
+        // };
 
-        };
+
+        // template<typename T>
+        // std::string read(const StringLimits& p) {
+        //     if (p.enable_whitespace) {
+        //         if (p.has_pattern) return inf.readToken(p.pattern);
+        //         else return inf.readToken();
+        //     } else {
+        //         if (p.has_pattern) return inf.readLine(p.pattern);
+        //         else return inf.readLine();
+        //     }
+        // }
+
+        // struct VectorBaseLimit {
+        //     bool has_limits;
+        //     int size;
+        //     std::string split;
+        //     bool end_extra_split;
+        // };
+
+        // template<typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
+        // struct VectorLimits : public VectorBaseLimit {
+
+        // };
     }
 }
 
