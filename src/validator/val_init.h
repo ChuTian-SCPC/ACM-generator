@@ -14,7 +14,7 @@ namespace generator {
         public:
             static void _auto_read_eof() {
                 if (testlibFinalizeGuard.readEofCount != 0) return;
-                inf.readEof();
+                if (inf.reader != NULL) inf.readEof(); // inf may be destroyed before this function if meet some error in reading
             }
 
             _ValidateAutoReadEof() {

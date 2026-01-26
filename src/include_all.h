@@ -32,6 +32,9 @@
 #ifndef _SGPCET_VAL_INIT_H_
 #include "validator/val_init.h"
 #endif // !_SGPCET_VAL_INIT_H_
+#ifndef _SGPCET_READ_IMPL_H_
+#include "validator/read_impl.h"
+#endif // !_SGPCET_READ_IMPL_H_
 
 #ifndef _SGPCET_PATH_H_
 #include "io/path.h"

@@ -156,6 +156,18 @@ namespace generator {
         out.println(_fail, " ", args...);
         exit(EXIT_FAILURE);
       }
+
+      template <typename... Args>
+      void __fail_eof_msg(OutStream& out, Args... args) {
+        out.println(_fail, " ", args...);
+        exit(_unexpected_eof); //  testlib exit with special code, so we use the same code
+      }
+
+      template <typename... Args>
+      void __fail_pe_msg(OutStream& out, Args... args) {
+        out.println(_fail, " ", args...);
+        exit(_pe); //  testlib exit with special code, so we use the same code
+      }
       
       template <typename... Args>
       void __success_msg(OutStream& out, Args... args) {
