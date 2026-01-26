@@ -249,6 +249,78 @@ namespace generator {
         // struct VectorLimits : public VectorBaseLimit {
 
         // };
+
+        // // -----------------------------
+        // // 占位类定义（可替换为你的实际 Limits 类型）
+        // // -----------------------------
+        // template<typename T> struct VarLimits {};
+        // struct StringLimits {};
+        // template<typename V> struct VectorLimits {};
+        // template<typename V1, typename V2> struct PairLimits {};
+
+        // // -----------------------------
+        // // 默认 ReadImpl：匹配失败会报错
+        // // -----------------------------
+        // template<typename T, typename Param, typename Enable = void>
+        // struct ReadImpl {
+        //     static T apply(const Param& p) {
+        //         _msg::__fail_msg(_msg::_defl, "invalid reader"); // 默认报错
+        //         return T{}; // 避免警告
+        //     }
+        // };
+
+        // // -----------------------------
+        // // 数值类型特化（int, double 等）
+        // // -----------------------------
+        // template<typename T>
+        // struct ReadImpl<T, VarLimits<T>,
+        //     typename std::enable_if<std::is_arithmetic<T>::value>::type> {
+        //     static T apply(const VarLimits<T>& p) {
+        //         // TODO: 实现 int/double 读取逻辑
+        //         return T{};
+        //     }
+        // };
+
+        // // -----------------------------
+        // // string 类型特化
+        // // -----------------------------
+        // template<>
+        // struct ReadImpl<std::string, StringLimits> {
+        //     static std::string apply(const StringLimits& p) {
+        //         // TODO: 实现 string 读取逻辑
+        //         return std::string{};
+        //     }
+        // };
+
+        // // -----------------------------
+        // // std::vector<V> 类型特化
+        // // -----------------------------
+        // template<typename V>
+        // struct ReadImpl<std::vector<V>, VectorLimits<V>> {
+        //     static std::vector<V> apply(const VectorLimits<V>& p) {
+        //         // TODO: 实现 vector<V> 读取逻辑
+        //         return std::vector<V>{};
+        //     }
+        // };
+
+        // // -----------------------------
+        // // std::pair<V1,V2> 类型特化
+        // // -----------------------------
+        // template<typename V1, typename V2>
+        // struct ReadImpl<std::pair<V1,V2>, PairLimits<V1,V2>> {
+        //     static std::pair<V1,V2> apply(const PairLimits<V1,V2>& p) {
+        //         // TODO: 实现 pair<V1,V2> 读取逻辑
+        //         return std::pair<V1,V2>{};
+        //     }
+        // };
+
+        // // -----------------------------
+        // // 封装函数 read<T>(Param)
+        // // -----------------------------
+        // template<typename T, typename Param>
+        // T read(const Param& p) {
+        //     return ReadImpl<T, Param>::apply(p);
+        // }
     }
 }
 
