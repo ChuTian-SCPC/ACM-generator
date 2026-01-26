@@ -321,6 +321,55 @@ namespace generator {
         // T read(const Param& p) {
         //     return ReadImpl<T, Param>::apply(p);
         // }
+
+        // class BasicVar {
+        // public:
+        //     virtual ~BasicVar() {}
+        //     virtual void read() = 0;          // 调用 read<T>(limit)
+        //     virtual void* get_ptr() = 0;      // 返回内部存储地址（类型擦除）
+        // };
+
+        // template<typename T, typename LimitType>
+        // class Var : public BasicVar {
+        //     T value;
+        //     LimitType limit;
+        // public:
+        //     Var(const LimitType& l) : limit(l) {}
+            
+        //     virtual void read() override {
+        //         value = read<T>(limit);
+        //     }
+
+        //     virtual void* get_ptr() override {
+        //         return &value;
+        //     }
+
+        //     T get() const { return value; }
+        // };
+
+        // class Line {
+        //     std::vector<BasicVar*> vars;
+        // public:
+        //     ~Line() {
+        //         for (auto v : vars) delete v;
+        //     }
+
+        //     template<typename T, typename LimitType>
+        //     void addVar(const LimitType& limit) {
+        //         vars.push_back(new Var<T, LimitType>(limit));
+        //     }
+
+        //     void readAll() {
+        //         for (auto v : vars) v->read();
+        //     }
+
+        //     template<typename T>
+        //     T get(std::size_t idx) {
+        //         return *static_cast<T*>(vars[idx]->get_ptr());
+        //     }
+        // };
+
+
     }
 }
 
