@@ -189,6 +189,14 @@ namespace generator {
       Distinct, // 不重复
       Duplicate // 允许重复
     };
+
+    enum class StringConvertError {
+      SUCCESS = 0,
+      INVALID_FORMAT,
+      OUT_OF_RANGE,
+      NEGATIVE_ZERO,   // warn
+      LEADING_ZERO     // warn
+    };
   } // namespace _enum
 } // namespace generator
 

@@ -162,12 +162,12 @@ namespace generator {
         
         void init_validator(int argc,char* argv[]) {
             registerValidation(argc, argv);
-            validate::_ValidateAutoReadEof _auto_read_eof;
+            validate::reader::_ValidateAutoReadEof _auto_read_eof;
         }
 
         void init_validator() {
             registerValidation();
-            validate::_ValidateAutoReadEof _auto_read_eof;
+            validate::reader::_ValidateAutoReadEof _auto_read_eof;
         }
 
         void __set_validator_args(std::string args) {

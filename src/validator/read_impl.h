@@ -112,6 +112,62 @@ namespace validate {
             if (result.size() == 0) _msg::__fail_eof_msg(_msg::_defl, "Unexpected end of file or white-space - token expected");
             return result;
         }
+
+        template<typename T>
+        typename std::enable_if<std::is_integral<T>::value, T>::type
+        __string_convert(const std::string& s, _enum::StringConvertError& err) {
+            T result = 0;
+            err = _enum::StringConvertError::SUCCESS;
+            int n = s.size();
+            int max_len = std::numeric_limits<T>::digits10 + 1;
+            bool is_negative = false;
+            if (n == 0) err = _enum::StringConvertError::INVALID_FORMAT;
+            else {
+                int start = 0;
+                if (s[0] == '-') {
+                    is_negative = true;
+                    start = 1;
+                }
+                else if (s[0] == '+') start = 1;
+                if (n - start > 2 && s[start] == '0') {
+                    err = _enum::StringConvertError::LEADING_ZERO;
+                    while(start < n && s[start] == '0') start++;
+                    if (start == n) {
+                        is_negative = true;
+                        return T(0);
+                    }
+                }
+                if (std::numeric_limits<T>::is_signed && is_negative) {
+                    err = _enum::StringConvertError::INVALID_FORMAT;
+                    return T(0);
+                }
+                
+                if (start == n) err = _enum::StringConvertError::INVALID_FORMAT;
+                else if (n - start > max_len) err = _enum::StringConvertError::OUT_OF_RANGE;
+                else if (n - start == max_len) {
+                    std::string max_str = std::to_string(std::numeric_limits<T>::max());
+                    std::string min_str = std::to_string(std::numeric_limits<T>::min());
+                    std::string abs_min_str = min_str.substr(1);
+                    if (is_negative) { //  unsigned has return before this
+                        if (s.substr(start) > abs_min_str) err = _enum::StringConvertError::OUT_OF_RANGE;
+                        // min value will overflow use result = result * 10 + digit to calculate
+                        else if (s.substr(start) == abs_min_str) result = std::numeric_limits<T>::min(); 
+                    } else {
+                        if (s.substr(start) > max_str) err = _enum::StringConvertError::OUT_OF_RANGE;
+                        else if (s.substr(start) == max_str) result = std::numeric_limits<T>::max();
+                    }
+                }
+
+                if (err == _enum::StringConvertError::SUCCESS && result == 0) {
+                    for (int i = start; i < n; i++) {
+                        result = result * 10 + (s[i] - '0');
+                    }
+                    if (is_negative) result = -result;
+                }
+                return result;
+                
+            }
+        }
     }
 
 
