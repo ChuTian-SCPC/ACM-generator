@@ -137,7 +137,7 @@ namespace validate {
                         return T(0);
                     }
                 }
-                if (std::numeric_limits<T>::is_signed && is_negative) {
+                if (!std::numeric_limits<T>::is_signed && is_negative) {
                     err = _enum::StringConvertError::INVALID_FORMAT;
                     return T(0);
                 }
@@ -151,22 +151,24 @@ namespace validate {
                     if (is_negative) { //  unsigned has return before this
                         if (s.substr(start) > abs_min_str) err = _enum::StringConvertError::OUT_OF_RANGE;
                         // min value will overflow use result = result * 10 + digit to calculate
-                        else if (s.substr(start) == abs_min_str) result = std::numeric_limits<T>::min(); 
+                        else if (s.substr(start) == abs_min_str) return std::numeric_limits<T>::min(); 
                     } else {
                         if (s.substr(start) > max_str) err = _enum::StringConvertError::OUT_OF_RANGE;
-                        else if (s.substr(start) == max_str) result = std::numeric_limits<T>::max();
+                        else if (s.substr(start) == max_str) return std::numeric_limits<T>::max();
                     }
                 }
 
-                if (err == _enum::StringConvertError::SUCCESS && result == 0) {
-                    for (int i = start; i < n; i++) {
-                        result = result * 10 + (s[i] - '0');
+                for (int i = start; i < n; i++) {
+                    if (s[i] < '0' || s[i] > '9') {
+                        err = _enum::StringConvertError::INVALID_FORMAT;
+                        return T(0);
                     }
-                    if (is_negative) result = -result;
+                    result = result * 10 + (s[i] - '0');
                 }
-                return result;
-                
+                if (is_negative) result = -result;
             }
+            if (err == _enum::StringConvertError::SUCCESS && result == 0 && is_negative) err = _enum::StringConvertError::NEGATIVE_ZERO;
+            return result;
         }
     }
 
