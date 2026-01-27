@@ -5,8 +5,9 @@
 #include "basic/common.h"
 #endif // !_SGPCET_COMMON_H_
 
-namespace generator {
-    namespace validate {
+namespace validate {
+    namespace reader {
+        using namespace generator;
         class _ValidateAutoReadEof {
         private:
             static bool _registered;
@@ -42,6 +43,8 @@ namespace generator {
         };
         int _AutoName::_var_count = 0;
     }
-};
+
+}
+
 
 #endif // !_SGPCET_VAL_INIT_H_

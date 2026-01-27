@@ -47,7 +47,7 @@ namespace generator {
         std::string rand_string(int n, _enum::CharType type = _enum::LowerLetter) {
             __judge_vector_lower_bound(n, "string");
             __judge_vector_upper_bound(n, "string");
-            std::string s = rnd.next("%s{%d}", rand_numeric::_PATTERN[type].c_str(), n);
+            std::string s = rnd.next("%s{%d}", _enum::_PATTERN[type].c_str(), n);
             return s;
         }
 
@@ -55,7 +55,7 @@ namespace generator {
             __judge_range(from, to);
             __judge_vector_lower_bound(to, "string");
             __judge_vector_upper_bound(from, "string");
-            std::string s = rnd.next("%s{%d,%d}", rand_numeric::_PATTERN[type].c_str(), from, to);
+            std::string s = rnd.next("%s{%d,%d}", _enum::_PATTERN[type].c_str(), from, to);
             return s;
         }
 
@@ -429,7 +429,7 @@ namespace generator {
         }
 
         std::string rand_palindrome(int n, int p, _enum::CharType type = _enum::LowerLetter) {
-            return __rand_palindrome_impl(n, p, rand_numeric::_PATTERN[type]);
+            return __rand_palindrome_impl(n, p, _enum::_PATTERN[type]);
         }
 
         std::string rand_palindrome(int n, int p, std::string format) {

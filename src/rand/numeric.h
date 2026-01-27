@@ -362,7 +362,7 @@ namespace generator {
         }       
 
         char rand_char(_enum::CharType type = _enum::LowerLetter){
-            std::string s = rnd.next(_PATTERN[type]);
+            std::string s = rnd.next(_enum::_PATTERN[type]);
             return s.c_str()[0];
         }
 

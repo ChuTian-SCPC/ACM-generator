@@ -192,9 +192,19 @@ namespace generator {
     using namespace generator::rand_array;
     using namespace generator::rand_graph;
     using namespace generator::rand_geometry;
-    using namespace generator::validate;
   } // namespace all
 } // namespace generator
+
+namespace validate {
+  namespace all {
+    using namespace generator::tools;
+    using namespace generator::_msg;
+    using namespace generator::_setting;
+    using namespace generator::_enum;
+    using namespace generator::io;
+    using namespace validate::reader;
+  }
+}
 
 #ifdef _SGPCET_MACRO_H_
 #undef _GET_VALUE_CONST

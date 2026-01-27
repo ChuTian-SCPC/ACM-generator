@@ -21,15 +21,6 @@ namespace generator {
         struct IsNumeric {
             static constexpr bool value = std::is_integral<T>::value || std::is_floating_point<T>::value;
         };
-
-        const std::string _PATTERN[_enum::MaxCharType]={
-            "[a-z]",
-            "[A-Z]",
-            "[a-zA-Z]",
-            "[0-9]",
-            "[a-zA-Z0-9]",
-            "[01]"
-        };
     } // namespace rand_numeric
 } // namespace generator
 
