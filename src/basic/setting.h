@@ -78,6 +78,8 @@ namespace generator {
 
     const double PI = 3.14159265358979323846;
 
+    std::string _empty_var_name = "";
+
   };// namespace _setting
   
 };// namespace generator

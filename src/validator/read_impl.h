@@ -115,7 +115,7 @@ namespace validate {
 
         template<typename T>
         typename std::enable_if<std::is_integral<T>::value, T>::type
-        __string_convert(const std::string& s, _enum::StringConvertError& err) {
+        __string_to_int(const std::string& s, _enum::StringConvertError& err) {
             T result = 0;
             err = _enum::StringConvertError::SUCCESS;
             int n = s.size();
@@ -173,9 +173,11 @@ namespace validate {
 
         template<typename T>
         typename std::enable_if<std::is_floating_point<T>::value, T>::type
-        __string_convert(const std::string& s, _enum::StringConvertError& err) {
+        __string_to_double(const std::string& s, _enum::StringConvertError& err, bool& is_scientific, int& point_digits_count) {
             T result = 0.0;
             err = _enum::StringConvertError::SUCCESS;
+            is_scientific = false;
+            point_digits_count = 0;
             int n = s.size();
             if (n == 0) err = _enum::StringConvertError::INVALID_FORMAT;
             else {
@@ -183,6 +185,7 @@ namespace validate {
                 int dot_count = 0;
                 int e_count = 0;
                 int digit_count = 0;
+                int dot_pos = -1;
                 for (int i = 0; i < n; i++) {
                     char c = s[i];
                     if (c == '-' || c == '+') {
@@ -194,9 +197,11 @@ namespace validate {
                             (i < n - 1 && (s[i + 1] < '0' || s[i + 1] > '9'))) 
                             err = _enum::StringConvertError::INVALID_FORMAT;
                         dot_count++;
+                        dot_pos = i;
                     } else if (c == 'e' || c == 'E') {
                         if (i == n - 1 || i == 0) err = _enum::StringConvertError::INVALID_FORMAT;
                         e_count++;
+                        is_scientific = true;
                     } else if (c >= '0' && c <= '9') {
                         digit_count++;
                     } else {
@@ -206,6 +211,8 @@ namespace validate {
                 
                 if (digit_count == 0 || dot_count > 1 || e_count > 1 || sign_count > e_count + 1) 
                     err = _enum::StringConvertError::INVALID_FORMAT;
+                if (dot_pos == -1) point_digits_count = 0;
+                else point_digits_count = n - dot_pos - 1;
             }
 
             if (err == _enum::StringConvertError::SUCCESS) {
@@ -239,127 +246,6 @@ namespace validate {
 
 
     }
-
-
-    // // -----------------------------
-    // // 占位类定义（可替换为你的实际 Limits 类型）
-    // // -----------------------------
-    // template<typename T> struct VarLimits {};
-    // struct StringLimits {};
-    // template<typename V> struct VectorLimits {};
-    // template<typename V1, typename V2> struct PairLimits {};
-
-    // // -----------------------------
-    // // 默认 ReadImpl：匹配失败会报错
-    // // -----------------------------
-    // template<typename T, typename Param, typename Enable = void>
-    // struct ReadImpl {
-    //     static T apply(const Param& p) {
-    //         _msg::__fail_msg(_msg::_defl, "invalid reader"); // 默认报错
-    //         return T{}; // 避免警告
-    //     }
-    // };
-
-    // // -----------------------------
-    // // 数值类型特化（int, double 等）
-    // // -----------------------------
-    // template<typename T>
-    // struct ReadImpl<T, VarLimits<T>,
-    //     typename std::enable_if<std::is_arithmetic<T>::value>::type> {
-    //     static T apply(const VarLimits<T>& p) {
-    //         // TODO: 实现 int/double 读取逻辑
-    //         return T{};
-    //     }
-    // };
-
-    // // -----------------------------
-    // // string 类型特化
-    // // -----------------------------
-    // template<>
-    // struct ReadImpl<std::string, StringLimits> {
-    //     static std::string apply(const StringLimits& p) {
-    //         // TODO: 实现 string 读取逻辑
-    //         return std::string{};
-    //     }
-    // };
-
-    // // -----------------------------
-    // // std::vector<V> 类型特化
-    // // -----------------------------
-    // template<typename V>
-    // struct ReadImpl<std::vector<V>, VectorLimits<V>> {
-    //     static std::vector<V> apply(const VectorLimits<V>& p) {
-    //         // TODO: 实现 vector<V> 读取逻辑
-    //         return std::vector<V>{};
-    //     }
-    // };
-
-    // // -----------------------------
-    // // std::pair<V1,V2> 类型特化
-    // // -----------------------------
-    // template<typename V1, typename V2>
-    // struct ReadImpl<std::pair<V1,V2>, PairLimits<V1,V2>> {
-    //     static std::pair<V1,V2> apply(const PairLimits<V1,V2>& p) {
-    //         // TODO: 实现 pair<V1,V2> 读取逻辑
-    //         return std::pair<V1,V2>{};
-    //     }
-    // };
-
-    // // -----------------------------
-    // // 封装函数 read<T>(Param)
-    // // -----------------------------
-    // template<typename T, typename Param>
-    // T read(const Param& p) {
-    //     return ReadImpl<T, Param>::apply(p);
-    // }
-
-    // class BasicVar {
-    // public:
-    //     virtual ~BasicVar() {}
-    //     virtual void read() = 0;          // 调用 read<T>(limit)
-    //     virtual void* get_ptr() = 0;      // 返回内部存储地址（类型擦除）
-    // };
-
-    // template<typename T, typename LimitType>
-    // class Var : public BasicVar {
-    //     T value;
-    //     LimitType limit;
-    // public:
-    //     Var(const LimitType& l) : limit(l) {}
-        
-    //     virtual void read() override {
-    //         value = read<T>(limit);
-    //     }
-
-    //     virtual void* get_ptr() override {
-    //         return &value;
-    //     }
-
-    //     T get() const { return value; }
-    // };
-
-    // class Line {
-    //     std::vector<BasicVar*> vars;
-    // public:
-    //     ~Line() {
-    //         for (auto v : vars) delete v;
-    //     }
-
-    //     template<typename T, typename LimitType>
-    //     void addVar(const LimitType& limit) {
-    //         vars.push_back(new Var<T, LimitType>(limit));
-    //     }
-
-    //     void readAll() {
-    //         for (auto v : vars) v->read();
-    //     }
-
-    //     template<typename T>
-    //     T get(std::size_t idx) {
-    //         return *static_cast<T*>(vars[idx]->get_ptr());
-    //     }
-    // };
-
 
 }
 
