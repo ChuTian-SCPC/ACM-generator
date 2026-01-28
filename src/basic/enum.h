@@ -1,6 +1,10 @@
 #ifndef _SGPCET_ENUM_H_
 #define _SGPCET_ENUM_H_
 
+#ifndef _SGPCET_COMMON_H_
+#include "common.h"
+#endif // !_SGPCET_COMMON_H_
+
 namespace generator {
   namespace _enum {
     enum class Color {

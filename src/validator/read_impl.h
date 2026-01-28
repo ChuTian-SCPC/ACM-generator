@@ -170,6 +170,74 @@ namespace validate {
             if (err == _enum::StringConvertError::SUCCESS && result == 0 && is_negative) err = _enum::StringConvertError::NEGATIVE_ZERO;
             return result;
         }
+
+        template<typename T>
+        typename std::enable_if<std::is_floating_point<T>::value, T>::type
+        __string_convert(const std::string& s, _enum::StringConvertError& err) {
+            T result = 0.0;
+            err = _enum::StringConvertError::SUCCESS;
+            int n = s.size();
+            if (n == 0) err = _enum::StringConvertError::INVALID_FORMAT;
+            else {
+                int sign_count = 0;
+                int dot_count = 0;
+                int e_count = 0;
+                int digit_count = 0;
+                for (int i = 0; i < n; i++) {
+                    char c = s[i];
+                    if (c == '-' || c == '+') {
+                        if (i != 0 && s[i - 1] != 'e' && s[i - 1] != 'E') err = _enum::StringConvertError::INVALID_FORMAT;
+                        sign_count++;
+                    } else if (c == '.') {
+                        if (i == n - 1 || i == 0 || 
+                            (i > 0 && (s[i - 1] < '0' || s[i - 1] > '9')) ||
+                            (i < n - 1 && (s[i + 1] < '0' || s[i + 1] > '9'))) 
+                            err = _enum::StringConvertError::INVALID_FORMAT;
+                        dot_count++;
+                    } else if (c == 'e' || c == 'E') {
+                        if (i == n - 1 || i == 0) err = _enum::StringConvertError::INVALID_FORMAT;
+                        e_count++;
+                    } else if (c >= '0' && c <= '9') {
+                        digit_count++;
+                    } else {
+                        err = _enum::StringConvertError::INVALID_FORMAT;
+                    }
+                }
+                
+                if (digit_count == 0 || dot_count > 1 || e_count > 1 || sign_count > e_count + 1) 
+                    err = _enum::StringConvertError::INVALID_FORMAT;
+            }
+
+            if (err == _enum::StringConvertError::SUCCESS) {
+                std::istringstream iss(s);
+                iss >> result;
+                if (iss.fail()) {
+                    result = std::numeric_limits<T>::quiet_NaN();
+                    err = _enum::StringConvertError::OUT_OF_RANGE;
+                }
+                iss.clear();
+            } else {
+                return T(0);
+            }
+            
+            if (result == T(0.0) && s[0] == '-') {
+                err = _enum::StringConvertError::NEGATIVE_ZERO;
+                result = T(0.0);
+            }
+            int start = 0, end = 0;
+            if (s[0] == '-' || s[0] == '+') start++;
+            for (int i = start; i < n; i++) {
+                if (s[i] < '0' || s[i] > '9') {
+                    end = i;
+                    break;
+                }
+            }
+            if (end - start > 1 && s[start] == '0') err = _enum::StringConvertError::LEADING_ZERO;
+
+            return result;
+        }
+
+
     }
 
 

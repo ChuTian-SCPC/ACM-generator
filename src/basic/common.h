@@ -10,6 +10,7 @@
 #include <queue>
 #include <stack>
 #include <unordered_set>
+#include <functional>
 
 #ifdef ON_WINDOWS
 #include <direct.h>

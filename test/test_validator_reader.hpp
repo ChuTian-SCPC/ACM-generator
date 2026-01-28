@@ -97,3 +97,75 @@ TEST_CASE("string to int", "[validator][string_convert][int]") {
     CHECK(err == _enum::StringConvertError::INVALID_FORMAT);
     
 }
+
+TEST_CASE("string to double", "[validator][string_convert][double]") {
+    init_gen();
+    using Catch::Matchers::WithinAbs;
+    _enum::StringConvertError err;
+    double x = __string_convert<double>("123.456", err);
+    CHECK_THAT(x, WithinAbs(123.456, 0.0001));
+    CHECK(err == _enum::StringConvertError::SUCCESS);
+
+    x = __string_convert<double>("123.456e-2", err);
+    CHECK_THAT(x, WithinAbs(123.456e-2, 1e-6));
+    CHECK(err == _enum::StringConvertError::SUCCESS);
+
+    x = __string_convert<double>("123.456e2", err);
+    CHECK_THAT(x, WithinAbs(12345.6, 0.01));
+    CHECK(err == _enum::StringConvertError::SUCCESS);
+
+    x = __string_convert<double>("-123.456", err);
+    CHECK_THAT(x, WithinAbs(-123.456, 0.0001));
+    CHECK(err == _enum::StringConvertError::SUCCESS);
+
+    x = __string_convert<double>("123.45.6e", err);
+    CHECK(err == _enum::StringConvertError::INVALID_FORMAT);
+
+    x = __string_convert<double>("-123.456-", err);
+    CHECK(err == _enum::StringConvertError::INVALID_FORMAT);
+
+    x = __string_convert<double>("123.456e2e3", err);
+    CHECK(err == _enum::StringConvertError::INVALID_FORMAT);
+
+    x = __string_convert<double>("123.e", err);
+    CHECK(err == _enum::StringConvertError::INVALID_FORMAT);
+
+    x = __string_convert<double>("123.", err);
+    CHECK(err == _enum::StringConvertError::INVALID_FORMAT);
+
+    x = __string_convert<double>("123e", err);
+    CHECK(err == _enum::StringConvertError::INVALID_FORMAT);
+
+    x = __string_convert<double>("e", err);
+    CHECK(err == _enum::StringConvertError::INVALID_FORMAT);
+
+    x = __string_convert<double>(".", err);
+    CHECK(err == _enum::StringConvertError::INVALID_FORMAT);
+
+    x = __string_convert<double>("0", err);
+    CHECK_THAT(x, WithinAbs(0.0, 1e-6));
+    CHECK(err == _enum::StringConvertError::SUCCESS);
+
+    x = __string_convert<double>("-0", err);
+    CHECK_THAT(x, WithinAbs(0.0, 1e-6));
+    CHECK(err == _enum::StringConvertError::NEGATIVE_ZERO);
+
+    x = __string_convert<double>("-0123.456", err);
+    CHECK_THAT(x, WithinAbs(-123.456, 0.0001));
+    CHECK(err == _enum::StringConvertError::LEADING_ZERO);
+
+    x = __string_convert<double>("0123.456", err);
+    CHECK(err == _enum::StringConvertError::LEADING_ZERO);
+
+    x = __string_convert<double>("0.456", err);
+    CHECK_THAT(x, WithinAbs(0.456, 0.0001));
+    CHECK(err == _enum::StringConvertError::SUCCESS);
+
+    x = __string_convert<double>("00.456", err);
+    CHECK_THAT(x, WithinAbs(0.456, 0.0001));
+    CHECK(err == _enum::StringConvertError::LEADING_ZERO);
+
+    x = __string_convert<double>("1e9999", err);
+    CHECK(err == _enum::StringConvertError::OUT_OF_RANGE);
+
+}

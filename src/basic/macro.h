@@ -1,7 +1,9 @@
 #ifndef _SGPCET_MACRO_H_
 #define _SGPCET_MACRO_H_
 
-#include <functional>
+#ifndef _SGPCET_COMMON_H_
+#include "common.h"
+#endif // !_SGPCET_COMMON_H_
 
 #ifndef _GET_VALUE_CONST
 #define _GET_VALUE_CONST(type, name) \
