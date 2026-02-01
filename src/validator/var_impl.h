@@ -4,6 +4,9 @@
 #ifndef _SGPCET_READ_IMPL_H_
 #include "read_impl.h"
 #endif
+#ifndef _SGPCET_VAL_INIT_H_
+#include "val_init.h"
+#endif
 
 namespace validate {
     namespace reader {
@@ -45,8 +48,6 @@ namespace validate {
 
         template<typename T>
         class Var : public _BasicVar {
-        protected:
-            static int _var_count;
         public:
             using Target = T;
             Var(const std::string& name = _setting::_empty_var_name) : _BasicVar(name) {};
@@ -63,16 +64,16 @@ namespace validate {
             }
 
             virtual T read() = 0;
+
+            std::string type() = 0;
         
         protected:
             virtual std::string __default_name() override {
-               _var_count++;
-               return "<unnamed>var_" + std::to_string(_var_count);
+               _AutoName<T> name;
+               return name.name();
             }
         };
 
-        template<typename T>
-        int Var<T>::_var_count = 0;
     }
 }
 

@@ -6,3 +6,4 @@
 #include "test_geometry.hpp"
 #include "test_distribution.hpp"
 #include "test_validator_reader.hpp"
+#include "test_validator_var.hpp"
