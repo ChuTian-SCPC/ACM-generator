@@ -71,7 +71,7 @@ namespace validate {
             int n = split.size();
             std::string match = "";
             while(!(isEof(cur) || (!multi_line && isEoln(cur)))) {
-                if (n == 0) result += char(cur); // if no split and multi_line is false, we read the whole txt
+                if (n == 0) result += char(cur); // if no split and multi_line is true, we read the whole txt
                 else if (char_match(cur, split[pos])) {
                     match += char(cur);
                     pos++;

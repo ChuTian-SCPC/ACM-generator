@@ -58,6 +58,35 @@ namespace validate {
             }
         };
 
+        template<typename T>
+        struct TypeName<std::queue<T>> {
+            static std::string get() {
+                return "queue<" + TypeName<T>::get() + ">";
+            }
+        };
+
+        template<typename T>
+        struct TypeName<std::stack<T>> {
+            static std::string get() {
+                return "stack<" + TypeName<T>::get() + ">";
+            }
+        };
+
+        template<typename T>
+        struct TypeName<std::deque<T>> {
+            static std::string get() {
+                return "deque<" + TypeName<T>::get() + ">";
+            }
+        };
+
+        template<typename T>
+        struct TypeName<std::list<T>> {
+            static std::string get() {
+                return "list<" + TypeName<T>::get() + ">";
+            }
+        };
+        
+
         template<typename... Args>
         struct _TupleName;
 
@@ -98,6 +127,13 @@ namespace validate {
             }
         };
 
+        template<typename K, typename V>
+        struct TypeName<std::multimap<K,V>> {
+            static std::string get() {
+                return "multimap<" + TypeName<K>::get() + "," + TypeName<V>::get() + ">";
+            }
+        };
+
         template<typename K>
         struct TypeName<std::set<K>> {
             static std::string get() {
@@ -109,6 +145,13 @@ namespace validate {
         struct TypeName<std::unordered_set<K>> {
             static std::string get() {
                 return "unordered_set<" + TypeName<K>::get() + ">";
+            }
+        };
+
+        template<typename K>
+        struct TypeName<std::multiset<K>> {
+            static std::string get() {
+                return "multiset<" + TypeName<K>::get() + ">";
             }
         };
 
