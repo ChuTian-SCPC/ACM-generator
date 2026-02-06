@@ -46,22 +46,22 @@ namespace validate {
             }
         };
 
-        template<typename T>
-        class Var : public _BasicVar {
+        template<typename T, typename Derived>
+        class _VarCRTP : public _BasicVar {
         protected:
             T _value;
         public:
             using Target = T;
-            Var(const std::string& name = _setting::_empty_var_name) : _BasicVar(name) {};
-            virtual ~Var() {};
-            Var(const Var& other) : _BasicVar(other), _value(other._value) {};
-            Var& operator=(const Var& other) {
+            _VarCRTP(const std::string& name = _setting::_empty_var_name) : _BasicVar(name) {};
+            virtual ~_VarCRTP() {};
+            _VarCRTP(const _VarCRTP& other) : _BasicVar(other), _value(other._value) {};
+            _VarCRTP& operator=(const _VarCRTP& other) {
                 _BasicVar::operator=(other);
                 _value = other._value;
                 return *this;
             }
-            Var(Var&& other) : _BasicVar(std::move(other)), _value(std::move(other._value)) {};
-            Var& operator=(Var&& other) {
+            _VarCRTP(_VarCRTP&& other) : _BasicVar(std::move(other)), _value(std::move(other._value)) {};
+            _VarCRTP& operator=(_VarCRTP&& other) {
                 _BasicVar::operator=(std::move(other));
                 _value = std::move(other._value);
                 return *this;
@@ -70,12 +70,12 @@ namespace validate {
             _GET_VALUE(T, value)
 
             virtual void read_and_cache() override {
-                _value = read();
-                cache();
+                _value = static_cast<Derived*>(this)->read();
+                static_cast<Derived*>(this)->cache();
             }
 
             virtual _BasicVar* clone() override {
-                return new Var<T>(*this);
+                return new Derived(static_cast<const Derived&>(*this));;
             }
 
             virtual _BasicVar* rename(const std::string& name) override {
@@ -84,9 +84,14 @@ namespace validate {
                 return result;
             }
 
-            virtual T read() override {
+            virtual T read() {
                 _msg::__error_msg(_msg::_defl, 
                     tools::string_format("No reader for %s", name().c_str()));
+                return T();
+            }
+
+            operator T() const {
+                return _value;
             }
         
         protected:
@@ -95,7 +100,25 @@ namespace validate {
                return name.name();
             }
 
-            virtual void cache() override {}
+            virtual void cache() {}
+        };
+
+        template<typename T, typename Derived>
+        class _Var : public _VarCRTP<T, Derived> {
+        public:
+            using Target = T;
+            _Var(const std::string& name = _setting::_empty_var_name) : _VarCRTP<T, Derived>(name) {};
+            virtual ~_Var() {};
+            _Var(const _Var& other) : _VarCRTP<T, Derived>(other) {};
+            _Var& operator=(const _Var& other) {
+                _VarCRTP<T, Derived>::operator=(other);
+                return *this;
+            }
+            _Var(_Var&& other) : _VarCRTP<T, Derived>(std::move(other)) {};
+            _Var& operator=(_Var&& other) {
+                _VarCRTP<T, Derived>::operator=(std::move(other));
+                return *this;
+            }
         };
 
     }

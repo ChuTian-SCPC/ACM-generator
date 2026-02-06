@@ -4,6 +4,9 @@
 #ifndef _SGPCET_LOGGER_H_
 #include "log/logger.h"
 #endif // !_SGPCET_LOGGER_H_
+#ifndef _SGPCET_VAL_INIT_H_
+#include "val_init.h"
+#endif // !_SGPCET_VAL_INIT_H_
 
 
 namespace validate {
@@ -244,7 +247,29 @@ namespace validate {
             return result;
         }
 
-
+        template<typename T>
+        class ErrorReporter {
+        public:
+            static void report_int(const std::string& name, _enum::StringConvertError error, const std::string& word) {
+                if (error == _enum::StringConvertError::INVALID_FORMAT) {
+                    _msg::__fail_pe_msg(_msg::_defl, 
+                        tools::string_format("%s: \"%s\" is invalid integer format", name.c_str(), word.c_str()));
+                }
+                if (error == _enum::StringConvertError::OUT_OF_RANGE) {
+                    _msg::__fail_pe_msg(_msg::_defl, 
+                        tools::string_format("%s: \"%s\" is out of %s range", 
+                            name.c_str(), word.c_str(), TypeName<T>::full_name().c_str()));
+                }
+                if (error == _enum::StringConvertError::NEGATIVE_ZERO) {
+                    _msg::__warn_msg(_msg::_defl, 
+                        tools::string_format("%s: \"%s\" is negative zero", name.c_str(), word.c_str()));
+                }
+                if (error == _enum::StringConvertError::LEADING_ZERO) {
+                    _msg::__warn_msg(_msg::_defl, 
+                        tools::string_format("%s: \"%s\" has leading zero", name.c_str(), word.c_str()));
+                }
+            }
+        };
     }
 
 }

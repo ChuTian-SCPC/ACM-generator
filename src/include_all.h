@@ -104,6 +104,10 @@
 #include "rand/distribution.h"
 #endif // !_SGPCET_DISTRIBUTION_H_
 
+#ifndef _SGPCET_VAR_INT_H_
+#include "validator/var_int.h"
+#endif // !_SGPCET_VAR_INT_H_
+
 #ifndef _SGPCET_EDGE_H_
 #include "graph/edge.h"
 #endif // !_SGPCET_EDGE_H_

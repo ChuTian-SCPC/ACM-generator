@@ -31,61 +31,81 @@ namespace validate {
 
         template<typename T>
         struct TypeName {
-            static std::string get() { return "var"; } 
+            static std::string short_name() { return "var"; } 
+            static std::string full_name() { return "var"; }
         };
 
-        template<> struct TypeName<int> { static std::string get() { return "int"; } };
-        template<> struct TypeName<unsigned int> { static std::string get() { return "uint"; } };
-        template<> struct TypeName<float> { static std::string get() { return "float"; } };
-        template<> struct TypeName<double> { static std::string get() { return "double"; } };
-        template<> struct TypeName<long long> { static std::string get() { return "longlong"; } };
-        template<> struct TypeName<unsigned long long> { static std::string get() { return "ulonglong"; } };
-        template<> struct TypeName<char> { static std::string get() { return "char"; } };
-        template<> struct TypeName<bool> { static std::string get() { return "bool"; } };
-        template<> struct TypeName<std::string> { static std::string get() { return "string"; } };
+        template<> struct TypeName<int> { 
+            static std::string short_name() { return "int"; } 
+            static std::string full_name() { return "int"; }
+        };
+        template<> struct TypeName<unsigned int> { 
+            static std::string short_name() { return "uint"; } 
+            static std::string full_name() { return "unsigned int"; }
+        };
+        template<> struct TypeName<float> { 
+            static std::string short_name() { return "float"; } 
+            static std::string full_name() { return "float"; }
+        };
+        template<> struct TypeName<double> { 
+            static std::string short_name() { return "double"; } 
+            static std::string full_name() { return "double"; }
+        };
+        template<> struct TypeName<long long> { 
+            static std::string short_name() { return "longlong"; } 
+            static std::string full_name() { return "long long"; }
+        };
+        template<> struct TypeName<unsigned long long> { 
+            static std::string short_name() { return "ulonglong"; } 
+            static std::string full_name() { return "unsigned long long"; }
+        };
+        template<> struct TypeName<char> { 
+            static std::string short_name() { return "char"; } 
+            static std::string full_name() { return "char"; }
+        };
+        template<> struct TypeName<bool> { 
+            static std::string short_name() { return "bool"; } 
+            static std::string full_name() { return "bool"; }
+        };
+        template<> struct TypeName<std::string> { 
+            static std::string short_name() { return "string"; } 
+            static std::string full_name() { return "string"; }
+        };
 
         template<typename T, typename U>
         struct TypeName<std::pair<T,U>> {
-            static std::string get() {
-                return "pair<" + TypeName<T>::get() + "," + TypeName<U>::get() + ">";
+            static std::string short_name() {
+                return "pair<" + TypeName<T>::short_name() + "," + TypeName<U>::short_name() + ">";
             }
         };
 
         template<typename T>
         struct TypeName<std::vector<T>> {
-            static std::string get() {
-                return "vector<" + TypeName<T>::get() + ">";
+            static std::string short_name() {
+                return "vector<" + TypeName<T>::short_name() + ">";
             }
         };
 
         template<typename T>
         struct TypeName<std::queue<T>> {
-            static std::string get() {
-                return "queue<" + TypeName<T>::get() + ">";
+            static std::string short_name() {
+                return "queue<" + TypeName<T>::short_name() + ">";
             }
         };
 
         template<typename T>
         struct TypeName<std::stack<T>> {
-            static std::string get() {
-                return "stack<" + TypeName<T>::get() + ">";
+            static std::string short_name() {
+                return "stack<" + TypeName<T>::short_name() + ">";
             }
         };
 
         template<typename T>
         struct TypeName<std::deque<T>> {
-            static std::string get() {
-                return "deque<" + TypeName<T>::get() + ">";
+            static std::string short_name() {
+                return "deque<" + TypeName<T>::short_name() + ">";
             }
-        };
-
-        template<typename T>
-        struct TypeName<std::list<T>> {
-            static std::string get() {
-                return "list<" + TypeName<T>::get() + ">";
-            }
-        };
-        
+        }; 
 
         template<typename... Args>
         struct _TupleName;
@@ -93,7 +113,7 @@ namespace validate {
         template<typename First, typename... Rest>
         struct _TupleName<First, Rest...> {
             static void append(std::string &s) {
-                s += TypeName<First>::get();
+                s += TypeName<First>::short_name();
                 if (sizeof...(Rest) > 0) {
                     s += ",";
                     _TupleName<Rest...>::append(s);
@@ -105,7 +125,7 @@ namespace validate {
 
         template<typename... Args>
         struct TypeName<std::tuple<Args...>> {
-            static std::string get() {
+            static std::string short_name() {
                 std::string s = "tuple<";
                 _TupleName<Args...>::append(s);
                 s += ">";
@@ -115,43 +135,43 @@ namespace validate {
 
         template<typename K, typename V>
         struct TypeName<std::map<K,V>> {
-            static std::string get() {
-                return "map<" + TypeName<K>::get() + "," + TypeName<V>::get() + ">";
+            static std::string short_name() {
+                return "map<" + TypeName<K>::short_name() + "," + TypeName<V>::short_name() + ">";
             }
         };
 
         template<typename K, typename V>
         struct TypeName<std::unordered_map<K,V>> {
-            static std::string get() {
-                return "unordered_map<" + TypeName<K>::get() + "," + TypeName<V>::get() + ">";
+            static std::string short_name() {
+                return "unordered_map<" + TypeName<K>::short_name() + "," + TypeName<V>::short_name() + ">";
             }
         };
 
         template<typename K, typename V>
         struct TypeName<std::multimap<K,V>> {
-            static std::string get() {
-                return "multimap<" + TypeName<K>::get() + "," + TypeName<V>::get() + ">";
+            static std::string short_name() {
+                return "multimap<" + TypeName<K>::short_name() + "," + TypeName<V>::short_name() + ">";
             }
         };
 
         template<typename K>
         struct TypeName<std::set<K>> {
-            static std::string get() {
-                return "set<" + TypeName<K>::get() + ">";
+            static std::string short_name() {
+                return "set<" + TypeName<K>::short_name() + ">";
             }
         };
 
         template<typename K>
         struct TypeName<std::unordered_set<K>> {
-            static std::string get() {
-                return "unordered_set<" + TypeName<K>::get() + ">";
+            static std::string short_name() {
+                return "unordered_set<" + TypeName<K>::short_name() + ">";
             }
         };
 
         template<typename K>
         struct TypeName<std::multiset<K>> {
-            static std::string get() {
-                return "multiset<" + TypeName<K>::get() + ">";
+            static std::string short_name() {
+                return "multiset<" + TypeName<K>::short_name() + ">";
             }
         };
 
@@ -165,7 +185,7 @@ namespace validate {
             }
             
             std::string name() {
-                return tools::string_format("<unnamed>%s_%d", TypeName<T>::get().c_str(), var_count);
+                return tools::string_format("<unnamed>%s_%d", TypeName<T>::short_name().c_str(), var_count);
             }
         };
 
