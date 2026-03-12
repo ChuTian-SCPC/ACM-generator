@@ -1,5 +1,5 @@
-#ifndef _SGPCET_VAL_INT_H_
-#define _SGPCET_VAL_INT_H_
+#ifndef _SGPCET_VAR_INT_H_
+#define _SGPCET_VAR_INT_H_
 
 #ifndef _SGPCET_VAR_IMPL_H_
 #include "var_impl.h"
