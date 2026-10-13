@@ -14,27 +14,42 @@ namespace generator {
         template<typename T, typename R>
         struct IsRangeContained {
         private:
-            static constexpr bool check_integral_range() {
-                if (std::is_same<T, R>::value) return true;
-                
-                if (std::is_signed<T>::value && std::is_unsigned<R>::value) {
-                    return std::numeric_limits<R>::max() >= std::numeric_limits<T>::max() &&
-                        std::numeric_limits<T>::min() >= 0; 
-                }
-                
-                if (std::is_unsigned<T>::value && std::is_signed<R>::value) {
-                    return std::numeric_limits<R>::max() >= std::numeric_limits<T>::max();
-                }
-                
-                return std::numeric_limits<R>::min() <= std::numeric_limits<T>::min() &&
-                    std::numeric_limits<R>::max() >= std::numeric_limits<T>::max();
-            }
-            
-        public:
-            static constexpr bool value = 
+            static const bool integral =
                 std::is_integral<T>::value &&
-                std::is_integral<R>::value &&
-                check_integral_range();
+                std::is_integral<R>::value;
+
+            static const bool same_sign =
+                std::is_signed<T>::value == std::is_signed<R>::value;
+
+            static const bool signed_to_unsigned =
+                std::is_signed<T>::value &&
+                std::is_unsigned<R>::value;
+
+            static const bool unsigned_to_signed =
+                std::is_unsigned<T>::value &&
+                std::is_signed<R>::value;
+
+        public:
+            static const bool value =
+                integral &&
+                (
+                    std::is_same<T, R>::value ||
+
+                    (signed_to_unsigned &&
+                    std::numeric_limits<T>::min() >= 0 &&
+                    std::numeric_limits<R>::max() >=
+                        std::numeric_limits<T>::max()) ||
+
+                    (unsigned_to_signed &&
+                    std::numeric_limits<R>::max() >=
+                        std::numeric_limits<T>::max()) ||
+
+                    (same_sign &&
+                    std::numeric_limits<R>::min() <=
+                        std::numeric_limits<T>::min() &&
+                    std::numeric_limits<R>::max() >=
+                        std::numeric_limits<T>::max())
+                );
         };
 
         template<typename T>

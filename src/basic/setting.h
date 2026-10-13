@@ -60,6 +60,12 @@ namespace generator {
 
     std::string input_suffix = ".in";
     std::string output_suffix = ".out";
+    std::string input_prefix = "";
+    std::string output_prefix = "";
+    void set_testcase_prefix(const std::string& prefix) {
+        input_prefix = prefix;
+        output_prefix = prefix;
+    }
     
     std::string _first_generator_argv = "generator";
     std::string _first_checker_argv = "checker";

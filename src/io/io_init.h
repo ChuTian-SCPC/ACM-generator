@@ -110,11 +110,11 @@ namespace generator {
         }
 
         Path __input_file_path(Path folder, int x) {
-            return __path_join(folder, __end_with(x, _enum::_IN));
+            return __path_join(folder, __end_with(_setting::input_prefix + std::to_string(x), _enum::_IN));
         }
         
         Path __output_file_path(Path folder, int x) {
-            return __path_join(folder, __end_with(x, _enum::_OUT));
+            return __path_join(folder, __end_with(_setting::output_prefix + std::to_string(x), _enum::_OUT));
         }
 
         Path __testcase_input_file_path(int x) {
@@ -152,7 +152,7 @@ namespace generator {
             if (hFind != INVALID_HANDLE_VALUE) {
                 do {
                     Path file_path(__path_join(folder_path,findFileData.cFileName));
-                    int num = std::stoi(file_path.__file_name());  
+                    int num = std::stoi(file_path.__file_name().substr(_setting::input_prefix.size()));  
                     inputs.emplace_back(num);  
                 } while (FindNextFile(hFind, &findFileData) != 0);
 
@@ -166,7 +166,7 @@ namespace generator {
                     std::string file_name = entry->d_name;
                     size_t suffix_len = _setting::input_suffix.size();
                     if (file_name.size() >= suffix_len && file_name.substr(file_name.size() - suffix_len) == _setting::input_suffix) {
-                        int num = std::stoi(file_name.substr(0, file_name.size() - suffix_len));
+                        int num = std::stoi(file_name.substr(_setting::input_prefix.size(), file_name.size() - suffix_len));
                         inputs.emplace_back(num);
                     }
                 }
